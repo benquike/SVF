@@ -37,7 +37,7 @@ set(SOURCES
 	st.c
 )
 
-add_llvm_library(Cudd ${SOURCES} LINK_LIBS m)
+add_llvm_library(Cudd SHARED ${SOURCES} LINK_LIBS m)
 
 
 set_target_properties(Cudd PROPERTIES COMPILE_FLAGS "-Wno-format \
