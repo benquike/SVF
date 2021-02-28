@@ -133,11 +133,9 @@ void CHGraph::buildCHGNodes(const GlobalValue *globalvalue)
                 if(const ConstantExpr *ce = isCastConstantExpr(vtbl->getOperand(i)))
                 {
                     const Value *bitcastValue = ce->getOperand(0);
-                    if (const  Function* func = SVFUtil::dyn_cast<Function>(bitcastValue))
-                    {
-                        struct DemangledName dname = demangle(func->getName().str());
-                        if (!getNode(dname.className))
-                            createNode(dname.className);
+                    if (const Function *func =
+                        SVFUtil::dyn_cast<Function>(bitcastValue)) {
+                        buildCHGNodes(getDefFunForMultipleModule(func));
                     }
                 }
             }
@@ -145,11 +143,12 @@ void CHGraph::buildCHGNodes(const GlobalValue *globalvalue)
     }
 }
 
-void CHGraph::buildCHGNodes(const SVFFunction* fun)
-{
-    const Function* F = fun->getLLVMFun();
-    if (isConstructor(F) || isDestructor(F))
-    {
+void CHGraph::buildCHGNodes(const SVFFunction *fun) {
+    if (fun == nullptr)
+        return;
+
+    const Function *F = fun->getLLVMFun();
+    if (isConstructor(F) || isDestructor(F)) {
         struct DemangledName dname = demangle(F->getName().str());
         DBOUT(DCHA, outs() << "\t build CHANode for class " + dname.className + "...\n");
         if (!getNode(dname.className))
