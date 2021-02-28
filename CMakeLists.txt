@@ -66,6 +66,11 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Test-Suite)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
+include("svf_macros")
+
+configure_file(config.h.in config.h @ONLY)
+include_directories(${CMAKE_BINARY_DIR})
 
 # is Z3 really needed?
 if(DEFINED ENV{name})
@@ -76,6 +81,8 @@ else()
     message(WARNING "Z3_DIR is not set in env")
 endif()
 
+add_subdirectory(tests)
+add_subdirectory(unittests)
 
 add_subdirectory(lib)
 add_subdirectory(tools)
