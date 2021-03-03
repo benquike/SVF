@@ -270,6 +270,13 @@ void CHGraph::addEdge(const string &className, const string &baseClassName,
 {
     CHNode *srcNode = getNode(className);
     CHNode *dstNode = getNode(baseClassName);
+    if (srcNode == nullptr) {
+        srcNode = createNode(className);
+    }
+    if (dstNode == nullptr) {
+        dstNode = createNode(baseClassName);
+    }
+
     assert(srcNode && dstNode && "node not found?");
 
     if (!hasEdge(srcNode, dstNode, edgeType))
