@@ -64,8 +64,6 @@ endif()
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
                     ${CMAKE_CURRENT_BINARY_DIR}/include)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Test-Suite)
-
 option(SVF_BUILD_UNITTESTS "Build all tests (default is OFF)" OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
@@ -109,5 +107,6 @@ INSTALL(
 if (EXISTS Test-Suite)
     enable_testing()
     add_subdirectory(Test-Suite)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Test-Suite)
     include(CTest)
 endif()
