@@ -66,6 +66,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Test-Suite)
 
+option(SVF_BUILD_UNITTESTS "Build all tests (default is OFF)" OFF)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
 include("svf_macros")
 
@@ -81,14 +83,20 @@ else()
     message(WARNING "Z3_DIR is not set in env")
 endif()
 
-add_subdirectory(tests)
-add_subdirectory(unittests)
-
 add_subdirectory(lib)
 add_subdirectory(tools)
 
-add_subdirectory(external/googletest)
-include_directories(external/googletest/googletest/include)
+if (SVF_BUILD_UNITTESTS)
+    if(EXISTS external/googletest)
+        add_subdirectory(external/googletest)
+        include_directories(external/googletest/googletest/include)
+        add_subdirectory(tests)
+        add_subdirectory(unittests)
+    else()
+        message(WARNING "external/googletest does not exist, "
+            "please run git submodule init; git submodule update")
+    endif()
+endif()
 
 INSTALL(
     DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ ${CMAKE_CURRENT_BINARY_DIR}/include/ ${Z3_DIR}/include/
