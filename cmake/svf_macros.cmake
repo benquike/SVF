@@ -63,8 +63,8 @@ function(generate_ll_file)
         set(GEN_CMD_COMMENT "${GEN_CMD_COMMENT}[M2R]")
     endif()
     if(GEN_LL_DEBUG)
-        list(APPEND GEN_CXX_FLAGS -g)
-        list(APPEND GEN_C_FLAGS -g)
+        list(APPEND GEN_CXX_FLAGS -gdwarf)
+        list(APPEND GEN_C_FLAGS -gdwarf)
         set(GEN_CMD_COMMENT "${GEN_CMD_COMMENT}[DBG]")
     endif()
     set(GEN_CMD_COMMENT "${GEN_CMD_COMMENT} ${GEN_LL_FILE}")
@@ -108,3 +108,14 @@ macro(subdirlist result curdir)
     endforeach()
     set(${result} ${dirlist})
 endmacro(subdirlist)
+
+function(add_all_cpp_as_gtests)
+    message("Adding unittests in: ${CMAKE_CURRENT_SOURCE_DIR}")
+    cmake_parse_arguments(
+        PARSE_ARGV
+        1
+        AACT
+        "EXCLDUE"
+
+        )
+endfunction()

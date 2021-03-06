@@ -15,18 +15,29 @@
 #include <string>
 #include <vector>
 
+// #include "WPA/FlowSensitive.h"
+
+#include "SVF-FE/CHG.h"
+
 #include "config.h"
 
 using namespace SVF;
 using namespace std;
 
 TEST(CHGTestSuite, BasicTest_0) {
-    string test_bc = SVF_BUILD_DIR"/tests/CHG/callsite_cpp.ll";
+    string test_bc = SVF_BUILD_DIR "/tests/CHG/callsite_cpp.ll";
     vector<string> moduleNameVec{test_bc};
     SVFModule *svfModule =
     LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
     PAGBuilder builder;
     PAG *pag = builder.build(svfModule);
+
+    ASSERT_TRUE(pag != nullptr);
+	CHGraph *chg = new CHGraph(pag->getModule());
+    ASSERT_TRUE(chg != nullptr);
+
+    chg->buildCHG();
+
 }
 
 int main(int argc, char *argv[]) {
