@@ -37,7 +37,10 @@ using namespace SVF;
 using namespace SVFUtil;
 
 static llvm::cl::opt<bool> SVFGWithIndirectCall("svfgWithIndCall", llvm::cl::init(false),
-        llvm::cl::desc("Update Indirect Calls for SVFG using pre-analysis"));
+                                                llvm::cl::desc("Update Indirect Calls for SVFG using pre-analysis"));
+
+static llvm::cl::opt<bool> SVFGWithVirtCall("svfgWithVirtCall", llvm::cl::init(false),
+                                            llvm::cl::desc("Update C++ virtual Calls for SVFG using CHA analysis"));
 
 static llvm::cl::opt<bool> SingleVFG("singleVFG", llvm::cl::init(false),
                                      llvm::cl::desc("Create a single VFG shared by multiple analysis"));
@@ -117,6 +120,11 @@ SVFG* SVFGBuilder::build(BVDataPTAImpl* pta, VFG::VFGK kind)
     /// Update call graph using pre-analysis results
     if(SVFGWithIndirectCall || SVFGWithIndCall)
         svfg->updateCallGraph(pta);
+
+    if(SVFGWithVirtCall) {
+        // connect the actual parameters with all possible
+        // virtual methods
+    }
 
     svfg->setDumpVFG(DumpVFG);
 
