@@ -109,6 +109,7 @@ SVFG* SVFGBuilder::build(BVDataPTAImpl* pta, VFG::VFGK kind)
 
     svfg->setDumpVFG(Options::DumpVFG);
 
+
     if(Options::DumpVFG)
     	svfg->dump("svfg_final");
 
