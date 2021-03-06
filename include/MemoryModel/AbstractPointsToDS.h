@@ -40,6 +40,7 @@ template <typename Key, typename KeySet, typename Data, typename DataSet>
 class PTData
 {
 public:
+
     /// Types of a points-to data structures.
     enum PTDataTy
     {
@@ -101,10 +102,12 @@ template <typename Key, typename KeySet, typename Data, typename DataSet>
 class DiffPTData : public PTData<Key, KeySet, Data, DataSet>
 {
 public:
-    typedef PTData<Key, KeySet, Data, DataSet> BasePTData;
-    typedef typename BasePTData::PTDataTy PTDataTy;
 
-    DiffPTData(bool reversePT = true, PTDataTy ty = PTDataTy::Diff) : BasePTData(reversePT, ty) { }
+    using BasePTData = PTData<Key, KeySet, Data, DataSet>;
+    using PTDataTy = typename BasePTData::PTDataTy;
+
+    DiffPTData(bool reversePT = true, PTDataTy ty = PTDataTy::Diff)
+        : BasePTData(reversePT, ty) { }
 
     virtual ~DiffPTData() { }
 
@@ -144,13 +147,14 @@ template <typename Key, typename KeySet, typename Data, typename DataSet>
 class DFPTData : public PTData<Key, KeySet, Data, DataSet>
 {
 public:
-    typedef PTData<Key, KeySet, Data, DataSet> BasePTData;
-    typedef typename BasePTData::PTDataTy PTDataTy;
+    using BasePTData = PTData<Key, KeySet, Data, DataSet>;
+    using PTDataTy = typename BasePTData::PTDataTy;
 
-    typedef NodeID LocID;
+    using LocID = NodeID;
 
     /// Constructor
-    DFPTData(bool reversePT = true, PTDataTy ty = BasePTData::DataFlow) : BasePTData(reversePT, ty) { }
+    DFPTData(bool reversePT = true, PTDataTy ty = BasePTData::DataFlow)
+        : BasePTData(reversePT, ty) { }
 
     virtual ~DFPTData() { }
 
@@ -217,10 +221,11 @@ template <typename Key, typename KeySet, typename Data, typename DataSet, typena
 class VersionedPTData : public PTData<Key, KeySet, Data, DataSet>
 {
 public:
-    typedef PTData<Key, KeySet, Data, DataSet> BasePTData;
-    typedef typename BasePTData::PTDataTy PTDataTy;
+    using BasePTData = PTData<Key, KeySet, Data, DataSet>;
+    using PTDataTy = typename BasePTData::PTDataTy;
 
-    VersionedPTData(bool reversePT = true, PTDataTy ty = PTDataTy::Versioned) : BasePTData(reversePT, ty) { }
+    VersionedPTData(bool reversePT = true, PTDataTy ty = PTDataTy::Versioned)
+        : BasePTData(reversePT, ty) { }
 
     virtual ~VersionedPTData() { }
 

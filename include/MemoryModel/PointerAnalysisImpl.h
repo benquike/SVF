@@ -42,15 +42,15 @@ class BVDataPTAImpl : public PointerAnalysis
 {
 
 public:
-    typedef PTData<NodeID, NodeBS, NodeID, PointsTo> PTDataTy;
-    typedef MutablePTData<NodeID, NodeBS, NodeID, PointsTo> MutPTDataTy;
-    typedef DiffPTData<NodeID, NodeBS, NodeID, PointsTo> DiffPTDataTy;
-    typedef MutableDiffPTData<NodeID, NodeBS, NodeID, PointsTo> MutDiffPTDataTy;
-    typedef DFPTData<NodeID, NodeBS, NodeID, PointsTo> DFPTDataTy;
-    typedef MutableDFPTData<NodeID, NodeBS, NodeID, PointsTo> MutDFPTDataTy;
-    typedef IncMutableDFPTData<NodeID, NodeBS, NodeID, PointsTo> IncMutDFPTDataTy;
-    typedef VersionedPTData<NodeID, NodeBS, NodeID, PointsTo, VersionedVar, Set<VersionedVar>> VersionedPTDataTy;
-    typedef MutableVersionedPTData<NodeID, NodeBS, NodeID, PointsTo, VersionedVar, Set<VersionedVar>> MutVersionedPTDataTy;
+    using PTDataTy = PTData<NodeID, NodeBS, NodeID, PointsTo>;
+    using MutPTDataTy = MutablePTData<NodeID, NodeBS, NodeID, PointsTo>;
+    using DiffPTDataTy = DiffPTData<NodeID, NodeBS, NodeID, PointsTo>;
+    using MutDiffPTDataTy = MutableDiffPTData<NodeID, NodeBS, NodeID, PointsTo>;
+    using DFPTDataTy = DFPTData<NodeID, NodeBS, NodeID, PointsTo>;
+    using MutDFPTDataTy = MutableDFPTData<NodeID, NodeBS, NodeID, PointsTo>;
+    using IncMutDFPTDataTy = IncMutableDFPTData<NodeID, NodeBS, NodeID, PointsTo>;
+    using VersionedPTDataTy = VersionedPTData<NodeID, NodeBS, NodeID, PointsTo, VersionedVar, Set<VersionedVar>>;
+    using MutVersionedPTDataTy = MutableVersionedPTData<NodeID, NodeBS, NodeID, PointsTo, VersionedVar, Set<VersionedVar>>;
 
     /// Constructor
     BVDataPTAImpl(PAG* pag, PointerAnalysis::PTATY type, bool alias_check = true);
@@ -75,11 +75,12 @@ public:
 
     /// Get points-to and reverse points-to
     ///@{
-    virtual inline const PointsTo& getPts(NodeID id)
+    inline const PointsTo& getPts(NodeID id) override
     {
         return ptD->getPts(id);
     }
-    virtual inline const NodeBS& getRevPts(NodeID nodeId)
+
+    inline const NodeBS& getRevPts(NodeID nodeId) override
     {
         return ptD->getRevPts(nodeId);
     }
@@ -132,7 +133,7 @@ public:
 protected:
 
     /// Finalization of pointer analysis, and normalize points-to information to Bit Vector representation
-    virtual void finalize()
+     void finalize() override
     {
         normalizePointsTo();
         PointerAnalysis::finalize();
@@ -153,28 +154,28 @@ protected:
 
     inline DiffPTDataTy* getDiffPTDataTy() const
     {
-        DiffPTDataTy* diff = SVFUtil::dyn_cast<DiffPTDataTy>(ptD);
+        auto* diff = SVFUtil::dyn_cast<DiffPTDataTy>(ptD);
         assert(diff && "BVDataPTAImpl::getDiffPTDataTy: not a DiffPTDataTy!");
         return diff;
     }
 
     inline DFPTDataTy* getDFPTDataTy() const
     {
-        DFPTDataTy* df = SVFUtil::dyn_cast<DFPTDataTy>(ptD);
+        auto* df = SVFUtil::dyn_cast<DFPTDataTy>(ptD);
         assert(df && "BVDataPTAImpl::getDFPTDataTy: not a DFPTDataTy!");
         return df;
     }
 
     inline MutDFPTDataTy* getMutDFPTDataTy() const
     {
-        MutDFPTDataTy* mdf = SVFUtil::dyn_cast<MutDFPTDataTy>(ptD);
+        auto* mdf = SVFUtil::dyn_cast<MutDFPTDataTy>(ptD);
         assert(mdf && "BVDataPTAImpl::getMutDFPTDataTy: not a MutDFPTDataTy!");
         return mdf;
     }
 
     inline VersionedPTDataTy* getVersionedPTDataTy() const
     {
-        VersionedPTDataTy* v = SVFUtil::dyn_cast<VersionedPTDataTy>(ptD);
+        auto* v = SVFUtil::dyn_cast<VersionedPTDataTy>(ptD);
         assert(v && "BVDataPTAImpl::getVersionedPTDataTy: not a VersionedPTDataTy!");
         return v;
     }
@@ -185,7 +186,7 @@ protected:
     /// Normalize points-to information for field-sensitive analysis,
     /// i.e., replace fieldObj with baseObj if it is field-insensitive
     virtual void normalizePointsTo(){
-        for (PAG::iterator nIter = pag->begin(); nIter != pag->end(); ++nIter){
+        for (auto nIter = pag->begin(); nIter != pag->end(); ++nIter){
             const PointsTo tmpPts = getPts(nIter->first);
             for(NodeID obj : tmpPts){
                 NodeID baseObj = pag->getBaseObjNode(obj);
@@ -206,29 +207,29 @@ private:
 
 public:
     /// Interface expose to users of our pointer analysis, given Location infos
-    virtual AliasResult alias(const MemoryLocation  &LocA,
-                              const MemoryLocation  &LocB);
+    AliasResult alias(const MemoryLocation  &LocA,
+                      const MemoryLocation  &LocB) override;
 
     /// Interface expose to users of our pointer analysis, given Value infos
-    virtual AliasResult alias(const Value* V1,
-                              const Value* V2);
+    AliasResult alias(const Value* V1,
+                              const Value* V2) override;
 
     /// Interface expose to users of our pointer analysis, given PAGNodeID
-    virtual AliasResult alias(NodeID node1, NodeID node2);
+    AliasResult alias(NodeID node1, NodeID node2) override;
 
     /// Interface expose to users of our pointer analysis, given two pts
     virtual AliasResult alias(const PointsTo& pts1, const PointsTo& pts2);
 
     /// dump and debug, print out conditional pts
     //@{
-    virtual void dumpCPts()
+    void dumpCPts() override
     {
         ptD->dumpPTData();
     }
 
-    virtual void dumpTopLevelPtsTo();
+    void dumpTopLevelPtsTo() override;
 
-    virtual void dumpAllPts();
+    void dumpAllPts() override;
     //@}
 };
 
@@ -308,6 +309,7 @@ public:
     {
         return ptD->getPts(id);
     }
+
     virtual inline const Set<CVar>& getRevPts(CVar nodeId)
     {
         return ptD->getRevPts(nodeId);
