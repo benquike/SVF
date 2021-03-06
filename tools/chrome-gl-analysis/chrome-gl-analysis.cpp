@@ -197,7 +197,7 @@ class MyCallToFuncVisitor: public InstVisitor<MyCallToFuncVisitor> {
   public:
     MyCallToFuncVisitor(string &fname,
                         set<const Value *> &res):
-      res(res), fname(fname) {
+      fname(fname), res(res) {
     }
 
     void visitCallInst(CallInst &callInst) {
