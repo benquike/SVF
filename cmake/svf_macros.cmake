@@ -11,6 +11,7 @@ function(add_unittest test_name)
         LINK_PUBLIC
         gtest
         Svf
+        Cudd
         ${llvm_libs}
         ${ARGN})
 
