@@ -345,12 +345,11 @@ UnaryOPPE* PAG::addUnaryOPPE(NodeID src, NodeID dst)
     PAGNode* dstNode = getPAGNode(dst);
     if(PAGEdge* edge = hasNonlabeledEdge(srcNode,dstNode, PAGEdge::UnaryOp))
         return SVFUtil::cast<UnaryOPPE>(edge);
-    else
-    {
-        UnaryOPPE* unaryOP = new UnaryOPPE(srcNode, dstNode);
-        addEdge(srcNode,dstNode, unaryOP);
-        return unaryOP;
-    }
+
+    auto* unaryOP = new UnaryOPPE(srcNode, dstNode);
+    addEdge(srcNode,dstNode, unaryOP);
+    return unaryOP;
+
 }
 
 /*!
@@ -362,12 +361,10 @@ LoadPE* PAG::addLoadPE(NodeID src, NodeID dst)
     PAGNode* dstNode = getPAGNode(dst);
     if(PAGEdge* edge = hasNonlabeledEdge(srcNode,dstNode, PAGEdge::Load))
         return SVFUtil::cast<LoadPE>(edge);
-    else
-    {
-        LoadPE* loadPE = new LoadPE(srcNode, dstNode);
-        addEdge(srcNode,dstNode, loadPE);
-        return loadPE;
-    }
+
+    auto* loadPE = new LoadPE(srcNode, dstNode);
+    addEdge(srcNode,dstNode, loadPE);
+    return loadPE;
 }
 
 /*!
@@ -380,12 +377,10 @@ StorePE* PAG::addStorePE(NodeID src, NodeID dst, const IntraBlockNode* curVal)
     PAGNode* dstNode = getPAGNode(dst);
     if(PAGEdge* edge = hasLabeledEdge(srcNode,dstNode, PAGEdge::Store, curVal))
         return SVFUtil::cast<StorePE>(edge);
-    else
-    {
-        StorePE* storePE = new StorePE(srcNode, dstNode, curVal);
-        addEdge(srcNode,dstNode, storePE);
-        return storePE;
-    }
+
+    auto* storePE = new StorePE(srcNode, dstNode, curVal);
+    addEdge(srcNode,dstNode, storePE);
+    return storePE;
 }
 
 /*!
@@ -397,12 +392,10 @@ CallPE* PAG::addCallPE(NodeID src, NodeID dst, const CallBlockNode* cs)
     PAGNode* dstNode = getPAGNode(dst);
     if(PAGEdge* edge = hasLabeledEdge(srcNode,dstNode, PAGEdge::Call, cs))
         return SVFUtil::cast<CallPE>(edge);
-    else
-    {
-        CallPE* callPE = new CallPE(srcNode, dstNode, cs);
-        addEdge(srcNode,dstNode, callPE);
-        return callPE;
-    }
+
+    auto* callPE = new CallPE(srcNode, dstNode, cs);
+    addEdge(srcNode,dstNode, callPE);
+    return callPE;
 }
 
 /*!
@@ -414,12 +407,10 @@ RetPE* PAG::addRetPE(NodeID src, NodeID dst, const CallBlockNode* cs)
     PAGNode* dstNode = getPAGNode(dst);
     if(PAGEdge* edge = hasLabeledEdge(srcNode,dstNode, PAGEdge::Ret, cs))
         return SVFUtil::cast<RetPE>(edge);
-    else
-    {
-        RetPE* retPE = new RetPE(srcNode, dstNode, cs);
-        addEdge(srcNode,dstNode, retPE);
-        return retPE;
-    }
+
+    auto* retPE = new RetPE(srcNode, dstNode, cs);
+    addEdge(srcNode,dstNode, retPE);
+    return retPE;
 }
 
 /*!
@@ -429,8 +420,8 @@ PAGEdge* PAG::addBlackHoleAddrPE(NodeID node)
 {
     if(Options::HandBlackHole)
         return pag->addAddrPE(pag->getBlackHoleNode(), node);
-    else
-        return pag->addCopyPE(pag->getNullPtr(), node);
+
+    return pag->addCopyPE(pag->getNullPtr(), node);
 }
 
 /*!
@@ -442,12 +433,10 @@ TDForkPE* PAG::addThreadForkPE(NodeID src, NodeID dst, const CallBlockNode* cs)
     PAGNode* dstNode = getPAGNode(dst);
     if(PAGEdge* edge = hasLabeledEdge(srcNode,dstNode, PAGEdge::ThreadFork, cs))
         return SVFUtil::cast<TDForkPE>(edge);
-    else
-    {
-        TDForkPE* forkPE = new TDForkPE(srcNode, dstNode, cs);
-        addEdge(srcNode,dstNode, forkPE);
-        return forkPE;
-    }
+
+    auto* forkPE = new TDForkPE(srcNode, dstNode, cs);
+    addEdge(srcNode,dstNode, forkPE);
+    return forkPE;
 }
 
 /*!
@@ -459,12 +448,10 @@ TDJoinPE* PAG::addThreadJoinPE(NodeID src, NodeID dst, const CallBlockNode* cs)
     PAGNode* dstNode = getPAGNode(dst);
     if(PAGEdge* edge = hasLabeledEdge(srcNode,dstNode, PAGEdge::ThreadJoin, cs))
         return SVFUtil::cast<TDJoinPE>(edge);
-    else
-    {
-        TDJoinPE* joinPE = new TDJoinPE(srcNode, dstNode, cs);
-        addEdge(srcNode,dstNode, joinPE);
-        return joinPE;
-    }
+
+    auto* joinPE = new TDJoinPE(srcNode, dstNode, cs);
+    addEdge(srcNode,dstNode, joinPE);
+    return joinPE;
 }
 
 
@@ -483,10 +470,8 @@ GepPE* PAG::addGepPE(NodeID src, NodeID dst, const LocationSet& ls, bool constGe
         /// the new gep edge being created is also a VariantGepPE edge.
         return addVariantGepPE(src, dst);
     }
-    else
-    {
-        return addNormalGepPE(src, dst, ls);
-    }
+
+    return addNormalGepPE(src, dst, ls);
 }
 
 /*!
@@ -499,12 +484,11 @@ NormalGepPE* PAG::addNormalGepPE(NodeID src, NodeID dst, const LocationSet& ls)
     PAGNode* dstNode = getPAGNode(dst);
     if(PAGEdge* edge = hasNonlabeledEdge(baseNode, dstNode, PAGEdge::NormalGep))
         return SVFUtil::cast<NormalGepPE>(edge);
-    else
-    {
-        NormalGepPE* gepPE = new NormalGepPE(baseNode, dstNode, ls+baseLS);
-        addEdge(baseNode, dstNode, gepPE);
-        return gepPE;
-    }
+
+    auto* gepPE = new NormalGepPE(baseNode, dstNode, ls+baseLS);
+    addEdge(baseNode, dstNode, gepPE);
+    return gepPE;
+
 }
 
 /*!
@@ -518,12 +502,11 @@ VariantGepPE* PAG::addVariantGepPE(NodeID src, NodeID dst)
     PAGNode* dstNode = getPAGNode(dst);
     if(PAGEdge* edge = hasNonlabeledEdge(baseNode, dstNode, PAGEdge::VariantGep))
         return SVFUtil::cast<VariantGepPE>(edge);
-    else
-    {
-        VariantGepPE* gepPE = new VariantGepPE(baseNode, dstNode);
-        addEdge(baseNode, dstNode, gepPE);
-        return gepPE;
-    }
+
+    auto* gepPE = new VariantGepPE(baseNode, dstNode);
+    addEdge(baseNode, dstNode, gepPE);
+    return gepPE;
+
 }
 
 
@@ -539,7 +522,7 @@ NodeID PAG::addGepValNode(const Value* curInst,const Value* gepVal, const Locati
     assert(0==GepValNodeMap[curInst].count(std::make_pair(base, ls))
            && "this node should not be created before");
     GepValNodeMap[curInst][std::make_pair(base, ls)] = i;
-    GepValPN *node = new GepValPN(gepVal, i, ls, type, fieldidx);
+    auto *node = new GepValPN(gepVal, i, ls, type, fieldidx);
     return addValNode(gepVal, node, i);
 }
 
@@ -549,17 +532,18 @@ NodeID PAG::addGepValNode(const Value* curInst,const Value* gepVal, const Locati
 NodeID PAG::getGepObjNode(NodeID id, const LocationSet& ls)
 {
     PAGNode* node = pag->getPAGNode(id);
-    if (GepObjPN* gepNode = SVFUtil::dyn_cast<GepObjPN>(node))
+    if (auto* gepNode = SVFUtil::dyn_cast<GepObjPN>(node))
         return getGepObjNode(gepNode->getMemObj(), gepNode->getLocationSet() + ls);
-    else if (FIObjPN* baseNode = SVFUtil::dyn_cast<FIObjPN>(node))
+
+    if (auto* baseNode = SVFUtil::dyn_cast<FIObjPN>(node))
         return getGepObjNode(baseNode->getMemObj(), ls);
-    else if (DummyObjPN* baseNode = SVFUtil::dyn_cast<DummyObjPN>(node))
+
+    if (auto* baseNode = SVFUtil::dyn_cast<DummyObjPN>(node))
         return getGepObjNode(baseNode->getMemObj(), ls);
-    else
-    {
-        assert(false && "new gep obj node kind?");
-        return id;
-    }
+
+    assert(false && "new gep obj node kind?");
+    return id;
+
 }
 
 /*!
@@ -581,12 +565,11 @@ NodeID PAG::getGepObjNode(const MemObj* obj, const LocationSet& ls)
 
     LocationSet newLS = SymbolTableInfo::SymbolInfo()->getModulusOffset(obj,ls);
 
-    NodeLocationSetMap::iterator iter = GepObjNodeMap.find(std::make_pair(base, newLS));
+    auto iter = GepObjNodeMap.find(std::make_pair(base, newLS));
     if (iter == GepObjNodeMap.end())
         return addGepObjNode(obj, newLS);
-    else
-        return iter->second;
 
+    return iter->second;
 }
 
 /*!
@@ -601,7 +584,7 @@ NodeID PAG::addGepObjNode(const MemObj* obj, const LocationSet& ls)
 
     NodeID gepId = NodeIDAllocator::get()->allocateGepObjectId(base, ls.getOffset(), StInfo::getMaxFieldLimit());
     GepObjNodeMap[std::make_pair(base, ls)] = gepId;
-    GepObjPN *node = new GepObjPN(obj, gepId, ls);
+    auto *node = new GepObjPN(obj, gepId, ls);
     memToFieldsMap[base].set(gepId);
     return addObjNode(obj->getRefVal(), node, gepId);
 }
@@ -614,7 +597,7 @@ NodeID PAG::addFIObjNode(const MemObj* obj)
     //assert(findPAGNode(i) == false && "this node should not be created before");
     NodeID base = getObjectNode(obj);
     memToFieldsMap[base].set(obj->getSymId());
-    FIObjPN *node = new FIObjPN(obj->getRefVal(), obj->getSymId(), obj);
+    auto *node = new FIObjPN(obj->getRefVal(), obj->getSymId(), obj);
     return addObjNode(obj->getRefVal(), node, obj->getSymId());
 }
 
@@ -625,11 +608,13 @@ NodeID PAG::addFIObjNode(const MemObj* obj)
 PAGEdge* PAG::hasNonlabeledEdge(PAGNode* src, PAGNode* dst, PAGEdge::PEDGEK kind)
 {
     PAGEdge edge(src,dst,kind);
-    PAGEdge::PAGEdgeSetTy::iterator it = PAGEdgeKindToSetMap[kind].find(&edge);
+    auto it = PAGEdgeKindToSetMap[kind].find(&edge);
+
     if (it != PAGEdgeKindToSetMap[kind].end())
     {
         return *it;
     }
+
     return nullptr;
 }
 
@@ -639,7 +624,7 @@ PAGEdge* PAG::hasNonlabeledEdge(PAGNode* src, PAGNode* dst, PAGEdge::PEDGEK kind
 PAGEdge* PAG::hasLabeledEdge(PAGNode* src, PAGNode* dst, PAGEdge::PEDGEK kind, const ICFGNode* callInst)
 {
     PAGEdge edge(src,dst,PAGEdge::makeEdgeFlagWithCallInst(kind,callInst));
-    PAGEdge::PAGEdgeSetTy::iterator it = PAGEdgeKindToSetMap[kind].find(&edge);
+    auto it = PAGEdgeKindToSetMap[kind].find(&edge);
     if (it != PAGEdgeKindToSetMap[kind].end())
     {
         return *it;
@@ -706,8 +691,8 @@ NodeBS PAG::getFieldsAfterCollapse(NodeID id)
         bs.set(getFIObjNode(mem));
         return bs;
     }
-    else
-        return getAllFieldsObjNode(mem);
+
+    return getAllFieldsObjNode(mem);
 }
 
 /*!
@@ -734,8 +719,9 @@ NodeID PAG::getBaseValNode(NodeID nodeId)
         assert(SVFUtil::isa<GepPE>(*it) && "not a gep edge??");
         return (*it)->getSrcID();
     }
-    else
-        return nodeId;
+
+
+    return nodeId;
 }
 
 /*!
@@ -753,10 +739,12 @@ LocationSet PAG::getLocationSetFromBaseNode(NodeID nodeId)
         return LocationSet(0);
 
     assert(geps.size()==1 && "one node can only be connected by at most one gep edge!");
-    PAGNode::iterator it = geps.begin();
+
+    auto it = geps.begin();
     const PAGEdge* edge = *it;
     assert(SVFUtil::isa<NormalGepPE>(edge) && "not a get edge??");
-    const NormalGepPE* gepEdge = SVFUtil::cast<NormalGepPE>(edge);
+
+    const auto* gepEdge = SVFUtil::cast<NormalGepPE>(edge);
     return gepEdge->getLocationSet();
 }
 
@@ -765,14 +753,11 @@ LocationSet PAG::getLocationSetFromBaseNode(NodeID nodeId)
  */
 void PAG::destroy()
 {
-    for (PAGEdge::PAGKindToEdgeSetMapTy::iterator I =
-                PAGEdgeKindToSetMap.begin(), E = PAGEdgeKindToSetMap.end(); I != E;
-            ++I)
+    for (auto & I : PAGEdgeKindToSetMap)
     {
-        for (PAGEdge::PAGEdgeSetTy::iterator edgeIt = I->second.begin(),
-                endEdgeIt = I->second.end(); edgeIt != endEdgeIt; ++edgeIt)
+        for (auto *edgeIt : I.second)
         {
-            delete *edgeIt;
+            delete edgeIt;
         }
     }
     SymbolTableInfo::releaseSymbolInfo();
@@ -787,83 +772,73 @@ void PAG::print()
 
     outs() << "-------------------PAG------------------------------------\n";
     PAGEdge::PAGEdgeSetTy& addrs = pag->getEdgeSet(PAGEdge::Addr);
-    for (PAGEdge::PAGEdgeSetTy::iterator iter = addrs.begin(), eiter =
-                addrs.end(); iter != eiter; ++iter)
+    for (auto *addr : addrs)
     {
-        outs() << (*iter)->getSrcID() << " -- Addr --> " << (*iter)->getDstID()
+        outs() << addr->getSrcID() << " -- Addr --> " << addr->getDstID()
                << "\n";
     }
 
     PAGEdge::PAGEdgeSetTy& copys = pag->getEdgeSet(PAGEdge::Copy);
-    for (PAGEdge::PAGEdgeSetTy::iterator iter = copys.begin(), eiter =
-                copys.end(); iter != eiter; ++iter)
+    for (auto *copy : copys)
     {
-        outs() << (*iter)->getSrcID() << " -- Copy --> " << (*iter)->getDstID()
+        outs() << copy->getSrcID() << " -- Copy --> " << copy->getDstID()
                << "\n";
     }
 
     PAGEdge::PAGEdgeSetTy& calls = pag->getEdgeSet(PAGEdge::Call);
-    for (PAGEdge::PAGEdgeSetTy::iterator iter = calls.begin(), eiter =
-                calls.end(); iter != eiter; ++iter)
+    for (auto *call : calls)
     {
-        outs() << (*iter)->getSrcID() << " -- Call --> " << (*iter)->getDstID()
+        outs() << call->getSrcID() << " -- Call --> " << call->getDstID()
                << "\n";
     }
 
     PAGEdge::PAGEdgeSetTy& rets = pag->getEdgeSet(PAGEdge::Ret);
-    for (PAGEdge::PAGEdgeSetTy::iterator iter = rets.begin(), eiter =
-                rets.end(); iter != eiter; ++iter)
+    for (auto *ret : rets)
     {
-        outs() << (*iter)->getSrcID() << " -- Ret --> " << (*iter)->getDstID()
+        outs() << ret->getSrcID() << " -- Ret --> " << ret->getDstID()
                << "\n";
     }
 
     PAGEdge::PAGEdgeSetTy& tdfks = pag->getEdgeSet(PAGEdge::ThreadFork);
-    for (PAGEdge::PAGEdgeSetTy::iterator iter = tdfks.begin(), eiter =
-                tdfks.end(); iter != eiter; ++iter)
+    for (auto *tdfk : tdfks)
     {
-        outs() << (*iter)->getSrcID() << " -- ThreadFork --> "
-               << (*iter)->getDstID() << "\n";
+        outs() << tdfk->getSrcID() << " -- ThreadFork --> "
+               << tdfk->getDstID() << "\n";
     }
 
     PAGEdge::PAGEdgeSetTy& tdjns = pag->getEdgeSet(PAGEdge::ThreadJoin);
-    for (PAGEdge::PAGEdgeSetTy::iterator iter = tdjns.begin(), eiter =
-                tdjns.end(); iter != eiter; ++iter)
+    for (auto *tdjn : tdjns)
     {
-        outs() << (*iter)->getSrcID() << " -- ThreadJoin --> "
-               << (*iter)->getDstID() << "\n";
+        outs() << tdjn->getSrcID() << " -- ThreadJoin --> "
+               << tdjn->getDstID() << "\n";
     }
 
     PAGEdge::PAGEdgeSetTy& ngeps = pag->getEdgeSet(PAGEdge::NormalGep);
-    for (PAGEdge::PAGEdgeSetTy::iterator iter = ngeps.begin(), eiter =
-                ngeps.end(); iter != eiter; ++iter)
+    for (auto *ngep : ngeps)
     {
-        NormalGepPE* gep = SVFUtil::cast<NormalGepPE>(*iter);
+        auto* gep = SVFUtil::cast<NormalGepPE>(ngep);
         outs() << gep->getSrcID() << " -- NormalGep (" << gep->getOffset()
                << ") --> " << gep->getDstID() << "\n";
     }
 
     PAGEdge::PAGEdgeSetTy& vgeps = pag->getEdgeSet(PAGEdge::VariantGep);
-    for (PAGEdge::PAGEdgeSetTy::iterator iter = vgeps.begin(), eiter =
-                vgeps.end(); iter != eiter; ++iter)
+    for (auto *vgep : vgeps)
     {
-        outs() << (*iter)->getSrcID() << " -- VariantGep --> "
-               << (*iter)->getDstID() << "\n";
+        outs() << vgep->getSrcID() << " -- VariantGep --> "
+               << vgep->getDstID() << "\n";
     }
 
     PAGEdge::PAGEdgeSetTy& loads = pag->getEdgeSet(PAGEdge::Load);
-    for (PAGEdge::PAGEdgeSetTy::iterator iter = loads.begin(), eiter =
-                loads.end(); iter != eiter; ++iter)
+    for (auto *load : loads)
     {
-        outs() << (*iter)->getSrcID() << " -- Load --> " << (*iter)->getDstID()
+        outs() << load->getSrcID() << " -- Load --> " << load->getDstID()
                << "\n";
     }
 
     PAGEdge::PAGEdgeSetTy& stores = pag->getEdgeSet(PAGEdge::Store);
-    for (PAGEdge::PAGEdgeSetTy::iterator iter = stores.begin(), eiter =
-                stores.end(); iter != eiter; ++iter)
+    for (auto *store : stores)
     {
-        outs() << (*iter)->getSrcID() << " -- Store --> " << (*iter)->getDstID()
+        outs() << store->getSrcID() << " -- Store --> " << store->getDstID()
                << "\n";
     }
     outs() << "----------------------------------------------------------\n";
@@ -966,12 +941,14 @@ PAGNode::PAGNode(const Value* val, NodeID i, PNODEK k) :
 bool PAGNode::isIsolatedNode() const{
 	if (getInEdges().empty() && getOutEdges().empty())
 		return true;
-	else if (isConstantData())
+
+    if (isConstantData())
 		return true;
-	else if (value && SVFUtil::isa<Function>(value))
+
+    if (value && SVFUtil::isa<Function>(value))
 		return SVFUtil::isIntrinsicFun(SVFUtil::cast<Function>(value));
-	else
-		return false;
+
+    return false;
 }
 
 
@@ -1001,8 +978,8 @@ template<>
 struct DOTGraphTraits<PAG*> : public DefaultDOTGraphTraits
 {
 
-    typedef PAGNode NodeType;
-    typedef NodeType::iterator ChildIteratorType;
+    using NodeType = PAGNode;
+    using ChildIteratorType = NodeType::iterator;
     DOTGraphTraits(bool isSimple = false) :
         DefaultDOTGraphTraits(isSimple)
     {
@@ -1042,21 +1019,24 @@ struct DOTGraphTraits<PAG*> : public DefaultDOTGraphTraits
         {
             if(SVFUtil::isa<GepValPN>(node))
                 return "shape=hexagon";
-            else if (SVFUtil::isa<DummyValPN>(node))
+
+            if (SVFUtil::isa<DummyValPN>(node))
                 return "shape=diamond";
-            else
-                return "shape=circle";
+
+            return "shape=circle";
         }
         else if (SVFUtil::isa<ObjPN>(node))
         {
             if(SVFUtil::isa<GepObjPN>(node))
                 return "shape=doubleoctagon";
-            else if(SVFUtil::isa<FIObjPN>(node))
+
+            if(SVFUtil::isa<FIObjPN>(node))
                 return "shape=septagon";
-            else if (SVFUtil::isa<DummyObjPN>(node))
+
+            if (SVFUtil::isa<DummyObjPN>(node))
                 return "shape=Mcircle";
-            else
-                return "shape=doublecircle";
+
+            return "shape=doublecircle";
         }
         else if (SVFUtil::isa<RetPN>(node))
         {
@@ -1082,47 +1062,52 @@ struct DOTGraphTraits<PAG*> : public DefaultDOTGraphTraits
         {
             return "color=green";
         }
-        else if (SVFUtil::isa<CopyPE>(edge))
+
+        if (SVFUtil::isa<CopyPE>(edge))
         {
             return "color=black";
         }
-        else if (SVFUtil::isa<GepPE>(edge))
+
+        if (SVFUtil::isa<GepPE>(edge))
         {
             return "color=purple";
         }
-        else if (SVFUtil::isa<StorePE>(edge))
+
+        if (SVFUtil::isa<StorePE>(edge))
         {
             return "color=blue";
         }
-        else if (SVFUtil::isa<LoadPE>(edge))
+        if (SVFUtil::isa<LoadPE>(edge))
         {
             return "color=red";
         }
-        else if (SVFUtil::isa<CmpPE>(edge))
+        if (SVFUtil::isa<CmpPE>(edge))
         {
             return "color=grey";
         }
-        else if (SVFUtil::isa<BinaryOPPE>(edge))
+        if (SVFUtil::isa<BinaryOPPE>(edge))
         {
             return "color=grey";
         }
-        else if (SVFUtil::isa<UnaryOPPE>(edge))
+        if (SVFUtil::isa<UnaryOPPE>(edge))
         {
             return "color=grey";
         }
-        else if (SVFUtil::isa<TDForkPE>(edge))
+        if (SVFUtil::isa<TDForkPE>(edge))
         {
             return "color=Turquoise";
         }
-        else if (SVFUtil::isa<TDJoinPE>(edge))
+        if (SVFUtil::isa<TDJoinPE>(edge))
         {
             return "color=Turquoise";
         }
-        else if (SVFUtil::isa<CallPE>(edge))
+
+        if (SVFUtil::isa<CallPE>(edge))
         {
             return "color=black,style=dashed";
         }
-        else if (SVFUtil::isa<RetPE>(edge))
+
+        if (SVFUtil::isa<RetPE>(edge))
         {
             return "color=black,style=dotted";
         }
@@ -1136,12 +1121,13 @@ struct DOTGraphTraits<PAG*> : public DefaultDOTGraphTraits
     {
         const PAGEdge* edge = *(EI.getCurrent());
         assert(edge && "No edge found!!");
-        if(const CallPE* calledge = SVFUtil::dyn_cast<CallPE>(edge))
+        if(const auto* calledge = SVFUtil::dyn_cast<CallPE>(edge))
         {
             const Instruction* callInst= calledge->getCallSite()->getCallSite();
             return SVFUtil::getSourceLoc(callInst);
         }
-        else if(const RetPE* retedge = SVFUtil::dyn_cast<RetPE>(edge))
+
+        if(const auto* retedge = SVFUtil::dyn_cast<RetPE>(edge))
         {
             const Instruction* callInst= retedge->getCallSite()->getCallSite();
             return SVFUtil::getSourceLoc(callInst);
