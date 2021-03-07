@@ -431,16 +431,15 @@ protected:
     {
         if (isPtrOnlySVFG())
             return pag->getPTAEdgeSet(kind);
-        else
-            return pag->getEdgeSet(kind);
+
+        return pag->getEdgeSet(kind);
     }
 
     virtual inline bool isInterestedPAGNode(const PAGNode* node) const
     {
         if (isPtrOnlySVFG())
             return node->isPointer();
-        else
-            return true;
+        return true;
     }
 
     /// Create edges between VFG nodes within a function

@@ -414,7 +414,7 @@ void VFG::addVFGNodes()
 
         for(const auto *param : it.second)
         {
-             if (isInterestedPAGNode(param) == false || hasBlackHoleConstObjAddrAsDef(param))
+             if (!isInterestedPAGNode(param) || hasBlackHoleConstObjAddrAsDef(param))
                 continue;
 
             CallPESet callPEs;
