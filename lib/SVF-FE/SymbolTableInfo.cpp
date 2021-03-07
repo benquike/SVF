@@ -106,9 +106,9 @@ void SymbolTableInfo::collectTypeInfo(const Type* ty)
 {
     assert(typeToFieldInfo.find(ty) == typeToFieldInfo.end() && "this type has been collected before");
 
-    if (const ArrayType* aty = SVFUtil::dyn_cast<ArrayType>(ty))
+    if (const auto* aty = SVFUtil::dyn_cast<ArrayType>(ty))
         collectArrayInfo(aty);
-    else if (const StructType* sty = SVFUtil::dyn_cast<StructType>(ty))
+    else if (const auto* sty = SVFUtil::dyn_cast<StructType>(ty))
         collectStructInfo(sty);
     else
         collectSimpleTypeInfo(ty);
@@ -126,7 +126,7 @@ void SymbolTableInfo::collectArrayInfo(const ArrayType* ty)
     u64_t out_num = ty->getNumElements();
     const llvm::Type* elemTy = ty->getElementType();
     u32_t out_stride = getTypeSizeInBytes(elemTy);
-    while (const ArrayType* aty = SVFUtil::dyn_cast<ArrayType>(elemTy))
+    while (const auto* aty = SVFUtil::dyn_cast<ArrayType>(elemTy))
     {
         out_num *= aty->getNumElements();
         elemTy = aty->getElementType();
@@ -161,7 +161,7 @@ void SymbolTableInfo::collectArrayInfo(const ArrayType* ty)
 void SymbolTableInfo::collectStructInfo(const StructType *sty)
 {
     /// The struct info should not be processed before
-    StInfo* stinfo = new StInfo();
+    auto* stinfo = new StInfo();
     typeToFieldInfo[sty] = stinfo;
 
     // Number of fields after flattening the struct
@@ -220,7 +220,7 @@ void SymbolTableInfo::collectStructInfo(const StructType *sty)
  */
 void SymbolTableInfo::collectSimpleTypeInfo(const Type* ty)
 {
-    StInfo* stinfo = new StInfo();
+    auto* stinfo = new StInfo();
     typeToFieldInfo[ty] = stinfo;
 
     /// Only one field
@@ -682,7 +682,7 @@ void SymbolTableInfo::collectObj(const Value *val)
                   outs() << "create a new obj sym " << id << "\n");
 
             // create a memory object
-            MemObj* mem = new MemObj(val, id);
+            auto* mem = new MemObj(val, id);
             assert(objMap.find(id) == objMap.end());
             objMap[id] = mem;
         }
@@ -726,7 +726,7 @@ void SymbolTableInfo::collectVararg(const Function *val)
  */
 bool SymbolTableInfo::isNullPtrSym(const Value *val)
 {
-    if (const Constant* v = SVFUtil::dyn_cast<Constant>(val))
+    if (const auto* v = SVFUtil::dyn_cast<Constant>(val))
     {
         return v->isNullValue() && v->getType()->isPointerTy();
     }
@@ -746,7 +746,7 @@ bool SymbolTableInfo::isBlackholeSym(const Value *val)
  */
 bool SymbolTableInfo::isConstantObjSym(const Value *val)
 {
-    if (const GlobalVariable* v = SVFUtil::dyn_cast<GlobalVariable>(val))
+    if (const auto* v = SVFUtil::dyn_cast<GlobalVariable>(val))
     {
         if (cppUtil::isValVtbl(const_cast<GlobalVariable*>(v)))
             return false;
@@ -850,7 +850,7 @@ void SymbolTableInfo::handleGlobalCE(const GlobalVariable *G)
     const Type *T = G->getType()->getContainedType(0);
     bool is_array = 0;
     //An array is considered a single variable of its type.
-    while (const ArrayType *AT = SVFUtil::dyn_cast<ArrayType>(T))
+    while (const auto *AT = SVFUtil::dyn_cast<ArrayType>(T))
     {
         T = AT->getElementType();
         is_array = 1;

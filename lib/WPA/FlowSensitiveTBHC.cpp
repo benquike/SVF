@@ -38,7 +38,7 @@ void FlowSensitiveTBHC::initialize()
     setGraph(svfg);
     stat = new FlowSensitiveStat(this);
 
-    DCHGraph *dchg = SVFUtil::dyn_cast<DCHGraph>(getCHGraph());
+    auto *dchg = SVFUtil::dyn_cast<DCHGraph>(getCHGraph());
     assert(dchg != nullptr && "FSTBHC: DCHGraph required!");
 
     TypeBasedHeapCloning::setDCHG(dchg);
@@ -108,7 +108,7 @@ bool FlowSensitiveTBHC::propAlongIndirectEdge(const IndirectSVFGEdge* edge)
     bool isStore = false;
     const DIType *tildet = nullptr;
     PointsTo storePts;
-    if (const StoreSVFGNode *store = SVFUtil::dyn_cast<StoreSVFGNode>(src))
+    if (const auto *store = SVFUtil::dyn_cast<StoreSVFGNode>(src))
     {
         tildet = getTypeFromCTirMetadata(store);
         isStore = true;
@@ -141,7 +141,7 @@ bool FlowSensitiveTBHC::propAlongIndirectEdge(const IndirectSVFGEdge* edge)
             }
         }
 
-        if (GepObjPN *gep = SVFUtil::dyn_cast<GepObjPN>(pag->getPAGNode(o)))
+        if (auto *gep = SVFUtil::dyn_cast<GepObjPN>(pag->getPAGNode(o)))
         {
             // Want the geps which are at the same "level" as this one (same mem obj, same offset).
             const NodeBS &geps = getGepObjsFromMemObj(gep->getMemObj(), gep->getLocationSet().getOffset());
@@ -188,12 +188,12 @@ bool FlowSensitiveTBHC::propAlongDirectEdge(const DirectSVFGEdge* edge)
     SVFGNode* dst = edge->getDstNode();
     // If this is an actual-param or formal-ret, top-level pointer's pts must be
     // propagated from src to dst.
-    if (ActualParmSVFGNode* ap = SVFUtil::dyn_cast<ActualParmSVFGNode>(src))
+    if (auto* ap = SVFUtil::dyn_cast<ActualParmSVFGNode>(src))
     {
         if (!ap->getParam()->isPointer()) return false;
         changed = propagateFromAPToFP(ap, dst);
     }
-    else if (FormalRetSVFGNode* fp = SVFUtil::dyn_cast<FormalRetSVFGNode>(src))
+    else if (auto* fp = SVFUtil::dyn_cast<FormalRetSVFGNode>(src))
     {
         if (!fp->getRet()->isPointer()) return false;
         changed = propagateFromFRToAR(fp, dst);
@@ -312,7 +312,7 @@ bool FlowSensitiveTBHC::processGep(const GepSVFGNode* gep)
                     }
                 }
             }
-            else if (const NormalGepPE* normalGep = SVFUtil::dyn_cast<NormalGepPE>(gep->getPAGEdge()))
+            else if (const auto* normalGep = SVFUtil::dyn_cast<NormalGepPE>(gep->getPAGEdge()))
             {
                 const DIType *baseType = getType(oq);
 
@@ -574,9 +574,9 @@ bool FlowSensitiveTBHC::propDFOutToIn(const SVFGNode* srcStmt, NodeID srcVar, co
 
 void FlowSensitiveTBHC::determineWhichGepsAreLoads(void)
 {
-    for (SVFG::iterator nI = svfg->begin(); nI != svfg->end(); ++nI)
+    for (auto & nI : *svfg)
     {
-        SVFGNode *svfgNode = nI->second;
+        SVFGNode *svfgNode = nI.second;
         if (const StmtSVFGNode *gep = SVFUtil::dyn_cast<GepSVFGNode>(svfgNode))
         {
             // Only care about ctir nodes - they have the reuse problem.
@@ -614,7 +614,7 @@ bool FlowSensitiveTBHC::gepIsLoad(NodeID gep)
 
 const MDNode *FlowSensitiveTBHC::getRawCTirMetadata(const SVFGNode *s)
 {
-    if (const StmtSVFGNode *stmt = SVFUtil::dyn_cast<StmtSVFGNode>(s))
+    if (const auto *stmt = SVFUtil::dyn_cast<StmtSVFGNode>(s))
     {
         const Value *v = stmt->getInst() ? stmt->getInst() : stmt->getPAGEdge()->getValue();
         if (v != nullptr)
@@ -628,7 +628,7 @@ const MDNode *FlowSensitiveTBHC::getRawCTirMetadata(const SVFGNode *s)
 
 const DIType *FlowSensitiveTBHC::getTypeFromCTirMetadata(const SVFGNode *s)
 {
-    if (const StmtSVFGNode *stmt = SVFUtil::dyn_cast<StmtSVFGNode>(s))
+    if (const auto *stmt = SVFUtil::dyn_cast<StmtSVFGNode>(s))
     {
         const Value *v = stmt->getInst();
         if (v != nullptr)
@@ -646,7 +646,7 @@ void FlowSensitiveTBHC::expandFIObjs(const PointsTo& pts, PointsTo& expandedPts)
     for (NodeID o : pts)
     {
         expandedPts |= getAllFieldsObjNode(o);
-        while (const GepObjPN *gepObj = SVFUtil::dyn_cast<GepObjPN>(pag->getPAGNode(o)))
+        while (const auto *gepObj = SVFUtil::dyn_cast<GepObjPN>(pag->getPAGNode(o)))
         {
             expandedPts |= getAllFieldsObjNode(o);
             o = gepObj->getBaseNode();

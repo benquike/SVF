@@ -166,11 +166,11 @@ void WPAPass::runPointerAnalysis(SVFModule* svfModule, u32_t kind)
 void WPAPass::PrintAliasPairs(PointerAnalysis* pta)
 {
     PAG* pag = pta->getPAG();
-    for (PAG::iterator lit = pag->begin(), elit = pag->end(); lit != elit; ++lit)
+    for (auto lit = pag->begin(), elit = pag->end(); lit != elit; ++lit)
     {
         PAGNode* node1 = lit->second;
         PAGNode* node2 = node1;
-        for (PAG::iterator rit = lit, erit = pag->end(); rit != erit; ++rit)
+        for (auto rit = lit, erit = pag->end(); rit != erit; ++rit)
         {
             node2 = rit->second;
             if(node1==node2)
@@ -211,10 +211,9 @@ AliasResult WPAPass::alias(const Value* V1, const Value* V2)
             /// Return NoAlias if any PTA gives NoAlias result
             result = llvm::MayAlias;
 
-            for (PTAVector::const_iterator it = ptaVector.begin(), eit = ptaVector.end();
-                    it != eit; ++it)
+            for (auto *it : ptaVector)
             {
-                if ((*it)->alias(V1, V2) == llvm::NoAlias)
+                if (it->alias(V1, V2) == llvm::NoAlias)
                     result = llvm::NoAlias;
             }
         }
@@ -223,10 +222,9 @@ AliasResult WPAPass::alias(const Value* V1, const Value* V2)
             /// Return MayAlias if any PTA gives MayAlias result
             result = llvm::NoAlias;
 
-            for (PTAVector::const_iterator it = ptaVector.begin(), eit = ptaVector.end();
-                    it != eit; ++it)
+            for (auto *it : ptaVector)
             {
-                if ((*it)->alias(V1, V2) == llvm::MayAlias)
+                if (it->alias(V1, V2) == llvm::MayAlias)
                     result = llvm::MayAlias;
             }
         }
