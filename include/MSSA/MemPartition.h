@@ -68,7 +68,8 @@ private:
 };
 
 /*!
- * Create memory regions which don't have intersections with each other in the same function scope.
+ * Create memory regions which don't have intersections with
+ * each other in the same function scope.
  */
 class IntraDisjointMRG : public MRGenerator
 {

@@ -522,20 +522,24 @@ protected:
     /// So we need to make a pair <PAGNodeID,CallSiteID> to find the right VFGParmNode
     inline void addActualParmVFGNode(const PAGNode* aparm, const CallBlockNode* cs)
     {
-        auto* sNode = new ActualParmVFGNode(totalVFGNode++,aparm,cs);
+        auto* sNode = new ActualParmVFGNode(totalVFGNode++, aparm, cs);
         addVFGNode(sNode, pag->getICFG()->getCallBlockNode(cs->getCallSite()));
-        PAGNodeToActualParmMap[std::make_pair(aparm->getId(),cs)] = sNode;
+        PAGNodeToActualParmMap[std::make_pair(aparm->getId(), cs)] = sNode;
         /// do not set def here, this node is not a variable definition
     }
+
     /// Add a formal parameter VFG node
-    inline void addFormalParmVFGNode(const PAGNode* fparm, const SVFFunction* fun, CallPESet& callPEs)
+    inline void addFormalParmVFGNode(const PAGNode* fparm,
+                                     const SVFFunction* fun,
+                                     CallPESet& callPEs)
     {
-        auto* sNode = new FormalParmVFGNode(totalVFGNode++,fparm,fun);
+        auto* sNode = new FormalParmVFGNode(totalVFGNode++, fparm, fun);
         addVFGNode(sNode, pag->getICFG()->getFunEntryBlockNode(fun));
+
         for(const auto *callPE : callPEs)
             sNode->addCallPE(callPE);
 
-        setDef(fparm,sNode);
+        setDef(fparm, sNode);
         PAGNodeToFormalParmMap[fparm] = sNode;
     }
     /// Add a callee Return VFG node

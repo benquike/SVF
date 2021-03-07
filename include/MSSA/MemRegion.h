@@ -346,7 +346,7 @@ protected:
     {
         storesToPointsToMap[st] = cpts;
         funToPointsToMap[fun].insert(cpts);
-        addModSideEffectOfFunction(fun,cpts);
+        addModSideEffectOfFunction(fun, cpts);
     }
     inline void addCPtsToLoad(PointsTo& cpts, const LoadPE *ld, const SVFFunction* fun)
     {
@@ -479,8 +479,8 @@ public:
         PAG* pag = pta->getPAG();
         if (ptrOnlyMSSA)
             return pag->hasPTAPAGEdgeList(pag->getICFG()->getBlockICFGNode(inst));
-        else
-            return pag->hasPAGEdgeList(pag->getICFG()->getBlockICFGNode(inst));
+
+        return pag->hasPAGEdgeList(pag->getICFG()->getBlockICFGNode(inst));
     }
     /// Given an instruction, get all its the PAGEdge (statement) in sequence
     inline PAGEdgeList& getPAGEdgesFromInst(const Instruction* inst)
@@ -488,8 +488,8 @@ public:
         PAG* pag = pta->getPAG();
         if (ptrOnlyMSSA)
             return pag->getInstPTAPAGEdgeList(pag->getICFG()->getBlockICFGNode(inst));
-        else
-            return pag->getInstPAGEdgeList(pag->getICFG()->getBlockICFGNode(inst));
+
+        return pag->getInstPAGEdgeList(pag->getICFG()->getBlockICFGNode(inst));
     }
 
     /// getModRefInfo APIs
