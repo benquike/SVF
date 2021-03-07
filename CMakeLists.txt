@@ -11,11 +11,11 @@ if(NOT COMMAND add_llvm_library)
     endif()
     if (DEFINED ENV{LLVM_DIR})
         # We need to match the build environment for LLVM:
-        # In particular, we need C++14 and the -fno-rtti flag
-        set(CMAKE_CXX_STANDARD 14)
+        # In particular, we need C++17 and the -fno-rtti flag
+        set(CMAKE_CXX_STANDARD 17)
         set(CMAKE_CXX_STANDARD_REQUIRED ON)
-        # add -std=gnu++14
-        set(CMAKE_CXX_EXTENSIONS ON)
+        # add -std=gnu++17
+        set(CMAKE_CXX_EXTENSIONS OFF)
 
         set(COMMON_FLAGS "-fPIC -Werror -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable")
 
