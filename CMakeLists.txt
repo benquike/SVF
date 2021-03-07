@@ -85,7 +85,7 @@ add_subdirectory(lib)
 add_subdirectory(tools)
 
 if (SVF_BUILD_UNITTESTS)
-    if(EXISTS external/googletest)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/external/googletest")
         add_subdirectory(external/googletest)
         include_directories(external/googletest/googletest/include)
         add_subdirectory(tests)
@@ -104,9 +104,11 @@ INSTALL(
     PATTERN "**/*.h"
     )
 
-if (EXISTS Test-Suite)
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/Test-Suite")
     enable_testing()
     add_subdirectory(Test-Suite)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Test-Suite)
     include(CTest)
+else()
+    message("Test-Suite is not included in the build")
 endif()
