@@ -585,7 +585,7 @@ void PointerAnalysis::resolveCPPIndCalls(const CallBlockNode* cs, const PointsTo
     assert(isVirtualCallSite(SVFUtil::getLLVMCallSite(cs->getCallSite())) && "not cpp virtual call");
 
     VFunSet vfns;
-    if (connectVCallOnCHA)
+    if (connectVCallOnCHA || vcall_cha)
         getVFnsFromCHA(cs, vfns);
     else
         getVFnsFromPts(cs, target, vfns);

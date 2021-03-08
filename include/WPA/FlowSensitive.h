@@ -79,11 +79,15 @@ public:
     }
 
     /// Create signle instance of flow-sensitive pointer analysis
-    static FlowSensitive* createFSWPA(PAG* _pag)
+    static FlowSensitive* createFSWPA(PAG* _pag, bool vcall_cha=false)
     {
         if (fspta == nullptr)
         {
             fspta = new FlowSensitive(_pag);
+            if (vcall_cha) {
+                fspta->connectCPPVirtualOnCHA();
+            }
+
             fspta->analyze();
         }
         return fspta;
