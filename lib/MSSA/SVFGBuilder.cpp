@@ -113,7 +113,7 @@ SVFG* SVFGBuilder::build(BVDataPTAImpl* pta, VFG::VFGK kind)
         if(OPTSVFG)
             svfg = new SVFGOPT(mssa, kind);
         else
-            svfg = new SVFG(mssa,kind);
+            svfg = new SVFG(mssa, kind);
         buildSVFG();
     }
 

@@ -76,8 +76,8 @@ private:
     {
         if(SVFUtil::isNonInstricCallSite(inst))
             return getOrAddInterBlockICFGNode(inst);
-        else
-            return getOrAddIntraBlockICFGNode(inst);
+
+        return getOrAddIntraBlockICFGNode(inst);
     }
 
     /// Create edges between ICFG nodes across functions

@@ -56,7 +56,8 @@ public:
     using PtsMap = BVDataPTAImpl::MutDFPTDataTy::PtsMap;
 
     /// Constructor
-    FlowSensitive(PAG* _pag, PTATY type = FSSPARSE_WPA) : WPASVFGFSSolver(), BVDataPTAImpl(_pag, type)
+    FlowSensitive(PAG* _pag, PTATY type = FSSPARSE_WPA) :
+        WPASVFGFSSolver(), BVDataPTAImpl(_pag, type)
     {
         svfg = nullptr;
         solveTime = sccTime = processTime = propagationTime = updateTime = 0;

@@ -154,8 +154,8 @@ inline bool isCallSite(const Value* val)
 {
 	if(const auto* inst = SVFUtil::dyn_cast<Instruction>(val))
 		return SVFUtil::isCallSite(inst);
-	else
-		return false;
+
+    return false;
 }
 /// Whether an instruction is a callsite in the application code, excluding llvm intrinsic calls
 inline bool isNonInstricCallSite(const Instruction* inst)
