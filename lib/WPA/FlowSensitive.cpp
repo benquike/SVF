@@ -50,10 +50,9 @@ void FlowSensitive::initialize()
 
     ander = AndersenWaveDiff::createAndersenWaveDiff(getPAG());
     // When evaluating ctir aliases, we want the whole SVFG.
-    svfg = Options::CTirAliasEval ? memSSA.buildFullSVFG(ander) : memSSA.buildPTROnlySVFG(ander);
+    svfg = Options::CTirAliasEval ? svfgBuilder.buildFullSVFG(ander) : svfgBuilder.buildPTROnlySVFG(ander);
     setGraph(svfg);
     //AndersenWaveDiff::releaseAndersenWaveDiff();
-
     stat = new FlowSensitiveStat(this);
 }
 
