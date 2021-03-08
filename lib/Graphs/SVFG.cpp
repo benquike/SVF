@@ -295,7 +295,9 @@ void SVFG::connectIndirectSVFGEdges()
         else if(const auto* formalIn = SVFUtil::dyn_cast<FormalINSVFGNode>(node))
         {
             PTACallGraphEdge::CallInstSet callInstSet;
-            mssa->getPTA()->getPTACallGraph()->getDirCallSitesInvokingCallee(formalIn->getEntryChi()->getFunction(),callInstSet);
+            auto *ptaCG = mssa->getPTA()->getPTACallGraph();
+            ptaCG->getDirCallSitesInvokingCallee(formalIn->getEntryChi()->getFunction(),
+                                                 callInstSet);
             for(const auto *cs : callInstSet)
             {
                  if(!mssa->hasMU(cs))
