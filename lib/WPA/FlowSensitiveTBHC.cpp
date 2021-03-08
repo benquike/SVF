@@ -37,7 +37,7 @@ void FlowSensitiveTBHC::initialize()
 {
     PointerAnalysis::initialize();
     AndersenWaveDiff* ander = AndersenWaveDiff::createAndersenWaveDiff(getPAG());
-    svfg = memSSA.buildFullSVFG(ander);
+    svfg = svfgBuilder.buildFullSVFG(ander);
     setGraph(svfg);
     stat = new FlowSensitiveStat(this);
 

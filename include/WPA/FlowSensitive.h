@@ -276,7 +276,7 @@ protected:
     ///@}
 
     static FlowSensitive* fspta;
-    SVFGBuilder memSSA;
+    SVFGBuilder svfgBuilder;
     AndersenWaveDiff *ander;
 
     /// Statistics.
