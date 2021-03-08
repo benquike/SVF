@@ -139,6 +139,9 @@ protected:
     u32_t OnTheFlyIterBudgetForStat;
     //@}
 
+    // add virtual call analysis results
+    bool vcall_cha;
+
     /// PAG
     static PAG* pag;
     /// Module
@@ -252,6 +255,10 @@ public:
     /// Clear points-to data
     virtual void clearPts()
     {
+    }
+
+    virtual void connectCPPVirtualOnCHA() {
+        vcall_cha = true;
     }
 
     /// Print targets of a function pointer
