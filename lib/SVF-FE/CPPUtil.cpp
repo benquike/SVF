@@ -288,20 +288,41 @@ bool cppUtil::isCPPThunkFunction(const Function *F) {
 const Function *cppUtil::getThunkTarget(const Function *F) {
     const Function *ret = nullptr;
 
+    assert (F != nullptr && "F should not be nullptr");
+
+    if (F->isDeclaration()) {
+          return F;
+    }
+
     for (const auto &bb:*F) {
         for (const auto &inst: bb) {
             if (llvm::isa<CallInst>(inst) || llvm::isa<InvokeInst>(inst)
                 || llvm::isa<CallBrInst>(inst)) {
                 llvm::ImmutableCallSite cs(&inst);
-                assert(cs.getCalledFunction() &&
-                       "Indirect call detected in thunk func");
                 assert(ret == nullptr && "multiple callsites in thunk func");
 
-                ret = cs.getCalledFunction();
+                const auto *v = cs.getCalledValue();
+                if (const auto *alias = llvm::dyn_cast<llvm::GlobalAlias>(v)) {
+                    v = alias->getAliasee();
+                }
+
+                if (auto *CE = llvm::dyn_cast<llvm::ConstantExpr>(v)) {
+                    auto *AsI = CE->getAsInstruction();
+                    if (auto *bc = llvm::dyn_cast<llvm::BitCastInst>(AsI)) {
+                        v = bc->getOperand(0);
+                    }
+                    AsI->deleteValue();
+                }
+
+                assert(llvm::isa<llvm::Function>(v) &&
+                       "Indirect call detected in thunk function");
+
+                ret = llvm::dyn_cast<llvm::Function>(v);
             }
         }
     }
 
+    assert(ret != nullptr && "no callsites detected in thunk function");
     return ret;
 }
 
