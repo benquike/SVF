@@ -320,7 +320,6 @@ public:
         funRetMap[fun] = ret;
     }
 
-
     ///
     /// \brief: set up one actual arguement for a callsite
     ///
@@ -884,7 +883,7 @@ template<> struct GraphTraits<Inverse<SVF::PAGNode *> > : public GraphTraits<Inv
 
 template<> struct GraphTraits<SVF::PAG*> : public GraphTraits<SVF::GenericGraph<SVF::PAGNode,SVF::PAGEdge>* >
 {
-    using NodeRef = SVF::PAGNode *;
+    typedef SVF::PAGNode *NodeRef;
 };
 
 } // End namespace llvm
