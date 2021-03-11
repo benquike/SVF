@@ -275,7 +275,8 @@ public:
 };
 
 /*!
- * Function exit ICFGNode containing (at most one) FormalRetVFGNodes of a function
+ * Function exit ICFGNode containing
+ * (at most one) FormalRetVFGNode of a function
  */
 class FunExitBlockNode : public InterBlockNode
 {

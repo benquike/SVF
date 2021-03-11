@@ -509,7 +509,7 @@ public:
     }
     inline PAGEdge* getIntraPAGEdge(PAGNode* src, PAGNode* dst, PAGEdge::PEDGEK kind)
     {
-        PAGEdge edge(src,dst,kind);
+        PAGEdge edge(src, dst, kind);
         const PAGEdge::PAGEdgeSetTy& edgeSet = getEdgeSet(kind);
         auto it = edgeSet.find(&edge);
         assert(it != edgeSet.end() && "can not find pag edge");
@@ -549,7 +549,7 @@ public:
     /// return whole allocated memory object if this node is a gep obj node
     /// return nullptr is this node is not a ObjPN type
     //@{
-    inline const MemObj*getObject(NodeID id) const
+    inline const MemObj* getObject(NodeID id) const
     {
         const PAGNode* node = getPAGNode(id);
         if(const ObjPN* objPN = SVFUtil::dyn_cast<ObjPN>(node))
@@ -557,7 +557,7 @@ public:
 
         return nullptr;
     }
-    inline const MemObj*getObject(const ObjPN* node) const
+    inline const MemObj* getObject(const ObjPN* node) const
     {
         return node->getMemObj();
     }
@@ -702,7 +702,7 @@ public:
     /// Add a PAG node into Node map
     inline NodeID addNode(PAGNode* node, NodeID i)
     {
-        addGNode(i,node);
+        addGNode(i, node);
         return i;
     }
     /// Add a value (pointer) node
@@ -791,7 +791,7 @@ public:
     /// Add a unique return node for a procedure
     inline NodeID addRetNode(const SVFFunction*, PAGNode *node, NodeID i)
     {
-        return addNode(node,i);
+        return addNode(node, i);
     }
     /// Add a unique vararg node for a procedure
     inline NodeID addVarargNode(const SVFFunction*, PAGNode *node, NodeID i)

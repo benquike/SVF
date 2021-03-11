@@ -98,7 +98,7 @@ void ICFGBuilder::processFunBody(WorkList& worklist)
             NodeID branchID = 0;
             for (const auto *succ : nextInsts)
             {
-                 ICFGNode* dstNode = getOrAddBlockICFGNode(succ);
+                ICFGNode* dstNode = getOrAddBlockICFGNode(succ);
                 if (isNonInstricCallSite(inst))
                 {
                     RetBlockNode* retICFGNode = getOrAddRetICFGNode(inst);
@@ -109,7 +109,9 @@ void ICFGBuilder::processFunBody(WorkList& worklist)
                 const auto* br = SVFUtil::dyn_cast<BranchInst>(inst);
 
                 if(br && br->isConditional())
-                    icfg->addConditionalIntraEdge(srcNode, dstNode, br->getCondition(), branchID);
+                    icfg->addConditionalIntraEdge(srcNode, dstNode,
+                                                  br->getCondition(),
+                                                  branchID);
                 else
                     icfg->addIntraEdge(srcNode, dstNode);
 

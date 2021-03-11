@@ -72,22 +72,23 @@ PAG* PAGBuilder::build(SVFModule* svfModule)
     ExternalPAG::initialise(svfModule);
 
     /// handle functions
-    for (auto & fit : *svfModule)
-    {
+    for (auto& fit : *svfModule) {
         const SVFFunction& fun = *fit;
         /// collect return node of function fun
         /// TODO: handle functions with only
         /// declaration
-        if(!SVFUtil::isExtCall(&fun))
-        {
+        /// FIXME: rename `isExtCall`, it should be a function.
+        if(!SVFUtil::isExtCall(&fun)) {
             /// Return PAG node will not be created for function which can not
             /// reach the return instruction due to call to abort(), exit(),
             /// etc. In 176.gcc of SPEC 2000, function build_objc_string() from
             /// c-lang.c shows an example when fun.doesNotReturn() evaluates
             /// to TRUE because of abort().
             if(!fun.getLLVMFun()->doesNotReturn() &&
-               !fun.getLLVMFun()->getReturnType()->isVoidTy())
+               !fun.getLLVMFun()->getReturnType()->isVoidTy()) {
+                /// Set up the mapping between function and its PAG RetPN
                 pag->addFunRet(&fun, pag->getPAGNode(pag->getReturnNode(&fun)));
+            }
 
             /// To be noted, we do not record arguments which are in
             /// declared function without body
