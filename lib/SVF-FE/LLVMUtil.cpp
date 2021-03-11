@@ -42,15 +42,22 @@ using namespace SVF;
 bool SVFUtil::isObject(const Value *ref) {
     bool createobj = false;
     if (SVFUtil::isa<Instruction>(ref) &&
-        SVFUtil::isStaticExtCall(SVFUtil::cast<Instruction>(ref)))
+        SVFUtil::isStaticExtCall(SVFUtil::cast<Instruction>(ref))) {
+        /// a call to external function
         createobj = true;
-    if (SVFUtil::isa<Instruction>(ref) &&
-        SVFUtil::isHeapAllocExtCallViaRet(SVFUtil::cast<Instruction>(ref)))
+    } else if (SVFUtil::isa<Instruction>(ref) &&
+               SVFUtil::isHeapAllocExtCallViaRet(
+                   SVFUtil::cast<Instruction>(ref))) {
+        // a call to heap allocation function
         createobj = true;
-    if (SVFUtil::isa<GlobalVariable>(ref))
+    } else if (SVFUtil::isa<GlobalVariable>(ref)) {
+        // global variable
         createobj = true;
-    if (SVFUtil::isa<Function>(ref) || SVFUtil::isa<AllocaInst>(ref))
+    } else if (SVFUtil::isa<Function>(ref) || SVFUtil::isa<AllocaInst>(ref)) {
+        /// function or Alloca instruction
         createobj = true;
+    }
+
 
     return createobj;
 }

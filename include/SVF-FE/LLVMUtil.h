@@ -47,10 +47,17 @@ inline const Function *getLLVMFunction(const Value *val) {
     return fun;
 }
 
-/// Return true if the call is an external call (external library in function
-/// summary table) If the libary function is redefined in the application code
+///
+/// Return true if the call is an external function (external library in function
+/// summary table) or it is just a declaration without a definition.
+/// If the libary function is redefined in the application code
 /// (e.g., memcpy), it will return false and will not be treated as an external
 /// call.
+///
+///  ExtAPI::getExtAPI()->is_ext(fun) will return true if fun is
+///  a declaration.
+///
+///  So, no worries
 //@{
 inline bool isExtCall(const SVFFunction *fun) {
     return fun && ExtAPI::getExtAPI()->is_ext(fun);

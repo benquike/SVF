@@ -40,8 +40,42 @@ using namespace std;
 using namespace SVF;
 using namespace SVFUtil;
 
-/*!
- * Start building PAG here
+/*! \brief Start the building of PAG
+ *
+ *  1. build the PAG nodes from the symbol table
+ *  2. building the edges
+ *     - connecting global vars with global object
+ *     - initialize external PAG (TODO)
+ *     - Handling functions, for each non-external function
+ *         -# Handling formal ret PAG node:
+ *            if it is not a void function,
+ *            the function Ret PAG node (Formal RetNode) (created in the
+ *            first step) will be saved in the ICFG FunExitBlockNode;
+ *            a mapping between the function and the PAG Ret node is
+ *            setup (see PAG::addFunRet)
+ *         -# Handling Formal Parameter PAG Nodes:
+ *            for each argument, (1) save the argument PAG node to the
+ *            ICFG FunEntryBlockNode::FPNodes; (2) save it to the mapping
+ *            between function and arglist (PAG::funArgsListMap); see
+ *            PAG::addFunArgs (FIXME: rename addFunArgs -> addFunArg).
+ *         -# handle each instruction in the function (see
+ *            PAGBuilder::visitXXXX). Importantly for
+ *            CallInst and related (callsites), it will
+ *            (see PAGBuilder::visitCallSite): (1) save the callsite to
+ *            PAG::callSiteSet (see PAG::addCallSite); (2) save the actual
+ *            parameter PAG nodes to CallBlockNode::APNodes in the ICFG,
+ *            see PAG::addCallSiteArgs;
+ *            (3) add the actual parameter PAG node to the mapping between
+ *            the CallBlockNode and actual parameter PAG node list
+ *            (PAG::callSiteArgsListMap), see PAG::addCallSiteArgs;
+ *            (4) save the PAG node corresponding to the call instruction
+ *            (Actual Ret Node) to the RetBlockNode::actualRet field in
+ *            ICFG; (5) set up the mapping between (ICFG) retBlockNode
+ *            and the actual return PAG Node, see PAG::addCallSiteRets;
+ *            (6) connect the formal RetNode to Actual RetNode with a RetEdge
+ *            (7) connect each of the Actual Parameter PAG nodes with
+ *            Formal Parameter PAG Nodes using CallPE;
+ *
  */
 PAG *PAGBuilder::build(SVFModule *svfModule) {
 
@@ -62,11 +96,13 @@ PAG *PAGBuilder::build(SVFModule *svfModule) {
     /// initial PAG nodes
     initialiseNodes();
 
-    /// initialize PAG edges:
-    ///// handle globals
+    ///
+    /// initialize PAG edges in globals
+    /// connecting global var syms with global objects
+    ///
     visitGlobal(svfModule);
 
-    ///// collect exception vals in the program
+    /// collect exception vals in the program
     ExternalPAG::initialise(svfModule);
 
     /// handle functions
@@ -75,7 +111,7 @@ PAG *PAGBuilder::build(SVFModule *svfModule) {
         /// collect return node of function fun
         /// TODO: handle functions with only
         /// declaration
-        /// FIXME: rename `isExtCall`, it should be a function.
+        /// FIXME: rename `isExtCall`, should it be an external function?.
         if (!SVFUtil::isExtCall(&fun)) {
             /// Return PAG node will not be created for function which can not
             /// reach the return instruction due to call to abort(), exit(),
@@ -88,6 +124,9 @@ PAG *PAGBuilder::build(SVFModule *svfModule) {
                 pag->addFunRet(&fun, pag->getPAGNode(pag->getReturnNode(&fun)));
             }
 
+            ///
+            /// Create a PAG node for each of the function argument
+            ///
             /// To be noted, we do not record arguments which are in
             /// declared function without body
             /// TODO: what about external functions with PAG
@@ -97,6 +136,7 @@ PAG *PAGBuilder::build(SVFModule *svfModule) {
                  I != E; ++I) {
                 setCurrentLocation(&(*I), &fun.getLLVMFun()->getEntryBlock());
                 NodeID argValNodeId = pag->getValueNode(&*I);
+
                 // if this is the function does not have caller (e.g. main)
                 // or a dead function, shall we create a black
                 // hole address edge for it?
@@ -158,7 +198,9 @@ void PAGBuilder::initialiseNodes() {
     pag->addBlackholePtrNode();
     addNullPtrNode();
 
-    // add each sym value as a node
+    ///
+    /// For each sym value in the symtable, add a PAG node
+    ///
     for (auto iter = symTable->valSyms().begin();
          iter != symTable->valSyms().end(); ++iter) {
         DBOUT(DPAGBuild, outs() << "add val node " << iter->second << "\n");
@@ -170,7 +212,9 @@ void PAGBuilder::initialiseNodes() {
         pag->addValNode(iter->first, iter->second);
     }
 
-    // add each object value as a node
+    ///
+    /// for each object value in the symtable, add a PAG node
+    ///
     for (auto iter = symTable->objSyms().begin();
          iter != symTable->objSyms().end(); ++iter) {
         DBOUT(DPAGBuild, outs() << "add obj node " << iter->second << "\n");
@@ -182,10 +226,10 @@ void PAGBuilder::initialiseNodes() {
         pag->addObjNode(iter->first, iter->second);
     }
 
-    // hanlding functions
-    // for each function, we add a return node
-    // TODO: how about external function with only
-    // declaration
+    /// hanlding functions
+    /// for each function, we add a PAG return node
+    /// TODO: how about external function with only
+    /// declaration
     for (auto iter = symTable->retSyms().begin();
          iter != symTable->retSyms().end(); ++iter) {
         DBOUT(DPAGBuild, outs() << "add ret node " << iter->second << "\n");
@@ -194,7 +238,11 @@ void PAGBuilder::initialiseNodes() {
         pag->addRetNode(fun, iter->second);
     }
 
-    // handle vararg node
+    ///
+    /// handle vararg node
+    /// for each vararg sym in the symbol table,
+    /// add a PAG node for it
+    ///
     for (auto iter = symTable->varargSyms().begin();
          iter != symTable->varargSyms().end(); ++iter) {
         DBOUT(DPAGBuild, outs() << "add vararg node " << iter->second << "\n");
@@ -715,8 +763,11 @@ void PAGBuilder::visitCallSite(CallSite cs) {
         /// i.e., the value receiting the return value
         ///
         /// FIXME: where is the PAG node added for the callsite ret?
-        pag->addCallSiteRets(icfgRetBlockNode, pag->getPAGNode(getValueNode(
-                                                   cs.getInstruction())));
+        /// here, when constructing the symboltable,
+        /// a value symbol will be created for the call instruction
+        pag->addCallSiteRets(icfgRetBlockNode,
+                             pag->getPAGNode(
+                                 getValueNode(cs.getInstruction())));
     }
 
     // extract direct callees?

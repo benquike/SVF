@@ -268,17 +268,21 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     inline CmpNodeMap &getCmpNodeMap() { return cmpNodeMap; }
     //@}
 
+    ///
     /// Get/set method for function/callsite arguments and returns
     //@{
-    /// Add function arguments
+    /// Add function argument nodes
     inline void addFunArgs(const SVFFunction *fun, const PAGNode *arg) {
         FunEntryBlockNode *funEntryBlockNode = icfg->getFunEntryBlockNode(fun);
+        /// save the PAG Arg node to the FunEntryBlockNode in the ICFG
         funEntryBlockNode->addFormalParms(arg);
+        /// save the PAG Arg node in the mapping
+        /// fun <--> [pag-arg0, pag-arg1, pag-arg2, ....]
         funArgsListMap[fun].push_back(arg);
     }
 
     ///
-    /// \brief: handle function ret node (PAG)
+    /// \brief handle function ret node (PAG)
     ///
     /// 1. add the PAG ret node to the ICFG FunExitBlockNode of the function
     /// 2. setup the mapping between the function and PAG ret node
@@ -290,7 +294,7 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
 
 
     ///
-    /// \brief: set up one actual arguement for a callsite
+    /// \brief set up one actual arguement for a callsite
     ///
     /// 1. Save the actual argument to the ICFG CallBlockNode
     /// 2. Save the actual argument to PAG::callSiteArgsListMap.
