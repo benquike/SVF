@@ -301,9 +301,9 @@ void PCG::printResults() { printTDFuns(); }
  */
 void PCG::printTDFuns() {
 
-    for (SVFModule::const_iterator fi = mod.begin(), efi = mod.end(); fi != efi;
-         ++fi) {
-        const Function *fun = *fi;
+    for (SVFModule::const_iterator fi = mod->begin(), efi = mod->end();
+         fi != efi; ++fi) {
+        const Function *fun = (*fi)->getLLVMFun();
         if (fun->isDeclaration())
             continue;
 

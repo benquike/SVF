@@ -165,6 +165,7 @@ class ThreadCallGraph : public PTACallGraph {
 
     /// Update call graph using pointer results
     void updateCallGraph(PointerAnalysis *pta);
+
     /// Update join edge using pointer analysis results
     void updateJoinEdge(PointerAnalysis *pta);
 
@@ -175,6 +176,7 @@ class ThreadCallGraph : public PTACallGraph {
         return callinstToThreadForkEdgesMap.find(cs) !=
                callinstToThreadForkEdgesMap.end();
     }
+
     inline ForkEdgeSet::const_iterator
     getForkEdgeBegin(const CallBlockNode *cs) const {
         auto it = callinstToThreadForkEdgesMap.find(cs);
@@ -182,6 +184,7 @@ class ThreadCallGraph : public PTACallGraph {
                "call instruction not found");
         return it->second.begin();
     }
+
     inline ForkEdgeSet::const_iterator
     getForkEdgeEnd(const CallBlockNode *cs) const {
         auto it = callinstToThreadForkEdgesMap.find(cs);
@@ -197,6 +200,7 @@ class ThreadCallGraph : public PTACallGraph {
         return callinstToThreadJoinEdgesMap.find(cs) !=
                callinstToThreadJoinEdgesMap.end();
     }
+
     inline JoinEdgeSet::const_iterator
     getJoinEdgeBegin(const CallBlockNode *cs) const {
         auto it = callinstToThreadJoinEdgesMap.find(cs);
@@ -204,6 +208,7 @@ class ThreadCallGraph : public PTACallGraph {
                "call instruction does not have a valid callee");
         return it->second.begin();
     }
+
     inline JoinEdgeSet::const_iterator
     getJoinEdgeEnd(const CallBlockNode *cs) const {
         auto it = callinstToThreadJoinEdgesMap.find(cs);
@@ -211,6 +216,7 @@ class ThreadCallGraph : public PTACallGraph {
                "call instruction does not have a valid callee");
         return it->second.end();
     }
+
     inline void getJoinSites(const PTACallGraphNode *routine, InstSet &csSet) {
         for (const auto &it : callinstToThreadJoinEdgesMap) {
             for (auto jit = it.second.begin(), ejit = it.second.end();
@@ -228,9 +234,11 @@ class ThreadCallGraph : public PTACallGraph {
     inline bool isForksite(const CallBlockNode *csInst) {
         return forksites.find(csInst) != forksites.end();
     }
+
     inline bool isJoinsite(const CallBlockNode *csInst) {
         return joinsites.find(csInst) != joinsites.end();
     }
+
     inline bool isParForSite(const CallBlockNode *csInst) {
         return parForSites.find(csInst) != parForSites.end();
     }
@@ -241,6 +249,7 @@ class ThreadCallGraph : public PTACallGraph {
     inline CallSiteSet::const_iterator forksitesBegin() const {
         return forksites.begin();
     }
+
     inline CallSiteSet::const_iterator forksitesEnd() const {
         return forksites.end();
     }
@@ -251,6 +260,7 @@ class ThreadCallGraph : public PTACallGraph {
     inline CallSiteSet::const_iterator joinsitesBegin() const {
         return joinsites.begin();
     }
+
     inline CallSiteSet::const_iterator joinsitesEnd() const {
         return joinsites.end();
     }
@@ -261,6 +271,7 @@ class ThreadCallGraph : public PTACallGraph {
     inline CallSiteSet::const_iterator parForSitesBegin() const {
         return parForSites.begin();
     }
+
     inline CallSiteSet::const_iterator parForSitesEnd() const {
         return parForSites.end();
     }

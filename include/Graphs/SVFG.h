@@ -313,8 +313,9 @@ class SVFG : public VFG {
                                         const SVFFunction *callee,
                                         SVFGEdgeSetTy &edges) {
         for (auto inIt = actualOut->InEdgeBegin(),
-                  inEit = actualOut->InEdgeEnd();
+                 inEit = actualOut->InEdgeEnd();
              inIt != inEit; ++inIt) {
+
             SVFGEdge *edge = *inIt;
             if (edge->getSrcNode()->getFun() == callee) {
                 edges.insert(edge);
@@ -350,6 +351,7 @@ class SVFG : public VFG {
                    "a PAG node can only have unique definition ");
         }
     }
+
     inline NodeID getDef(const MRVer *mvar) const {
         auto it = MSSAVarToDefMap.find(mvar);
         assert(it != MSSAVarToDefMap.end() &&

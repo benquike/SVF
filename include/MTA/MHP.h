@@ -8,6 +8,7 @@
 #ifndef MHP_H_
 #define MHP_H_
 
+#include "Graphs/SVFG.h"
 #include "MTA/TCT.h"
 #include <set>
 #include <vector>

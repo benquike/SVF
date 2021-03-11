@@ -53,8 +53,9 @@ PAG *PAGBuilder::build(SVFModule *svfModule) {
 
     // If the PAG has been built before, then we return the unique PAG of the
     // program
-    if (pag->getNodeNumAfterPAGBuild() > 1)
+    if (pag->getNodeNumAfterPAGBuild() > 1) {
         return pag;
+    }
 
     svfMod = svfModule;
 
@@ -163,8 +164,9 @@ void PAGBuilder::initialiseNodes() {
         DBOUT(DPAGBuild, outs() << "add val node " << iter->second << "\n");
 
         if (iter->second == symTable->blkPtrSymID() ||
-            iter->second == symTable->nullPtrSymID())
+            iter->second == symTable->nullPtrSymID()) {
             continue;
+        }
         pag->addValNode(iter->first, iter->second);
     }
 
@@ -174,8 +176,9 @@ void PAGBuilder::initialiseNodes() {
         DBOUT(DPAGBuild, outs() << "add obj node " << iter->second << "\n");
 
         if (iter->second == symTable->blackholeSymID() ||
-            iter->second == symTable->constantSymID())
+            iter->second == symTable->constantSymID()) {
             continue;
+        }
         pag->addObjNode(iter->first, iter->second);
     }
 
@@ -342,10 +345,11 @@ void PAGBuilder::processCE(const Value *val) {
             addAddrEdge(pag->getConstantNode(), dst);
             setCurrentLocation(cval, cbb);
         } else {
-            if (SVFUtil::isa<ConstantExpr>(val))
+            if (SVFUtil::isa<ConstantExpr>(val)) {
                 assert(
                     false &&
                     "we don't handle all other constant expression for now!");
+            }
         }
     }
 }
@@ -364,8 +368,9 @@ NodeID PAGBuilder::getGlobalVarField(const GlobalVariable *gvar, u32_t offset) {
     /// if we did not find the constant expression in the program,
     /// then we need to create a gep node for this field
     const Type *gvartype = gvar->getType();
-    while (const auto *ptype = SVFUtil::dyn_cast<PointerType>(gvartype))
+    while (const auto *ptype = SVFUtil::dyn_cast<PointerType>(gvartype)) {
         gvartype = ptype->getElementType();
+    }
     return getGepValNode(gvar, LocationSet(offset), gvartype, offset);
 }
 
@@ -408,14 +413,18 @@ void PAGBuilder::InitialGlobal(const GlobalVariable *gvar, Constant *C,
             setCurrentLocation(C, nullptr);
             addStoreEdge(src, field);
             /// src should not point to anything yet
-            if (C->getType()->isPtrOrPtrVectorTy() && src != pag->getNullPtr())
+            if (C->getType()->isPtrOrPtrVectorTy() &&
+                src != pag->getNullPtr()) {
                 addCopyEdge(pag->getNullPtr(), src);
+            }
         }
     } else if (SVFUtil::isa<ConstantArray>(C)) {
-        if (cppUtil::isValVtbl(gvar) == false)
-            for (u32_t i = 0, e = C->getNumOperands(); i != e; i++)
+        if (cppUtil::isValVtbl(gvar) == false) {
+            for (u32_t i = 0, e = C->getNumOperands(); i != e; i++) {
                 InitialGlobal(gvar, SVFUtil::cast<Constant>(C->getOperand(i)),
                               offset);
+            }
+        }
 
     } else if (SVFUtil::isa<ConstantStruct>(C)) {
         const StructType *sty = SVFUtil::cast<StructType>(C->getType());
@@ -603,8 +612,9 @@ void PAGBuilder::visitCastInst(CastInst &inst) {
         addBlackHoleAddrEdge(dst);
     } else {
         Value *opnd = inst.getOperand(0);
-        if (!SVFUtil::isa<PointerType>(opnd->getType()))
+        if (!SVFUtil::isa<PointerType>(opnd->getType())) {
             opnd = stripAllCasts(opnd);
+        }
 
         NodeID src = getValueNode(opnd);
         addCopyEdge(src, dst);
@@ -675,8 +685,9 @@ void PAGBuilder::visitSelectInst(SelectInst &inst) {
  */
 void PAGBuilder::visitCallSite(CallSite cs) {
     // skip llvm intrinsics
-    if (isIntrinsicInst(cs.getInstruction()))
+    if (isIntrinsicInst(cs.getInstruction())) {
         return;
+    }
 
     DBOUT(DPAGBuild,
           outs() << "process callsite " << *cs.getInstruction() << "\n");
@@ -788,10 +799,12 @@ void PAGBuilder::visitExtractElementInst(ExtractElementInst &inst) {
 void PAGBuilder::visitBranchInst(BranchInst &inst) {
     NodeID dst = getValueNode(&inst);
     NodeID src;
-    if (inst.isConditional())
+    if (inst.isConditional()) {
         src = getValueNode(inst.getCondition());
-    else
+    } else {
         src = pag->getNullPtr();
+    }
+
     const UnaryOPPE *unaryPE = addUnaryOPEdge(src, dst);
     pag->addUnaryNode(pag->getPAGNode(dst), unaryPE);
 }
@@ -893,8 +906,9 @@ void PAGBuilder::addComplexConsForExt(Value *D, Value *S, u32_t sz) {
     assert(D && S);
     NodeID vnD = getValueNode(D);
     NodeID vnS = getValueNode(S);
-    if (!vnD || !vnS)
+    if (!vnD || !vnS) {
         return;
+    }
 
     std::vector<LocationSet> fields;
 
@@ -903,14 +917,16 @@ void PAGBuilder::addComplexConsForExt(Value *D, Value *S, u32_t sz) {
     std::vector<LocationSet> dstFields;
     const Type *stype = getBaseTypeAndFlattenedFields(S, srcFields);
     const Type *dtype = getBaseTypeAndFlattenedFields(D, dstFields);
-    if (srcFields.size() > dstFields.size())
+    if (srcFields.size() > dstFields.size()) {
         fields = dstFields;
-    else
+    } else {
         fields = srcFields;
+    }
 
     /// If sz is 0, we will add edges for all fields.
-    if (sz == 0)
+    if (sz == 0) {
         sz = fields.size();
+    }
 
     assert(fields.size() >= sz &&
            "the number of flattened fields is smaller than size");
@@ -960,8 +976,9 @@ void PAGBuilder::handleExtCall(CallSite cs, const SVFFunction *callee) {
             ExtAPI::extf_t tF = extCallTy(callee);
             switch (tF) {
             case ExtAPI::EFT_REALLOC: {
-                if (!SVFUtil::isa<PointerType>(inst->getType()))
+                if (!SVFUtil::isa<PointerType>(inst->getType())) {
                     break;
+                }
                 // e.g. void *realloc(void *ptr, size_t size)
                 // if ptr is null then we will treat it as a malloc
                 // if ptr is not null, then we assume a new data memory will be
@@ -977,8 +994,9 @@ void PAGBuilder::handleExtCall(CallSite cs, const SVFFunction *callee) {
             case ExtAPI::EFT_L_A1:
             case ExtAPI::EFT_L_A2:
             case ExtAPI::EFT_L_A8: {
-                if (!SVFUtil::isa<PointerType>(inst->getType()))
+                if (!SVFUtil::isa<PointerType>(inst->getType())) {
                     break;
+                }
                 NodeID dstNode = getValueNode(inst);
                 Size_t arg_pos;
                 switch (tF) {
@@ -1011,9 +1029,10 @@ void PAGBuilder::handleExtCall(CallSite cs, const SVFFunction *callee) {
                 // However, the second argument is non-pointer, thus we can not
                 // use addComplexConsForExt
                 // addComplexConsForExt(cs.getArgument(0), cs.getArgument(1));
-                if (SVFUtil::isa<PointerType>(inst->getType()))
+                if (SVFUtil::isa<PointerType>(inst->getType())) {
                     addCopyEdge(getValueNode(cs.getArgument(0)),
                                 getValueNode(inst));
+                }
                 break;
             }
             case ExtAPI::EFT_L_A0__A0R_A1R: {
@@ -1035,22 +1054,25 @@ void PAGBuilder::handleExtCall(CallSite cs, const SVFFunction *callee) {
             case ExtAPI::EFT_A1R_A0: {
                 NodeID vnD = getValueNode(cs.getArgument(1));
                 NodeID vnS = getValueNode(cs.getArgument(0));
-                if (vnD && vnS)
+                if (vnD && vnS) {
                     addStoreEdge(vnS, vnD);
+                }
                 break;
             }
             case ExtAPI::EFT_A2R_A1: {
                 NodeID vnD = getValueNode(cs.getArgument(2));
                 NodeID vnS = getValueNode(cs.getArgument(1));
-                if (vnD && vnS)
+                if (vnD && vnS) {
                     addStoreEdge(vnS, vnD);
+                }
                 break;
             }
             case ExtAPI::EFT_A4R_A1: {
                 NodeID vnD = getValueNode(cs.getArgument(4));
                 NodeID vnS = getValueNode(cs.getArgument(1));
-                if (vnD && vnS)
+                if (vnD && vnS) {
                     addStoreEdge(vnS, vnD);
+                }
                 break;
             }
             case ExtAPI::EFT_L_A0__A1_A0: {
@@ -1063,9 +1085,10 @@ void PAGBuilder::handleExtCall(CallSite cs, const SVFFunction *callee) {
                     addStoreEdge(getValueNode(cs.getArgument(1)),
                                  getValueNode(load->getPointerOperand()));
 
-                    if (SVFUtil::isa<PointerType>(inst->getType()))
+                    if (SVFUtil::isa<PointerType>(inst->getType())) {
                         addLoadEdge(getValueNode(load->getPointerOperand()),
                                     getValueNode(inst));
+                    }
                 }
                 //				else if (const GetElementPtrInst *gep =
                 // SVFUtil::dyn_cast<GetElementPtrInst>(cs.getArgument(0))) {
@@ -1084,8 +1107,9 @@ void PAGBuilder::handleExtCall(CallSite cs, const SVFFunction *callee) {
                     Value *src = cs.getArgument(0);
                     if (SVFUtil::isa<PointerType>(src->getType())) {
                         NodeID vnS = getValueNode(src);
-                        if (vnS)
+                        if (vnS) {
                             addCopyEdge(vnS, vnD);
+                        }
                     } else {
                         addBlackHoleAddrEdge(vnD);
                     }
@@ -1093,8 +1117,9 @@ void PAGBuilder::handleExtCall(CallSite cs, const SVFFunction *callee) {
                 // Do the A2R_A0 part.
                 NodeID vnD = getValueNode(cs.getArgument(2));
                 NodeID vnS = getValueNode(cs.getArgument(0));
-                if (vnD && vnS)
+                if (vnD && vnS) {
                     addStoreEdge(vnS, vnD);
+                }
                 break;
             }
             case ExtAPI::EFT_A0R_NEW:
@@ -1142,8 +1167,9 @@ void PAGBuilder::handleExtCall(CallSite cs, const SVFFunction *callee) {
                 for (int i = offset + 1; i <= offset + 3; ++i) {
                     NodeID vnD = getGepValNode(vArg3, fields[i], type, i);
                     NodeID vnS = getValueNode(vArg1);
-                    if (vnD && vnS)
+                    if (vnD && vnS) {
                         addStoreEdge(vnS, vnD);
+                    }
                 }
                 break;
             }
@@ -1166,8 +1192,9 @@ void PAGBuilder::handleExtCall(CallSite cs, const SVFFunction *callee) {
                 // "offset".
                 for (int i = offset + 1; i <= offset + 3; ++i) {
                     NodeID vnS = getGepValNode(vArg, fields[i], type, i);
-                    if (vnD && vnS)
+                    if (vnD && vnS) {
                         addStoreEdge(vnS, vnD);
+                    }
                 }
                 break;
             }
@@ -1399,8 +1426,9 @@ NodeID PAGBuilder::getGepValNode(const Value *val, const LocationSet &ls,
  * Constant             StoreEdge (PAGBuilder::InitialGlobal)
  */
 void PAGBuilder::setCurrentBBAndValueForPAGEdge(PAGEdge *edge) {
-    if (SVFModule::pagReadFromTXT())
+    if (SVFModule::pagReadFromTXT()) {
         return;
+    }
 
     assert(curVal && "current Val is nullptr?");
     edge->setBB(curBB);
@@ -1424,8 +1452,9 @@ void PAGBuilder::setCurrentBBAndValueForPAGEdge(PAGEdge *edge) {
         /// We assume every GepValPN and its GepPE are unique across whole
         /// program
         if (!(SVFUtil::isa<GepPE>(edge) &&
-              SVFUtil::isa<GepValPN>(edge->getDstNode())))
+              SVFUtil::isa<GepValPN>(edge->getDstNode()))) {
             assert(curBB && "instruction does not have a basic block??");
+        }
 
         icfgNode = pag->getICFG()->getBlockICFGNode(curInst);
     } else if (const auto *arg = SVFUtil::dyn_cast<Argument>(curVal)) {
@@ -1434,10 +1463,11 @@ void PAGBuilder::setCurrentBBAndValueForPAGEdge(PAGEdge *edge) {
             LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(arg->getParent());
         icfgNode = pag->getICFG()->getFunEntryBlockNode(fun);
     } else if (SVFUtil::isa<ConstantExpr>(curVal)) {
-        if (!curBB)
+        if (!curBB) {
             pag->addGlobalPAGEdge(edge);
-        else
+        } else {
             icfgNode = pag->getICFG()->getBlockICFGNode(&curBB->front());
+        }
     } else if (SVFUtil::isa<GlobalVariable>(curVal) ||
                SVFUtil::isa<Function>(curVal) ||
                SVFUtil::isa<Constant>(curVal) ||

@@ -110,9 +110,11 @@ class IntraCFGEdge : public ICFGEdge {
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const IntraCFGEdge *) { return true; }
+
     static inline bool classof(const ICFGEdge *edge) {
         return edge->getEdgeKind() == IntraCF;
     }
+
     static inline bool classof(const GenericICFGEdgeTy *edge) {
         return edge->getEdgeKind() == IntraCF;
     }
