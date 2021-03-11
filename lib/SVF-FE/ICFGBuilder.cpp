@@ -45,7 +45,7 @@ void ICFGBuilder::build(SVFModule* svfModule)
          if (SVFUtil::isExtCall(fun))
             continue;
         WorkList worklist;
-        processFunEntry(fun,worklist);
+        processFunEntry(fun, worklist);
         processFunBody(worklist);
         processFunExit(fun);
     }

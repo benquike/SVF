@@ -154,8 +154,8 @@ inline bool isCallSite(const Value* val)
 {
 	if(const auto* inst = SVFUtil::dyn_cast<Instruction>(val))
 		return SVFUtil::isCallSite(inst);
-	else
-		return false;
+
+    return false;
 }
 /// Whether an instruction is a callsite in the application code, excluding llvm intrinsic calls
 inline bool isNonInstricCallSite(const Instruction* inst)
@@ -212,7 +212,7 @@ inline const SVFFunction* getDefFunForMultipleModule(const Function* fun)
 inline const SVFFunction* getCallee(const CallSite cs)
 {
     // FIXME: do we need to strip-off the casts here to discover more library functions
-    Function *callee = SVFUtil::dyn_cast<Function>(cs.getCalledValue()->stripPointerCasts());
+    auto *callee = SVFUtil::dyn_cast<Function>(cs.getCalledValue()->stripPointerCasts());
     return getDefFunForMultipleModule(callee);
 }
 

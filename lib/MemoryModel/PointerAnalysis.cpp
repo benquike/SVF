@@ -115,7 +115,8 @@ const std::string PointerAnalysis::aliasTestFailNoAliasMangled  = "_Z20EXPECTEDF
  * Constructor
  */
 PointerAnalysis::PointerAnalysis(PAG* p, PTATY ty, bool alias_check) :
-    svfMod(nullptr),ptaTy(ty),stat(nullptr),ptaCallGraph(nullptr),callGraphSCC(nullptr),icfg(nullptr),typeSystem(nullptr)
+    svfMod(nullptr), ptaTy(ty), stat(nullptr), ptaCallGraph(nullptr),
+    callGraphSCC(nullptr), icfg(nullptr), typeSystem(nullptr)
 {
     pag = p;
 	OnTheFlyIterBudgetForStat = statBudget;
@@ -193,7 +194,7 @@ void PointerAnalysis::initialize()
     else
     {
         auto* cg = new PTACallGraph();
-        CallGraphBuilder bd(cg,pag->getICFG());
+        CallGraphBuilder bd(cg, pag->getICFG());
         ptaCallGraph = bd.buildCallGraph(pag->getModule());
     }
     callGraphSCCDetection();
@@ -580,12 +581,14 @@ void PointerAnalysis::connectVCallToVFns(const CallBlockNode* cs, const VFunSet 
 }
 
 /// Resolve cpp indirect call edges
-void PointerAnalysis::resolveCPPIndCalls(const CallBlockNode* cs, const PointsTo& target, CallEdgeMap& newEdges)
+void PointerAnalysis::resolveCPPIndCalls(const CallBlockNode* cs,
+                                         const PointsTo& target,
+                                         CallEdgeMap& newEdges)
 {
     assert(isVirtualCallSite(SVFUtil::getLLVMCallSite(cs->getCallSite())) && "not cpp virtual call");
 
     VFunSet vfns;
-    if (connectVCallOnCHA)
+    if (connectVCallOnCHA || vcall_cha)
         getVFnsFromCHA(cs, vfns);
     else
         getVFnsFromPts(cs, target, vfns);

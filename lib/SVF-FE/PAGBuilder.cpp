@@ -85,28 +85,35 @@ PAG* PAGBuilder::build(SVFModule* svfModule)
             /// etc. In 176.gcc of SPEC 2000, function build_objc_string() from
             /// c-lang.c shows an example when fun.doesNotReturn() evaluates
             /// to TRUE because of abort().
-            if(!fun.getLLVMFun()->doesNotReturn() && !fun.getLLVMFun()->getReturnType()->isVoidTy())
-                pag->addFunRet(&fun, pag->getPAGNode(pag->getReturnNode(&fun)));
+            if(!fun.getLLVMFun()->doesNotReturn() &&
+               !fun.getLLVMFun()->getReturnType()->isVoidTy())
+                pag->addFunRet(&fun,pag->getPAGNode(pag->getReturnNode(&fun)));
 
-            /// To be noted, we do not record arguments which are in declared function without body
-            /// TODO: what about external functions with PAG imported by commandline?
-            for (Function::arg_iterator I = fun.getLLVMFun()->arg_begin(), E = fun.getLLVMFun()->arg_end();
-                    I != E; ++I) {
-                setCurrentLocation(&*I,&fun.getLLVMFun()->getEntryBlock());
+            /// To be noted, we do not record arguments which are in
+            /// declared function without body
+            /// TODO: what about external functions with PAG
+            /// imported by commandline?
+            for (Function::arg_iterator I = fun.getLLVMFun()->arg_begin(),
+                     E = fun.getLLVMFun()->arg_end();
+                 I != E; ++I) {
+                setCurrentLocation(&(*I), &fun.getLLVMFun()->getEntryBlock());
                 NodeID argValNodeId = pag->getValueNode(&*I);
                 // if this is the function does not have caller (e.g. main)
-                // or a dead function, shall we create a black hole address edge for it?
-                // it is (1) too conservative, and (2) make FormalParmVFGNode defined at blackhole address PAGEdge.
+                // or a dead function, shall we create a black
+                // hole address edge for it?
+                // it is (1) too conservative, and (2) make
+                // FormalParmVFGNode defined at blackhole address PAGEdge.
                 // if(SVFUtil::ArgInNoCallerFunction(&*I)) {
                 //    if(I->getType()->isPointerTy())
                 //        addBlackHoleAddrEdge(argValNodeId);
-                //}
-                pag->addFunArgs(&fun,pag->getPAGNode(argValNodeId));
+                // }
+                pag->addFunArgs(&fun, pag->getPAGNode(argValNodeId));
             }
         }
-        for (auto & bb : *fun.getLLVMFun())
+
+        for (auto& bb : *fun.getLLVMFun())
         {
-             for (BasicBlock::iterator it = bb.begin(), eit = bb.end();
+            for (BasicBlock::iterator it = bb.begin(), eit = bb.end();
                     it != eit; ++it)
             {
                 Instruction& inst = *it;
@@ -739,7 +746,6 @@ void PAGBuilder::visitSelectInst(SelectInst &inst)
  */
 void PAGBuilder::visitCallSite(CallSite cs)
 {
-
     // skip llvm intrinsics
     if(isIntrinsicInst(cs.getInstruction()))
         return;
@@ -747,18 +753,24 @@ void PAGBuilder::visitCallSite(CallSite cs)
     DBOUT(DPAGBuild,
           outs() << "process callsite " << *cs.getInstruction() << "\n");
 
-    CallBlockNode* callBlockNode = pag->getICFG()->getCallBlockNode(cs.getInstruction());
-    RetBlockNode* retBlockNode = pag->getICFG()->getRetBlockNode(cs.getInstruction());
+    CallBlockNode* icfgCallBlockNode = pag->getICFG()->getCallBlockNode(cs.getInstruction());
+    RetBlockNode* icfgRetBlockNode = pag->getICFG()->getRetBlockNode(cs.getInstruction());
 
-    pag->addCallSite(callBlockNode);
+    pag->addCallSite(icfgCallBlockNode);
 
     /// Collect callsite arguments and returns
-    for(CallSite::arg_iterator itA = cs.arg_begin(), ieA = cs.arg_end(); itA!=ieA; ++itA)
-        pag->addCallSiteArgs(callBlockNode,pag->getPAGNode(getValueNode(*itA)));
+    for(CallSite::arg_iterator itA = cs.arg_begin();
+        itA != cs.arg_end(); ++itA) {
+        pag->addCallSiteArgs(icfgCallBlockNode,
+                             pag->getPAGNode(getValueNode(*itA)));
+    }
 
-    if(!cs.getType()->isVoidTy())
-        pag->addCallSiteRets(retBlockNode,pag->getPAGNode(getValueNode(cs.getInstruction())));
+    if(!cs.getType()->isVoidTy()) {
+        pag->addCallSiteRets(icfgRetBlockNode,
+                             pag->getPAGNode(getValueNode(cs.getInstruction())));
+}
 
+    // extract direct callees?
     const SVFFunction *callee = getCallee(cs);
 
     if (callee)
@@ -782,7 +794,8 @@ void PAGBuilder::visitCallSite(CallSite cs)
     }
     else
     {
-        //If the callee was not identified as a function (null F), this is indirect.
+        //If the callee was not identified as a
+        //function (null F), this is indirect.
         handleIndCall(cs);
     }
 }
@@ -877,11 +890,13 @@ void PAGBuilder::handleDirectCall(CallSite cs, const SVFFunction *F)
     //Only handle the ret.val. if it's used as a ptr.
     NodeID dstrec = getValueNode(cs.getInstruction());
     //Does it actually return a ptr?
+    // Connect the Return Node of the callsite with
+    // the return value receiving the return value
     if (!cs.getType()->isVoidTy())
     {
         NodeID srcret = getReturnNode(F);
         CallBlockNode* icfgNode = pag->getICFG()->getCallBlockNode(cs.getInstruction());
-        addRetEdge(srcret, dstrec,icfgNode);
+        addRetEdge(srcret, dstrec, icfgNode);
     }
     //Iterators for the actual and formal parameters
     CallSite::arg_iterator itA = cs.arg_begin();
@@ -906,6 +921,8 @@ void PAGBuilder::handleDirectCall(CallSite cs, const SVFFunction *F)
         NodeID dstFA = getValueNode(FA);
         NodeID srcAA = getValueNode(AA);
         CallBlockNode* icfgNode = pag->getICFG()->getCallBlockNode(cs.getInstruction());
+        // Add a CallEdge between a formal argument and real argument
+        // what a "good" name.
         addCallEdge(srcAA, dstFA, icfgNode);
     }
     //Any remaining actual args must be varargs.
@@ -1386,7 +1403,7 @@ void PAGBuilder::handleExtCall(CallSite cs, const SVFFunction *callee)
 void PAGBuilder::handleIndCall(CallSite cs)
 {
     const CallBlockNode* cbn = pag->getICFG()->getCallBlockNode(cs.getInstruction());
-    pag->addIndirectCallsites(cbn,pag->getValueNode(cs.getCalledValue()));
+    pag->addIndirectCallsites(cbn, pag->getValueNode(cs.getCalledValue()));
 }
 
 /*

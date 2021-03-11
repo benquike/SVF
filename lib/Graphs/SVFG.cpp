@@ -165,7 +165,8 @@ FormalOUTSVFGNode::FormalOUTSVFGNode(NodeID id, const MemSSA::RETMU* exit): MRSV
 /*!
  * Constructor
  */
-SVFG::SVFG(MemSSA* _mssa, VFGK k): VFG(_mssa->getPTA()->getPTACallGraph(),k),mssa(_mssa), pta(mssa->getPTA())
+SVFG::SVFG(MemSSA* _mssa, VFGK k): VFG(_mssa->getPTA()->getPTACallGraph(), k),
+                                   mssa(_mssa), pta(mssa->getPTA())
 {
     stat = new SVFGStat(this);
 }
@@ -226,31 +227,31 @@ void SVFG::addSVFGNodesForAddrTakenVars()
     /// set defs for address-taken vars defined at phi/chi/call
     /// create corresponding def and use nodes for address-taken vars (a.k.a MRVers)
     /// initialize memory SSA phi nodes (phi of address-taken variables)
-    for(auto & it : mssa->getBBToPhiSetMap())
+    for(auto& it : mssa->getBBToPhiSetMap())
     {
         for(auto *pi : it.second)
             addIntraMSSAPHISVFGNode(pi);
     }
     /// initialize memory SSA entry chi nodes
-    for(auto & it : mssa->getFunToEntryChiSetMap())
+    for(auto& it : mssa->getFunToEntryChiSetMap())
     {
         for(auto *pi : it.second)
             addFormalINSVFGNode(SVFUtil::cast<ENTRYCHI>(pi));
     }
     /// initialize memory SSA return mu nodes
-    for(auto & it : mssa->getFunToRetMuSetMap())
+    for(auto& it : mssa->getFunToRetMuSetMap())
     {
         for(auto *pi : it.second)
             addFormalOUTSVFGNode(SVFUtil::cast<RETMU>(pi));
     }
     /// initialize memory SSA callsite mu nodes
-    for(auto & it : mssa->getCallSiteToMuSetMap())
+    for(auto& it : mssa->getCallSiteToMuSetMap())
     {
         for(auto *pi : it.second)
             addActualINSVFGNode(SVFUtil::cast<CALLMU>(pi));
     }
     /// initialize memory SSA callsite chi nodes
-    for(auto & it : mssa->getCallSiteToChiSetMap())
+    for(auto& it : mssa->getCallSiteToChiSetMap())
     {
         for(auto *pi : it.second)
             addActualOUTSVFGNode(SVFUtil::cast<CALLCHI>(pi));
@@ -294,7 +295,9 @@ void SVFG::connectIndirectSVFGEdges()
         else if(const auto* formalIn = SVFUtil::dyn_cast<FormalINSVFGNode>(node))
         {
             PTACallGraphEdge::CallInstSet callInstSet;
-            mssa->getPTA()->getPTACallGraph()->getDirCallSitesInvokingCallee(formalIn->getEntryChi()->getFunction(),callInstSet);
+            auto *ptaCG = mssa->getPTA()->getPTACallGraph();
+            ptaCG->getDirCallSitesInvokingCallee(formalIn->getEntryChi()->getFunction(),
+                                                 callInstSet);
             for(const auto *cs : callInstSet)
             {
                  if(!mssa->hasMU(cs))

@@ -302,8 +302,12 @@ PHIVFGNode::PHIVFGNode(NodeID id, const PAGNode* r,VFGNodeK k): VFGNode(id, k), 
  * 2) connect VFG edges
  *    between two statements (PAGEdges)
  */
-VFG::VFG(PTACallGraph* cg, VFGK k): totalVFGNode(0), callgraph(cg), pag(PAG::getPAG()), kind(k), dumpVFG(false)
+VFG::VFG(PTACallGraph* cg, VFGK k): totalVFGNode(0),
+                                    callgraph(cg),
+                                    pag(PAG::getPAG()),
+                                    kind(k), dumpVFG(false)
 {
+    connectCPPVirtualFuncWithCS();
 
     DBOUT(DGENERAL, outs() << pasMsg("\tCreate VFG Top Level Node\n"));
     addVFGNodes();
@@ -320,6 +324,65 @@ void VFG::destroy()
     pag = nullptr;
 }
 
+// pretty much a copy of PAGBuilder::handleDirectCall
+void VFG::handleVirtualTargetInPAG(const CallBlockNode *cbn,
+                                   const SVFFunction *callee) {
+
+    auto dstrec = pag->getValueNode(cbn->getCallSite());
+    const auto *callInst = cbn->getCallSite();
+    CallBlockNode *icfgCbn = pag->getICFG()->getCallBlockNode(callInst);
+    if (!callee->getLLVMFun()->getReturnType()->isVoidTy()) {
+        auto src = pag->getReturnNode(callee);
+        pag->addRetPE(src, dstrec, icfgCbn);
+    }
+
+    llvm::ImmutableCallSite cs(cbn->getCallSite());
+
+    auto itA = cs.arg_begin();
+    auto ieA = cs.arg_end();
+    auto itF = callee->getLLVMFun()->arg_begin();
+    auto ieF = callee->getLLVMFun()->arg_end();
+
+    for (; itF != ieF; ++itA, ++itF) {
+        //Some programs (e.g. Linux kernel) leave unneeded parameters empty.
+        if (itA == ieA) {
+            break;
+        }
+        const Value *AA = *itA;
+        const Value *FA = &*itF; //current actual/formal arg
+
+        auto dstFA = pag->getValueNode(FA);
+        auto srcAA = pag->getValueNode(AA);
+
+        // Add a CallEdge between a formal argument and real argument
+        // what a "good" name.
+        pag->addCallPE(srcAA, dstFA, icfgCbn);
+    }
+
+    if (callee->getLLVMFun()->isVarArg()) {
+        auto vaF = pag->getVarargNode(callee);
+        for (; itA != ieA; ++itA) {
+            Value *AA = *itA;
+            auto vnAA = pag->getValueNode(AA);
+            pag->addCallPE(vnAA, vaF, icfgCbn);
+        }
+    }
+
+    if(itA != ieA) {
+        assert(false && "Too many args passed to Non-VarArg function");
+    }
+}
+
+
+void VFG::connectCPPVirtualFuncWithCS() {
+    auto& indCallMap = callgraph->getIndCallMap();
+
+    for (auto &[cbn, vfs]: indCallMap) {
+        for (const auto* callee: vfs) {
+            handleVirtualTargetInPAG(cbn, callee);
+        }
+    }
+}
 
 /*!
  * Create VFG nodes for top level pointers
@@ -383,19 +446,19 @@ void VFG::addVFGNodes()
     }
 
     // initialize actual parameter nodes
-    for(auto & it : pag->getCallSiteArgsMap())
+    for(auto& it : pag->getCallSiteArgsMap())
     {
-
-        for(auto pit = it.second.begin(), epit = it.second.end(); pit!=epit; ++pit)
+        for(auto pit = it.second.begin(), epit = it.second.end();
+            pit!=epit; ++pit)
         {
-            const PAGNode* pagNode = *pit;
-            if (isInterestedPAGNode(pagNode))
-                addActualParmVFGNode(pagNode,it.first);
+            const PAGNode* argPAGNode = *pit;
+            if (isInterestedPAGNode(argPAGNode))
+                addActualParmVFGNode(argPAGNode, it.first);
         }
     }
 
     // initialize actual return nodes (callsite return)
-    for(auto & it : pag->getCallSiteRets())
+    for(auto& it : pag->getCallSiteRets())
     {
 
         /// for external function we do not create acutalRet VFGNode
@@ -404,17 +467,17 @@ void VFG::addVFGNodes()
         if(isInterestedPAGNode(it.second) == false || hasDef(it.second))
             continue;
 
-        addActualRetVFGNode(it.second,it.first->getCallBlockNode());
+        addActualRetVFGNode(it.second, it.first->getCallBlockNode());
     }
 
     // initialize formal parameter nodes
-    for(auto & it : pag->getFunArgsMap())
+    for(auto& it : pag->getFunArgsMap())
     {
         const SVFFunction* func = it.first;
 
         for(const auto *param : it.second)
         {
-             if (isInterestedPAGNode(param) == false || hasBlackHoleConstObjAddrAsDef(param))
+             if (!isInterestedPAGNode(param) || hasBlackHoleConstObjAddrAsDef(param))
                 continue;
 
             CallPESet callPEs;
@@ -428,7 +491,8 @@ void VFG::addVFGNodes()
                         callPEs.insert(callPE);
                 }
             }
-            addFormalParmVFGNode(param,func,callPEs);
+
+            addFormalParmVFGNode(param, func, callPEs);
         }
 
         if (func->getLLVMFun()->getFunctionType()->isVarArg())
@@ -568,38 +632,42 @@ VFGEdge* VFG::addRetEdge(NodeID srcId, NodeID dstId, CallSiteID csId)
 void VFG::connectDirectVFGEdges()
 {
 
-    for(iterator it = begin(), eit = end(); it!=eit; ++it)
+    for(iterator it = begin(); it != end(); ++it)
     {
         NodeID nodeId = it->first;
         VFGNode* node = it->second;
 
         if(auto* stmtNode = SVFUtil::dyn_cast<StmtVFGNode>(node))
         {
-            /// do not handle AddrSVFG node, as it is already the source of a definition
+            /// do not handle AddrSVFG node, as it is already
+            /// the source of a definition
             if(SVFUtil::isa<AddrVFGNode>(stmtNode))
                 continue;
+
             /// for all other cases, like copy/gep/load/ret, connect the RHS pointer to its def
-            if (stmtNode->getPAGSrcNode()->isConstantData() == false)
+            if (!stmtNode->getPAGSrcNode()->isConstantData())
                 addIntraDirectVFEdge(getDef(stmtNode->getPAGSrcNode()), nodeId);
 
             /// for store, connect the RHS/LHS pointer to its def
-            if(SVFUtil::isa<StoreVFGNode>(stmtNode) && (stmtNode->getPAGDstNode()->isConstantData() == false))
+            if(SVFUtil::isa<StoreVFGNode>(stmtNode) &&
+               (stmtNode->getPAGDstNode()->isConstantData() == false))
             {
                 addIntraDirectVFEdge(getDef(stmtNode->getPAGDstNode()), nodeId);
             }
-
         }
         else if(auto* phiNode = SVFUtil::dyn_cast<PHIVFGNode>(node))
         {
-            for (auto it = phiNode->opVerBegin(), eit = phiNode->opVerEnd(); it != eit; it++)
+            for (auto it = phiNode->opVerBegin(), eit = phiNode->opVerEnd();
+                 it != eit; it++)
             {
-                if (it->second->isConstantData() == false)
+                if (!it->second->isConstantData())
                     addIntraDirectVFEdge(getDef(it->second), nodeId);
             }
         }
         else if(auto* binaryNode = SVFUtil::dyn_cast<BinaryOPVFGNode>(node))
         {
-            for (auto it = binaryNode->opVerBegin(), eit = binaryNode->opVerEnd(); it != eit; it++)
+            for (auto it = binaryNode->opVerBegin(), eit = binaryNode->opVerEnd();
+                 it != eit; it++)
             {
                 if (it->second->isConstantData() == false)
                     addIntraDirectVFEdge(getDef(it->second), nodeId);
@@ -607,23 +675,25 @@ void VFG::connectDirectVFGEdges()
         }
         else if(auto* unaryNode = SVFUtil::dyn_cast<UnaryOPVFGNode>(node))
         {
-            for (auto it = unaryNode->opVerBegin(), eit = unaryNode->opVerEnd(); it != eit; it++)
+            for (auto it = unaryNode->opVerBegin(), eit = unaryNode->opVerEnd();
+                 it != eit; it++)
             {
-                if (it->second->isConstantData() == false)
+                if (!it->second->isConstantData())
                     addIntraDirectVFEdge(getDef(it->second), nodeId);
             }
         }
         else if(auto* cmpNode = SVFUtil::dyn_cast<CmpVFGNode>(node))
         {
-            for (auto it = cmpNode->opVerBegin(), eit = cmpNode->opVerEnd(); it != eit; it++)
+            for (auto it = cmpNode->opVerBegin(), eit = cmpNode->opVerEnd();
+                 it != eit; it++)
             {
-                if (it->second->isConstantData() == false)
+                if (!it->second->isConstantData())
                     addIntraDirectVFEdge(getDef(it->second), nodeId);
             }
         }
         else if(auto* actualParm = SVFUtil::dyn_cast<ActualParmVFGNode>(node))
         {
-            if (actualParm->getParam()->isConstantData() == false)
+            if (!actualParm->getParam()->isConstantData())
                 addIntraDirectVFEdge(getDef(actualParm->getParam()), nodeId);
         }
         else if(auto* formalParm = SVFUtil::dyn_cast<FormalParmVFGNode>(node))
@@ -632,8 +702,9 @@ void VFG::connectDirectVFGEdges()
                     it!=eit; ++it)
             {
                 const CallBlockNode* cs = (*it)->getCallSite();
-                ActualParmVFGNode* acutalParm = getActualParmVFGNode((*it)->getSrcNode(),cs);
-                addInterEdgeFromAPToFP(acutalParm,formalParm,getCallSiteID(cs, formalParm->getFun()));
+                ActualParmVFGNode* acutalParm = getActualParmVFGNode((*it)->getSrcNode(), cs);
+                addInterEdgeFromAPToFP(acutalParm, formalParm,
+                                       getCallSiteID(cs, formalParm->getFun()));
             }
         }
         else if(auto* calleeRet = SVFUtil::dyn_cast<FormalRetVFGNode>(node))
@@ -660,9 +731,12 @@ void VFG::connectDirectVFGEdges()
     for (auto *fork : forks)
     {
         auto* forkedge = SVFUtil::cast<TDForkPE>(fork);
-        ActualParmVFGNode* acutalParm = getActualParmVFGNode(forkedge->getSrcNode(),forkedge->getCallSite());
+        ActualParmVFGNode* acutalParm = getActualParmVFGNode(forkedge->getSrcNode(),
+                                                             forkedge->getCallSite());
         FormalParmVFGNode* formalParm = getFormalParmVFGNode(forkedge->getDstNode());
-        addInterEdgeFromAPToFP(acutalParm,formalParm,getCallSiteID(forkedge->getCallSite(), formalParm->getFun()));
+        addInterEdgeFromAPToFP(acutalParm, formalParm,
+                               getCallSiteID(forkedge->getCallSite(),
+                                             formalParm->getFun()));
     }
     /// add join edge
     PAGEdge::PAGEdgeSetTy& joins = getPAGEdgeSet(PAGEdge::ThreadJoin);

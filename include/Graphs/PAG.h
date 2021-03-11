@@ -132,7 +132,7 @@ public:
     inline void initialiseCandidatePointers()
     {
         // collect candidate pointers for demand-driven analysis
-        for (auto & nIter : *this)
+        for (auto& nIter : *this)
         {
             NodeID nodeId = nIter.first;
             // do not compute points-to for isolated node
@@ -318,16 +318,18 @@ public:
         funRetMap[fun] = ret;
     }
     /// Add callsite arguments
-    inline void addCallSiteArgs(CallBlockNode* callBlockNode,const PAGNode* arg)
+    inline void addCallSiteArgs(CallBlockNode* callBlockNode, const PAGNode* arg)
     {
+        // add the argument value the ICFG CallBlockNode
         callBlockNode->addActualParms(arg);
+        // add the argument to the callSiteArgsListMap in PA
         callSiteArgsListMap[callBlockNode].push_back(arg);
     }
     /// Add callsite returns
-    inline void addCallSiteRets(RetBlockNode* retBlockNode,const PAGNode* arg)
+    inline void addCallSiteRets(RetBlockNode* retBlockNode,const PAGNode* function)
     {
-        retBlockNode->addActualRet(arg);
-        callSiteRetMap[retBlockNode]= arg;
+        retBlockNode->addActualRet(function);
+        callSiteRetMap[retBlockNode]= function;
     }
     /// Function has arguments list
     inline bool hasFunArgsList(const SVFFunction* func) const
@@ -432,13 +434,13 @@ public:
         if(iter==GepValNodeMap.end()){
             return UINT_MAX;
         }
-        else{
-            auto lit = iter->second.find(std::make_pair(base, ls));
-            if(lit==iter->second.end())
-                return UINT_MAX;
-            else
-                return lit->second;
-        }
+
+        auto lit = iter->second.find(std::make_pair(base, ls));
+
+        if(lit == iter->second.end())
+            return UINT_MAX;
+
+        return lit->second;
     }
 
     /// Add/get indirect callsites
@@ -447,9 +449,9 @@ public:
     {
         return indCallSiteToFunPtrMap;
     }
-    inline void addIndirectCallsites(const CallBlockNode* cs,NodeID funPtr)
+    inline void addIndirectCallsites(const CallBlockNode* cs, NodeID funPtr)
     {
-        bool added = indCallSiteToFunPtrMap.insert(std::make_pair(cs,funPtr)).second;
+        bool added = indCallSiteToFunPtrMap.insert(std::make_pair(cs, funPtr)).second;
         funPtrToCallSitesMap[funPtr].insert(cs);
         assert(added && "adding the same indirect callsite twice?");
     }
@@ -534,8 +536,8 @@ public:
         const PAGNode* node = getPAGNode(id);
         if(const ObjPN* objPN = SVFUtil::dyn_cast<ObjPN>(node))
             return getObject(objPN);
-        else
-            return nullptr;
+
+        return nullptr;
     }
     inline const MemObj*getObject(const ObjPN* node) const
     {
@@ -864,7 +866,7 @@ template<> struct GraphTraits<Inverse<SVF::PAGNode *> > : public GraphTraits<Inv
 
 template<> struct GraphTraits<SVF::PAG*> : public GraphTraits<SVF::GenericGraph<SVF::PAGNode,SVF::PAGEdge>* >
 {
-    using NodeRef = SVF::PAGNode *;
+    typedef SVF::PAGNode *NodeRef;
 };
 
 } // End namespace llvm

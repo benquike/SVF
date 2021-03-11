@@ -56,7 +56,8 @@ public:
     using PtsMap = BVDataPTAImpl::MutDFPTDataTy::PtsMap;
 
     /// Constructor
-    FlowSensitive(PAG* _pag, PTATY type = FSSPARSE_WPA) : WPASVFGFSSolver(), BVDataPTAImpl(_pag, type)
+    FlowSensitive(PAG* _pag, PTATY type = FSSPARSE_WPA) :
+        WPASVFGFSSolver(), BVDataPTAImpl(_pag, type)
     {
         svfg = nullptr;
         solveTime = sccTime = processTime = propagationTime = updateTime = 0;
@@ -79,11 +80,15 @@ public:
     }
 
     /// Create signle instance of flow-sensitive pointer analysis
-    static FlowSensitive* createFSWPA(PAG* _pag)
+    static FlowSensitive* createFSWPA(PAG* _pag, bool vcall_cha=false)
     {
         if (fspta == nullptr)
         {
             fspta = new FlowSensitive(_pag);
+            if (vcall_cha) {
+                fspta->connectCPPVirtualOnCHA();
+            }
+
             fspta->analyze();
         }
         return fspta;
@@ -272,7 +277,7 @@ protected:
     ///@}
 
     static FlowSensitive* fspta;
-    SVFGBuilder memSSA;
+    SVFGBuilder svfgBuilder;
     AndersenWaveDiff *ander;
 
     /// Statistics.
