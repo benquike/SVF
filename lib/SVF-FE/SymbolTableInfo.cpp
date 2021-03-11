@@ -479,8 +479,12 @@ void SymbolTableInfo::buildMemModel(SVFModule *svfModule) {
     for (auto F = svfModule->llvmFunBegin(), E = svfModule->llvmFunEnd();
          F != E; ++F) {
         Function *fun = *F;
+
+        /// for
         collectSym(fun);
+
         collectRet(fun);
+
         if (fun->getFunctionType()->isVarArg()) {
             collectVararg(fun);
         }
