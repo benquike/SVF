@@ -496,6 +496,9 @@ void SymbolTableInfo::buildMemModel(SVFModule* svfModule)
         for (inst_iterator II = inst_begin(*fun), E = inst_end(*fun);
              II != E; ++II) {
             const Instruction *inst = &*II;
+
+            // no matter what it is
+            // the instruction is collected
             collectSym(inst);
 
             // initialization for some special instructions
