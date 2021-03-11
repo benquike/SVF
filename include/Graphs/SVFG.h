@@ -395,14 +395,14 @@ protected:
     /// Add memory callsite mu SVFG node
     inline void addActualINSVFGNode(const MemSSA::CALLMU* mu)
     {
-        auto* sNode = new ActualINSVFGNode(totalVFGNode++,mu, mu->getCallSite());
-        addSVFGNode(sNode,pag->getICFG()->getCallBlockNode(mu->getCallSite()->getCallSite()));
+        auto* sNode = new ActualINSVFGNode(totalVFGNode++, mu, mu->getCallSite());
+        addSVFGNode(sNode, pag->getICFG()->getCallBlockNode(mu->getCallSite()->getCallSite()));
         callSiteToActualINMap[mu->getCallSite()].set(sNode->getId());
     }
     /// Add memory callsite chi SVFG node
     inline void addActualOUTSVFGNode(const MemSSA::CALLCHI* chi)
     {
-        auto* sNode = new ActualOUTSVFGNode(totalVFGNode++,chi,chi->getCallSite());
+        auto* sNode = new ActualOUTSVFGNode(totalVFGNode++, chi, chi->getCallSite());
         addSVFGNode(sNode, pag->getICFG()->getRetBlockNode(chi->getCallSite()->getCallSite()));
         setDef(chi->getResVer(),sNode);
         callSiteToActualOUTMap[chi->getCallSite()].set(sNode->getId());

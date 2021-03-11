@@ -45,7 +45,8 @@ class SVFModule;
 /*
  * Call Graph edge representing a calling relation between two functions
  * Multiple calls from function A to B are merged into one call edge
- * Each call edge has a set of direct callsites and a set of indirect callsites
+ * Each call edge has a set of direct callsites and a set
+ * of indirect callsites
  */
 using GenericCallGraphEdgeTy = GenericEdge<PTACallGraphNode>;
 class PTACallGraphEdge : public GenericCallGraphEdgeTy
@@ -55,7 +56,7 @@ public:
     using CallInstSet = Set<const CallBlockNode *>;
     enum CEDGEK
     {
-        CallRetEdge,TDForkEdge,TDJoinEdge,HareParForEdge
+        CallRetEdge, TDForkEdge, TDJoinEdge, HareParForEdge
     };
 
 
@@ -340,6 +341,7 @@ public:
         }
         return it->second;
     }
+
     inline CallSiteID getCallSiteID(const CallBlockNode* cs, const SVFFunction* callee) const
     {
         CallSitePair newCS(std::make_pair(cs, callee));
@@ -347,6 +349,7 @@ public:
         assert(it != csToIdMap.end() && "callsite id not found! This maybe a partially resolved callgraph, please check the indCallEdge limit");
         return it->second;
     }
+
     inline bool hasCallSiteID(const CallBlockNode* cs, const SVFFunction* callee) const
     {
         CallSitePair newCS(std::make_pair(cs, callee));

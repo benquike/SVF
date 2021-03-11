@@ -134,8 +134,8 @@ public:
     {
         if (hasValue())
             return SVFUtil::isConstantData(value);
-        else
-            return false;
+
+        return false;
     }
 
     /// Whether this is an isoloated node on the PAG graph
