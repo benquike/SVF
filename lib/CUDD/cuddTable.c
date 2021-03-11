@@ -1826,15 +1826,15 @@ cuddInsertSubtables(
   int  n,
   int  level)
 {
-    DdSubtable *newsubtables;
-    DdNodePtr *newnodelist;
-    DdNodePtr *newvars;
+    DdSubtable *newsubtables = NULL;
+    DdNodePtr *newnodelist = NULL;
+    DdNodePtr *newvars = NULL;
     DdNode *sentinel = &(unique->sentinel);
     int oldsize,newsize;
     int i,j,index,reorderSave;
     unsigned int numSlots = unique->initSlots;
-    int *newperm, *newinvperm, *newmap;
-    DdNode *one, *zero;
+    int *newperm = NULL, *newinvperm = NULL, *newmap = NULL;
+    DdNode *one = NULL, *zero = NULL;
 
 #ifdef DD_DEBUG
     assert(n > 0 && level < unique->size);
@@ -2557,15 +2557,15 @@ ddResizeTable(
   int index,
   int amount)
 {
-    DdSubtable *newsubtables;
-    DdNodePtr *newnodelist;
-    DdNodePtr *newvars;
+    DdSubtable *newsubtables = NULL;
+    DdNodePtr *newnodelist = NULL;
+    DdNodePtr *newvars = NULL;
     DdNode *sentinel = &(unique->sentinel);
     int oldsize,newsize;
     int i,j,reorderSave;
     int numSlots = unique->initSlots;
-    int *newperm, *newinvperm, *newmap;
-    DdNode *one, *zero;
+    int *newperm = NULL, *newinvperm = NULL, *newmap = NULL;
+    DdNode *one = NULL, *zero = NULL;
 
     oldsize = unique->size;
     /* Easy case: there is still room in the current table. */
