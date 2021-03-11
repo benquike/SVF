@@ -124,8 +124,9 @@ class ContextDDA : public CondPTAImpl<ContextCond>,
         const SVFFunction *srcfun = edge->getSrcNode()->getFun();
         const SVFFunction *dstfun = edge->getDstNode()->getFun();
 
-        if (srcfun && dstfun)
+        if (srcfun && dstfun) {
             return inSameCallGraphSCC(srcfun, dstfun);
+        }
 
         assert(edge->isRetVFGEdge() == false &&
                "should not be an inter-procedural return edge");
@@ -142,8 +143,9 @@ class ContextDDA : public CondPTAImpl<ContextCond>,
                     const AddrSVFGNode *addr) override {
         NodeID srcID = addr->getPAGSrcNodeID();
         /// whether this object is set field-insensitive during pre-analysis
-        if (isFieldInsensitive(srcID))
+        if (isFieldInsensitive(srcID)) {
             srcID = getFIObjNode(srcID);
+        }
 
         CxtVar var(dpm.getCond(), srcID);
         addDDAPts(pts, var);

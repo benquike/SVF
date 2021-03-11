@@ -62,17 +62,19 @@ void DDAStat::initDefault() {
 }
 
 SVFG *DDAStat::getSVFG() const {
-    if (flowDDA)
+    if (flowDDA) {
         return flowDDA->getSVFG();
-    else
+    } else {
         return contextDDA->getSVFG();
+    }
 }
 
 PointerAnalysis *DDAStat::getPTA() const {
-    if (flowDDA)
+    if (flowDDA) {
         return flowDDA;
-    else
+    } else {
         return contextDDA;
+    }
 }
 
 void DDAStat::performStatPerQuery(NodeID ptr) {
@@ -87,8 +89,9 @@ void DDAStat::performStatPerQuery(NodeID ptr) {
             NumOfLoc++;
             u32_t num = it.second.size();
             NumOfDPM += num;
-            if (num > maxNumOfDPMPerLoc)
+            if (num > maxNumOfDPMPerLoc) {
                 maxNumOfDPMPerLoc = num;
+            }
         }
         cptsSize = flowDDA->getPts(ptr).count();
         pts = flowDDA->getPts(ptr);
@@ -97,8 +100,9 @@ void DDAStat::performStatPerQuery(NodeID ptr) {
             NumOfLoc++;
             u32_t num = it.second.size();
             NumOfDPM += num;
-            if (num > maxNumOfDPMPerLoc)
+            if (num > maxNumOfDPMPerLoc) {
                 maxNumOfDPMPerLoc = num;
+            }
         }
         ContextCond cxt;
         CxtVar var(cxt, ptr);
@@ -109,19 +113,23 @@ void DDAStat::performStatPerQuery(NodeID ptr) {
 
     double avgDPMAtLoc = NumOfLoc != 0 ? (double)NumOfDPM / NumOfLoc : 0;
     _AvgNumOfDPMAtSVFGNode += avgDPMAtLoc;
-    if (maxNumOfDPMPerLoc > _MaxNumOfDPMAtSVFGNode)
+    if (maxNumOfDPMPerLoc > _MaxNumOfDPMAtSVFGNode) {
         _MaxNumOfDPMAtSVFGNode = maxNumOfDPMPerLoc;
+    }
 
     _TotalCPtsSize += cptsSize;
-    if (_MaxCPtsSize < cptsSize)
+    if (_MaxCPtsSize < cptsSize) {
         _MaxCPtsSize = cptsSize;
+    }
 
     _TotalPtsSize += ptsSize;
-    if (_MaxPtsSize < ptsSize)
+    if (_MaxPtsSize < ptsSize) {
         _MaxPtsSize = ptsSize;
+    }
 
-    if (cptsSize == 0)
+    if (cptsSize == 0) {
         _NumOfNullPtr++;
+    }
 
     if (getPTA()->containBlackHoleNode(pts)) {
         _NumOfConstantPtr++;
@@ -172,10 +180,11 @@ void DDAStat::performStatPerQuery(NodeID ptr) {
 }
 
 void DDAStat::getNumOfOOBQuery() {
-    if (flowDDA)
+    if (flowDDA) {
         _TotalNumOfOutOfBudgetQuery = flowDDA->outOfBudgetDpms.size();
-    else if (contextDDA)
+    } else if (contextDDA) {
         _TotalNumOfOutOfBudgetQuery = contextDDA->outOfBudgetDpms.size();
+    }
 }
 
 void DDAStat::performStat() {

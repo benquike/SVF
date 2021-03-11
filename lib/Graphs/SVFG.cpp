@@ -102,9 +102,10 @@ const std::string MSSAPHISVFGNode::toString() const {
            << " {fun: " << getFun()->getName() << "}";
     rawstr << "MR_" << getRes()->getMR()->getMRID() << "V_"
            << getRes()->getResVer()->getSSAVersion() << " = PHI(";
-    for (auto it = opVerBegin(), eit = opVerEnd(); it != eit; it++)
+    for (auto it = opVerBegin(), eit = opVerEnd(); it != eit; it++) {
         rawstr << "MR_" << it->second->getMR()->getMRID() << "V_"
                << it->second->getSSAVersion() << ", ";
+    }
     rawstr << ")\n";
 
     rawstr << getRes()->getMR()->dumpStr();
@@ -124,13 +125,14 @@ const std::string IntraMSSAPHISVFGNode::toString() const {
 const std::string InterMSSAPHISVFGNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
-    if (isFormalINPHI())
+    if (isFormalINPHI()) {
         rawstr << "FormalINPHISVFGNode ID: " << getId()
                << " {fun: " << getFun()->getName() << "}";
-    else
+    } else {
         rawstr << "ActualOUTPHISVFGNode ID: " << getId()
                << " at callsite: " << *getCallSite()->getCallSite()
                << " {fun: " << getFun()->getName() << "}";
+    }
     rawstr << MSSAPHISVFGNode::toString();
     return rawstr.str();
 }
@@ -231,36 +233,42 @@ void SVFG::addSVFGNodesForAddrTakenVars() {
     for (auto *iter : stores) {
         auto *store = SVFUtil::cast<StorePE>(iter);
         const StmtSVFGNode *sNode = getStmtVFGNode(store);
-        for (auto *pi : mssa->getCHISet(store))
+        for (auto *pi : mssa->getCHISet(store)) {
             setDef(pi->getResVer(), sNode);
+        }
     }
 
     /// set defs for address-taken vars defined at phi/chi/call
     /// create corresponding def and use nodes for address-taken vars (a.k.a
     /// MRVers) initialize memory SSA phi nodes (phi of address-taken variables)
     for (auto &it : mssa->getBBToPhiSetMap()) {
-        for (auto *pi : it.second)
+        for (auto *pi : it.second) {
             addIntraMSSAPHISVFGNode(pi);
+        }
     }
     /// initialize memory SSA entry chi nodes
     for (auto &it : mssa->getFunToEntryChiSetMap()) {
-        for (auto *pi : it.second)
+        for (auto *pi : it.second) {
             addFormalINSVFGNode(SVFUtil::cast<ENTRYCHI>(pi));
+        }
     }
     /// initialize memory SSA return mu nodes
     for (auto &it : mssa->getFunToRetMuSetMap()) {
-        for (auto *pi : it.second)
+        for (auto *pi : it.second) {
             addFormalOUTSVFGNode(SVFUtil::cast<RETMU>(pi));
+        }
     }
     /// initialize memory SSA callsite mu nodes
     for (auto &it : mssa->getCallSiteToMuSetMap()) {
-        for (auto *pi : it.second)
+        for (auto *pi : it.second) {
             addActualINSVFGNode(SVFUtil::cast<CALLMU>(pi));
+        }
     }
     /// initialize memory SSA callsite chi nodes
     for (auto &it : mssa->getCallSiteToChiSetMap()) {
-        for (auto *pi : it.second)
+        for (auto *pi : it.second) {
             addActualOUTSVFGNode(SVFUtil::cast<CALLCHI>(pi));
+        }
     }
 }
 
@@ -301,8 +309,9 @@ void SVFG::connectIndirectSVFGEdges() {
             ptaCG->getDirCallSitesInvokingCallee(
                 formalIn->getEntryChi()->getFunction(), callInstSet);
             for (const auto *cs : callInstSet) {
-                if (!mssa->hasMU(cs))
+                if (!mssa->hasMU(cs)) {
                     continue;
+                }
                 ActualINSVFGNodeSet &actualIns = getActualINSVFGNodes(cs);
                 for (auto ait : actualIns) {
                     const auto *actualIn =
@@ -319,8 +328,9 @@ void SVFG::connectIndirectSVFGEdges() {
             mssa->getPTA()->getPTACallGraph()->getDirCallSitesInvokingCallee(
                 retMu->getFunction(), callInstSet);
             for (const auto *cs : callInstSet) {
-                if (!mssa->hasCHI(cs))
+                if (!mssa->hasCHI(cs)) {
                     continue;
+                }
                 ActualOUTSVFGNodeSet &actualOuts = getActualOUTSVFGNodes(cs);
                 for (auto ait : actualOuts) {
                     const ActualOUTSVFGNode *actualOut =
@@ -363,8 +373,9 @@ void SVFG::connectFromGlobalToProgEntry() {
     SVFModule *svfModule = mssa->getPTA()->getModule();
     const SVFFunction *mainFunc = SVFUtil::getProgEntryFunction(svfModule);
     FormalINSVFGNodeSet &formalIns = getFormalINSVFGNodes(mainFunc);
-    if (formalIns.empty())
+    if (formalIns.empty()) {
         return;
+    }
 
     for (const auto *globalVFGNode : globalVFGNodes) {
         if (const auto *store =
@@ -380,8 +391,9 @@ void SVFG::connectFromGlobalToProgEntry() {
                         ->getPointsTo();
 
                 formalInPts &= storePts;
-                if (formalInPts.empty())
+                if (formalInPts.empty()) {
                     continue;
+                }
 
                 /// add indirect value flow edge
                 addIntraIndirectVFEdge(store->getId(), formalInID, formalInPts);
@@ -538,9 +550,10 @@ void SVFG::getInterVFEdgesForIndirectCallSite(
              funArgIt++, csArgIt++) {
             const PAGNode *cs_arg = *csArgIt;
             const PAGNode *fun_arg = *funArgIt;
-            if (fun_arg->isPointer() && cs_arg->isPointer())
+            if (fun_arg->isPointer() && cs_arg->isPointer()) {
                 getInterVFEdgeAtIndCSFromAPToFP(cs_arg, fun_arg, callBlockNode,
                                                 csId, edges);
+            }
         }
         assert(funArgIt == funArgEit &&
                "function has more arguments than call site");
@@ -550,9 +563,10 @@ void SVFG::getInterVFEdgesForIndirectCallSite(
             if (varFunArgNode->isPointer()) {
                 for (; csArgIt != csArgEit; csArgIt++) {
                     const PAGNode *cs_arg = *csArgIt;
-                    if (cs_arg->isPointer())
+                    if (cs_arg->isPointer()) {
                         getInterVFEdgeAtIndCSFromAPToFP(
                             cs_arg, varFunArgNode, callBlockNode, csId, edges);
+                    }
                 }
             }
         }
@@ -562,8 +576,9 @@ void SVFG::getInterVFEdgesForIndirectCallSite(
     if (pag->funHasRet(callee) && pag->callsiteHasRet(retBlockNode)) {
         const PAGNode *cs_return = pag->getCallSiteRet(retBlockNode);
         const PAGNode *fun_return = pag->getFunRet(callee);
-        if (cs_return->isPointer() && fun_return->isPointer())
+        if (cs_return->isPointer() && fun_return->isPointer()) {
             getInterVFEdgeAtIndCSFromFRToAR(fun_return, cs_return, csId, edges);
+        }
     }
 
     // Find inter indirect call edges between actual-in and formal-in svfg
@@ -645,15 +660,17 @@ const SVFFunction *SVFG::isFunEntrySVFGNode(const SVFGNode *node) const {
     }
 
     if (const auto *phi = SVFUtil::dyn_cast<InterPHISVFGNode>(node)) {
-        if (phi->isFormalParmPHI())
+        if (phi->isFormalParmPHI()) {
             return phi->getFun();
+        }
     } else if (const auto *fi = SVFUtil::dyn_cast<FormalINSVFGNode>(node)) {
         return fi->getFun();
     }
 
     if (const auto *mphi = SVFUtil::dyn_cast<InterMSSAPHISVFGNode>(node)) {
-        if (mphi->isFormalINPHI())
+        if (mphi->isFormalINPHI()) {
             return mphi->getFun();
+        }
     }
 
     return nullptr;
@@ -668,15 +685,17 @@ const CallBlockNode *SVFG::isCallSiteRetSVFGNode(const SVFGNode *node) const {
     }
 
     if (const auto *phi = SVFUtil::dyn_cast<InterPHISVFGNode>(node)) {
-        if (phi->isActualRetPHI())
+        if (phi->isActualRetPHI()) {
             return phi->getCallSite();
+        }
     } else if (const auto *ao = SVFUtil::dyn_cast<ActualOUTSVFGNode>(node)) {
         return ao->getCallSite();
     }
 
     if (const auto *mphi = SVFUtil::dyn_cast<InterMSSAPHISVFGNode>(node)) {
-        if (mphi->isActualOUTPHI())
+        if (mphi->isActualOUTPHI()) {
             return mphi->getCallSite();
+        }
     }
     return nullptr;
 }
@@ -699,8 +718,9 @@ template <> struct DOTGraphTraits<SVFG *> : public DOTGraphTraits<PAG *> {
     static std::string getGraphName(SVFG *) { return "SVFG"; }
 
     std::string getNodeLabel(NodeType *node, SVFG *graph) {
-        if (isSimple())
+        if (isSimple()) {
             return getSimpleNodeLabel(node, graph);
+        }
 
         return getCompleteNodeLabel(node, graph);
     }
@@ -740,8 +760,9 @@ template <> struct DOTGraphTraits<SVFG *> : public DOTGraphTraits<PAG *> {
             rawstr << uop->toString();
         } else if (auto *cmp = SVFUtil::dyn_cast<CmpVFGNode>(node)) {
             rawstr << cmp->toString();
-        } else
+        } else {
             assert(false && "what else kinds of nodes do we have??");
+        }
 
         return rawstr.str();
     }
@@ -781,8 +802,9 @@ template <> struct DOTGraphTraits<SVFG *> : public DOTGraphTraits<PAG *> {
             rawstr << ar->toString();
         } else if (auto *fr = SVFUtil::dyn_cast<FormalRetSVFGNode>(node)) {
             rawstr << fr->toString();
-        } else
+        } else {
             assert(false && "what else kinds of nodes do we have??");
+        }
 
         return rawstr.str();
     }
@@ -837,8 +859,9 @@ template <> struct DOTGraphTraits<SVFG *> : public DOTGraphTraits<PAG *> {
             rawstr << "color=black,style=double";
         } else if (SVFUtil::isa<UnaryOPVFGNode>(node)) {
             rawstr << "color=black,style=double";
-        } else
+        } else {
             assert(false && "no such kind of node!!");
+        }
 
         /// dump slice information
         if (graph->getStat()->isSource(node)) {
@@ -847,8 +870,9 @@ template <> struct DOTGraphTraits<SVFG *> : public DOTGraphTraits<PAG *> {
             rawstr << ",style=filled, fillcolor=blue";
         } else if (graph->getStat()->inBackwardSlice(node)) {
             rawstr << ",style=filled, fillcolor=yellow";
-        } else if (graph->getStat()->inForwardSlice(node))
+        } else if (graph->getStat()->inForwardSlice(node)) {
             rawstr << ",style=filled, fillcolor=gray";
+        }
 
         rawstr << "";
 
@@ -860,19 +884,23 @@ template <> struct DOTGraphTraits<SVFG *> : public DOTGraphTraits<PAG *> {
         SVFGEdge *edge = *(EI.getCurrent());
         assert(edge && "No edge found!!");
         if (SVFUtil::isa<DirectSVFGEdge>(edge)) {
-            if (SVFUtil::isa<CallDirSVFGEdge>(edge))
+            if (SVFUtil::isa<CallDirSVFGEdge>(edge)) {
                 return "style=solid,color=red";
+            }
 
-            if (SVFUtil::isa<RetDirSVFGEdge>(edge))
+            if (SVFUtil::isa<RetDirSVFGEdge>(edge)) {
                 return "style=solid,color=blue";
+            }
             return "style=solid";
         }
 
         if (SVFUtil::isa<IndirectSVFGEdge>(edge)) {
-            if (SVFUtil::isa<CallIndSVFGEdge>(edge))
+            if (SVFUtil::isa<CallIndSVFGEdge>(edge)) {
                 return "style=dashed,color=red";
-            if (SVFUtil::isa<RetIndSVFGEdge>(edge))
+            }
+            if (SVFUtil::isa<RetIndSVFGEdge>(edge)) {
                 return "style=dashed,color=blue";
+            }
 
             return "style=dashed";
         }
@@ -887,14 +915,15 @@ template <> struct DOTGraphTraits<SVFG *> : public DOTGraphTraits<PAG *> {
 
         std::string str;
         raw_string_ostream rawstr(str);
-        if (auto *dirCall = SVFUtil::dyn_cast<CallDirSVFGEdge>(edge))
+        if (auto *dirCall = SVFUtil::dyn_cast<CallDirSVFGEdge>(edge)) {
             rawstr << dirCall->getCallSiteId();
-        else if (auto *dirRet = SVFUtil::dyn_cast<RetDirSVFGEdge>(edge))
+        } else if (auto *dirRet = SVFUtil::dyn_cast<RetDirSVFGEdge>(edge)) {
             rawstr << dirRet->getCallSiteId();
-        else if (auto *indCall = SVFUtil::dyn_cast<CallIndSVFGEdge>(edge))
+        } else if (auto *indCall = SVFUtil::dyn_cast<CallIndSVFGEdge>(edge)) {
             rawstr << indCall->getCallSiteId();
-        else if (auto *indRet = SVFUtil::dyn_cast<RetIndSVFGEdge>(edge))
+        } else if (auto *indRet = SVFUtil::dyn_cast<RetIndSVFGEdge>(edge)) {
             rawstr << indRet->getCallSiteId();
+        }
 
         return rawstr.str();
     }

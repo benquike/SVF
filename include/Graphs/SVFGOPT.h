@@ -109,8 +109,9 @@ class SVFGOPT : public SVFG {
             NodeID aiDef = getActualINDef(actualIn->getId());
             SVFGEdge *edge = addCallIndirectSVFGEdge(aiDef, formalIn->getId(),
                                                      csId, intersection);
-            if (edge != nullptr)
+            if (edge != nullptr) {
                 edges.insert(edge);
+            }
         }
     }
     /// Connect formal-out and actual-out
@@ -124,8 +125,9 @@ class SVFGOPT : public SVFG {
             NodeID foDef = getFormalOUTDef(formalOut->getId());
             SVFGEdge *edge = addRetIndirectSVFGEdge(foDef, actualOut->getId(),
                                                     csId, intersection);
-            if (edge != nullptr)
+            if (edge != nullptr) {
                 edges.insert(edge);
+            }
         }
     }
     //@}
@@ -191,8 +193,9 @@ class SVFGOPT : public SVFG {
 
     /// Initial work list with MSSAPHI nodes which may be removed.
     inline void initialWorkList() {
-        for (auto it = begin(), eit = end(); it != eit; ++it)
+        for (auto it = begin(), eit = end(); it != eit; ++it) {
             addIntoWorklist(it->second);
+        }
     }
 
     /// Only MSSAPHI node which satisfy following conditions will be removed:
@@ -201,8 +204,9 @@ class SVFGOPT : public SVFG {
     inline bool addIntoWorklist(const SVFGNode *node) {
         if (const auto *phi = SVFUtil::dyn_cast<MSSAPHISVFGNode>(node)) {
             if (isConnectingTwoCallSites(phi) == false &&
-                isDefOfAInFOut(phi) == false)
+                isDefOfAInFOut(phi) == false) {
                 return worklist.push(phi);
+            }
         }
         return false;
     }
@@ -323,12 +327,14 @@ class SVFGOPT : public SVFG {
     }
     inline void removeInEdges(const SVFGNode *node) {
         /// remove incoming edges
-        while (node->hasIncomingEdge())
+        while (node->hasIncomingEdge()) {
             removeSVFGEdge(*(node->InEdgeBegin()));
+        }
     }
     inline void removeOutEdges(const SVFGNode *node) {
-        while (node->hasOutgoingEdge())
+        while (node->hasOutgoingEdge()) {
             removeSVFGEdge(*(node->OutEdgeBegin()));
+        }
     }
     //@}
 

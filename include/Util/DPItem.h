@@ -105,11 +105,13 @@ template <class LocCond> class StmtDPItem : public DPItem {
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
     inline bool operator<(const StmtDPItem &rhs) const {
-        if (this->cur != rhs.cur)
+        if (this->cur != rhs.cur) {
             return this->cur < rhs.cur;
-        else
-            return this->curloc < rhs.curloc;
+        }
+
+        return this->curloc < rhs.curloc;
     }
+
     /// Overloading operator==
     inline StmtDPItem &operator=(const StmtDPItem &rhs) {
         if (*this != rhs) {
@@ -118,14 +120,17 @@ template <class LocCond> class StmtDPItem : public DPItem {
         }
         return *this;
     }
+
     /// Overloading operator==
     inline bool operator==(const StmtDPItem &rhs) const {
         return (this->cur == rhs.cur && this->curloc == rhs.getLoc());
     }
+
     /// Overloading operator!=
     inline bool operator!=(const StmtDPItem &rhs) const {
         return !(*this == rhs);
     }
+
     inline void dump() const {
         SVFUtil::outs() << "statement " << *(this->curloc) << ", var "
                         << this->cur << "\n";
@@ -167,30 +172,34 @@ class ContextCond {
         if (context.size() < maximumCxtLen) {
             context.push_back(ctx);
 
-            if (context.size() > maximumCxt)
+            if (context.size() > maximumCxt) {
                 maximumCxt = context.size();
-            return true;
-        } else /// handle out of context limit case
-        {
-            if (!context.empty()) {
-                setNonConcreteCxt();
-                context.erase(context.begin());
-                context.push_back(ctx);
             }
-            return false;
+            return true;
         }
+
+        /// handle out of context limit case
+        if (!context.empty()) {
+            setNonConcreteCxt();
+            context.erase(context.begin());
+            context.push_back(ctx);
+        }
+
+        return false;
     }
 
     /// Match context
     inline virtual bool matchContext(NodeID ctx) {
         /// if context is empty, then it is the unbalanced parentheses match
-        if (context.empty())
+        if (context.empty()) {
             return true;
+        }
         /// otherwise, we perform balanced parentheses matching
-        else if (context.back() == ctx) {
+        if (context.back() == ctx) {
             context.pop_back();
             return true;
         }
+
         return false;
     }
 
@@ -288,12 +297,15 @@ template <class LocCond> class CxtStmtDPItem : public StmtDPItem<LocCond> {
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
     inline bool operator<(const CxtStmtDPItem<LocCond> &rhs) const {
-        if (this->cur != rhs.cur)
+        if (this->cur != rhs.cur) {
             return this->cur < rhs.cur;
-        else if (this->curloc != rhs.getLoc())
+        }
+
+        if (this->curloc != rhs.getLoc()) {
             return this->curloc < rhs.getLoc();
-        else
-            return this->context < rhs.context;
+        }
+
+        return this->context < rhs.context;
     }
     /// Overloading operator=
     inline CxtStmtDPItem<LocCond> &
@@ -352,8 +364,9 @@ class VFPathCond : public ContextCond {
     /// Add SVFG Edge
     inline void addVFEdge(NodeID from, NodeID to) {
         //	assert(!hasVFEdge(from,to) && "Edge exit?");
-        if (edges.size() > maximumPath)
+        if (edges.size() > maximumPath) {
             maximumPath = edges.size();
+        }
 
         edges.push_back(std::make_pair(from, to));
     }
@@ -365,16 +378,18 @@ class VFPathCond : public ContextCond {
     /// Whether Node dst has incoming edge
     inline bool hasIncomingEdge(NodeID node) const {
         for (const auto &edge : edges) {
-            if (edge.second == node)
+            if (edge.second == node) {
                 return true;
+            }
         }
         return false;
     }
     /// Whether Node dst has outgoing edge
     inline bool hasOutgoingEdge(NodeID node) const {
         for (const auto &edge : edges) {
-            if (edge.first == node)
+            if (edge.first == node) {
                 return true;
+            }
         }
         return false;
     }
@@ -383,8 +398,9 @@ class VFPathCond : public ContextCond {
         if (pathLen() < maximumPathLen) {
             if (!hasVFEdge(from, to)) {
                 /// drop condition when existing a loop (vf cycle)
-                if (hasOutgoingEdge(from))
+                if (hasOutgoingEdge(from)) {
                     c = allocator->getTrueCond();
+                }
             }
             addVFEdge(from, to);
             return condAnd(allocator, c);
@@ -407,10 +423,10 @@ class VFPathCond : public ContextCond {
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
     inline bool operator<(const VFPathCond &rhs) const {
-        if (path != rhs.path)
+        if (path != rhs.path) {
             return path < rhs.path;
-        else
-            return context < rhs.context;
+        }
+        { return context < rhs.context; }
     }
     /// Overloading operator=
     inline VFPathCond &operator=(const VFPathCond &rhs) {
@@ -504,12 +520,15 @@ template <class LocCond> class PathStmtDPItem : public StmtDPItem<LocCond> {
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
     inline bool operator<(const PathStmtDPItem<LocCond> &rhs) const {
-        if (this->cur != rhs.getCurNodeID())
+        if (this->cur != rhs.getCurNodeID()) {
             return this->cur < rhs.getCurNodeID();
-        else if (this->curloc != rhs.getLoc())
+        }
+
+        if (this->curloc != rhs.getLoc()) {
             return this->curloc < rhs.getLoc();
-        else
-            return this->vfpath < rhs.getCond();
+        }
+
+        return this->vfpath < rhs.getCond();
     }
     /// Overloading operator=
     inline PathStmtDPItem<LocCond> &
@@ -569,10 +588,11 @@ class CxtDPItem : public DPItem {
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
     inline bool operator<(const CxtDPItem &rhs) const {
-        if (cur != rhs.cur)
+        if (cur != rhs.cur) {
             return cur < rhs.cur;
-        else
-            return context < rhs.context;
+        }
+
+        return context < rhs.context;
     }
     /// Overloading Operator=
     inline CxtDPItem &operator=(const CxtDPItem &rhs) {
@@ -616,6 +636,7 @@ template <class LocCond> struct std::hash<SVF::CxtStmtDPItem<LocCond>> {
         std::hash<std::pair<SVF::NodeID,
                             std::pair<const LocCond *, SVF::ContextCond>>>
             h;
+
         return h(
             std::make_pair(csdpi.getCurNodeID(),
                            std::make_pair(csdpi.getLoc(), csdpi.getCond())));

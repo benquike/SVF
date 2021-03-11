@@ -82,8 +82,9 @@ const std::string CmpVFGNode::toString() const {
     rawstr << "CmpVFGNode ID: " << getId() << " ";
     rawstr << "PAGEdge: [" << res->getId() << " = cmp(";
     for (CmpVFGNode::OPVers::const_iterator it = opVerBegin(), eit = opVerEnd();
-         it != eit; it++)
+         it != eit; it++) {
         rawstr << it->second->getId() << ", ";
+    }
     rawstr << ")]\n";
     if (res->hasValue()) {
         rawstr << " " << *res->getValue();
@@ -99,8 +100,9 @@ const std::string BinaryOPVFGNode::toString() const {
     rawstr << "PAGEdge: [" << res->getId() << " = Binary(";
     for (BinaryOPVFGNode::OPVers::const_iterator it = opVerBegin(),
                                                  eit = opVerEnd();
-         it != eit; it++)
+         it != eit; it++) {
         rawstr << it->second->getId() << ", ";
+    }
     rawstr << ")]\t";
     if (res->hasValue()) {
         rawstr << " " << *res->getValue() << " ";
@@ -116,8 +118,9 @@ const std::string UnaryOPVFGNode::toString() const {
     rawstr << "PAGEdge: [" << res->getId() << " = Unary(";
     for (UnaryOPVFGNode::OPVers::const_iterator it = opVerBegin(),
                                                 eit = opVerEnd();
-         it != eit; it++)
+         it != eit; it++) {
         rawstr << it->second->getId() << ", ";
+    }
     rawstr << ")]\t";
     if (res->hasValue()) {
         rawstr << " " << *res->getValue() << " ";
@@ -140,8 +143,9 @@ const std::string PHIVFGNode::toString() const {
     rawstr << "PHIVFGNode ID: " << getId() << " ";
     rawstr << "PAGEdge: [" << res->getId() << " = PHI(";
     for (PHIVFGNode::OPVers::const_iterator it = opVerBegin(), eit = opVerEnd();
-         it != eit; it++)
+         it != eit; it++) {
         rawstr << it->second->getId() << ", ";
+    }
     rawstr << ")]\t";
     if (res->hasValue()) {
         rawstr << " " << *res->getValue();
@@ -156,8 +160,9 @@ const std::string IntraPHIVFGNode::toString() const {
     rawstr << "IntraPHIVFGNode ID: " << getId() << " ";
     rawstr << "PAGEdge: [" << res->getId() << " = PHI(";
     for (PHIVFGNode::OPVers::const_iterator it = opVerBegin(), eit = opVerEnd();
-         it != eit; it++)
+         it != eit; it++) {
         rawstr << it->second->getId() << ", ";
+    }
     rawstr << ")]\t";
     if (res->hasValue()) {
         rawstr << " " << *res->getValue();
@@ -221,14 +226,15 @@ const std::string FormalRetVFGNode::toString() const {
 const std::string InterPHIVFGNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
-    if (isFormalParmPHI())
+    if (isFormalParmPHI()) {
         rawstr << "FormalParmPHI ID: " << getId()
                << " PAGNode ID: " << res->getId() << "\n"
                << *res->getValue();
-    else
+    } else {
         rawstr << "ActualRetPHI ID: " << getId()
                << " PAGNode ID: " << res->getId() << "\n"
                << *res->getValue();
+    }
     return rawstr.str();
 }
 
@@ -397,8 +403,9 @@ void VFG::addVFGNodes() {
     PAGEdge::PAGEdgeSetTy &copys = getPAGEdgeSet(PAGEdge::Copy);
     for (auto *copy : copys) {
         const CopyPE *edge = SVFUtil::cast<CopyPE>(copy);
-        if (!isPhiCopyEdge(edge))
+        if (!isPhiCopyEdge(edge)) {
             addCopyVFGNode(edge);
+        }
     }
 
     ///
@@ -454,8 +461,9 @@ void VFG::addVFGNodes() {
         for (auto pit = it.second.begin(), epit = it.second.end(); pit != epit;
              ++pit) {
             const PAGNode *argPAGNode = *pit;
-            if (isInterestedPAGNode(argPAGNode))
+            if (isInterestedPAGNode(argPAGNode)) {
                 addActualParmVFGNode(argPAGNode, it.first);
+            }
         }
     }
 
@@ -467,8 +475,9 @@ void VFG::addVFGNodes() {
         /// they are in the formal of AddrVFGNode if the external function
         /// returns an allocated memory if fun has body, it may also exist in
         /// isExtCall, e.g., xmalloc() in bzip2, spec2000.
-        if (isInterestedPAGNode(it.second) == false || hasDef(it.second))
+        if (isInterestedPAGNode(it.second) == false || hasDef(it.second)) {
             continue;
+        }
 
         addActualRetVFGNode(it.second, it.first->getCallBlockNode());
     }
@@ -479,8 +488,9 @@ void VFG::addVFGNodes() {
 
         for (const auto *param : it.second) {
             if (!isInterestedPAGNode(param) ||
-                hasBlackHoleConstObjAddrAsDef(param))
+                hasBlackHoleConstObjAddrAsDef(param)) {
                 continue;
+            }
 
             CallPESet callPEs;
             if (param->hasIncomingEdges(PAGEdge::Call)) {
@@ -488,8 +498,9 @@ void VFG::addVFGNodes() {
                           ecit = param->getIncomingEdgesEnd(PAGEdge::Call);
                      cit != ecit; ++cit) {
                     auto *callPE = SVFUtil::cast<CallPE>(*cit);
-                    if (isInterestedPAGNode(callPE->getSrcNode()))
+                    if (isInterestedPAGNode(callPE->getSrcNode())) {
                         callPEs.insert(callPE);
+                    }
                 }
             }
 
@@ -499,8 +510,9 @@ void VFG::addVFGNodes() {
         if (func->getLLVMFun()->getFunctionType()->isVarArg()) {
             const PAGNode *varParam = pag->getPAGNode(pag->getVarargNode(func));
             if (isInterestedPAGNode(varParam) == false ||
-                hasBlackHoleConstObjAddrAsDef(varParam))
+                hasBlackHoleConstObjAddrAsDef(varParam)) {
                 continue;
+            }
 
             CallPESet callPEs;
             if (varParam->hasIncomingEdges(PAGEdge::Call)) {
@@ -508,8 +520,9 @@ void VFG::addVFGNodes() {
                           ecit = varParam->getIncomingEdgesEnd(PAGEdge::Call);
                      cit != ecit; ++cit) {
                     auto *callPE = SVFUtil::cast<CallPE>(*cit);
-                    if (isInterestedPAGNode(callPE->getSrcNode()))
+                    if (isInterestedPAGNode(callPE->getSrcNode())) {
                         callPEs.insert(callPE);
+                    }
                 }
             }
             addFormalParmVFGNode(varParam, func, callPEs);
@@ -530,38 +543,44 @@ void VFG::addVFGNodes() {
                      ecit = uniqueFunRetNode->getOutgoingEdgesEnd(PAGEdge::Ret);
                  cit != ecit; ++cit) {
                 const RetPE *retPE = SVFUtil::cast<RetPE>(*cit);
-                if (isInterestedPAGNode(retPE->getDstNode()))
+                if (isInterestedPAGNode(retPE->getDstNode())) {
                     retPEs.insert(retPE);
+                }
             }
         }
 
-        if (isInterestedPAGNode(uniqueFunRetNode))
+        if (isInterestedPAGNode(uniqueFunRetNode)) {
             addFormalRetVFGNode(uniqueFunRetNode, func, retPEs);
+        }
     }
 
     // initialize llvm phi nodes (phi of top level pointers)
     PAG::PHINodeMap &phiNodeMap = pag->getPhiNodeMap();
     for (auto &pit : phiNodeMap) {
-        if (isInterestedPAGNode(pit.first))
+        if (isInterestedPAGNode(pit.first)) {
             addIntraPHIVFGNode(pit.first, pit.second);
+        }
     }
     // initialize llvm binary nodes (binary operators)
     PAG::BinaryNodeMap &binaryNodeMap = pag->getBinaryNodeMap();
     for (auto &pit : binaryNodeMap) {
-        if (isInterestedPAGNode(pit.first))
+        if (isInterestedPAGNode(pit.first)) {
             addBinaryOPVFGNode(pit.first, pit.second);
+        }
     }
     // initialize llvm unary nodes (unary operators)
     PAG::UnaryNodeMap &unaryNodeMap = pag->getUnaryNodeMap();
     for (auto &pit : unaryNodeMap) {
-        if (isInterestedPAGNode(pit.first))
+        if (isInterestedPAGNode(pit.first)) {
             addUnaryOPVFGNode(pit.first, pit.second);
+        }
     }
     // initialize llvm cmp nodes (comparision)
     PAG::CmpNodeMap &cmpNodeMap = pag->getCmpNodeMap();
     for (auto &pit : cmpNodeMap) {
-        if (isInterestedPAGNode(pit.first))
+        if (isInterestedPAGNode(pit.first)) {
             addCmpVFGNode(pit.first, pit.second);
+        }
     }
 }
 
@@ -633,13 +652,15 @@ void VFG::connectDirectVFGEdges() {
         if (auto *stmtNode = SVFUtil::dyn_cast<StmtVFGNode>(node)) {
             /// do not handle AddrSVFG node, as it is already
             /// the source of a definition
-            if (SVFUtil::isa<AddrVFGNode>(stmtNode))
+            if (SVFUtil::isa<AddrVFGNode>(stmtNode)) {
                 continue;
+            }
 
             /// for all other cases, like copy/gep/load/ret, connect the RHS
             /// pointer to its def
-            if (!stmtNode->getPAGSrcNode()->isConstantData())
+            if (!stmtNode->getPAGSrcNode()->isConstantData()) {
                 addIntraDirectVFEdge(getDef(stmtNode->getPAGSrcNode()), nodeId);
+            }
 
             /// for store, connect the RHS/LHS pointer to its def
             if (SVFUtil::isa<StoreVFGNode>(stmtNode) &&
@@ -649,37 +670,42 @@ void VFG::connectDirectVFGEdges() {
         } else if (auto *phiNode = SVFUtil::dyn_cast<PHIVFGNode>(node)) {
             for (auto it = phiNode->opVerBegin(), eit = phiNode->opVerEnd();
                  it != eit; it++) {
-                if (!it->second->isConstantData())
+                if (!it->second->isConstantData()) {
                     addIntraDirectVFEdge(getDef(it->second), nodeId);
+                }
             }
         } else if (auto *binaryNode =
                        SVFUtil::dyn_cast<BinaryOPVFGNode>(node)) {
             for (auto it = binaryNode->opVerBegin(),
                       eit = binaryNode->opVerEnd();
                  it != eit; it++) {
-                if (it->second->isConstantData() == false)
+                if (it->second->isConstantData() == false) {
                     addIntraDirectVFEdge(getDef(it->second), nodeId);
+                }
             }
         } else if (auto *unaryNode = SVFUtil::dyn_cast<UnaryOPVFGNode>(node)) {
 
             for (auto it = unaryNode->opVerBegin(), eit = unaryNode->opVerEnd();
                  it != eit; it++) {
-                if (!it->second->isConstantData())
+                if (!it->second->isConstantData()) {
                     addIntraDirectVFEdge(getDef(it->second), nodeId);
+                }
             }
 
         } else if (auto *cmpNode = SVFUtil::dyn_cast<CmpVFGNode>(node)) {
 
             for (auto it = cmpNode->opVerBegin(), eit = cmpNode->opVerEnd();
                  it != eit; it++) {
-                if (!it->second->isConstantData())
+                if (!it->second->isConstantData()) {
                     addIntraDirectVFEdge(getDef(it->second), nodeId);
+                }
             }
         } else if (auto *actualParm =
                        SVFUtil::dyn_cast<ActualParmVFGNode>(node)) {
 
-            if (!actualParm->getParam()->isConstantData())
+            if (!actualParm->getParam()->isConstantData()) {
                 addIntraDirectVFEdge(getDef(actualParm->getParam()), nodeId);
+            }
 
         } else if (auto *formalParm =
                        SVFUtil::dyn_cast<FormalParmVFGNode>(node)) {
@@ -845,9 +871,10 @@ void VFG::connectCallerAndCallee(const CallBlockNode *callBlockNode,
              funArgIt++, csArgIt++) {
             const PAGNode *cs_arg = *csArgIt;
             const PAGNode *fun_arg = *funArgIt;
-            if (fun_arg->isPointer() && cs_arg->isPointer())
+            if (fun_arg->isPointer() && cs_arg->isPointer()) {
                 connectAParamAndFParam(cs_arg, fun_arg, callBlockNode, csId,
                                        edges);
+            }
         }
         assert(funArgIt == funArgEit &&
                "function has more arguments than call site");
@@ -857,9 +884,10 @@ void VFG::connectCallerAndCallee(const CallBlockNode *callBlockNode,
             if (varFunArgNode->isPointer()) {
                 for (; csArgIt != csArgEit; csArgIt++) {
                     const PAGNode *cs_arg = *csArgIt;
-                    if (cs_arg->isPointer())
+                    if (cs_arg->isPointer()) {
                         connectAParamAndFParam(cs_arg, varFunArgNode,
                                                callBlockNode, csId, edges);
+                    }
                 }
             }
         }
@@ -869,8 +897,9 @@ void VFG::connectCallerAndCallee(const CallBlockNode *callBlockNode,
     if (pag->funHasRet(callee) && pag->callsiteHasRet(retBlockNode)) {
         const PAGNode *cs_return = pag->getCallSiteRet(retBlockNode);
         const PAGNode *fun_return = pag->getFunRet(callee);
-        if (cs_return->isPointer() && fun_return->isPointer())
+        if (cs_return->isPointer() && fun_return->isPointer()) {
             connectFRetAndARet(fun_return, cs_return, csId, edges);
+        }
     }
 }
 
@@ -879,44 +908,57 @@ void VFG::connectCallerAndCallee(const CallBlockNode *callBlockNode,
  */
 const PAGNode *VFG::getLHSTopLevPtr(const VFGNode *node) const {
 
-    if (const auto *addr = SVFUtil::dyn_cast<AddrVFGNode>(node))
+    if (const auto *addr = SVFUtil::dyn_cast<AddrVFGNode>(node)) {
         return addr->getPAGDstNode();
+    }
 
-    if (const auto *copy = SVFUtil::dyn_cast<CopyVFGNode>(node))
+    if (const auto *copy = SVFUtil::dyn_cast<CopyVFGNode>(node)) {
         return copy->getPAGDstNode();
+    }
 
-    if (const auto *gep = SVFUtil::dyn_cast<GepVFGNode>(node))
+    if (const auto *gep = SVFUtil::dyn_cast<GepVFGNode>(node)) {
         return gep->getPAGDstNode();
+    }
 
-    if (const auto *load = SVFUtil::dyn_cast<LoadVFGNode>(node))
+    if (const auto *load = SVFUtil::dyn_cast<LoadVFGNode>(node)) {
         return load->getPAGDstNode();
+    }
 
-    if (const auto *phi = SVFUtil::dyn_cast<PHIVFGNode>(node))
+    if (const auto *phi = SVFUtil::dyn_cast<PHIVFGNode>(node)) {
         return phi->getRes();
+    }
 
-    if (const auto *cmp = SVFUtil::dyn_cast<CmpVFGNode>(node))
+    if (const auto *cmp = SVFUtil::dyn_cast<CmpVFGNode>(node)) {
         return cmp->getRes();
+    }
 
-    if (const auto *bop = SVFUtil::dyn_cast<BinaryOPVFGNode>(node))
+    if (const auto *bop = SVFUtil::dyn_cast<BinaryOPVFGNode>(node)) {
         return bop->getRes();
+    }
 
-    if (const auto *uop = SVFUtil::dyn_cast<UnaryOPVFGNode>(node))
+    if (const auto *uop = SVFUtil::dyn_cast<UnaryOPVFGNode>(node)) {
         return uop->getRes();
+    }
 
-    if (const auto *ap = SVFUtil::dyn_cast<ActualParmVFGNode>(node))
+    if (const auto *ap = SVFUtil::dyn_cast<ActualParmVFGNode>(node)) {
         return ap->getParam();
+    }
 
-    if (const auto *fp = SVFUtil::dyn_cast<FormalParmVFGNode>(node))
+    if (const auto *fp = SVFUtil::dyn_cast<FormalParmVFGNode>(node)) {
         return fp->getParam();
+    }
 
-    if (const auto *ar = SVFUtil::dyn_cast<ActualRetVFGNode>(node))
+    if (const auto *ar = SVFUtil::dyn_cast<ActualRetVFGNode>(node)) {
         return ar->getRev();
+    }
 
-    if (const auto *fr = SVFUtil::dyn_cast<FormalRetVFGNode>(node))
+    if (const auto *fr = SVFUtil::dyn_cast<FormalRetVFGNode>(node)) {
         return fr->getRet();
+    }
 
-    if (const auto *nullVFG = SVFUtil::dyn_cast<NullPtrVFGNode>(node))
+    if (const auto *nullVFG = SVFUtil::dyn_cast<NullPtrVFGNode>(node)) {
         return nullVFG->getPAGNode();
+    }
 
     assert(false && "unexpected node kind!");
     return nullptr;
@@ -931,8 +973,9 @@ const SVFFunction *VFG::isFunEntryVFGNode(const VFGNode *node) const {
         return fp->getFun();
     } else if (const InterPHIVFGNode *phi =
                    SVFUtil::dyn_cast<InterPHIVFGNode>(node)) {
-        if (phi->isFormalParmPHI())
+        if (phi->isFormalParmPHI()) {
             return phi->getFun();
+        }
     }
     return nullptr;
 }
@@ -950,8 +993,9 @@ template <> struct DOTGraphTraits<VFG *> : public DOTGraphTraits<PAG *> {
     static std::string getGraphName(VFG *) { return "VFG"; }
 
     std::string getNodeLabel(NodeType *node, VFG *graph) {
-        if (isSimple())
+        if (isSimple()) {
             return getSimpleNodeLabel(node, graph);
+        }
 
         return getCompleteNodeLabel(node, graph);
     }
@@ -981,8 +1025,9 @@ template <> struct DOTGraphTraits<VFG *> : public DOTGraphTraits<PAG *> {
         } else if (auto *cmp = SVFUtil::dyn_cast<CmpVFGNode>(node)) {
             rawstr << cmp->toString();
             ;
-        } else
+        } else {
             assert(false && "what else kinds of nodes do we have??");
+        }
 
         return rawstr.str();
     }
@@ -1012,8 +1057,9 @@ template <> struct DOTGraphTraits<VFG *> : public DOTGraphTraits<PAG *> {
             rawstr << ar->toString();
         } else if (auto *fr = SVFUtil::dyn_cast<FormalRetVFGNode>(node)) {
             rawstr << fr->toString();
-        } else
+        } else {
             assert(false && "what else kinds of nodes do we have??");
+        }
 
         return rawstr.str();
     }
@@ -1058,8 +1104,9 @@ template <> struct DOTGraphTraits<VFG *> : public DOTGraphTraits<PAG *> {
             rawstr << "color=yellow,style=double";
         } else if (SVFUtil::isa<FormalRetVFGNode>(node)) {
             rawstr << "color=yellow,style=double";
-        } else
+        } else {
             assert(false && "no such kind of node!!");
+        }
 
         rawstr << "";
 
@@ -1071,11 +1118,13 @@ template <> struct DOTGraphTraits<VFG *> : public DOTGraphTraits<PAG *> {
         VFGEdge *edge = *(EI.getCurrent());
         assert(edge && "No edge found!!");
         if (SVFUtil::isa<DirectSVFGEdge>(edge)) {
-            if (SVFUtil::isa<CallDirSVFGEdge>(edge))
+            if (SVFUtil::isa<CallDirSVFGEdge>(edge)) {
                 return "style=solid,color=red";
+            }
 
-            if (SVFUtil::isa<RetDirSVFGEdge>(edge))
+            if (SVFUtil::isa<RetDirSVFGEdge>(edge)) {
                 return "style=solid,color=blue";
+            }
 
             return "style=solid";
         }
@@ -1091,10 +1140,11 @@ template <> struct DOTGraphTraits<VFG *> : public DOTGraphTraits<PAG *> {
 
         std::string str;
         raw_string_ostream rawstr(str);
-        if (auto *dirCall = SVFUtil::dyn_cast<CallDirSVFGEdge>(edge))
+        if (auto *dirCall = SVFUtil::dyn_cast<CallDirSVFGEdge>(edge)) {
             rawstr << dirCall->getCallSiteId();
-        else if (auto *dirRet = SVFUtil::dyn_cast<RetDirSVFGEdge>(edge))
+        } else if (auto *dirRet = SVFUtil::dyn_cast<RetDirSVFGEdge>(edge)) {
             rawstr << dirRet->getCallSiteId();
+        }
 
         return rawstr.str();
     }

@@ -79,12 +79,13 @@ template <class NodeTy> class GenericEdge {
     typedef struct {
         bool operator()(const GenericEdge<NodeType> *lhs,
                         const GenericEdge<NodeType> *rhs) const {
-            if (lhs->edgeFlag != rhs->edgeFlag)
+            if (lhs->edgeFlag != rhs->edgeFlag) {
                 return lhs->edgeFlag < rhs->edgeFlag;
-            else if (lhs->getSrcID() != rhs->getSrcID())
+            } else if (lhs->getSrcID() != rhs->getSrcID()) {
                 return lhs->getSrcID() < rhs->getSrcID();
-            else
+            } else {
                 return lhs->getDstID() < rhs->getDstID();
+            }
         }
     } equalGEdge;
 
@@ -212,15 +213,17 @@ template <class NodeTy, class EdgeTy> class GenericNode {
     //@{
     inline EdgeType *hasIncomingEdge(EdgeType *edge) const {
         const_iterator it = InEdges.find(edge);
-        if (it != InEdges.end())
+        if (it != InEdges.end()) {
             return *it;
+        }
 
         return nullptr;
     }
     inline EdgeType *hasOutgoingEdge(EdgeType *edge) const {
         const_iterator it = OutEdges.find(edge);
-        if (it != OutEdges.end())
+        if (it != OutEdges.end()) {
             return *it;
+        }
 
         return nullptr;
     }
@@ -261,8 +264,9 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
             //         delete *it;
         }
         for (iterator I = IDToNodeMap.begin(), E = IDToNodeMap.end(); I != E;
-             ++I)
+             ++I) {
             delete I->second;
+        }
     }
     /// Iterators
     //@{

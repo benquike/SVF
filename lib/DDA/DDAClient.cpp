@@ -133,17 +133,19 @@ void FunptrDDAClient::performStat(PointerAnalysis *pta) {
         const PTACallGraph::FunctionSet &callees =
             callgraph->getIndCSCallees(cbn);
         totalCallsites++;
-        if (callees.size() == 0)
+        if (callees.size() == 0) {
             zeroTargetCallsites++;
-        else if (callees.size() == 1)
+        } else if (callees.size() == 1) {
             oneTargetCallsites++;
-        else if (callees.size() == 2)
+        } else if (callees.size() == 2) {
             twoTargetCallsites++;
-        else
+        } else {
             moreThanTwoCallsites++;
+        }
 
-        if (ddaPts.count() >= anderPts.count() || ddaPts.empty())
+        if (ddaPts.count() >= anderPts.count() || ddaPts.empty()) {
             continue;
+        }
 
         Set<const SVFFunction *> ander_vfns;
         Set<const SVFFunction *> dda_vfns;

@@ -134,6 +134,7 @@ class ThreadAPI {
         CallSite cs = getLLVMCallSite(inst);
         return cs.getArgument(0);
     }
+
     inline const Value *getForkedThread(CallSite cs) const {
         return getForkedThread(cs.getInstruction());
     }
@@ -145,6 +146,7 @@ class ThreadAPI {
         CallSite cs = getLLVMCallSite(inst);
         return cs.getArgument(2)->stripPointerCasts();
     }
+
     inline const Value *getForkedFun(CallSite cs) const {
         return getForkedFun(cs.getInstruction());
     }
@@ -184,6 +186,7 @@ class ThreadAPI {
         CallSite cs = getLLVMCallSite(inst);
         return cs.getArgument(5);
     }
+
     inline const Value *getTaskDataAtHareParForSite(CallSite cs) const {
         return getTaskDataAtHareParForSite(cs.getInstruction());
     }
@@ -194,6 +197,7 @@ class ThreadAPI {
     inline bool isTDJoin(const Instruction *inst) const {
         return getType(getCallee(inst)) == TD_JOIN;
     }
+
     inline bool isTDJoin(CallSite cs) const {
         return isTDJoin(cs.getInstruction());
     }
@@ -215,9 +219,11 @@ class ThreadAPI {
                         "instruction?");
         return nullptr;
     }
+
     inline const Value *getJoinedThread(CallSite cs) const {
         return getJoinedThread(cs.getInstruction());
     }
+
     /// Return the send argument of the call,
     /// Note that, it is the pthread_t pointer
     inline const Value *getRetParmAtJoinedSite(const Instruction *inst) const {
@@ -225,6 +231,7 @@ class ThreadAPI {
         CallSite cs = getLLVMCallSite(inst);
         return cs.getArgument(1);
     }
+
     inline const Value *getRetParmAtJoinedSite(CallSite cs) const {
         return getRetParmAtJoinedSite(cs.getInstruction());
     }
@@ -272,6 +279,7 @@ class ThreadAPI {
         CallSite cs = getLLVMCallSite(inst);
         return cs.getArgument(0);
     }
+
     inline const Value *getLockVal(CallSite cs) const {
         return getLockVal(cs.getInstruction());
     }

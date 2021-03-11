@@ -108,8 +108,9 @@ bool OfflineConsG::addRefStoreEdge(NodeID src, NodeID dst) {
  * Create a ref node for a constraint node if it does not have one
  */
 bool OfflineConsG::createRefNode(NodeID nodeId) {
-    if (hasRef(nodeId))
+    if (hasRef(nodeId)) {
         return false;
+    }
 
     NodeID refId = pag->addDummyValNode();
     ConstraintNode *node = new ConstraintNode(refId);
@@ -137,8 +138,9 @@ void OfflineConsG::buildOfflineMap(OSCC *oscc) {
         NodeID node = it->first;
         NodeID ref = getRef(node);
         NodeID rep = solveRep(oscc, oscc->repNode(ref));
-        if (!isaRef(rep) && !isaRef(node))
+        if (!isaRef(rep) && !isaRef(node)) {
             setNorRep(node, rep);
+        }
     }
 }
 
@@ -164,8 +166,9 @@ NodeID OfflineConsG::solveRep(OSCC *oscc, NodeID rep) {
  * Dump offline constraint graph
  */
 void OfflineConsG::dump(std::string name) {
-    if (OCGDotGraph)
+    if (OCGDotGraph) {
         GraphPrinter::WriteGraphToFile(outs(), name, this);
+    }
 }
 
 // --- GraphTraits specialization for offline constraint graph ---
@@ -195,19 +198,22 @@ struct DOTGraphTraits<OfflineConsG *> : public DOTGraphTraits<PAG *> {
 
             if (briefDisplay) {
                 if (SVFUtil::isa<ValPN>(node)) {
-                    if (nameDisplay)
+                    if (nameDisplay) {
                         rawstr << node->getId() << ":" << node->getValueName();
-                    else
+                    } else {
                         rawstr << node->getId();
-                } else
+                    }
+                } else {
                     rawstr << node->getId();
+                }
             } else {
                 // print the whole value
                 if (!SVFUtil::isa<DummyValPN>(node) &&
-                    !SVFUtil::isa<DummyObjPN>(node))
+                    !SVFUtil::isa<DummyObjPN>(node)) {
                     rawstr << *node->getValue();
-                else
+                } else {
                     rawstr << "";
+                }
             }
 
             return rawstr.str();
@@ -221,24 +227,29 @@ struct DOTGraphTraits<OfflineConsG *> : public DOTGraphTraits<PAG *> {
         if (PAG::getPAG()->findPAGNode(n->getId())) {
             PAGNode *node = PAG::getPAG()->getPAGNode(n->getId());
             if (SVFUtil::isa<ValPN>(node)) {
-                if (SVFUtil::isa<GepValPN>(node))
+                if (SVFUtil::isa<GepValPN>(node)) {
                     return "shape=hexagon";
+                }
 
-                if (SVFUtil::isa<DummyValPN>(node))
+                if (SVFUtil::isa<DummyValPN>(node)) {
                     return "shape=diamond";
+                }
 
                 return "shape=circle";
             }
 
             if (SVFUtil::isa<ObjPN>(node)) {
-                if (SVFUtil::isa<GepObjPN>(node))
+                if (SVFUtil::isa<GepObjPN>(node)) {
                     return "shape=doubleoctagon";
+                }
 
-                if (SVFUtil::isa<FIObjPN>(node))
+                if (SVFUtil::isa<FIObjPN>(node)) {
                     return "shape=septagon";
+                }
 
-                if (SVFUtil::isa<DummyObjPN>(node))
+                if (SVFUtil::isa<DummyObjPN>(node)) {
                     return "shape=Mcircle";
+                }
                 return "shape=doublecircle";
             }
 

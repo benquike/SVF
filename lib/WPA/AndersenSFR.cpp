@@ -41,8 +41,9 @@ void AndersenSFR::initialize() {
     AndersenSCD::initialize();
     setPWCOpt(false);
 
-    if (!csc)
+    if (!csc) {
         csc = new CSC(_graph, scc);
+    }
 
     // detect and collapse cycles that only comprise copy edges
     getSCCDetector()->find();
@@ -84,8 +85,9 @@ bool AndersenSFR::processGepPts(PointsTo &pts, const GepCGEdge *edge) {
 
         if (!srcInits.empty()) {
             NodeSet sortSrcInits;
-            for (NodeID ptd : srcInits)
+            for (NodeID ptd : srcInits) {
                 sortSrcInits.insert(ptd);
+            }
 
             Size_t offset =
                 SVFUtil::dyn_cast<NormalGepCGEdge>(edge)->getOffset();
@@ -114,20 +116,21 @@ void AndersenSFR::fieldExpand(NodeSet &initials, Size_t offset, NodeBS &strides,
         NodeID init = *initials.begin();
         initials.erase(init);
 
-        if (consCG->isBlkObjOrConstantObj(init))
+        if (consCG->isBlkObjOrConstantObj(init)) {
             expandPts.set(init);
-        else {
+        } else {
             PAGNode *initPN = pag->getPAGNode(init);
             const MemObj *obj = pag->getBaseObj(init);
             const Size_t maxLimit = obj->getMaxFieldOffsetLimit();
             Size_t initOffset;
-            if (auto *gepNode = SVFUtil::dyn_cast<GepObjPN>(initPN))
+            if (auto *gepNode = SVFUtil::dyn_cast<GepObjPN>(initPN)) {
                 initOffset = gepNode->getLocationSet().getOffset();
-            else if (SVFUtil::isa<FIObjPN>(initPN) ||
-                     SVFUtil::isa<DummyObjPN>(initPN))
+            } else if (SVFUtil::isa<FIObjPN>(initPN) ||
+                       SVFUtil::isa<DummyObjPN>(initPN)) {
                 initOffset = 0;
-            else
+            } else {
                 assert(false && "Not an object node!!");
+            }
 
             Set<Size_t> offsets;
             offsets.insert(offset);
@@ -141,8 +144,9 @@ void AndersenSFR::fieldExpand(NodeSet &initials, Size_t offset, NodeBS &strides,
                         Size_t _f1 = _f + _s;
                         loopFlag = (offsets.find(_f1) == offsets.end()) &&
                                    (initOffset + _f1 < maxLimit);
-                        if (loopFlag)
+                        if (loopFlag) {
                             offsets.insert(_f1);
+                        }
                     }
                 }
             }

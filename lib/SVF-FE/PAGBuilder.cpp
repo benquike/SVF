@@ -1068,12 +1068,12 @@ void PAGBuilder::handleExtCall(CallSite cs, const SVFFunction *callee) {
                                     getValueNode(inst));
                 }
                 //				else if (const GetElementPtrInst *gep =
-                //SVFUtil::dyn_cast<GetElementPtrInst>(cs.getArgument(0))) {
+                // SVFUtil::dyn_cast<GetElementPtrInst>(cs.getArgument(0))) {
                 //					addStoreEdge(getValueNode(cs.getArgument(1)),
-                //getValueNode(cs.getArgument(0))); 					if
+                // getValueNode(cs.getArgument(0))); 					if
                 //(SVFUtil::isa<PointerType>(inst->getType()))
                 //						addCopyEdge(getValueNode(cs.getArgument(0)),
-                //getValueNode(inst));
+                // getValueNode(inst));
                 //				}
                 break;
             }

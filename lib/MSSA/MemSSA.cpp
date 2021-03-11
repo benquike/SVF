@@ -145,9 +145,9 @@ void MemSSA::createMUCHI(const SVFFunction &fun) {
 
     // 2. find global names (region name before renaming) of each memory region,
     // collect used mrs in usedRegs, and collect its def basic block in
-    // reg2BBMap in the form of mu(r) and r = chi (r) a) mu(r): 		if(r \not\in
-    // varKills) global = global \cup r b) r = chi(r): 		if(r \not\in varKills)
-    // global = global \cup r
+    // reg2BBMap in the form of mu(r) and r = chi (r) a) mu(r): 		if(r
+    // \not\in varKills) global = global \cup r b) r = chi(r): 		if(r \not\in
+    // varKills) global = global \cup r
     //		varKills = varKills \cup r
     //		block(r) = block(r) \cup bb_{chi}
 

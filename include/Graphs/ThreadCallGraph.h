@@ -348,8 +348,9 @@ class ThreadCallGraph : public PTACallGraph {
         auto it = callinstToThreadJoinEdgesMap.find(call);
         if (it != callinstToThreadJoinEdgesMap.end()) {
             auto jit = it->second.find(&joinEdge);
-            if (jit != it->second.end())
+            if (jit != it->second.end()) {
                 return *jit;
+            }
         }
         return nullptr;
     }

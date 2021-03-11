@@ -251,12 +251,14 @@ class VFG : public GenericVFGTy {
             const VFGNode *defNode = getVFGNode(getDef(pagNode));
             if (const auto *addr = SVFUtil::dyn_cast<AddrVFGNode>(defNode)) {
                 if (PAG::getPAG()->isBlkObjOrConstantObj(
-                        addr->getPAGEdge()->getSrcID()))
+                        addr->getPAGEdge()->getSrcID())) {
                     return true;
+                }
             } else if (const auto *copy =
                            SVFUtil::dyn_cast<CopyVFGNode>(defNode)) {
-                if (PAG::getPAG()->isNullPtr(copy->getPAGEdge()->getSrcID()))
+                if (PAG::getPAG()->isNullPtr(copy->getPAGEdge()->getSrcID())) {
                     return true;
+                }
             }
         }
         return false;
@@ -370,8 +372,9 @@ class VFG : public GenericVFGTy {
         NodeID actualParam = getActualParmVFGNode(csArg, cbn)->getId();
         NodeID formalParam = getFormalParmVFGNode(funArg)->getId();
         VFGEdge *edge = addInterEdgeFromAPToFP(actualParam, formalParam, csId);
-        if (edge != nullptr)
+        if (edge != nullptr) {
             edges.insert(edge);
+        }
     }
     /// Connect formal-ret and actual ret
     virtual inline void connectFRetAndARet(const PAGNode *funReturn,
@@ -381,8 +384,9 @@ class VFG : public GenericVFGTy {
         NodeID formalRet = getFormalRetVFGNode(funReturn)->getId();
         NodeID actualRet = getActualRetVFGNode(csReturn)->getId();
         VFGEdge *edge = addInterEdgeFromFRToAR(formalRet, actualRet, csId);
-        if (edge != nullptr)
+        if (edge != nullptr) {
             edges.insert(edge);
+        }
     }
     //@}
 
@@ -418,15 +422,17 @@ class VFG : public GenericVFGTy {
                                   const SVFFunction *callee);
     /// Get PAGEdge set
     virtual inline PAGEdge::PAGEdgeSetTy &getPAGEdgeSet(PAGEdge::PEDGEK kind) {
-        if (isPtrOnlySVFG())
+        if (isPtrOnlySVFG()) {
             return pag->getPTAEdgeSet(kind);
+        }
 
         return pag->getEdgeSet(kind);
     }
 
     virtual inline bool isInterestedPAGNode(const PAGNode *node) const {
-        if (isPtrOnlySVFG())
+        if (isPtrOnlySVFG()) {
             return node->isPointer();
+        }
         return true;
     }
 
@@ -446,10 +452,11 @@ class VFG : public GenericVFGTy {
         vfgNode->setICFGNode(icfgNode);
         icfgNode->addVFGNode(vfgNode);
 
-        if (const SVFFunction *fun = icfgNode->getFun())
+        if (const SVFFunction *fun = icfgNode->getFun()) {
             funToVFGNodesMap[fun].insert(vfgNode);
-        else
+        } else {
             globalVFGNodes.insert(vfgNode);
+        }
     }
 
     /// Add a VFG node for program statement
@@ -519,8 +526,9 @@ class VFG : public GenericVFGTy {
         auto *sNode = new FormalParmVFGNode(totalVFGNode++, fparm, fun);
         addVFGNode(sNode, pag->getICFG()->getFunEntryBlockNode(fun));
 
-        for (const auto *callPE : callPEs)
+        for (const auto *callPE : callPEs) {
             sNode->addCallPE(callPE);
+        }
 
         setDef(fparm, sNode);
         PAGNodeToFormalParmMap[fparm] = sNode;
@@ -534,8 +542,9 @@ class VFG : public GenericVFGTy {
                                     const SVFFunction *fun, RetPESet &retPEs) {
         auto *sNode = new FormalRetVFGNode(totalVFGNode++, uniqueFunRet, fun);
         addVFGNode(sNode, pag->getICFG()->getFunExitBlockNode(fun));
-        for (const auto *retPE : retPEs)
+        for (const auto *retPE : retPEs) {
             sNode->addRetPE(retPE);
+        }
 
         PAGNodeToFormalRetMap[uniqueFunRet] = sNode;
         /// if this uniqueFunRet is a phi node, which means it will receive

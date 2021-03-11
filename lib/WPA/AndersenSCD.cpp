@@ -42,8 +42,10 @@ void AndersenSCD::solveWorklist() {
     // Nodes in nodeStack are in topological order by default.
     NodeStack &nodeStack = SCCDetect();
 
-    for (NodeID nId : sccCandidates)
+    for (NodeID nId : sccCandidates) {
         pushIntoWorklist(nId);
+    }
+
     sccCandidates.clear();
 
     // propagate point-to sets
@@ -54,9 +56,10 @@ void AndersenSCD::solveWorklist() {
         if (sccRepNode(nodeId) == nodeId) {
             collapsePWCNode(nodeId);
 
-            if (isInWorklist(nodeId))
+            if (isInWorklist(nodeId)) {
                 // push the rep of node into worklist
                 pushIntoWorklist(nodeId);
+            }
 
             double propStart = stat->getClk();
             // propagate pts through copy and gep edges
@@ -115,8 +118,9 @@ void AndersenSCD::PWCDetect() {
     // replace scc candidates by their reps
     NodeSet tmpSccCandidates = sccCandidates;
     sccCandidates.clear();
-    for (NodeID candidate : tmpSccCandidates)
+    for (NodeID candidate : tmpSccCandidates) {
         sccCandidates.insert(sccRepNode(candidate));
+    }
     tmpSccCandidates.clear();
 
     // set scc edge type as direct edge
@@ -135,10 +139,11 @@ void AndersenSCD::PWCDetect() {
 void AndersenSCD::handleCopyGep(ConstraintNode *node) {
     NodeID nodeId = node->getId();
 
-    if (!mergePWC() && getSCCDetector()->subNodes(nodeId).count() > 1)
+    if (!mergePWC() && getSCCDetector()->subNodes(nodeId).count() > 1) {
         processPWC(node);
-    else if (isInWorklist(nodeId))
+    } else if (isInWorklist(nodeId)) {
         Andersen::handleCopyGep(node);
+    }
 }
 
 /*!
@@ -148,13 +153,16 @@ void AndersenSCD::processPWC(ConstraintNode *rep) {
     NodeID repId = rep->getId();
 
     NodeSet pwcNodes;
-    for (NodeID nId : getSCCDetector()->subNodes(repId))
+    for (NodeID nId : getSCCDetector()->subNodes(repId)) {
         pwcNodes.insert(nId);
+    }
 
     WorkList tmpWorkList;
-    for (NodeID subId : pwcNodes)
-        if (isInWorklist(subId))
+    for (NodeID subId : pwcNodes) {
+        if (isInWorklist(subId)) {
             tmpWorkList.push(subId);
+        }
+    }
 
     while (!tmpWorkList.empty()) {
         NodeID nodeId = tmpWorkList.pop();
@@ -165,15 +173,17 @@ void AndersenSCD::processPWC(ConstraintNode *rep) {
             for (ConstraintEdge *edge : node->getCopyOutEdges()) {
                 bool changed = processCopy(nodeId, edge);
                 if (changed &&
-                    pwcNodes.find(edge->getDstID()) != pwcNodes.end())
+                    pwcNodes.find(edge->getDstID()) != pwcNodes.end()) {
                     tmpWorkList.push(edge->getDstID());
+                }
             }
             for (ConstraintEdge *edge : node->getGepOutEdges()) {
                 if (auto *gepEdge = SVFUtil::dyn_cast<GepCGEdge>(edge)) {
                     bool changed = processGep(nodeId, gepEdge);
                     if (changed &&
-                        pwcNodes.find(edge->getDstID()) != pwcNodes.end())
+                        pwcNodes.find(edge->getDstID()) != pwcNodes.end()) {
                         tmpWorkList.push(edge->getDstID());
+                    }
                 }
             }
         }
@@ -191,7 +201,7 @@ void AndersenSCD::handleLoadStore(ConstraintNode *node) {
     NodeID nodeId = node->getId();
     // handle load
     for (auto it = node->outgoingLoadsBegin(), eit = node->outgoingLoadsEnd();
-         it != eit; ++it)
+         it != eit; ++it) {
         for (PointsTo::iterator piter = getPts(nodeId).begin(),
                                 epiter = getPts(nodeId).end();
              piter != epiter; ++piter) {
@@ -200,6 +210,7 @@ void AndersenSCD::handleLoadStore(ConstraintNode *node) {
                 reanalyze = true;
             }
         }
+    }
 
     // handle store
     for (auto it = node->incomingStoresBegin(), eit = node->incomingStoresEnd();

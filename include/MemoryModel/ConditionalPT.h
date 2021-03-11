@@ -75,10 +75,11 @@ template <class Cond> class CondVar {
      * Less than implementation.
      */
     inline bool operator<(const CondVar &rhs) const {
-        if (m_id != rhs.get_id())
+        if (m_id != rhs.get_id()) {
             return m_id < rhs.get_id();
-        else
+        } else {
             return m_cond < rhs.get_cond();
+        }
     }
 
     inline const Cond &get_cond() const { return m_cond; }
@@ -153,15 +154,17 @@ template <class Element> class CondStdSet {
     //@{
     inline bool operator|=(const CondStdSet<Element> &rhs) {
         const ElementSet &rhsElementSet = rhs.getElementSet();
-        if (rhsElementSet.empty() || (*this == rhs))
+        if (rhsElementSet.empty() || (*this == rhs)) {
             return false;
+        }
         u32_t oldSize = elements.size();
         elements.insert(rhsElementSet.begin(), rhsElementSet.end());
         return oldSize != elements.size();
     }
     inline bool operator&=(const CondStdSet<Element> &rhs) {
-        if (rhs.empty() || (*this == rhs))
+        if (rhs.empty() || (*this == rhs)) {
             return false;
+        }
         bool changed = false;
         for (const_iterator i = rhs.begin(); i != rhs.end(); ++i) {
             if (elements.find(*i) == elements.end()) {
@@ -192,12 +195,14 @@ template <class Element> class CondStdSet {
      * Return TRUE if this and RHS share common elements.
      */
     bool intersects(const CondStdSet<Element> &rhs) const {
-        if (empty() && rhs.empty())
+        if (empty() && rhs.empty()) {
             return false;
+        }
 
         for (const_iterator i = rhs.begin(); i != rhs.end(); ++i) {
-            if (elements.find(*i) != elements.end())
+            if (elements.find(*i) != elements.end()) {
                 return true;
+            }
         }
         return false;
     }
@@ -271,9 +276,9 @@ template <class Cond> class CondPointsToSet {
 
     /// Get number of points-to targets.
     inline unsigned numElement() const {
-        if (_condPts.empty())
+        if (_condPts.empty()) {
             return 0;
-        else {
+        } else {
             unsigned num = 0;
             for (CondPtsConstIter it = cptsBegin(); it != cptsEnd(); it++) {
                 PointsTo pts = it->second;
@@ -296,8 +301,9 @@ template <class Cond> class CondPointsToSet {
     /// Overloading operator ==
     inline bool operator==(const CondPointsToSet<Cond> &rhs) const {
         // Always remember give the typename when define a template variable
-        if (pointsTo().size() != rhs.pointsTo().size())
+        if (pointsTo().size() != rhs.pointsTo().size()) {
             return false;
+        }
         CondPtsConstIter lit = cptsBegin();
         CondPtsConstIter elit = cptsEnd();
         CondPtsConstIter rit = rhs.cptsBegin();
@@ -305,8 +311,9 @@ template <class Cond> class CondPointsToSet {
         for (; lit != elit && rit != erit; ++lit, ++rit) {
             const Cond &lc = lit->first;
             const Cond &rc = rit->first;
-            if (lc != rc || lit->second != rit->second)
+            if (lc != rc || lit->second != rit->second) {
                 return false;
+            }
         }
         return true;
     }
@@ -315,9 +322,9 @@ template <class Cond> class CondPointsToSet {
     /// Two conditional points-to set are aliased when they access the same
     /// memory location under the same condition
     inline bool aliased(const CondPointsToSet<Cond> &rhs) const {
-        if (pointsTo().empty() || rhs.pointsTo().empty())
+        if (pointsTo().empty() || rhs.pointsTo().empty()) {
             return false;
-        else {
+        } else {
             CondPtsConstIter lit = cptsBegin();
             CondPtsConstIter elit = cptsEnd();
             for (; lit != elit; ++lit) {
@@ -326,8 +333,9 @@ template <class Cond> class CondPointsToSet {
                 CondPtsConstIter rit = rhs.pointsTo().find(lc);
                 if (rit != rhs.pointsTo().end()) {
                     const PointsTo &rpts = rit->second;
-                    if (pts.intersects(rpts))
+                    if (pts.intersects(rpts)) {
                         return true;
+                    }
                 }
             }
             return false;
@@ -336,21 +344,22 @@ template <class Cond> class CondPointsToSet {
 
     /// Check whether this CondPointsToSet is a subset of RHS
     inline bool isSubset(const CondPointsToSet<Cond> &rhs) const {
-        if (pointsTo().size() > rhs.pointsTo().size())
+        if (pointsTo().size() > rhs.pointsTo().size()) {
             return false;
-        else {
+        } else {
             CondPtsConstIter lit = cptsBegin();
             CondPtsConstIter elit = cptsEnd();
             for (; lit != elit; ++lit) {
                 const Cond &lc = lit->first;
                 CondPtsConstIter rit = rhs.pointsTo().find(lc);
-                if (rit == rhs.pointsTo().end())
+                if (rit == rhs.pointsTo().end()) {
                     return false;
-                else {
+                } else {
                     const PointsTo &pts = lit->second;
                     const PointsTo &rpts = rit->second;
-                    if (!rpts.contains(pts))
+                    if (!rpts.contains(pts)) {
                         return false;
+                    }
                 }
             }
         }
@@ -360,8 +369,9 @@ template <class Cond> class CondPointsToSet {
     /// Return TRUE if this and RHS share any common element.
     bool intersects(const CondPointsToSet<Cond> *rhs) const {
         /// if either cpts is empty, just return.
-        if (pointsTo().empty() && rhs->pointsTo().empty())
+        if (pointsTo().empty() && rhs->pointsTo().empty()) {
             return false;
+        }
 
         CondPtsConstIter it = rhs->cptsBegin();
         CondPtsConstIter eit = rhs->cptsEnd();
@@ -370,8 +380,9 @@ template <class Cond> class CondPointsToSet {
             if (hasPointsTo(cond)) {
                 const PointsTo &rhs_pts = it->second;
                 const PointsTo &pts = pointsTo(cond);
-                if (pts.intersects(rhs_pts))
+                if (pts.intersects(rhs_pts)) {
                     return true;
+                }
             }
         }
 
@@ -436,8 +447,9 @@ template <class Cond> class CondPointsToSet {
                 const Cond &cond = it->first;
                 PointsTo &pts = it->second;
                 if (rhs.hasPointsTo(cond)) {
-                    if (pts &= rhs.pointsTo(cond))
+                    if (pts &= rhs.pointsTo(cond)) {
                         changed = true;
+                    }
                 } else {
                     if (!pts.empty()) {
                         pts.clear();
@@ -465,8 +477,9 @@ template <class Cond> class CondPointsToSet {
             const Cond &cond = rhsIt->first;
             const PointsTo &rhsPts = rhsIt->second;
             PointsTo &pts = pointsTo(cond);
-            if ((pts |= rhsPts))
+            if ((pts |= rhsPts)) {
                 changed = true;
+            }
         }
         return changed;
     }
@@ -482,9 +495,9 @@ template <class Cond> class CondPointsToSet {
     // TODO: try to use an efficient method to compare two conditional points-to
     // set.
     inline bool operator<(const CondPointsToSet<Cond> &rhs) const {
-        if (pointsTo().size() < rhs.pointsTo().size())
+        if (pointsTo().size() < rhs.pointsTo().size()) {
             return true;
-        else if (pointsTo().size() == rhs.pointsTo().size()) {
+        } else if (pointsTo().size() == rhs.pointsTo().size()) {
             CondPtsConstIter lit = cptsBegin();
             CondPtsConstIter elit = cptsEnd();
             CondPtsConstIter rit = rhs.cptsBegin();
@@ -492,28 +505,31 @@ template <class Cond> class CondPointsToSet {
             for (; lit != elit && rit != erit; ++lit, ++rit) {
                 const Cond &lc = lit->first;
                 const Cond &rc = rit->first;
-                if (lc < rc)
+                if (lc < rc) {
                     return true;
-                else if (lc == rc) {
+                } else if (lc == rc) {
                     const PointsTo &lpts = lit->second;
                     const PointsTo &rpts = rit->second;
-                    if (lpts.count() < rpts.count())
+                    if (lpts.count() < rpts.count()) {
                         return true;
-                    else if (lpts.count() == rpts.count()) {
+                    } else if (lpts.count() == rpts.count()) {
                         NodeBS::iterator bit = lpts.begin();
                         NodeBS::iterator eit = lpts.end();
                         NodeBS::iterator rbit = rpts.begin();
                         NodeBS::iterator reit = rpts.end();
                         for (; bit != eit && rbit != reit; bit++, rbit++) {
-                            if (*bit < *rbit)
+                            if (*bit < *rbit) {
                                 return true;
-                            else if (*bit > *rbit)
+                            } else if (*bit > *rbit) {
                                 return false;
+                            }
                         }
-                    } else
+                    } else {
                         return false;
-                } else
+                    }
+                } else {
                     return false;
+                }
             }
         }
         return false;
@@ -590,8 +606,9 @@ template <class Cond> class CondPointsToSet {
         //@{
         bool operator==(const CondPtsSetIterator &RHS) const {
             // If they are both at the end, ignore the rest of the fields.
-            if (atEnd && RHS.atEnd)
+            if (atEnd && RHS.atEnd) {
                 return true;
+            }
             // Otherwise they are the same if they have the same condVar
             return atEnd == RHS.atEnd && RHS._curIter == _curIter &&
                    RHS._ptIter == _ptIter;
@@ -601,8 +618,9 @@ template <class Cond> class CondPointsToSet {
         }
 
         void operator++(void) {
-            if (atEnd == true)
+            if (atEnd == true) {
                 return;
+            }
 
             if (_ptIter == _ptEndIter) {
                 if (_curIter == _endIter) {
@@ -612,8 +630,9 @@ template <class Cond> class CondPointsToSet {
                 _curIter++;
                 _ptIter = _curIter->second.begin();
                 _ptIter = _curIter->second.end();
-            } else
+            } else {
                 _ptIter++;
+            }
         }
         SingleCondVar operator*() {
             SingleCondVar temp_var(cond(), *_ptIter);

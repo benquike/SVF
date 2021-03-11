@@ -92,20 +92,20 @@ void increaseStackSize();
  * 2. If the sizes are equal, comparing the points-to targets.
  */
 inline bool cmpPts(const PointsTo &lpts, const PointsTo &rpts) {
-    if (lpts.count() != rpts.count())
+    if (lpts.count() != rpts.count()) {
         return (lpts.count() < rpts.count());
-    else {
-        PointsTo::iterator bit = lpts.begin();
-        PointsTo::iterator eit = lpts.end();
-        PointsTo::iterator rbit = rpts.begin();
-        PointsTo::iterator reit = rpts.end();
-        for (; bit != eit && rbit != reit; bit++, rbit++) {
-            if (*bit != *rbit)
-                return (*bit < *rbit);
-        }
-
-        return false;
     }
+    PointsTo::iterator bit = lpts.begin();
+    PointsTo::iterator eit = lpts.end();
+    PointsTo::iterator rbit = rpts.begin();
+    PointsTo::iterator reit = rpts.end();
+    for (; bit != eit && rbit != reit; bit++, rbit++) {
+        if (*bit != *rbit) {
+            return (*bit < *rbit);
+        }
+    }
+
+    return false;
 }
 
 inline bool isIntrinsicFun(const Function *func) {
@@ -138,16 +138,18 @@ inline bool isCallSite(const Instruction *inst) {
 }
 /// Whether an instruction is a call or invoke instruction
 inline bool isCallSite(const Value *val) {
-    if (const auto *inst = SVFUtil::dyn_cast<Instruction>(val))
+    if (const auto *inst = SVFUtil::dyn_cast<Instruction>(val)) {
         return SVFUtil::isCallSite(inst);
+    }
 
     return false;
 }
 /// Whether an instruction is a callsite in the application code, excluding llvm
 /// intrinsic calls
 inline bool isNonInstricCallSite(const Instruction *inst) {
-    if (isIntrinsicInst(inst))
+    if (isIntrinsicInst(inst)) {
         return false;
+    }
     return isCallSite(inst);
 }
 /// Whether an instruction is a return instruction
@@ -179,12 +181,14 @@ inline const SVFFunction *getFunction(StringRef name) {
 
 /// Get the definition of a function across multiple modules
 inline const SVFFunction *getDefFunForMultipleModule(const Function *fun) {
-    if (fun == nullptr)
+    if (fun == nullptr) {
         return nullptr;
+    }
     LLVMModuleSet *llvmModuleset = LLVMModuleSet::getLLVMModuleSet();
     const SVFFunction *svfFun = llvmModuleset->getSVFFunction(fun);
-    if (fun->isDeclaration() && llvmModuleset->hasDefinition(fun))
+    if (fun->isDeclaration() && llvmModuleset->hasDefinition(fun)) {
         svfFun = LLVMModuleSet::getLLVMModuleSet()->getDefinition(fun);
+    }
     return svfFun;
 }
 
@@ -199,8 +203,10 @@ inline const SVFFunction *getCallee(const CallSite cs) {
 }
 
 inline const SVFFunction *getCallee(const Instruction *inst) {
-    if (!isCallSite(inst))
+    if (!isCallSite(inst)) {
         return nullptr;
+    }
+
     CallSite cs(const_cast<Instruction *>(inst));
     return getCallee(cs);
 }

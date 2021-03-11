@@ -45,14 +45,15 @@ void LocationSet::addElemNumStridePair(const NodePair &pair) {
     /// The pair will not be added if any number of a stride is zero,
     /// because they will not have effect on the locations represented by this
     /// LocationSet.
-    if (pair.first == 0 || pair.second == 0)
+    if (pair.first == 0 || pair.second == 0) {
         return;
+    }
 
     if (singleStride) {
-        if (numStridePair.empty())
+        if (numStridePair.empty()) {
             numStridePair.push_back(
                 std::make_pair(StInfo::getMaxFieldLimit(), pair.second));
-        else {
+        } else {
             /// Find the GCD stride
             NodeID existStride = (*numStridePair.begin()).second;
             NodeID newStride = gcd(pair.second, existStride);
@@ -78,8 +79,9 @@ bool LocationSet::increaseIfNotReachUpperBound(
     bool reachUpperBound = true;
     for (u32_t i = 0; i < indices.size(); i++) {
         assert(pairVec[i].first > 0 && "number must be greater than 0");
-        if (indices[i] < (pairVec[i].first - 1))
+        if (indices[i] < (pairVec[i].first - 1)) {
             reachUpperBound = false;
+        }
     }
 
     /// Increase index if not reach upper bound

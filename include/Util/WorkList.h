@@ -84,10 +84,12 @@ template <class Data> class List {
     void push(Data data) {
         if (nodeSet.find(data) == nodeSet.end()) {
             Node *new_node = new Node(data);
-            if (head == nullptr)
+            if (head == nullptr) {
                 head = new_node; // the list is empty
-            else
+            } else {
                 tail->next = new_node;
+            }
+
             tail = new_node;
         }
     }
@@ -99,8 +101,9 @@ template <class Data> class List {
 
         /// change list head to the next node
         head = head->next;
-        if (head == nullptr)
+        if (head == nullptr) {
             tail = nullptr; /// the last node is popped.
+        }
 
         Data data = head_node->data;
         nodeSet.erase(data);
@@ -142,8 +145,9 @@ template <class Data> class FIFOWorkList {
             data_list.push_back(data);
             data_set.insert(data);
             return true;
-        } else
-            return false;
+        }
+
+        return false;
     }
 
     /**
@@ -198,8 +202,9 @@ template <class Data> class FILOWorkList {
             data_list.push_back(data);
             data_set.insert(data);
             return true;
-        } else
-            return false;
+        }
+
+        return false;
     }
 
     /**

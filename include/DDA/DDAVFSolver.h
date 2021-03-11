@@ -53,8 +53,9 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
             _svfg = nullptr;
         }
 
-        if (_svfgSCC != nullptr)
+        if (_svfgSCC != nullptr) {
             delete _svfgSCC;
+        }
         _svfgSCC = nullptr;
 
         _callGraph = nullptr;
@@ -188,8 +189,9 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
             }
         } else if (SVFUtil::isa<MRSVFGNode>(node)) {
             backtraceAlongIndirectVF(pts, dpm);
-        } else
+        } else {
             assert(false && "unexpected kind of SVFG nodes");
+        }
     }
 
     /// recompute points-to for value-flow cycles and indirect calls
@@ -199,12 +201,14 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
         if (_pag->isFunPtr(dpm.getCurNodeID())) {
             const CallSiteSet &csSet =
                 _pag->getIndCallSites(dpm.getCurNodeID());
-            for (const auto *it : csSet)
+            for (const auto *it : csSet) {
                 updateCallGraphAndSVFG(dpm, it, newIndirectEdges);
+            }
         }
         /// callgraph scc detection for local variable in recursion
-        if (!newIndirectEdges.empty())
+        if (!newIndirectEdges.empty()) {
             _callGraphSCC->find();
+        }
         reComputeForEdges(dpm, newIndirectEdges, true);
 
         /// re-compute for transitive closures
@@ -221,8 +225,9 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
             typename LocToDPMVecMap::const_iterator locIt =
                 getLocToDPMVecMap().find(dst->getId());
             /// Only collect nodes we have traversed
-            if (locIt == getLocToDPMVecMap().end())
+            if (locIt == getLocToDPMVecMap().end()) {
                 continue;
+            }
             DPTItemSet dpmSet(locIt->second.begin(), locIt->second.end());
             for (typename DPTItemSet::const_iterator it = dpmSet.begin(),
                                                      eit = dpmSet.end();
@@ -239,13 +244,14 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
                         findPT(dstDpm);
                     }
                 } else {
-                    if (indirectCall)
+                    if (indirectCall) {
                         DBOUT(DDDA,
                               SVFUtil::outs()
                                   << "\t Recompute for indirect call from :");
-                    else
+                    } else {
                         DBOUT(DDDA, SVFUtil::outs()
                                         << "\t Recompute forward from :");
+                    }
                     DBOUT(DDDA, dpm.dump());
                     DOSTAT(ddaStat->_NumOfStepInCycle++);
                     clearbkVisited(dstDpm);
@@ -263,8 +269,9 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
     }
     /// Reset visited map for next points-to query
     virtual inline void resetQuery() {
-        if (outOfBudgetQuery)
+        if (outOfBudgetQuery) {
             OOBResetVisited();
+        }
 
         locToDpmSetMap.clear();
         dpmToloadDpmMap.clear();
@@ -281,9 +288,11 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
             DPTItemSet dpmSet(it->second.begin(), it->second.end());
             for (typename DPTItemSet::const_iterator dit = dpmSet.begin(),
                                                      deit = dpmSet.end();
-                 dit != deit; ++dit)
-                if (isOutOfBudgetDpm(*dit) == false)
+                 dit != deit; ++dit) {
+                if (isOutOfBudgetDpm(*dit) == false) {
                     clearbkVisited(*dit);
+                }
+            }
         }
     }
     /// GetDefinition SVFG
@@ -294,8 +303,9 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
     void backtraceAlongIndirectVF(CPtSet &pts, const DPIm &oldDpm) {
         const SVFGNode *node = oldDpm.getLoc();
         NodeID obj = oldDpm.getCurNodeID();
-        if (_pag->isConstantObj(obj) || _pag->isNonPointerObj(obj))
+        if (_pag->isConstantObj(obj) || _pag->isNonPointerObj(obj)) {
             return;
+        }
         const SVFGEdgeSet &edgeSet(node->getInEdges());
         for (auto *it : edgeSet) {
             if (const IndirectSVFGEdge *indirEdge =
@@ -391,8 +401,9 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
         }
 
         /// record the source of load dpm
-        if (SVFUtil::isa<IndirectSVFGEdge>(edge))
+        if (SVFUtil::isa<IndirectSVFGEdge>(edge)) {
             addLoadDpmAndCVar(dpm, getLoadDpm(oldDpm), getLoadCVar(oldDpm));
+        }
 
         DOSTAT(ddaStat->_NumOfDPM++);
         /// handle out of budget case
@@ -438,8 +449,9 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
     /// indirect value-flow edge
     virtual inline bool propagateViaObj(const CVar &storeObj,
                                         const CVar &loadObj) {
-        if (getPtrNodeID(storeObj) == getPtrNodeID(loadObj))
+        if (getPtrNodeID(storeObj) == getPtrNodeID(loadObj)) {
             return true;
+        }
         return false;
     }
     /// resolve function pointer
@@ -509,10 +521,11 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
     /// Points-to Caching for top-level pointers and address-taken objects
     //@{
     virtual inline const CPtSet &getCachedPointsTo(const DPIm &dpm) {
-        if (isTopLevelPtrStmt(dpm.getLoc()))
+        if (isTopLevelPtrStmt(dpm.getLoc())) {
             return getCachedTLPointsTo(dpm);
-        else
+        } else {
             return getCachedADPointsTo(dpm);
+        }
     }
     virtual inline void updateCachedPointsTo(const DPIm &dpm,
                                              const CPtSet &pts) {
@@ -532,10 +545,12 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
 
     /// Whether this is a top-level pointer statement
     inline bool isTopLevelPtrStmt(const SVFGNode *stmt) {
-        if (SVFUtil::isa<StoreSVFGNode>(stmt) || SVFUtil::isa<MRSVFGNode>(stmt))
+        if (SVFUtil::isa<StoreSVFGNode>(stmt) ||
+            SVFUtil::isa<MRSVFGNode>(stmt)) {
             return false;
-        else
+        } else {
             return true;
+        }
     }
     /// Return dpm with old context and path conditions
     virtual inline DPIm getDPImWithOldCond(const DPIm &oldDpm, const CVar &var,
@@ -543,11 +558,13 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
         DPIm dpm(oldDpm);
         dpm.setLocVar(loc, getPtrNodeID(var));
 
-        if (SVFUtil::isa<StoreSVFGNode>(loc))
+        if (SVFUtil::isa<StoreSVFGNode>(loc)) {
             addLoadDpmAndCVar(dpm, getLoadDpm(oldDpm), var);
+        }
 
-        if (SVFUtil::isa<LoadSVFGNode>(loc))
+        if (SVFUtil::isa<LoadSVFGNode>(loc)) {
             addLoadDpmAndCVar(dpm, oldDpm, var);
+        }
 
         DOSTAT(ddaStat->_NumOfDPM++);
         return dpm;
@@ -624,10 +641,11 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
     /// a default constructor
     inline void addLoadDpm(const DPIm &dpm, const DPIm &loadDpm) {
         typename DPMToDPMMap::iterator it = dpmToloadDpmMap.find(dpm);
-        if (it != dpmToloadDpmMap.end())
+        if (it != dpmToloadDpmMap.end()) {
             it->second = loadDpm;
-        else
+        } else {
             dpmToloadDpmMap.insert(std::make_pair(dpm, loadDpm));
+        }
     }
     inline const DPIm &getLoadDpm(const DPIm &dpm) const {
         typename DPMToDPMMap::const_iterator it = dpmToloadDpmMap.find(dpm);
@@ -636,10 +654,11 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
     }
     inline void addLoadCVar(const DPIm &dpm, const CVar &loadVar) {
         typename DPMToCVarMap::iterator it = loadToPTCVarMap.find(dpm);
-        if (it != loadToPTCVarMap.end())
+        if (it != loadToPTCVarMap.end()) {
             it->second = loadVar;
-        else
+        } else {
             loadToPTCVarMap.insert(std::make_pair(dpm, loadVar));
+        }
     }
     inline const CVar &getLoadCVar(const DPIm &dpm) const {
         typename DPMToCVarMap::const_iterator it = loadToPTCVarMap.find(dpm);
@@ -654,10 +673,13 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
     /// Handle out-of-budget dpm
     inline void handleOutOfBudgetDpm(const DPIm &dpm) {}
     inline bool testOutOfBudget(const DPIm &dpm) {
-        if (outOfBudgetQuery)
+        if (outOfBudgetQuery) {
             return true;
-        if (++ddaStat->_NumOfStep > DPIm::getMaxBudget())
+        }
+
+        if (++ddaStat->_NumOfStep > DPIm::getMaxBudget()) {
             outOfBudgetQuery = true;
+        }
         return isOutOfBudgetDpm(dpm) || outOfBudgetQuery;
     }
     inline bool isOutOfBudgetQuery() const { return outOfBudgetQuery; }
@@ -686,8 +708,9 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
         DPTItemSet &dpmSet = storeToDPMs[node];
         if (dpmSet.erase(dpm)) {
             ddaStat->_NumOfStrongUpdates--;
-            if (dpmSet.empty())
+            if (dpmSet.empty()) {
                 ddaStat->_StrongUpdateStores.reset(node->getId());
+            }
         }
     }
 

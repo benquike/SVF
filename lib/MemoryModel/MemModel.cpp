@@ -55,36 +55,41 @@ void ObjTypeInfo::analyzeGlobalStackObjType(const Value *val) {
     // Find the inter nested array element
     while (const ArrayType *AT = SVFUtil::dyn_cast<ArrayType>(elemTy)) {
         elemTy = AT->getElementType();
-        if (elemTy->isPointerTy())
+        if (elemTy->isPointerTy()) {
             isPtrObj = true;
+        }
         if (SVFUtil::isa<GlobalVariable>(val) &&
             SVFUtil::cast<GlobalVariable>(val)->hasInitializer() &&
             SVFUtil::isa<ConstantArray>(
                 SVFUtil::cast<GlobalVariable>(val)->getInitializer())) {
             setFlag(CONST_ARRAY_OBJ);
-        } else
+        } else {
             setFlag(VAR_ARRAY_OBJ);
+        }
     }
     if (const StructType *ST = SVFUtil::dyn_cast<StructType>(elemTy)) {
         const std::vector<FieldInfo> &flattenFields =
             SymbolTableInfo::SymbolInfo()->getFlattenFieldInfoVec(ST);
         for (const auto &flattenField : flattenFields) {
-            if (flattenField.getFlattenElemTy()->isPointerTy())
+            if (flattenField.getFlattenElemTy()->isPointerTy()) {
                 isPtrObj = true;
+            }
         }
         if (SVFUtil::isa<GlobalVariable>(val) &&
             SVFUtil::cast<GlobalVariable>(val)->hasInitializer() &&
             SVFUtil::isa<ConstantStruct>(
-                SVFUtil::cast<GlobalVariable>(val)->getInitializer()))
+                SVFUtil::cast<GlobalVariable>(val)->getInitializer())) {
             setFlag(CONST_STRUCT_OBJ);
-        else
+        } else {
             setFlag(VAR_STRUCT_OBJ);
+        }
     } else if (elemTy->isPointerTy()) {
         isPtrObj = true;
     }
 
-    if (isPtrObj)
+    if (isPtrObj) {
         setFlag(HASPTR_OBJ);
+    }
 }
 
 /*!
@@ -128,8 +133,9 @@ void ObjTypeInfo::init(const Value *val) {
         objSize = getObjSize(val);
     } else if (SVFUtil::isa<GlobalVariable>(val)) {
         setFlag(GLOBVAR_OBJ);
-        if (SymbolTableInfo::SymbolInfo()->isConstantObjSym(val))
+        if (SymbolTableInfo::SymbolInfo()->isConstantObjSym(val)) {
             setFlag(CONST_OBJ);
+        }
         analyzeGlobalStackObjType(val);
         objSize = getObjSize(val);
     } else if (SVFUtil::isa<Instruction>(val) &&
@@ -149,20 +155,23 @@ void ObjTypeInfo::init(const Value *val) {
         analyzeHeapStaticObjType(val);
         // user input data, label its field as infinite here
         objSize = -1;
-    } else
+    } else {
         assert("what other object do we have??");
+    }
 
     // Reset maxOffsetLimit if it is over the total fieldNum of this object
-    if (objSize > 0 && maxOffsetLimit > objSize)
+    if (objSize > 0 && maxOffsetLimit > objSize) {
         maxOffsetLimit = objSize;
+    }
 }
 
 /*!
  * Whether a location set is a pointer type or not
  */
 bool ObjTypeInfo::isNonPtrFieldObj(const LocationSet &ls) {
-    if (isHeap() || isStaticObj())
+    if (isHeap() || isStaticObj()) {
         return false;
+    }
 
     const Type *ety = getType();
     while (const auto *AT = SVFUtil::dyn_cast<ArrayType>(ety)) {
@@ -178,8 +187,9 @@ bool ObjTypeInfo::isNonPtrFieldObj(const LocationSet &ls) {
             const FieldInfo &fieldLS = it;
             if (ls.intersects(LocationSet(fieldLS))) {
                 hasIntersection = true;
-                if (fieldLS.getFlattenElemTy()->isPointerTy())
+                if (fieldLS.getFlattenElemTy()->isPointerTy()) {
                     return false;
+                }
             }
         }
         assert(hasIntersection && "cannot find field of specified offset");
@@ -247,14 +257,16 @@ bool MemObj::isBlackHoleObj() const {
 const Type *MemObj::getType() const {
     if (isHeap() == false) {
         if (const PointerType *type =
-                SVFUtil::dyn_cast<PointerType>(typeInfo->getType()))
+                SVFUtil::dyn_cast<PointerType>(typeInfo->getType())) {
             return type->getElementType();
-        else
+        } else {
             return typeInfo->getType();
-    } else if (refVal && SVFUtil::isa<Instruction>(refVal))
+        }
+    } else if (refVal && SVFUtil::isa<Instruction>(refVal)) {
         return SVFUtil::getTypeOfHeapAlloc(SVFUtil::cast<Instruction>(refVal));
-    else
+    } else {
         return typeInfo->getType();
+    }
 }
 /*
  * Destroy the fields of the memory object
@@ -274,8 +286,9 @@ bool LocSymTableInfo::computeGepOffset(const User *V, LocationSet &ls) {
     int index = 0;
     for (bridge_gep_iterator gi = bridge_gep_begin(*V), ge = bridge_gep_end(*V);
          gi != ge; ++gi, ++index) {
-        if (SVFUtil::isa<ConstantInt>(gi.getOperand()) == false)
+        if (SVFUtil::isa<ConstantInt>(gi.getOperand()) == false) {
             baseIndex = index;
+        }
     }
 
     index = 0;
@@ -290,10 +303,11 @@ bool LocSymTableInfo::computeGepOffset(const User *V, LocationSet &ls) {
                 Size_t sz = getTypeSizeInBytes(et);
 
                 Size_t num = 1;
-                if (const ArrayType *aty = SVFUtil::dyn_cast<ArrayType>(et))
+                if (const ArrayType *aty = SVFUtil::dyn_cast<ArrayType>(et)) {
                     num = aty->getNumElements();
-                else
+                } else {
                     num = StInfo::getMaxFieldLimit();
+                }
 
                 ls.addElemNumStridePair(std::make_pair(num, sz));
             }
@@ -303,8 +317,9 @@ bool LocSymTableInfo::computeGepOffset(const User *V, LocationSet &ls) {
                 Size_t sz = getTypeSizeInBytes(et);
                 Size_t num = at->getNumElements();
                 ls.addElemNumStridePair(std::make_pair(num, sz));
-            } else
+            } else {
                 assert(false && "what other types?");
+            }
         }
         // constant offset
         else {
@@ -343,8 +358,9 @@ bool LocSymTableInfo::computeGepOffset(const User *V, LocationSet &ls) {
                 }
                 // add the translated offset
                 ls.setByteOffset(ls.getByteOffset() + so[idx]);
-            } else
+            } else {
                 assert(false && "what other types?");
+            }
         }
     }
     return true;
@@ -466,9 +482,9 @@ LocationSet LocSymTableInfo::getModulusOffset(const MemObj *obj,
                 LocationSet::checkRelation(ls, rhsLS);
             if (result == LocationSet::Same ||
                 result == LocationSet::Superset ||
-                result == LocationSet::Subset)
+                result == LocationSet::Subset) {
                 return ls;
-            else if (result == LocationSet::Overlap) {
+            } else if (result == LocationSet::Overlap) {
                 // TODO:
                 return ls;
             } else if (result == LocationSet::NonOverlap) {
@@ -513,10 +529,11 @@ LocationSet LocSymTableInfo::getModulusOffset(const MemObj *obj,
             offset = abs(offset);
         }
         u32_t maxOffset = obj->getMaxFieldOffsetLimit();
-        if (maxOffset != 0)
+        if (maxOffset != 0) {
             offset = offset % maxOffset;
-        else
+        } else {
             offset = 0;
+        }
     }
     /// This location set represents multiple objects
     else {
@@ -537,8 +554,9 @@ void LocSymTableInfo::verifyStructSize(StInfo *stinfo, u32_t structSize) {
         stinfo->getFlattenFieldInfoVec().back().elemStridePairBegin();
     FieldInfo::ElemNumStridePairVec::const_iterator epit =
         stinfo->getFlattenFieldInfoVec().back().elemStridePairEnd();
-    for (; pit != epit; ++pit)
+    for (; pit != epit; ++pit) {
         strideSize += pit->first * pit->second;
+    }
 
     u32_t lastSize = getTypeSizeInBytes(
         stinfo->getFlattenFieldInfoVec().back().getFlattenElemTy());

@@ -104,16 +104,17 @@ class ICFGStat : public PTAStat {
 
             ICFGNode *node = it->second;
 
-            if (SVFUtil::isa<IntraBlockNode>(node))
+            if (SVFUtil::isa<IntraBlockNode>(node)) {
                 numOfIntraNodes++;
-            else if (SVFUtil::isa<CallBlockNode>(node))
+            } else if (SVFUtil::isa<CallBlockNode>(node)) {
                 numOfCallNodes++;
-            else if (SVFUtil::isa<RetBlockNode>(node))
+            } else if (SVFUtil::isa<RetBlockNode>(node)) {
                 numOfRetNodes++;
-            else if (SVFUtil::isa<FunEntryBlockNode>(node))
+            } else if (SVFUtil::isa<FunEntryBlockNode>(node)) {
                 numOfEntryNodes++;
-            else if (SVFUtil::isa<FunExitBlockNode>(node))
+            } else if (SVFUtil::isa<FunExitBlockNode>(node)) {
                 numOfExitNodes++;
+            }
 
             ICFGEdge::ICFGEdgeSetTy::iterator edgeIt =
                 it->second->OutEdgeBegin();
@@ -122,12 +123,13 @@ class ICFGStat : public PTAStat {
             for (; edgeIt != edgeEit; ++edgeIt) {
                 const ICFGEdge *edge = *edgeIt;
                 numOfEdges++;
-                if (edge->isCallCFGEdge())
+                if (edge->isCallCFGEdge()) {
                     numOfCallEdges++;
-                else if (edge->isRetCFGEdge())
+                } else if (edge->isRetCFGEdge()) {
                     numOfRetEdges++;
-                else if (edge->isIntraCFGEdge())
+                } else if (edge->isIntraCFGEdge()) {
                     numOfIntraEdges++;
+                }
             }
         }
     }

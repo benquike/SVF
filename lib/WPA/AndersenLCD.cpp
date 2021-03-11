@@ -70,8 +70,9 @@ void AndersenLCD::handleCopyGep(ConstraintNode *node) {
         processCopy(nodeId, edge);
     }
     for (ConstraintEdge *edge : node->getGepOutEdges()) {
-        if (GepCGEdge *gepEdge = SVFUtil::dyn_cast<GepCGEdge>(edge))
+        if (GepCGEdge *gepEdge = SVFUtil::dyn_cast<GepCGEdge>(edge)) {
             processGep(nodeId, gepEdge);
+        }
     }
 
     double propEnd = stat->getClk();
@@ -96,9 +97,11 @@ NodeStack &AndersenLCD::SCCDetect() {
 
     NodeSet sccCandidates;
     sccCandidates.clear();
-    for (const auto &lcdCandidate : lcdCandidates)
-        if (sccRepNode(lcdCandidate) == lcdCandidate)
+    for (const auto &lcdCandidate : lcdCandidates) {
+        if (sccRepNode(lcdCandidate) == lcdCandidate) {
             sccCandidates.insert(lcdCandidate);
+        }
+    }
 
     double sccStart = stat->getClk();
     /// Detect SCC cycles
@@ -120,8 +123,9 @@ NodeStack &AndersenLCD::SCCDetect() {
  */
 bool AndersenLCD::mergeSrcToTgt(NodeID nodeId, NodeID newRepId) {
 
-    if (nodeId == newRepId)
+    if (nodeId == newRepId) {
         return false;
+    }
 
     /// union pts of node to rep
     updatePropaPts(newRepId, nodeId);

@@ -1,5 +1,5 @@
 //===- CSC.h -- Cycle Stride Calculation
-//algorithm---------------------------------------//
+// algorithm---------------------------------------//
 //
 //                     SVF: Static Value-Flow Analysis
 //
@@ -61,8 +61,8 @@ class CSC {
                       // while accessing the node via DFS
     NodeStack _S;     // a stack holding a DFS branch
     NodeSet _visited; // a set holding visited nodes
-    //    NodeStrides nodeStrides;
-    //    IdToIdMap pwcReps;
+                      //    NodeStrides nodeStrides;
+                      //    IdToIdMap pwcReps;
 
   public:
     CSC(ConstraintGraph *g, CGSCC *c) : _consG(g), _scc(c), _I(0) {}

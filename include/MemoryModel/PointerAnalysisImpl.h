@@ -163,11 +163,11 @@ class BVDataPTAImpl : public PointerAnalysis {
     }
 
     inline const typename MutPTDataTy::PtsMap &getPtsMap() const {
-        if (auto *m = SVFUtil::dyn_cast<MutPTDataTy>(ptD))
+        if (auto *m = SVFUtil::dyn_cast<MutPTDataTy>(ptD)) {
             return m->getPtsMap();
-        else if (auto *md = SVFUtil::dyn_cast<MutDiffPTDataTy>(ptD))
+        } else if (auto *md = SVFUtil::dyn_cast<MutDiffPTDataTy>(ptD)) {
             return md->getPtsMap();
-        else {
+        } else {
             assert(false &&
                    "BVDataPTAImpl::getPtsMap: not a PTData with a PtsMap!");
             return SVFUtil::dyn_cast<MutPTDataTy>(ptD)->getPtsMap();
@@ -185,8 +185,10 @@ class BVDataPTAImpl : public PointerAnalysis {
             const PointsTo tmpPts = getPts(nIter->first);
             for (NodeID obj : tmpPts) {
                 NodeID baseObj = pag->getBaseObjNode(obj);
-                if (baseObj == obj)
+                if (baseObj == obj) {
                     continue;
+                }
+
                 const MemObj *memObj = pag->getObject(obj);
                 if (memObj && memObj->isFieldInsensitive()) {
                     clearPts(nIter->first, obj);
@@ -245,10 +247,11 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
     /// Constructor
     CondPTAImpl(PAG *pag, PointerAnalysis::PTATY type)
         : PointerAnalysis(pag, type), normalized(false) {
-        if (type == PathS_DDA || type == Cxt_DDA)
+        if (type == PathS_DDA || type == Cxt_DDA) {
             ptD = new MutPTDataTy();
-        else
+        } else {
             assert(false && "no points-to data available");
+        }
 
         ptaImplTy = CondImpl;
     }
@@ -278,8 +281,9 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
     inline bool hasPtsMap(void) const { return SVFUtil::isa<MutPTDataTy>(ptD); }
 
     inline const typename MutPTDataTy::PtsMap &getPtsMap() const {
-        if (MutPTDataTy *m = SVFUtil::dyn_cast<MutPTDataTy>(ptD))
+        if (MutPTDataTy *m = SVFUtil::dyn_cast<MutPTDataTy>(ptD)) {
             return m->getPtsMap();
+        }
         assert(false && "CondPTAImpl::getPtsMap: not a PTData with a PtsMap!");
         exit(1);
     }
@@ -301,8 +305,9 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
              it1 != cpts1.end(); ++it1) {
             for (typename CPtSet::const_iterator it2 = cpts2.begin();
                  it2 != cpts2.end(); ++it2) {
-                if (isSameVar(*it1, *it2))
+                if (isSameVar(*it1, *it2)) {
                     return true;
+                }
             }
         }
         return false;
@@ -353,14 +358,16 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
     /// Internal interface to be used for conditional points-to set queries
     //@{
     inline bool mustAlias(const CVar &var1, const CVar &var2) {
-        if (isSameVar(var1, var2))
+        if (isSameVar(var1, var2)) {
             return true;
+        }
 
         bool singleton = !(isHeapMemObj(var1.get_id()) ||
                            isLocalVarInRecursiveFun(var1.get_id()));
         if (isCondCompatible(var1.get_cond(), var2.get_cond(), singleton) ==
-            false)
+            false) {
             return false;
+        }
 
         const CPtSet &cpts1 = getPts(var1);
         const CPtSet &cpts2 = getPts(var2);
@@ -369,8 +376,9 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
 
     //  Whether cpts1 contains all points-to targets of pts2
     bool contains(const CPtSet &cpts1, const CPtSet &cpts2) {
-        if (cpts1.empty() || cpts2.empty())
+        if (cpts1.empty() || cpts2.empty()) {
             return false;
+        }
 
         for (typename CPtSet::const_iterator it2 = cpts2.begin();
              it2 != cpts2.end(); ++it2) {
@@ -382,8 +390,9 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
                     break;
                 }
             }
-            if (hasObj == false)
+            if (hasObj == false) {
                 return false;
+            }
         }
         return true;
     }
@@ -391,8 +400,9 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
     /// Whether two pointers/objects are the same one by considering their
     /// conditions
     bool isSameVar(const CVar &var1, const CVar &var2) const {
-        if (var1.get_id() != var2.get_id())
+        if (var1.get_id() != var2.get_id()) {
             return false;
+        }
 
         /// we distinguish context sensitive memory allocation here
         bool singleton = !(isHeapMemObj(var1.get_id()) ||
@@ -443,8 +453,9 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
         PointsTo pts;
         for (typename CPtSet::const_iterator cit = cpts.begin(),
                                              ecit = cpts.end();
-             cit != ecit; ++cit)
+             cit != ecit; ++cit) {
             pts.set(cit->get_id());
+        }
         return pts;
     }
     /// Given a pointer return its bit vector points-to
@@ -494,23 +505,25 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
         expandFIObjs(pts1, cpts1);
         CPtSet cpts2;
         expandFIObjs(pts2, cpts2);
-        if (containBlackHoleNode(cpts1) || containBlackHoleNode(cpts2))
+        if (containBlackHoleNode(cpts1) || containBlackHoleNode(cpts2)) {
             return llvm::MayAlias;
-        else if (this->getAnalysisTy() == PathS_DDA && contains(cpts1, cpts2) &&
-                 contains(cpts2, cpts1)) {
+        } else if (this->getAnalysisTy() == PathS_DDA &&
+                   contains(cpts1, cpts2) && contains(cpts2, cpts1)) {
             return llvm::MustAlias;
-        } else if (overlap(cpts1, cpts2))
+        } else if (overlap(cpts1, cpts2)) {
             return llvm::MayAlias;
-        else
+        } else {
             return llvm::NoAlias;
+        }
     }
     /// Test blk node for cpts
     inline bool containBlackHoleNode(const CPtSet &cpts) {
         for (typename CPtSet::const_iterator cit = cpts.begin(),
                                              ecit = cpts.end();
              cit != ecit; ++cit) {
-            if (cit->get_id() == pag->getBlackHoleNode())
+            if (cit->get_id() == pag->getBlackHoleNode()) {
                 return true;
+            }
         }
         return false;
     }
@@ -519,8 +532,9 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
         for (typename CPtSet::const_iterator cit = cpts.begin(),
                                              ecit = cpts.end();
              cit != ecit; ++cit) {
-            if (cit->get_id() == pag->getConstantNode())
+            if (cit->get_id() == pag->getConstantNode()) {
                 return true;
+            }
         }
         return false;
     }
@@ -551,8 +565,9 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
                 } else {
                     SVFUtil::outs() << "\t\tPointsTo: { ";
                     for (PointsTo::iterator it = pts.begin(), eit = pts.end();
-                         it != eit; ++it)
+                         it != eit; ++it) {
                         SVFUtil::outs() << *it << " ";
+                    }
                     SVFUtil::outs() << "}\n\n";
                 }
             }

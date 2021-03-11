@@ -144,8 +144,9 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
         for (auto &nIter : *this) {
             NodeID nodeId = nIter.first;
             // do not compute points-to for isolated node
-            if (isValidPointer(nodeId) == false)
+            if (isValidPointer(nodeId) == false) {
                 continue;
+            }
 
             candidatePointers.insert(nodeId);
         }
@@ -161,8 +162,9 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
         return pag;
     }
     static void releasePAG() {
-        if (pag)
+        if (pag) {
             delete pag;
+        }
         pag = nullptr;
     }
     //@}
@@ -214,8 +216,9 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     inline void addToInstPAGEdgeList(ICFGNode *inst, PAGEdge *edge) {
         edge->setICFGNode(inst);
         inst2PAGEdgesMap[inst].push_back(edge);
-        if (edge->isPTAEdge())
+        if (edge->isPTAEdge()) {
             inst2PTAPAGEdgesMap[inst].push_back(edge);
+        }
     }
     /// Get global PAGEdges (not in a procedure)
     inline void addGlobalPAGEdge(const PAGEdge *edge) {
@@ -388,8 +391,9 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
 
         auto lit = iter->second.find(std::make_pair(base, ls));
 
-        if (lit == iter->second.end())
+        if (lit == iter->second.end()) {
             return UINT_MAX;
+        }
 
         return lit->second;
     }
@@ -472,8 +476,9 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     //@{
     inline const MemObj *getObject(NodeID id) const {
         const PAGNode *node = getPAGNode(id);
-        if (const ObjPN *objPN = SVFUtil::dyn_cast<ObjPN>(node))
+        if (const ObjPN *objPN = SVFUtil::dyn_cast<ObjPN>(node)) {
             return getObject(objPN);
+        }
 
         return nullptr;
     }

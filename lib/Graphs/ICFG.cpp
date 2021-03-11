@@ -80,11 +80,12 @@ const std::string FunEntryBlockNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "FunEntryBlockNode ID: " << getId();
-    if (isExtCall(getFun()))
+    if (isExtCall(getFun())) {
         rawstr << " Entry("
                << ")\n";
-    else
+    } else {
         rawstr << " Entry(" << getSourceLoc(getFun()->getLLVMFun()) << ")\n";
+    }
     rawstr << " {fun: " << getFun()->getName() << "}";
     return rawstr.str();
 }
@@ -93,14 +94,15 @@ const std::string FunExitBlockNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "FunExitBlockNode ID: " << getId();
-    if (isExtCall(getFun()))
+    if (isExtCall(getFun())) {
         rawstr << " Exit("
                << ")\n";
-    else
+    } else {
         rawstr << " Exit("
                << getSourceLoc(
                       getFunExitBB(getFun()->getLLVMFun())->getFirstNonPHI())
                << ")\n";
+    }
     rawstr << " {fun: " << getFun()->getName() << "}";
     return rawstr.str();
 }
@@ -131,13 +133,14 @@ const std::string ICFGEdge::toString() const {
 const std::string IntraCFGEdge::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
-    if (brCondition.first == nullptr)
+    if (brCondition.first == nullptr) {
         rawstr << "IntraCFGEdge: [" << getDstID() << "<--" << getSrcID()
                << "]\t";
-    else
+    } else {
         rawstr << "IntraCFGEdge: [" << getDstID() << "<--" << getSrcID()
                << "] with condition (" << *brCondition.first
                << "==" << brCondition.second << ") \t";
+    }
 
     return rawstr.str();
 }
@@ -175,28 +178,32 @@ ICFG::ICFG() : totalICFGNode(0) {
 /// Get a basic block ICFGNode
 ICFGNode *ICFG::getBlockICFGNode(const Instruction *inst) {
     ICFGNode *node;
-    if (SVFUtil::isNonInstricCallSite(inst))
+    if (SVFUtil::isNonInstricCallSite(inst)) {
         node = getCallBlockNode(inst);
-    else if (SVFUtil::isIntrinsicInst(inst))
+    } else if (SVFUtil::isIntrinsicInst(inst)) {
         node = getIntraBlockNode(inst);
-    //			assert (false && "associating an intrinsic instruction with an
-    // ICFGNode!");
-    else
+        //			assert (false && "associating an intrinsic instruction with
+        // an
+        // ICFGNode!");
+    } else {
         node = getIntraBlockNode(inst);
+    }
 
     assert(node != nullptr && "no ICFGNode for this instruction?");
     return node;
 }
 
 CallBlockNode *ICFG::getCallBlockNode(const Instruction *inst) {
-    if (SVFUtil::isCallSite(inst) == false)
+    if (SVFUtil::isCallSite(inst) == false) {
         outs() << *inst << "\n";
+    }
     assert(SVFUtil::isCallSite(inst) && "not a call instruction?");
     assert(SVFUtil::isNonInstricCallSite(inst) &&
            "associating an intrinsic debug instruction with an ICFGNode!");
     CallBlockNode *node = getCallICFGNode(inst);
-    if (node == nullptr)
+    if (node == nullptr) {
         node = addCallICFGNode(inst);
+    }
     assert(node != nullptr && "no CallBlockNode for this instruction?");
     return node;
 }
@@ -206,32 +213,36 @@ RetBlockNode *ICFG::getRetBlockNode(const Instruction *inst) {
     assert(SVFUtil::isNonInstricCallSite(inst) &&
            "associating an intrinsic debug instruction with an ICFGNode!");
     RetBlockNode *node = getRetICFGNode(inst);
-    if (node == nullptr)
+    if (node == nullptr) {
         node = addRetICFGNode(inst);
+    }
     assert(node != nullptr && "no RetBlockNode for this instruction?");
     return node;
 }
 
 IntraBlockNode *ICFG::getIntraBlockNode(const Instruction *inst) {
     IntraBlockNode *node = getIntraBlockICFGNode(inst);
-    if (node == nullptr)
+    if (node == nullptr) {
         node = addIntraBlockICFGNode(inst);
+    }
     return node;
 }
 
 /// Add a function entry node
 FunEntryBlockNode *ICFG::getFunEntryBlockNode(const SVFFunction *fun) {
     FunEntryBlockNode *b = getFunEntryICFGNode(fun);
-    if (b == nullptr)
+    if (b == nullptr) {
         return addFunEntryICFGNode(fun);
+    }
 
     return b;
 }
 /// Add a function exit node
 FunExitBlockNode *ICFG::getFunExitBlockNode(const SVFFunction *fun) {
     FunExitBlockNode *b = getFunExitICFGNode(fun);
-    if (b == nullptr)
+    if (b == nullptr) {
         return addFunExitICFGNode(fun);
+    }
 
     return b;
 }
@@ -439,8 +450,9 @@ template <> struct DOTGraphTraits<ICFG *> : public DOTGraphTraits<PAG *> {
             for (const auto *edge : edges) {
                 rawstr << edge->toString();
             }
-        } else
+        } else {
             assert(false && "what else kinds of nodes do we have??");
+        }
 
         return rawstr.str();
     }
@@ -461,8 +473,9 @@ template <> struct DOTGraphTraits<ICFG *> : public DOTGraphTraits<PAG *> {
             rawstr << "color=blue";
         } else if (SVFUtil::isa<GlobalBlockNode>(node)) {
             rawstr << "color=purple";
-        } else
+        } else {
             assert(false && "no such kind of node!!");
+        }
 
         rawstr << "";
 
@@ -473,11 +486,13 @@ template <> struct DOTGraphTraits<ICFG *> : public DOTGraphTraits<PAG *> {
     static std::string getEdgeAttributes(NodeType *, EdgeIter EI, ICFG *) {
         ICFGEdge *edge = *(EI.getCurrent());
         assert(edge && "No edge found!!");
-        if (SVFUtil::isa<CallCFGEdge>(edge))
+        if (SVFUtil::isa<CallCFGEdge>(edge)) {
             return "style=solid,color=red";
+        }
 
-        if (SVFUtil::isa<RetCFGEdge>(edge))
+        if (SVFUtil::isa<RetCFGEdge>(edge)) {
             return "style=solid,color=blue";
+        }
 
         return "style=solid";
 
@@ -491,10 +506,11 @@ template <> struct DOTGraphTraits<ICFG *> : public DOTGraphTraits<PAG *> {
 
         std::string str;
         raw_string_ostream rawstr(str);
-        if (auto *dirCall = SVFUtil::dyn_cast<CallCFGEdge>(edge))
+        if (auto *dirCall = SVFUtil::dyn_cast<CallCFGEdge>(edge)) {
             rawstr << dirCall->getCallSite();
-        else if (auto *dirRet = SVFUtil::dyn_cast<RetCFGEdge>(edge))
+        } else if (auto *dirRet = SVFUtil::dyn_cast<RetCFGEdge>(edge)) {
             rawstr << dirRet->getCallSite();
+        }
 
         return rawstr.str();
     }
