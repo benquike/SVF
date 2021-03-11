@@ -68,7 +68,7 @@ private:
 
     ValueToIDMapTy valSymMap;	///< map a value to its sym id
     ValueToIDMapTy objSymMap;	///< map a obj reference to its sym id
-    IDToMemMapTy		objMap;		///< map a memory sym id to its obj
+    IDToMemMapTy objMap;		///< map a memory sym id to its obj
     IDToSymTyMapTy	symTyMap;	/// < map a sym id to its type
     FunToIDMapTy returnSymMap;		///< return  map
     FunToIDMapTy varargSymMap;	    ///< vararg map

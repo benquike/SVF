@@ -59,7 +59,9 @@ public:
     using VFGNodeSet = Set<VFGNode *>;
     using PAGNodeToDefMapTy = Map<const PAGNode *, NodeID>;
     using PAGNodeToActualParmMapTy = Map<std::pair<NodeID, const CallBlockNode *>, ActualParmVFGNode *>;
+
     using PAGNodeToActualRetMapTy = Map<const PAGNode *, ActualRetVFGNode *>;
+
     using PAGNodeToFormalParmMapTy = Map<const PAGNode *, FormalParmVFGNode *>;
     using PAGNodeToFormalRetMapTy = Map<const PAGNode *, FormalRetVFGNode *>;
     using PAGEdgeToStmtVFGNodeMapTy = Map<const PAGEdge *, StmtVFGNode *>;
@@ -238,12 +240,14 @@ public:
         assert(it!=PAGNodeToActualParmMap.end() && "acutal parameter VFG node can not be found??");
         return it->second;
     }
+
     inline ActualRetVFGNode* getActualRetVFGNode(const PAGNode* aret) const
     {
         auto it = PAGNodeToActualRetMap.find(aret);
         assert(it!=PAGNodeToActualRetMap.end() && "actual return VFG node can not be found??");
         return it->second;
     }
+
     inline FormalParmVFGNode* getFormalParmVFGNode(const PAGNode* fparm) const
     {
         auto it = PAGNodeToFormalParmMap.find(fparm);
@@ -559,14 +563,16 @@ protected:
 			setDef(uniqueFunRet, sNode);
 		}
     }
+
     /// Add a callsite Receive VFG node
-    inline void addActualRetVFGNode(const PAGNode* ret,const CallBlockNode* cs)
+    inline void addActualRetVFGNode(const PAGNode* ret, const CallBlockNode* cs)
     {
-        auto* sNode = new ActualRetVFGNode(totalVFGNode++,ret,cs);
+        auto* sNode = new ActualRetVFGNode(totalVFGNode++, ret, cs);
         addVFGNode(sNode, pag->getICFG()->getRetBlockNode(cs->getCallSite()));
-        setDef(ret,sNode);
+        setDef(ret, sNode);
         PAGNodeToActualRetMap[ret] = sNode;
     }
+
     /// Add an llvm PHI VFG node
     inline void addIntraPHIVFGNode(const PAGNode* phiResNode, PAG::CopyPEList& oplist)
     {
