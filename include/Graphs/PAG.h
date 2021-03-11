@@ -310,6 +310,8 @@ public:
         funEntryBlockNode->addFormalParms(arg);
         funArgsListMap[fun].push_back(arg);
     }
+
+
     /// Add function returns
     inline void addFunRet(const SVFFunction* fun, const PAGNode* ret)
     {
@@ -317,30 +319,43 @@ public:
         funExitBlockNode->addFormalRet(ret);
         funRetMap[fun] = ret;
     }
-    /// Add callsite arguments
+
+
+    ///
+    /// \brief: set up one actual arguement for a callsite
+    ///
+    /// 1. Save the actual argument to the ICFG CallBlockNode
+    /// 2. Save the actual argument to PAG::callSiteArgsListMap.
+    ///
     inline void addCallSiteArgs(CallBlockNode* callBlockNode, const PAGNode* arg)
     {
-        // add the argument value the ICFG CallBlockNode
+        /// add the argument value the ICFG CallBlockNode
+        /// FIXME: what is the point of this design here
         callBlockNode->addActualParms(arg);
-        // add the argument to the callSiteArgsListMap in PA
+
+        // add the argument to the callSiteArgsListMap in PAG
         callSiteArgsListMap[callBlockNode].push_back(arg);
     }
+
     /// Add callsite returns
-    inline void addCallSiteRets(RetBlockNode* retBlockNode,const PAGNode* function)
-    {
-        retBlockNode->addActualRet(function);
-        callSiteRetMap[retBlockNode]= function;
+    inline void addCallSiteRets(RetBlockNode *retBlockNode,
+                                const PAGNode *callInstNode) {
+        retBlockNode->addActualRet(callInstNode);
+        callSiteRetMap[retBlockNode] = callInstNode;
     }
+
     /// Function has arguments list
     inline bool hasFunArgsList(const SVFFunction* func) const
     {
         return (funArgsListMap.find(func) != funArgsListMap.end());
     }
+
     /// Get function arguments list
     inline FunToArgsListMap& getFunArgsMap()
     {
         return funArgsListMap;
     }
+
     /// Get function arguments list
     inline const PAGNodeList& getFunArgsList(const SVFFunction*  func) const
     {
@@ -348,16 +363,19 @@ public:
         assert(it != funArgsListMap.end() && "this function doesn't have arguments");
         return it->second;
     }
+
     /// Callsite has argument list
     inline bool hasCallSiteArgsMap(const CallBlockNode* cs) const
     {
         return (callSiteArgsListMap.find(cs) != callSiteArgsListMap.end());
     }
+
     /// Get callsite argument list
     inline CSToArgsListMap& getCallSiteArgsMap()
     {
         return callSiteArgsListMap;
     }
+
     /// Get callsite argument list
     inline const PAGNodeList& getCallSiteArgsList(const CallBlockNode* cs) const
     {
@@ -866,7 +884,7 @@ template<> struct GraphTraits<Inverse<SVF::PAGNode *> > : public GraphTraits<Inv
 
 template<> struct GraphTraits<SVF::PAG*> : public GraphTraits<SVF::GenericGraph<SVF::PAGNode,SVF::PAGEdge>* >
 {
-    typedef SVF::PAGNode *NodeRef;
+    using NodeRef = SVF::PAGNode *;
 };
 
 } // End namespace llvm

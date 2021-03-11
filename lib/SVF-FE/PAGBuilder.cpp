@@ -741,8 +741,10 @@ void PAGBuilder::visitSelectInst(SelectInst &inst)
     pag->addPhiNode(pag->getPAGNode(dst), cpy2);
 }
 
-/*
- * Visit callsites
+/*!
+ *  \brief Handling call and related instructions
+ *
+ *
  */
 void PAGBuilder::visitCallSite(CallSite cs)
 {
@@ -753,9 +755,14 @@ void PAGBuilder::visitCallSite(CallSite cs)
     DBOUT(DPAGBuild,
           outs() << "process callsite " << *cs.getInstruction() << "\n");
 
-    CallBlockNode* icfgCallBlockNode = pag->getICFG()->getCallBlockNode(cs.getInstruction());
-    RetBlockNode* icfgRetBlockNode = pag->getICFG()->getRetBlockNode(cs.getInstruction());
+    CallBlockNode* icfgCallBlockNode =
+        pag->getICFG()->getCallBlockNode(cs.getInstruction());
+    RetBlockNode* icfgRetBlockNode =
+        pag->getICFG()->getRetBlockNode(cs.getInstruction());
 
+    ///
+    /// record the callsite in the PAG
+    ///
     pag->addCallSite(icfgCallBlockNode);
 
     /// Collect callsite arguments and returns
@@ -766,34 +773,29 @@ void PAGBuilder::visitCallSite(CallSite cs)
     }
 
     if(!cs.getType()->isVoidTy()) {
+        ///
+        /// the second argument is a callinstruction
+        /// i.e., the value receiting the return value
+        ///
         pag->addCallSiteRets(icfgRetBlockNode,
                              pag->getPAGNode(getValueNode(cs.getInstruction())));
-}
+    }
 
     // extract direct callees?
     const SVFFunction *callee = getCallee(cs);
 
-    if (callee)
-    {
-        if (isExtCall(callee))
-        {
-            if (ExternalPAG::hasExternalPAG(callee))
-            {
+    if (callee) {
+        if (isExtCall(callee)) {
+            if (ExternalPAG::hasExternalPAG(callee)) {
                 ExternalPAG::connectCallsiteToExternalPAG(&cs);
-            }
-            else
-            {
+            } else {
                 // There is no extpag for the function, use the old method.
                 handleExtCall(cs, callee);
             }
-        }
-        else
-        {
+        } else {
             handleDirectCall(cs, callee);
         }
-    }
-    else
-    {
+    } else {
         //If the callee was not identified as a
         //function (null F), this is indirect.
         handleIndCall(cs);

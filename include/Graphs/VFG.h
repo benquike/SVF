@@ -170,7 +170,8 @@ public:
     }
 
     /// Get a SVFG edge according to src and dst
-    VFGEdge* getIntraVFGEdge(const VFGNode* src, const VFGNode* dst, VFGEdge::VFGEdgeK kind);
+    VFGEdge* getIntraVFGEdge(const VFGNode* src,
+                             const VFGNode* dst, VFGEdge::VFGEdgeK kind);
 
     /// Dump graph into dot file
     void dump(const std::string& file, bool simple = false);
@@ -179,7 +180,9 @@ public:
     void updateCallGraph(PointerAnalysis* pta);
 
     /// Connect VFG nodes between caller and callee for indirect call site
-    virtual void connectCallerAndCallee(const CallBlockNode* cs, const SVFFunction* callee, VFGEdgeSetTy& edges);
+    virtual void connectCallerAndCallee(const CallBlockNode* cs,
+                                        const SVFFunction* callee,
+                                        VFGEdgeSetTy& edges);
 
     /// Get callsite given a callsiteID
     //@{
@@ -216,6 +219,7 @@ public:
         assert(it != PAGNodeToIntraPHIVFGNodeMap.end() && "PHIVFGNode can not be found??");
         return it->second;
     }
+
     inline BinaryOPVFGNode* getBinaryOPVFGNode(const PAGNode* pagNode) const
     {
         auto it = PAGNodeToBinaryOPVFGNodeMap.find(pagNode);
