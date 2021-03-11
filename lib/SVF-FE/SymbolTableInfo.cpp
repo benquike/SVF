@@ -485,8 +485,8 @@ void SymbolTableInfo::buildMemModel(SVFModule* svfModule)
     }
 
     // Add symbols for all of the functions and the instructions in them.
-    for (auto F = svfModule->llvmFunBegin(), E = svfModule->llvmFunEnd(); F != E; ++F)
-    {
+    for (auto F = svfModule->llvmFunBegin(), E = svfModule->llvmFunEnd();
+         F != E; ++F) {
         Function *fun = *F;
         collectSym(fun);
         collectRet(fun);
@@ -495,85 +495,69 @@ void SymbolTableInfo::buildMemModel(SVFModule* svfModule)
 
         // Add symbols for all formal parameters.
         for (Function::arg_iterator I = fun->arg_begin(), E = fun->arg_end();
-                I != E; ++I)
-        {
+                I != E; ++I) {
             collectSym(&*I);
         }
 
         // collect and create symbols inside the function body
-        for (inst_iterator II = inst_begin(*fun), E = inst_end(*fun); II != E; ++II)
-        {
+        for (inst_iterator II = inst_begin(*fun), E = inst_end(*fun);
+             II != E; ++II) {
             const Instruction *inst = &*II;
             collectSym(inst);
 
             // initialization for some special instructions
             //{@
-            if (const auto *st = SVFUtil::dyn_cast<StoreInst>(inst))
-            {
+            if (const auto *st = SVFUtil::dyn_cast<StoreInst>(inst)) {
                 collectSym(st->getPointerOperand());
                 collectSym(st->getValueOperand());
             }
-            else if (const auto *ld = SVFUtil::dyn_cast<LoadInst>(inst))
-            {
+            else if (const auto *ld = SVFUtil::dyn_cast<LoadInst>(inst)) {
                 collectSym(ld->getPointerOperand());
             }
-            else if (const auto *phi = SVFUtil::dyn_cast<PHINode>(inst))
-            {
-                for (u32_t i = 0; i < phi->getNumIncomingValues(); ++i)
-                {
+            else if (const auto *phi = SVFUtil::dyn_cast<PHINode>(inst)) {
+                for (u32_t i = 0; i < phi->getNumIncomingValues(); ++i) {
                     collectSym(phi->getIncomingValue(i));
                 }
             }
-            else if (const auto *gep = SVFUtil::dyn_cast<GetElementPtrInst>(inst))
-            {
+            else if (const auto *gep = SVFUtil::dyn_cast<GetElementPtrInst>(inst)) {
                 collectSym(gep->getPointerOperand());
             }
-            else if (const auto *sel = SVFUtil::dyn_cast<SelectInst>(inst))
-            {
+            else if (const auto *sel = SVFUtil::dyn_cast<SelectInst>(inst)) {
                 collectSym(sel->getTrueValue());
                 collectSym(sel->getFalseValue());
             }
-            else if (const auto *binary = SVFUtil::dyn_cast<BinaryOperator>(inst))
-            {
+            else if (const auto *binary = SVFUtil::dyn_cast<BinaryOperator>(inst)) {
                 for (u32_t i = 0; i < binary->getNumOperands(); i++)
                     collectSym(binary->getOperand(i));
             }
-            else if (const auto *unary = SVFUtil::dyn_cast<UnaryOperator>(inst))
-            {
+            else if (const auto *unary = SVFUtil::dyn_cast<UnaryOperator>(inst)) {
                 for (u32_t i = 0; i < unary->getNumOperands(); i++)
                     collectSym(unary->getOperand(i));
             }
-            else if (const auto *cmp = SVFUtil::dyn_cast<CmpInst>(inst))
-            {
+            else if (const auto *cmp = SVFUtil::dyn_cast<CmpInst>(inst)) {
                 for (u32_t i = 0; i < cmp->getNumOperands(); i++)
                     collectSym(cmp->getOperand(i));
             }
-            else if (const auto *cast = SVFUtil::dyn_cast<CastInst>(inst))
-            {
+            else if (const auto *cast = SVFUtil::dyn_cast<CastInst>(inst)) {
                 collectSym(cast->getOperand(0));
             }
-            else if (const auto *ret = SVFUtil::dyn_cast<ReturnInst>(inst))
-            {
+            else if (const auto *ret = SVFUtil::dyn_cast<ReturnInst>(inst)) {
                 if(ret->getReturnValue())
                     collectSym(ret->getReturnValue());
             }
-            else if (const auto *br = SVFUtil::dyn_cast<BranchInst>(inst))
-            {
+            else if (const auto *br = SVFUtil::dyn_cast<BranchInst>(inst)) {
                 Value* opnd = br->isConditional() ? br->getCondition() : br->getOperand(0);
                 collectSym(opnd);
             }
-            else if (const auto *sw = SVFUtil::dyn_cast<SwitchInst>(inst))
-            {
+            else if (const auto *sw = SVFUtil::dyn_cast<SwitchInst>(inst)) {
                 collectSym(sw->getCondition());
             }
-            else if (isNonInstricCallSite(inst))
-            {
+            else if (isNonInstricCallSite(inst)) {
 
                 CallSite cs = SVFUtil::getLLVMCallSite(inst);
                 callSiteSet.insert(cs);
                 for (CallSite::arg_iterator it = cs.arg_begin();
-                        it != cs.arg_end(); ++it)
-                {
+                     it != cs.arg_end(); ++it) {
                     collectSym(*it);
                 }
                 // Calls to inline asm need to be added as well because the callee isn't

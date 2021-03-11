@@ -344,7 +344,7 @@ ICFGEdge* ICFG::addConditionalIntraEdge(ICFGNode* srcNode, ICFGNode* dstNode, co
     }
 
     auto* intraEdge = new IntraCFGEdge(srcNode,dstNode);
-    intraEdge->setBranchCondtion(condition,branchID);
+    intraEdge->setBranchCondtion(condition, branchID);
     return (addICFGEdge(intraEdge) ? intraEdge : nullptr);
 }
 
