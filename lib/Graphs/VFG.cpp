@@ -305,6 +305,7 @@ VFG::VFG(PTACallGraph* cg, VFGK k): totalVFGNode(0),
                                     pag(PAG::getPAG()),
                                     kind(k), dumpVFG(false)
 {
+    // TODO: rename this function to include PAG
     connectCPPVirtualFuncWithCS();
 
     DBOUT(DGENERAL, outs() << pasMsg("\tCreate VFG Top Level Node\n"));
