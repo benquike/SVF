@@ -1,4 +1,5 @@
-//===- AndersenSFR.h -- SFR based field-sensitive Andersen's analysis-------------//
+//===- AndersenSFR.h -- SFR based field-sensitive Andersen's
+//analysis-------------//
 //
 //                     SVF: Static Value-Flow Analysis
 //
@@ -30,37 +31,31 @@
 #ifndef PROJECT_ANDERSENSFR_H
 #define PROJECT_ANDERSENSFR_H
 
-
 #include "WPA/Andersen.h"
 #include "WPA/CSC.h"
 
-namespace SVF
-{
+namespace SVF {
 
 /*!
  * Selective Cycle Detection Based Andersen Analysis
  */
-class AndersenSCD : public Andersen
-{
-public:
+class AndersenSCD : public Andersen {
+  public:
     using NodeToNodeMap = Map<NodeID, NodeID>;
 
-protected:
-    static AndersenSCD* scdAndersen;
+  protected:
+    static AndersenSCD *scdAndersen;
     NodeSet sccCandidates;
     NodeToNodeMap pwcReps;
 
-public:
-    AndersenSCD(PAG* _pag, PTATY type = AndersenSCD_WPA) :
-        Andersen(_pag,type)
-    {
-    }
+  public:
+    AndersenSCD(PAG *_pag, PTATY type = AndersenSCD_WPA)
+        : Andersen(_pag, type) {}
 
-    /// Create an singleton instance directly instead of invoking llvm pass manager
-    static AndersenSCD *createAndersenSCD(PAG* _pag)
-    {
-        if (scdAndersen == nullptr)
-        {
+    /// Create an singleton instance directly instead of invoking llvm pass
+    /// manager
+    static AndersenSCD *createAndersenSCD(PAG *_pag) {
+        if (scdAndersen == nullptr) {
             new AndersenSCD(_pag);
             scdAndersen->analyze();
             return scdAndersen;
@@ -68,61 +63,52 @@ public:
         return scdAndersen;
     }
 
-    static void releaseAndersenSCD()
-    {
+    static void releaseAndersenSCD() {
         if (scdAndersen)
             delete scdAndersen;
         scdAndersen = nullptr;
     }
 
-protected:
-    inline void addSccCandidate(NodeID nodeId)
-    {
+  protected:
+    inline void addSccCandidate(NodeID nodeId) {
         sccCandidates.insert(sccRepNode(nodeId));
     }
 
-    NodeStack& SCCDetect() override;
+    NodeStack &SCCDetect() override;
     virtual void PWCDetect();
     void solveWorklist() override;
-    void handleLoadStore(ConstraintNode* node) override;
-    void processAddr(const AddrCGEdge* addr) override;
+    void handleLoadStore(ConstraintNode *node) override;
+    void processAddr(const AddrCGEdge *addr) override;
     bool addCopyEdge(NodeID src, NodeID dst) override;
-    bool updateCallGraph(const CallSiteToFunPtrMap& callsites) override;
-    virtual void processPWC(ConstraintNode* rep);
-    void handleCopyGep(ConstraintNode* node) override;
-
+    bool updateCallGraph(const CallSiteToFunPtrMap &callsites) override;
+    virtual void processPWC(ConstraintNode *rep);
+    void handleCopyGep(ConstraintNode *node) override;
 };
-
-
 
 /*!
  * Selective Cycle Detection with Stride-based Field Representation
  */
-class AndersenSFR : public AndersenSCD
-{
-public:
+class AndersenSFR : public AndersenSCD {
+  public:
     using NodeStrides = Map<NodeID, NodeBS>;
     using FieldReps = Map<NodeID, NodeSet>;
-    using SFRTrait = Map<NodeID, pair<NodeID, NodeSet> >;
+    using SFRTrait = Map<NodeID, pair<NodeID, NodeSet>>;
 
-private:
-    static AndersenSFR* sfrAndersen;
+  private:
+    static AndersenSFR *sfrAndersen;
 
-    CSC* csc;
+    CSC *csc;
     NodeSet sfrObjNodes;
     FieldReps fieldReps;
 
-public:
-    AndersenSFR(PAG* _pag, PTATY type = AndersenSFR_WPA) :
-        AndersenSCD(_pag, type), csc(nullptr)
-    {
-    }
+  public:
+    AndersenSFR(PAG *_pag, PTATY type = AndersenSFR_WPA)
+        : AndersenSCD(_pag, type), csc(nullptr) {}
 
-    /// Create an singleton instance directly instead of invoking llvm pass manager
-    static AndersenSFR *createAndersenSFR(PAG* _pag)
-    {
-        if (sfrAndersen == nullptr)
-        {
+    /// Create an singleton instance directly instead of invoking llvm pass
+    /// manager
+    static AndersenSFR *createAndersenSFR(PAG *_pag) {
+        if (sfrAndersen == nullptr) {
             new AndersenSFR(_pag);
             sfrAndersen->analyze();
             return sfrAndersen;
@@ -130,30 +116,27 @@ public:
         return sfrAndersen;
     }
 
-    static void releaseAndersenSFR()
-    {
+    static void releaseAndersenSFR() {
         if (sfrAndersen)
             delete sfrAndersen;
     }
 
-    ~AndersenSFR()
-    {
-        if (csc != nullptr)
-        {
-            delete(csc);
+    ~AndersenSFR() {
+        if (csc != nullptr) {
+            delete (csc);
             csc = nullptr;
         }
     }
 
-protected:
+  protected:
     void initialize();
     void PWCDetect();
-    void fieldExpand(NodeSet& initials, Size_t offset, NodeBS& strides, PointsTo& expandPts);
-    bool processGepPts(PointsTo& pts, const GepCGEdge* edge);
+    void fieldExpand(NodeSet &initials, Size_t offset, NodeBS &strides,
+                     PointsTo &expandPts);
+    bool processGepPts(PointsTo &pts, const GepCGEdge *edge);
     bool mergeSrcToTgt(NodeID nodeId, NodeID newRepId);
-
 };
 
 } // End namespace SVF
 
-#endif //PROJECT_ANDERSENSFR_H
+#endif // PROJECT_ANDERSENSFR_H

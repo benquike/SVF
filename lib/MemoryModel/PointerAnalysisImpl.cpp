@@ -5,7 +5,6 @@
  *      Author: yulei
  */
 
-
 #include "MemoryModel/PointerAnalysisImpl.h"
 #include "SVF-FE/CPPUtil.h"
 #include "SVF-FE/DCHG.h"
@@ -17,34 +16,31 @@ using namespace SVFUtil;
 using namespace cppUtil;
 using namespace std;
 
-static llvm::cl::opt<bool> INCDFPTData("incdata", llvm::cl::init(true),
-                                       llvm::cl::desc("Enable incremental DFPTData for flow-sensitive analysis"));
-
+static llvm::cl::opt<bool> INCDFPTData(
+    "incdata", llvm::cl::init(true),
+    llvm::cl::desc("Enable incremental DFPTData for flow-sensitive analysis"));
 
 /*!
  * Constructor
  */
-BVDataPTAImpl::BVDataPTAImpl(PAG* p, PointerAnalysis::PTATY type, bool alias_check) :
-    PointerAnalysis(p, type, alias_check)
-{
-    if (type == Andersen_BASE || type == Andersen_WPA || type == AndersenWaveDiff_WPA || type == AndersenHCD_WPA || type == AndersenHLCD_WPA
-            || type == AndersenLCD_WPA || type == TypeCPP_WPA || type == FlowS_DDA || type == AndersenWaveDiffWithType_WPA
-            || type == AndersenSCD_WPA || type == AndersenSFR_WPA || type == Steensgaard_WPA)
-    {
+BVDataPTAImpl::BVDataPTAImpl(PAG *p, PointerAnalysis::PTATY type,
+                             bool alias_check)
+    : PointerAnalysis(p, type, alias_check) {
+    if (type == Andersen_BASE || type == Andersen_WPA ||
+        type == AndersenWaveDiff_WPA || type == AndersenHCD_WPA ||
+        type == AndersenHLCD_WPA || type == AndersenLCD_WPA ||
+        type == TypeCPP_WPA || type == FlowS_DDA ||
+        type == AndersenWaveDiffWithType_WPA || type == AndersenSCD_WPA ||
+        type == AndersenSFR_WPA || type == Steensgaard_WPA) {
         ptD = new MutDiffPTDataTy();
-    }
-    else if (type == FSSPARSE_WPA || type == FSTBHC_WPA)
-    {
+    } else if (type == FSSPARSE_WPA || type == FSTBHC_WPA) {
         if (INCDFPTData)
             ptD = new IncMutDFPTDataTy(false);
         else
             ptD = new MutDFPTDataTy(false);
-    }
-    else if (type == VFS_WPA)
-    {
+    } else if (type == VFS_WPA) {
         ptD = new MutVersionedPTDataTy(false);
-    }
-    else
+    } else
         assert(false && "no points-to data available");
 
     ptaImplTy = BVDataImpl;
@@ -53,13 +49,12 @@ BVDataPTAImpl::BVDataPTAImpl(PAG* p, PointerAnalysis::PTATY type, bool alias_che
 /*!
  * Expand all fields of an aggregate in all points-to sets
  */
-void BVDataPTAImpl::expandFIObjs(const PointsTo& pts, PointsTo& expandedPts)
-{
-    expandedPts = pts;;
-    for(PointsTo::iterator pit = pts.begin(), epit = pts.end(); pit!=epit; ++pit)
-    {
-        if (pag->getBaseObjNode(*pit) == *pit || isFieldInsensitive(*pit))
-        {
+void BVDataPTAImpl::expandFIObjs(const PointsTo &pts, PointsTo &expandedPts) {
+    expandedPts = pts;
+    ;
+    for (PointsTo::iterator pit = pts.begin(), epit = pts.end(); pit != epit;
+         ++pit) {
+        if (pag->getBaseObjNode(*pit) == *pit || isFieldInsensitive(*pit)) {
             expandedPts |= pag->getAllFieldsObjNode(*pit);
         }
     }
@@ -70,14 +65,12 @@ void BVDataPTAImpl::expandFIObjs(const PointsTo& pts, PointsTo& expandedPts)
  * It includes the points-to relations, and all PAG nodes including those
  * created when solving Andersen's constraints.
  */
-void BVDataPTAImpl::writeToFile(const string& filename)
-{
+void BVDataPTAImpl::writeToFile(const string &filename) {
     outs() << "Storing pointer analysis results to '" << filename << "'...";
 
     error_code err;
     ToolOutputFile F(filename.c_str(), err, llvm::sys::fs::F_None);
-    if (err)
-    {
+    if (err) {
         outs() << "  error opening file for writing!\n";
         F.os().clear_error();
         return;
@@ -85,23 +78,17 @@ void BVDataPTAImpl::writeToFile(const string& filename)
 
     // Write analysis results to file
     PTDataTy *ptD = getPTDataTy();
-    if (hasPtsMap())
-    {
+    if (hasPtsMap()) {
         const auto &ptsMap = getPtsMap();
-        for (const auto & it : ptsMap)
-        {
+        for (const auto &it : ptsMap) {
             NodeID var = it.first;
             const PointsTo &pts = getPts(var);
 
             F.os() << var << " -> { ";
-            if (pts.empty())
-            {
+            if (pts.empty()) {
                 F.os() << " ";
-            }
-            else
-            {
-                for (auto it = pts.begin(), ie = pts.end(); it != ie; ++it)
-                {
+            } else {
+                for (auto it = pts.begin(), ie = pts.end(); it != ie; ++it) {
                     F.os() << *it << " ";
                 }
             }
@@ -110,11 +97,9 @@ void BVDataPTAImpl::writeToFile(const string& filename)
     }
 
     // Write GepPAGNodes to file
-    for (auto it = pag->begin(), ie = pag->end(); it != ie; ++it)
-    {
-        PAGNode* pagNode = it->second;
-        if (auto *gepObjPN = SVFUtil::dyn_cast<GepObjPN>(pagNode))
-        {
+    for (auto it = pag->begin(), ie = pag->end(); it != ie; ++it) {
+        PAGNode *pagNode = it->second;
+        if (auto *gepObjPN = SVFUtil::dyn_cast<GepObjPN>(pagNode)) {
             F.os() << it->first << " ";
             F.os() << pag->getBaseObjNode(it->first) << " ";
             F.os() << gepObjPN->getLocationSet().getOffset() << "\n";
@@ -123,8 +108,7 @@ void BVDataPTAImpl::writeToFile(const string& filename)
 
     // Job finish and close file
     F.os().close();
-    if (!F.os().has_error())
-    {
+    if (!F.os().has_error()) {
         outs() << "\n";
         F.keep();
         return;
@@ -136,13 +120,11 @@ void BVDataPTAImpl::writeToFile(const string& filename)
  * It populates BVDataPTAImpl with the points-to data, and updates PAG with
  * the PAG offset nodes created during Andersen's solving stage.
  */
-bool BVDataPTAImpl::readFromFile(const string& filename)
-{
+bool BVDataPTAImpl::readFromFile(const string &filename) {
     outs() << "Loading pointer analysis results from '" << filename << "'...";
 
     ifstream F(filename.c_str());
-    if (!F.is_open())
-    {
+    if (!F.is_open()) {
         outs() << "  error opening file for reading!\n";
         return false;
     }
@@ -154,13 +136,14 @@ bool BVDataPTAImpl::readFromFile(const string& filename)
     // Read points-to sets
     string delimiter1 = " -> { ";
     string delimiter2 = " }";
-    while (F.good())
-    {
+    while (F.good()) {
         // Parse a single line in the form of "var -> { obj1 obj2 obj3 }"
         getline(F, line);
         size_t pos = line.find(delimiter1);
-        if (pos == string::npos)    break;
-        if (line.back() != '}')     break;
+        if (pos == string::npos)
+            break;
+        if (line.back() != '}')
+            break;
 
         // var
         NodeID var = atoi(line.substr(0, pos).c_str());
@@ -169,12 +152,10 @@ bool BVDataPTAImpl::readFromFile(const string& filename)
         pos = pos + delimiter1.length();
         size_t len = line.length() - pos - delimiter2.length();
         string objs = line.substr(pos, len);
-        if (!objs.empty())
-        {
+        if (!objs.empty()) {
             istringstream ss(objs);
             NodeID obj;
-            while (ss.good())
-            {
+            while (ss.good()) {
                 ss >> obj;
                 ptD->addPts(var, obj);
             }
@@ -182,8 +163,7 @@ bool BVDataPTAImpl::readFromFile(const string& filename)
     }
 
     // Read PAG offset nodes
-    while (F.good())
-    {
+    while (F.good()) {
         // Parse a single line in the form of "ID baseNodeID offset"
         istringstream ss(line);
         NodeID id;
@@ -191,7 +171,8 @@ bool BVDataPTAImpl::readFromFile(const string& filename)
         size_t offset;
         ss >> id >> base >> offset;
 
-        NodeID n = pag->getGepObjNode(pag->getObject(base), LocationSet(offset));
+        NodeID n =
+            pag->getGepObjNode(pag->getObject(base), LocationSet(offset));
         assert(id == n && "Error adding GepObjNode into PAG!");
 
         getline(F, line);
@@ -209,22 +190,16 @@ bool BVDataPTAImpl::readFromFile(const string& filename)
 /*!
  * Dump points-to of each pag node
  */
-void BVDataPTAImpl::dumpTopLevelPtsTo()
-{
-    for (const auto &nIter : this->getAllValidPtrs())
-    {
-        const PAGNode* node = getPAG()->getPAGNode(nIter);
-        if (getPAG()->isValidTopLevelPtr(node))
-        {
-            const PointsTo& pts = this->getPts(node->getId());
+void BVDataPTAImpl::dumpTopLevelPtsTo() {
+    for (const auto &nIter : this->getAllValidPtrs()) {
+        const PAGNode *node = getPAG()->getPAGNode(nIter);
+        if (getPAG()->isValidTopLevelPtr(node)) {
+            const PointsTo &pts = this->getPts(node->getId());
             outs() << "\nNodeID " << node->getId() << " ";
 
-            if (pts.empty())
-            {
+            if (pts.empty()) {
                 outs() << "\t\tPointsTo: {empty}\n\n";
-            }
-            else
-            {
+            } else {
                 outs() << "\t\tPointsTo: { ";
                 for (const auto &it : pts)
                     outs() << it << " ";
@@ -236,20 +211,17 @@ void BVDataPTAImpl::dumpTopLevelPtsTo()
     outs().flush();
 }
 
-
 /*!
- * Dump all points-to including top-level (ValPN) and address-taken (ObjPN) variables
+ * Dump all points-to including top-level (ValPN) and address-taken (ObjPN)
+ * variables
  */
-void BVDataPTAImpl::dumpAllPts()
-{
+void BVDataPTAImpl::dumpAllPts() {
     OrderedNodeSet pagNodes;
-    for(auto & it : *pag)
-    {
+    for (auto &it : *pag) {
         pagNodes.insert(it.first);
     }
 
-    for (NodeID n : pagNodes)
-    {
+    for (NodeID n : pagNodes) {
         outs() << "----------------------------------------------\n";
         dumpPts(n, this->getPts(n));
     }
@@ -257,69 +229,61 @@ void BVDataPTAImpl::dumpAllPts()
     outs() << "----------------------------------------------\n";
 }
 
-
 /*!
  * On the fly call graph construction
- * callsites is candidate indirect callsites need to be analyzed based on points-to results
- * newEdges is the new indirect call edges discovered
+ * callsites is candidate indirect callsites need to be analyzed based on
+ * points-to results newEdges is the new indirect call edges discovered
  */
-void BVDataPTAImpl::onTheFlyCallGraphSolve(const CallSiteToFunPtrMap& callsites, CallEdgeMap& newEdges)
-{
-    for(auto callsite : callsites)
-    {
-        const CallBlockNode* cs = callsite.first;
+void BVDataPTAImpl::onTheFlyCallGraphSolve(const CallSiteToFunPtrMap &callsites,
+                                           CallEdgeMap &newEdges) {
+    for (auto callsite : callsites) {
+        const CallBlockNode *cs = callsite.first;
 
-        if (isVirtualCallSite(SVFUtil::getLLVMCallSite(cs->getCallSite())))
-        {
-            const Value *vtbl = getVCallVtblPtr(SVFUtil::getLLVMCallSite(cs->getCallSite()));
+        if (isVirtualCallSite(SVFUtil::getLLVMCallSite(cs->getCallSite()))) {
+            const Value *vtbl =
+                getVCallVtblPtr(SVFUtil::getLLVMCallSite(cs->getCallSite()));
             assert(pag->hasValueNode(vtbl));
             NodeID vtblId = pag->getValueNode(vtbl);
             resolveCPPIndCalls(cs, getPts(vtblId), newEdges);
-        }
-        else
-            resolveIndCalls(callsite.first,getPts(callsite.second),newEdges);
+        } else
+            resolveIndCalls(callsite.first, getPts(callsite.second), newEdges);
     }
 }
-
 
 /*!
  * Return alias results based on our points-to/alias analysis
  */
 AliasResult BVDataPTAImpl::alias(const MemoryLocation &LocA,
-                                 const MemoryLocation &LocB)
-{
+                                 const MemoryLocation &LocB) {
     return alias(LocA.Ptr, LocB.Ptr);
 }
 
 /*!
  * Return alias results based on our points-to/alias analysis
  */
-AliasResult BVDataPTAImpl::alias(const Value* V1,
-                                 const Value* V2)
-{
-    return alias(pag->getValueNode(V1),pag->getValueNode(V2));
+AliasResult BVDataPTAImpl::alias(const Value *V1, const Value *V2) {
+    return alias(pag->getValueNode(V1), pag->getValueNode(V2));
 }
 
 /*!
  * Return alias results based on our points-to/alias analysis
  */
-AliasResult BVDataPTAImpl::alias(NodeID node1, NodeID node2)
-{
-    return alias(getPts(node1),getPts(node2));
+AliasResult BVDataPTAImpl::alias(NodeID node1, NodeID node2) {
+    return alias(getPts(node1), getPts(node2));
 }
 
 /*!
  * Return alias results based on our points-to/alias analysis
  */
-AliasResult BVDataPTAImpl::alias(const PointsTo& p1, const PointsTo& p2)
-{
+AliasResult BVDataPTAImpl::alias(const PointsTo &p1, const PointsTo &p2) {
 
     PointsTo pts1;
-    expandFIObjs(p1,pts1);
+    expandFIObjs(p1, pts1);
     PointsTo pts2;
-    expandFIObjs(p2,pts2);
+    expandFIObjs(p2, pts2);
 
-    if (containBlackHoleNode(pts1) || containBlackHoleNode(pts2) || pts1.intersects(pts2))
+    if (containBlackHoleNode(pts1) || containBlackHoleNode(pts2) ||
+        pts1.intersects(pts2))
         return llvm::MayAlias;
 
     return llvm::NoAlias;

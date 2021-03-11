@@ -20,7 +20,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 /*
  * Conditions.cpp
  *
@@ -33,14 +32,14 @@
 
 using namespace SVF;
 
-static llvm::cl::opt<unsigned> maxBddSize("maxbddsize",  llvm::cl::init(100000),
-        llvm::cl::desc("Maximum context limit for DDA"));
+static llvm::cl::opt<unsigned>
+    maxBddSize("maxbddsize", llvm::cl::init(100000),
+               llvm::cl::desc("Maximum context limit for DDA"));
 
 /// Operations on conditions.
 //@{
 /// use Cudd_bddAndLimit interface to avoid bdds blow up
-DdNode* BddCondManager::AND(DdNode* lhs, DdNode* rhs)
-{
+DdNode *BddCondManager::AND(DdNode *lhs, DdNode *rhs) {
     if (lhs == getFalseCond() || rhs == getFalseCond())
         return getFalseCond();
 
@@ -50,11 +49,10 @@ DdNode* BddCondManager::AND(DdNode* lhs, DdNode* rhs)
     if (rhs == getTrueCond())
         return lhs;
 
-    DdNode* tmp = Cudd_bddAndLimit(m_bdd_mgr, lhs, rhs, maxBddSize);
-    if(tmp==nullptr)
-    {
+    DdNode *tmp = Cudd_bddAndLimit(m_bdd_mgr, lhs, rhs, maxBddSize);
+    if (tmp == nullptr) {
         SVFUtil::writeWrnMsg("exceeds max bdd size \n");
-        ///drop the rhs condition
+        /// drop the rhs condition
         return lhs;
     }
 
@@ -65,8 +63,7 @@ DdNode* BddCondManager::AND(DdNode* lhs, DdNode* rhs)
 /*!
  * Use Cudd_bddOrLimit interface to avoid bdds blow up
  */
-DdNode* BddCondManager::OR(DdNode* lhs, DdNode* rhs)
-{
+DdNode *BddCondManager::OR(DdNode *lhs, DdNode *rhs) {
     if (lhs == getTrueCond() || rhs == getTrueCond())
         return getTrueCond();
 
@@ -75,9 +72,8 @@ DdNode* BddCondManager::OR(DdNode* lhs, DdNode* rhs)
 
     if (rhs == getFalseCond())
         return lhs;
-    DdNode* tmp = Cudd_bddOrLimit(m_bdd_mgr, lhs, rhs, maxBddSize);
-    if(tmp==nullptr)
-    {
+    DdNode *tmp = Cudd_bddOrLimit(m_bdd_mgr, lhs, rhs, maxBddSize);
+    if (tmp == nullptr) {
         SVFUtil::writeWrnMsg("exceeds max bdd size \n");
         /// drop the two conditions here
         return getTrueCond();
@@ -87,8 +83,7 @@ DdNode* BddCondManager::OR(DdNode* lhs, DdNode* rhs)
     return tmp;
 }
 
-DdNode* BddCondManager::NEG(DdNode* lhs)
-{
+DdNode *BddCondManager::NEG(DdNode *lhs) {
     if (lhs == getTrueCond())
         return getFalseCond();
 
@@ -100,11 +95,11 @@ DdNode* BddCondManager::NEG(DdNode* lhs)
 //@}
 
 /*!
- * Utilities for dumping conditions. These methods use global functions from CUDD
- * package and they can be removed outside this class scope to be used by others.
+ * Utilities for dumping conditions. These methods use global functions from
+ * CUDD package and they can be removed outside this class scope to be used by
+ * others.
  */
-void BddCondManager::ddClearFlag(DdNode * f) const
-{
+void BddCondManager::ddClearFlag(DdNode *f) const {
     if (!Cudd_IsComplement(f->next))
         return;
     /* Clear visited flag. */
@@ -115,8 +110,7 @@ void BddCondManager::ddClearFlag(DdNode * f) const
     ddClearFlag(Cudd_Regular(cuddE(f)));
 }
 
-void BddCondManager::BddSupportStep(DdNode * f, NodeBS &support) const
-{
+void BddCondManager::BddSupportStep(DdNode *f, NodeBS &support) const {
     if (cuddIsConstant(f) || Cudd_IsComplement(f->next))
         return;
 
@@ -128,26 +122,22 @@ void BddCondManager::BddSupportStep(DdNode * f, NodeBS &support) const
     f->next = Cudd_Complement(f->next);
 }
 
-void BddCondManager::BddSupport(DdNode * f, NodeBS &support) const
-{
-    BddSupportStep( Cudd_Regular(f), support);
+void BddCondManager::BddSupport(DdNode *f, NodeBS &support) const {
+    BddSupportStep(Cudd_Regular(f), support);
     ddClearFlag(Cudd_Regular(f));
 }
 
 /*!
  * Dump BDD
  */
-void BddCondManager::dump(DdNode* lhs, raw_ostream & O)
-{
+void BddCondManager::dump(DdNode *lhs, raw_ostream &O) {
     if (lhs == getTrueCond())
         O << "T";
-    else
-    {
+    else {
         NodeBS support;
         BddSupport(lhs, support);
-        for (const auto& rid : support)
-        {
-             O << rid << " ";
+        for (const auto &rid : support) {
+            O << rid << " ";
         }
     }
 }
@@ -155,17 +145,14 @@ void BddCondManager::dump(DdNode* lhs, raw_ostream & O)
 /*!
  * Dump BDD
  */
-std::string BddCondManager::dumpStr(DdNode* lhs) const
-{
+std::string BddCondManager::dumpStr(DdNode *lhs) const {
     std::string str;
     if (lhs == getTrueCond())
         str += "T";
-    else
-    {
+    else {
         NodeBS support;
         BddSupport(lhs, support);
-        for (const auto& rid : support)
-        {
+        for (const auto &rid : support) {
             char int2str[16];
             sprintf(int2str, "%d", rid);
             str += int2str;
@@ -174,4 +161,3 @@ std::string BddCondManager::dumpStr(DdNode* lhs) const
     }
     return str;
 }
-

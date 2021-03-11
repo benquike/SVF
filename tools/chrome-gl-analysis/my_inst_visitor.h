@@ -10,30 +10,22 @@
  *     2021-02-25
  *****************************************************************************/
 
-
 #ifndef MY_INST_VISITOR_H
 #define MY_INST_VISITOR_H
 
 #include "Util/BasicTypes.h"
 
-class MyInstVisitor:
-  public llvm::InstVisitor<MyInstVisitor> {
+class MyInstVisitor : public llvm::InstVisitor<MyInstVisitor> {
 
   private:
     std::set<const llvm::Value *> &values;
+
   public:
-    MyInstVisitor(std::set<const llvm::Value *> &values):
-      values(values) {
-    }
+    MyInstVisitor(std::set<const llvm::Value *> &values) : values(values) {}
 
-    void addValue(const llvm::Value *v) {
-      values.insert(v);
-    }
+    void addValue(const llvm::Value *v) { values.insert(v); }
 
-    std::set<const llvm::Value *> &
-    getResults() {
-      return values;
-    }
+    std::set<const llvm::Value *> &getResults() { return values; }
 };
 
 #endif /* MY_INST_VISITOR_H */

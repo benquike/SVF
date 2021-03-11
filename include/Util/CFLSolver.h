@@ -30,22 +30,20 @@
 #ifndef CFLSOLVER_H_
 #define CFLSOLVER_H_
 
-#include "Util/WorkList.h"
 #include "Util/DPItem.h"
+#include "Util/WorkList.h"
 
-namespace SVF
-{
+namespace SVF {
 
 /*
- * Generic CFL solver for demand-driven analysis based on different graphs (e.g. PAG, VFG, ThreadVFG)
- * Extend this class for sophisticated CFL-reachability resolution (e.g. field, flow, path)
+ * Generic CFL solver for demand-driven analysis based on different graphs (e.g.
+ * PAG, VFG, ThreadVFG) Extend this class for sophisticated CFL-reachability
+ * resolution (e.g. field, flow, path)
  */
-template<class GraphType, class DPIm = DPItem>
-class CFLSolver
-{
+template <class GraphType, class DPIm = DPItem> class CFLSolver {
 
-public:
-    ///Define the GTraits and node iterator
+  public:
+    /// Define the GTraits and node iterator
     using GTraits = llvm::GraphTraits<GraphType>;
     using GNODE = typename GTraits::NodeType;
     using GEDGE = typename GTraits::EdgeType;
@@ -53,99 +51,72 @@ public:
     using child_iterator = typename GTraits::ChildIteratorType;
 
     /// Define inverse GTraits and note iterator
-    using InvGTraits = llvm::GraphTraits<llvm::Inverse<GNODE *> >;
+    using InvGTraits = llvm::GraphTraits<llvm::Inverse<GNODE *>>;
     using inv_child_iterator = typename InvGTraits::ChildIteratorType;
 
     /// Define worklist
     using WorkList = FIFOWorkList<DPIm>;
 
-protected:
-
+  protected:
     /// Constructor
-    CFLSolver(): _graph(nullptr)
-    {
-    }
+    CFLSolver() : _graph(nullptr) {}
     /// Destructor
-    virtual ~CFLSolver()
-    {
-    }
+    virtual ~CFLSolver() {}
     /// Get/Set graph methods
     //@{
-    const inline GraphType graph() const
-    {
-        return _graph;
-    }
-    inline void setGraph(GraphType g)
-    {
-        _graph = g;
-    }
+    const inline GraphType graph() const { return _graph; }
+    inline void setGraph(GraphType g) { _graph = g; }
     //@}
 
-    inline GNODE* getNode(NodeID id) const
-    {
-        return _graph->getGNode(id);
-    }
-    virtual inline NodeID getNodeIDFromItem(const DPIm& item) const
-    {
+    inline GNODE *getNode(NodeID id) const { return _graph->getGNode(id); }
+    virtual inline NodeID getNodeIDFromItem(const DPIm &item) const {
         return item.getCurNodeID();
     }
     /// CFL forward traverse solve
-    virtual void forwardTraverse(DPIm& it)
-    {
+    virtual void forwardTraverse(DPIm &it) {
         pushIntoWorklist(it);
 
-        while (!isWorklistEmpty())
-        {
+        while (!isWorklistEmpty()) {
             DPIm item = popFromWorklist();
             FWProcessCurNode(item);
 
-            GNODE* v = getNode(getNodeIDFromItem(item));
+            GNODE *v = getNode(getNodeIDFromItem(item));
             child_iterator EI = GTraits::child_begin(v);
             child_iterator EE = GTraits::child_end(v);
-            for (; EI != EE; ++EI)
-            {
-                FWProcessOutgoingEdge(item,*(EI.getCurrent()) );
+            for (; EI != EE; ++EI) {
+                FWProcessOutgoingEdge(item, *(EI.getCurrent()));
             }
         }
     }
     /// CFL forward traverse solve
-    virtual void backwardTraverse(DPIm& it)
-    {
+    virtual void backwardTraverse(DPIm &it) {
         pushIntoWorklist(it);
 
-        while (!isWorklistEmpty())
-        {
+        while (!isWorklistEmpty()) {
             DPIm item = popFromWorklist();
             BWProcessCurNode(item);
 
-            GNODE* v = getNode(getNodeIDFromItem(item));
+            GNODE *v = getNode(getNodeIDFromItem(item));
             inv_child_iterator EI = InvGTraits::child_begin(v);
             inv_child_iterator EE = InvGTraits::child_end(v);
-            for (; EI != EE; ++EI)
-            {
-                BWProcessIncomingEdge(item,*(EI.getCurrent()) );
+            for (; EI != EE; ++EI) {
+                BWProcessIncomingEdge(item, *(EI.getCurrent()));
             }
         }
     }
     /// Process the DP item
     //@{
-    virtual void FWProcessCurNode(const DPIm& /*unused*/)
-    {
-    }
-    virtual void BWProcessCurNode(const DPIm& /*unused*/)
-    {
-    }
+    virtual void FWProcessCurNode(const DPIm & /*unused*/) {}
+    virtual void BWProcessCurNode(const DPIm & /*unused*/) {}
     //@}
     /// Propagation for the solving, to be implemented in the child class
     //@{
-    virtual void FWProcessOutgoingEdge(const DPIm& item, GEDGE* edge)
-    {
+    virtual void FWProcessOutgoingEdge(const DPIm &item, GEDGE *edge) {
         DPIm newItem(item);
         newItem.setCurNodeID(edge->getDstID());
         pushIntoWorklist(newItem);
     }
-    virtual void BWProcessIncomingEdge(const DPIm& item, GEDGE* edge)
-    {
+    virtual void BWProcessIncomingEdge(const DPIm &item, GEDGE *edge) {
         DPIm newItem(item);
         newItem.setCurNodeID(edge->getSrcID());
         pushIntoWorklist(newItem);
@@ -153,32 +124,18 @@ protected:
     //@}
     /// Worklist operations
     //@{
-    inline DPIm popFromWorklist()
-    {
-        return worklist.pop();
-    }
-    inline bool pushIntoWorklist(DPIm& item)
-    {
-        return worklist.push(item);
-    }
-    inline bool isWorklistEmpty()
-    {
-        return worklist.empty();
-    }
-    inline bool isInWorklist(DPIm& item)
-    {
-        return worklist.find(item);
-    }
+    inline DPIm popFromWorklist() { return worklist.pop(); }
+    inline bool pushIntoWorklist(DPIm &item) { return worklist.push(item); }
+    inline bool isWorklistEmpty() { return worklist.empty(); }
+    inline bool isInWorklist(DPIm &item) { return worklist.find(item); }
     //@}
 
-private:
-
+  private:
     /// Graph
     GraphType _graph;
 
     /// Worklist for resolution
     WorkList worklist;
-
 };
 
 } // End namespace SVF

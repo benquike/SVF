@@ -27,32 +27,30 @@
  *      Author: Yulei Sui
  */
 
-#include "SVF-FE/CPPUtil.h"
-#include "SVF-FE/ICFGBuilder.h"
-#include "SVF-FE/CHG.h"
 #include "WPA/TypeAnalysis.h"
-#include "MemoryModel/PTAStat.h"
 #include "Graphs/ICFGStat.h"
 #include "Graphs/VFG.h"
+#include "MemoryModel/PTAStat.h"
+#include "SVF-FE/CHG.h"
+#include "SVF-FE/CPPUtil.h"
+#include "SVF-FE/ICFGBuilder.h"
 
 using namespace SVF;
 using namespace SVFUtil;
 using namespace cppUtil;
 using namespace std;
 
-llvm::cl::opt<bool> genICFG("genicfg", llvm::cl::init(true), llvm::cl::desc("Generate ICFG graph"));
+llvm::cl::opt<bool> genICFG("genicfg", llvm::cl::init(true),
+                            llvm::cl::desc("Generate ICFG graph"));
 
 /// Initialize analysis
-void TypeAnalysis::initialize()
-{
-	AndersenBase::initialize();
-    if (genICFG)
-    {
+void TypeAnalysis::initialize() {
+    AndersenBase::initialize();
+    if (genICFG) {
         icfg = PAG::getPAG()->getICFG();
         icfg->dump("icfg_initial");
         icfg->dump("vfg_initial");
-        if (print_stat)
-        {
+        if (print_stat) {
             ICFGStat stat(icfg);
             stat.performStat();
         }
@@ -60,29 +58,25 @@ void TypeAnalysis::initialize()
 }
 
 /// Finalize analysis
-void TypeAnalysis::finalize()
-{
+void TypeAnalysis::finalize() {
     AndersenBase::finalize();
     if (print_stat)
         dumpCHAStats();
 }
 
-void TypeAnalysis::analyze()
-{
+void TypeAnalysis::analyze() {
     initialize();
     CallEdgeMap newEdges;
     callGraphSolveBasedOnCHA(getIndirectCallsites(), newEdges);
     finalize();
 }
 
-void TypeAnalysis::callGraphSolveBasedOnCHA(const CallSiteToFunPtrMap& callsites, CallEdgeMap& newEdges)
-{
-    for(auto callsite : callsites)
-    {
-        const CallBlockNode* cbn = callsite.first;
+void TypeAnalysis::callGraphSolveBasedOnCHA(
+    const CallSiteToFunPtrMap &callsites, CallEdgeMap &newEdges) {
+    for (auto callsite : callsites) {
+        const CallBlockNode *cbn = callsite.first;
         CallSite cs = SVFUtil::getLLVMCallSite(cbn->getCallSite());
-        if (isVirtualCallSite(cs))
-        {
+        if (isVirtualCallSite(cs)) {
             virtualCallSites.insert(cs);
             const Value *vtbl = getVCallVtblPtr(cs);
             assert(pag->hasValueNode(vtbl));
@@ -93,21 +87,18 @@ void TypeAnalysis::callGraphSolveBasedOnCHA(const CallSiteToFunPtrMap& callsites
     }
 }
 
-
-void TypeAnalysis::dumpCHAStats()
-{
+void TypeAnalysis::dumpCHAStats() {
 
     const CHGraph *chgraph = SVFUtil::dyn_cast<CHGraph>(getCHGraph());
-    if (chgraph == nullptr)
-    {
-        SVFUtil::errs() << "dumpCHAStats only implemented for standard CHGraph.\n";
+    if (chgraph == nullptr) {
+        SVFUtil::errs()
+            << "dumpCHAStats only implemented for standard CHGraph.\n";
         return;
     }
 
     s32_t pure_abstract_class_num = 0;
     s32_t multi_inheritance_class_num = 0;
-    for (auto it : *chgraph)
-    {
+    for (auto it : *chgraph) {
         CHNode *node = it.second;
         outs() << "class " << node->getName() << "\n";
         if (node->isPureAbstract())
@@ -117,7 +108,8 @@ void TypeAnalysis::dumpCHAStats()
     }
     outs() << "class_num:\t" << chgraph->getTotalNodeNum() << '\n';
     outs() << "pure_abstract_class_num:\t" << pure_abstract_class_num << '\n';
-    outs() << "multi_inheritance_class_num:\t" << multi_inheritance_class_num << '\n';
+    outs() << "multi_inheritance_class_num:\t" << multi_inheritance_class_num
+           << '\n';
 
     /*
      * count the following info:
@@ -130,28 +122,24 @@ void TypeAnalysis::dumpCHAStats()
     s32_t vfunc_total = 0;
     s32_t vtbl_max = 0;
     s32_t pure_abstract = 0;
-    set<const SVFFunction*> allVirtualFunctions;
-    for (auto it : *chgraph)
-    {
+    set<const SVFFunction *> allVirtualFunctions;
+    for (auto it : *chgraph) {
         CHNode *node = it.second;
         if (node->isPureAbstract())
             pure_abstract++;
 
         s32_t vfuncs_size = 0;
-        const vector<CHNode::FuncVector>& vecs = node->getVirtualFunctionVectors();
-        for (const auto & vec : vecs)
-        {
+        const vector<CHNode::FuncVector> &vecs =
+            node->getVirtualFunctionVectors();
+        for (const auto &vec : vecs) {
             vfuncs_size += vec.size();
-            for (const auto *func : vec)
-            {
-                 allVirtualFunctions.insert(func);
+            for (const auto *func : vec) {
+                allVirtualFunctions.insert(func);
             }
         }
-        if (vfuncs_size > 0)
-        {
+        if (vfuncs_size > 0) {
             vtblnum++;
-            if (vfuncs_size > vtbl_max)
-            {
+            if (vfuncs_size > vtbl_max) {
                 vtbl_max = vfuncs_size;
             }
         }
@@ -159,8 +147,6 @@ void TypeAnalysis::dumpCHAStats()
     vfunc_total = allVirtualFunctions.size();
 
     outs() << "vtblnum:\t" << vtblnum << '\n';
-    outs() << "vtbl_average:\t" << (double)(vfunc_total)/vtblnum << '\n';
+    outs() << "vtbl_average:\t" << (double)(vfunc_total) / vtblnum << '\n';
     outs() << "vtbl_max:\t" << vtbl_max << '\n';
 }
-
-

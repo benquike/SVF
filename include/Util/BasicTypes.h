@@ -30,42 +30,40 @@
 #ifndef BASICTYPES_H_
 #define BASICTYPES_H_
 
-#include "Util/SVFBasicTypes.h"
-#include "SVF-FE/GEPTypeBridgeIterator.h"
 #include "Graphs/GraphPrinter.h"
+#include "SVF-FE/GEPTypeBridgeIterator.h"
 #include "Util/Casting.h"
-#include <llvm/ADT/SmallVector.h>		// for small vector
+#include "Util/SVFBasicTypes.h"
+#include <llvm/ADT/SmallVector.h> // for small vector
 #include <llvm/ADT/SparseBitVector.h>
-#include <llvm/IR/Instructions.h>
-#include <llvm/IR/CallSite.h>
-#include <llvm/IR/InstVisitor.h>	// for instruction visitor
-#include <llvm/IR/InstIterator.h>	// for inst iteration
-#include <llvm/IR/GetElementPtrTypeIterator.h>	//for gep iterator
-#include <llvm/Analysis/ScalarEvolution.h>
-#include <llvm/ADT/StringExtras.h>	// for utostr_32
+#include <llvm/ADT/StringExtras.h> // for utostr_32
 #include <llvm/Analysis/AliasAnalysis.h>
-#include <llvm/Analysis/CallGraph.h>	// call graph
-#include <llvm/IR/GlobalVariable.h>	// for GlobalVariable
+#include <llvm/Analysis/CallGraph.h> // call graph
+#include <llvm/Analysis/ScalarEvolution.h>
+#include <llvm/IR/CallSite.h>
+#include <llvm/IR/GetElementPtrTypeIterator.h> //for gep iterator
+#include <llvm/IR/GlobalVariable.h>            // for GlobalVariable
+#include <llvm/IR/InstIterator.h>              // for inst iteration
+#include <llvm/IR/InstVisitor.h>               // for instruction visitor
+#include <llvm/IR/Instructions.h>
 
-#include <llvm/Support/SourceMgr.h> // for SMDiagnostic
-#include <llvm/Bitcode/BitcodeWriter.h>		// for WriteBitcodeToFile
-#include <llvm/Bitcode/BitcodeReader.h>     /// for isBitcode
-#include <llvm/IRReader/IRReader.h>	// IR reader for bit file
-#include <llvm/Transforms/Utils/UnifyFunctionExitNodes.h>
+#include <llvm/ADT/GraphTraits.h> // for Graphtraits
 #include <llvm/Analysis/DominanceFrontier.h>
 #include <llvm/Analysis/PostDominators.h>
 #include <llvm/Analysis/ScalarEvolutionExpressions.h>
-#include <llvm/ADT/GraphTraits.h>		// for Graphtraits
-#include <llvm/Support/GraphWriter.h>		// for graph write
-#include <llvm/IR/IRBuilder.h>		// for instrument svf.main
-#include <llvm/Transforms/Utils/Local.h>	// for FindDbgAddrUses
+#include <llvm/Bitcode/BitcodeReader.h> /// for isBitcode
+#include <llvm/Bitcode/BitcodeWriter.h> // for WriteBitcodeToFile
 #include <llvm/IR/DebugInfo.h>
+#include <llvm/IR/IRBuilder.h>           // for instrument svf.main
+#include <llvm/IRReader/IRReader.h>      // IR reader for bit file
+#include <llvm/Support/GraphWriter.h>    // for graph write
+#include <llvm/Support/SourceMgr.h>      // for SMDiagnostic
+#include <llvm/Transforms/Utils/Local.h> // for FindDbgAddrUses
+#include <llvm/Transforms/Utils/UnifyFunctionExitNodes.h>
 
-namespace SVF
-{
+namespace SVF {
 
 class BddCond;
-
 
 /// LLVM Basic classes
 using SMDiagnostic = llvm::SMDiagnostic;
@@ -130,7 +128,6 @@ using ConstantDataArray = llvm::ConstantDataArray;
 using NamedMDNode = llvm::NamedMDNode;
 using MDString = llvm::MDString;
 using MDNode = llvm::MDNode;
-
 
 /// LLVM Instructions
 using AllocaInst = llvm::AllocaInst;
@@ -213,83 +210,54 @@ using DITypeRefArray = llvm::DITypeRefArray;
 
 namespace dwarf = llvm::dwarf;
 
-class SVFFunction : public SVFValue
-{
-private:
+class SVFFunction : public SVFValue {
+  private:
     bool isDecl;
     bool isIntri;
-    Function* fun;
-public:
-    SVFFunction(const std::string& val): SVFValue(val,SVFValue::SVFFunc),
-        isDecl(false), isIntri(false), fun(nullptr)
-    {
-    }
+    Function *fun;
 
-    SVFFunction(Function* f): SVFValue(f->getName(),SVFValue::SVFFunc),
-        isDecl(f->isDeclaration()), isIntri(f->isIntrinsic()), fun(f)
-    {
-    }
-    inline Function* getLLVMFun() const
-    {
+  public:
+    SVFFunction(const std::string &val)
+        : SVFValue(val, SVFValue::SVFFunc), isDecl(false), isIntri(false),
+          fun(nullptr) {}
+
+    SVFFunction(Function *f)
+        : SVFValue(f->getName(), SVFValue::SVFFunc), isDecl(f->isDeclaration()),
+          isIntri(f->isIntrinsic()), fun(f) {}
+    inline Function *getLLVMFun() const {
         assert(fun && "no LLVM Function found!");
         return fun;
     }
 
-    inline bool isDeclaration() const
-    {
-        return isDecl;
-    }
+    inline bool isDeclaration() const { return isDecl; }
 
-    inline bool isIntrinsic() const
-    {
-        return isIntri;
-    }
+    inline bool isIntrinsic() const { return isIntri; }
 
-    inline u32_t arg_size() const
-    {
-        return getLLVMFun()->arg_size();
-    }
+    inline u32_t arg_size() const { return getLLVMFun()->arg_size(); }
 
-    inline bool isVarArg() const
-    {
-        return getLLVMFun()->isVarArg();
-    }
-
+    inline bool isVarArg() const { return getLLVMFun()->isVarArg(); }
 };
 
-class SVFGlobal : public SVFValue
-{
+class SVFGlobal : public SVFValue {
 
-public:
-    SVFGlobal(const std::string& val): SVFValue(val,SVFValue::SVFGlob)
-    {
-    }
-
+  public:
+    SVFGlobal(const std::string &val) : SVFValue(val, SVFValue::SVFGlob) {}
 };
 
-class SVFBasicBlock : public SVFValue
-{
+class SVFBasicBlock : public SVFValue {
 
-public:
-    SVFBasicBlock(const std::string& val): SVFValue(val,SVFValue::SVFBB)
-    {
-    }
-
+  public:
+    SVFBasicBlock(const std::string &val) : SVFValue(val, SVFValue::SVFBB) {}
 };
 
-class SVFInstruction : public SVFValue
-{
+class SVFInstruction : public SVFValue {
 
-public:
-    SVFInstruction(const std::string& val): SVFValue(val,SVFValue::SVFInst)
-    {
-    }
-
+  public:
+    SVFInstruction(const std::string &val) : SVFValue(val, SVFValue::SVFInst) {}
 };
 
 template <typename F, typename S>
-raw_ostream& operator<< (raw_ostream &o, const std::pair<F, S> &var)
-{
+raw_ostream &operator<<(raw_ostream &o, const std::pair<F, S> &var) {
     o << "<" << var.first << ", " << var.second << ">";
     return o;
 }
@@ -305,11 +273,11 @@ template <> struct std::hash<SVF::CallSite> {
 };
 
 /// Specialise hash for SparseBitVectors.
-template <> struct std::hash<llvm::SparseBitVector<>>
-{
+template <> struct std::hash<llvm::SparseBitVector<>> {
     size_t operator()(const llvm::SparseBitVector<> &sbv) const {
         std::hash<std::pair<std::pair<size_t, size_t>, size_t>> h;
-        return h(std::make_pair(std::make_pair(sbv.count(), sbv.find_first()), sbv.find_last()));
+        return h(std::make_pair(std::make_pair(sbv.count(), sbv.find_first()),
+                                sbv.find_last()));
     }
 };
 

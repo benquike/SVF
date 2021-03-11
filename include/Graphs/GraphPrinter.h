@@ -20,7 +20,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 /*
  * GraphPrinter.h
  *
@@ -31,44 +30,40 @@
 #ifndef INCLUDE_UTIL_GRAPHPRINTER_H_
 #define INCLUDE_UTIL_GRAPHPRINTER_H_
 
-#include <system_error>
 #include <llvm/Support/ToolOutputFile.h>
-#include <llvm/Support/FileSystem.h>		// for file open flag
+#include <llvm/ADT/GraphTraits.h>
+#include <llvm/Support/FileSystem.h> // for file open flag
+#include <system_error>
 
-namespace llvm
-{
+namespace llvm {
 
 /*
  * Dump and print the graph for debugging
  */
-class GraphPrinter
-{
+class GraphPrinter {
 
-public:
-    GraphPrinter()
-    {
-    }
+  public:
+    GraphPrinter() {}
 
     /*!
      *  Write the graph into dot file for debugging purpose
      */
-    template<class GraphType>
+    template <class GraphType>
     static void WriteGraphToFile(llvm::raw_ostream &O,
-                                 const std::string &GraphName, const GraphType &GT, bool simple = false)
-    {
+                                 const std::string &GraphName,
+                                 const GraphType &GT, bool simple = false) {
         // Filename of the output dot file
         std::string Filename = GraphName + ".dot";
         O << "Writing '" << Filename << "'...";
         std::error_code ErrInfo;
-        llvm::ToolOutputFile F(Filename.c_str(), ErrInfo, llvm::sys::fs::F_None);
+        llvm::ToolOutputFile F(Filename.c_str(), ErrInfo,
+                               llvm::sys::fs::F_None);
 
-        if (!ErrInfo)
-        {
+        if (!ErrInfo) {
             // dump the ValueFlowGraph here
             WriteGraph(F.os(), GT, simple);
             F.os().close();
-            if (!F.os().has_error())
-            {
+            if (!F.os().has_error()) {
                 O << "\n";
                 F.keep();
                 return;
@@ -81,29 +76,26 @@ public:
     /*!
      * Print the graph to command line
      */
-    template<class GraphType>
+    template <class GraphType>
     static void PrintGraph(llvm::raw_ostream &O, const std::string &GraphName,
-                           const GraphType &GT)
-    {
-        ///Define the GTraits and node iterator for printing
+                           const GraphType &GT) {
+        /// Define the GTraits and node iterator for printing
         using GTraits = llvm::GraphTraits<GraphType>;
 
         using NodeRef = typename GTraits::NodeRef;
         using node_iterator = typename GTraits::nodes_iterator;
-        using child_iterator = typename GTraits::ChildIteratorType ;
+        using child_iterator = typename GTraits::ChildIteratorType;
 
-        O << "Printing Graph '" << GraphName <<  "'...\n";
+        O << "Printing Graph '" << GraphName << "'...\n";
         // Print each node name and its edges
         node_iterator I = GTraits::nodes_begin(GT);
         node_iterator E = GTraits::nodes_end(GT);
-        for (; I != E; ++I)
-        {
+        for (; I != E; ++I) {
             NodeRef *Node = *I;
             O << "node :" << Node << "'\n";
             child_iterator EI = GTraits::child_begin(Node);
             child_iterator EE = GTraits::child_end(Node);
-            for (unsigned i = 0; EI != EE && i != 64; ++EI, ++i)
-            {
+            for (unsigned i = 0; EI != EE && i != 64; ++EI, ++i) {
                 O << "child :" << *EI << "'\n";
             }
         }
@@ -111,7 +103,5 @@ public:
 };
 
 } // End namespace llvm
-
-
 
 #endif /* INCLUDE_UTIL_GRAPHPRINTER_H_ */

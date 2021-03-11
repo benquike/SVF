@@ -30,234 +30,149 @@
 #ifndef DPITEM_H_
 #define DPITEM_H_
 
-#include "Util/PathCondAllocator.h"
 #include "MemoryModel/ConditionalPT.h"
+#include "Util/PathCondAllocator.h"
 #include "llvm/Support/raw_ostream.h"
-#include <algorithm>    // std::sort
+#include <algorithm> // std::sort
 
-namespace SVF
-{
+namespace SVF {
 
 /*!
  * Dynamic programming item for CFL researchability search
- * This serves as a base class for CFL-reachability formulation by matching parentheses.
- * Extend this class for further sophisticated CFL-reachability items (e.g. field, flow, path)
+ * This serves as a base class for CFL-reachability formulation by matching
+ * parentheses. Extend this class for further sophisticated CFL-reachability
+ * items (e.g. field, flow, path)
  */
-class DPItem
-{
-protected:
+class DPItem {
+  protected:
     NodeID cur;
     static u64_t maximumBudget;
 
-public:
+  public:
     /// Constructor
-    DPItem(NodeID c) : cur(c)
-    {
-    }
+    DPItem(NodeID c) : cur(c) {}
     /// Copy constructor
-    DPItem(const DPItem& dps) : cur(dps.cur)
-    {
-    }
+    DPItem(const DPItem &dps) : cur(dps.cur) {}
     /// Destructor
-    virtual ~DPItem()
-    {
-    }
-    inline NodeID getCurNodeID() const
-    {
-        return cur;
-    }
-    inline void setCurNodeID(NodeID c)
-    {
-        cur = c;
-    }
+    virtual ~DPItem() {}
+    inline NodeID getCurNodeID() const { return cur; }
+    inline void setCurNodeID(NodeID c) { cur = c; }
     /// set max step budge per query
-    static inline void setMaxBudget(u32_t max)
-    {
-        maximumBudget = max;
-    }
-    static inline u32_t getMaxBudget()
-    {
-        return maximumBudget;
-    }
+    static inline void setMaxBudget(u32_t max) { maximumBudget = max; }
+    static inline u32_t getMaxBudget() { return maximumBudget; }
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
-    inline bool operator< (const DPItem& rhs) const
-    {
-        return cur < rhs.cur;
-    }
+    inline bool operator<(const DPItem &rhs) const { return cur < rhs.cur; }
     /// Overloading Operator=
-    inline DPItem& operator= (const DPItem& rhs)
-    {
-        if(*this!=rhs)
-        {
+    inline DPItem &operator=(const DPItem &rhs) {
+        if (*this != rhs) {
             cur = rhs.cur;
         }
         return *this;
     }
     /// Overloading Operator==
-    inline bool operator== (const DPItem& rhs) const
-    {
-        return (cur == rhs.cur);
-    }
+    inline bool operator==(const DPItem &rhs) const { return (cur == rhs.cur); }
     /// Overloading Operator!=
-    inline bool operator!= (const DPItem& rhs) const
-    {
-        return !(*this == rhs);
-    }
+    inline bool operator!=(const DPItem &rhs) const { return !(*this == rhs); }
 
-    inline void dump() const
-    {
-        SVFUtil::outs() << "var " << cur << "\n";
-    }
+    inline void dump() const { SVFUtil::outs() << "var " << cur << "\n"; }
 };
-
 
 /*!
  * FlowSensitive DPItem
  */
-template<class LocCond>
-class StmtDPItem : public DPItem
-{
+template <class LocCond> class StmtDPItem : public DPItem {
 
+  protected:
+    const LocCond *curloc;
 
-protected:
-    const LocCond* curloc;
-
-public:
+  public:
     /// Constructor
-    StmtDPItem(NodeID c, const LocCond* locCond) : DPItem(c), curloc(locCond)
-    {
-    }
+    StmtDPItem(NodeID c, const LocCond *locCond) : DPItem(c), curloc(locCond) {}
     /// Copy constructor
-    StmtDPItem(const StmtDPItem& dps) :
-        DPItem(dps), curloc(dps.curloc)
-    {
-    }
+    StmtDPItem(const StmtDPItem &dps) : DPItem(dps), curloc(dps.curloc) {}
     /// Destructor
-    virtual ~StmtDPItem()
-    {
-    }
+    virtual ~StmtDPItem() {}
     /// Get context
-    inline const LocCond* getLoc() const
-    {
-        return this->curloc;
-    }
+    inline const LocCond *getLoc() const { return this->curloc; }
     /// Set location
-    inline void setLoc(const LocCond* l)
-    {
-        this->curloc = l;
-    }
+    inline void setLoc(const LocCond *l) { this->curloc = l; }
     /// Set location and pointer id
-    inline void setLocVar(const LocCond* l,NodeID v)
-    {
+    inline void setLocVar(const LocCond *l, NodeID v) {
         this->curloc = l;
         this->cur = v;
     }
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
-    inline bool operator< (const StmtDPItem& rhs) const
-    {
+    inline bool operator<(const StmtDPItem &rhs) const {
         if (this->cur != rhs.cur)
             return this->cur < rhs.cur;
         else
             return this->curloc < rhs.curloc;
     }
     /// Overloading operator==
-    inline StmtDPItem& operator= (const StmtDPItem& rhs)
-    {
-        if(*this!=rhs)
-        {
+    inline StmtDPItem &operator=(const StmtDPItem &rhs) {
+        if (*this != rhs) {
             DPItem::operator=(rhs);
             this->curloc = rhs.getLoc();
         }
         return *this;
     }
     /// Overloading operator==
-    inline bool operator== (const StmtDPItem& rhs) const
-    {
+    inline bool operator==(const StmtDPItem &rhs) const {
         return (this->cur == rhs.cur && this->curloc == rhs.getLoc());
     }
     /// Overloading operator!=
-    inline bool operator!= (const StmtDPItem& rhs) const
-    {
-        return !(*this==rhs);
+    inline bool operator!=(const StmtDPItem &rhs) const {
+        return !(*this == rhs);
     }
-    inline void dump() const
-    {
-        SVFUtil::outs() << "statement " << *(this->curloc)  << ", var " << this->cur << "\n";
+    inline void dump() const {
+        SVFUtil::outs() << "statement " << *(this->curloc) << ", var "
+                        << this->cur << "\n";
     }
 };
 
 /*!
  * Context Condition
  */
-class ContextCond
-{
-public:
+class ContextCond {
+  public:
     using const_iterator = CallStrCxt::const_iterator;
     /// Constructor
-    ContextCond():concreteCxt(true)
-    {
-    }
+    ContextCond() : concreteCxt(true) {}
     /// Copy Constructor
-    ContextCond(const ContextCond& cond): context(cond.getContexts()), concreteCxt(cond.isConcreteCxt())
-    {
-    }
+    ContextCond(const ContextCond &cond)
+        : context(cond.getContexts()), concreteCxt(cond.isConcreteCxt()) {}
     /// Destructor
-    virtual ~ContextCond()
-    {
-    }
+    virtual ~ContextCond() {}
     /// Get context
-    inline const CallStrCxt& getContexts() const
-    {
-        return context;
-    }
+    inline const CallStrCxt &getContexts() const { return context; }
     /// Get context
-    inline CallStrCxt& getContexts()
-    {
-        return context;
-    }
+    inline CallStrCxt &getContexts() { return context; }
     /// Whether it is an concrete context
-    inline bool isConcreteCxt() const
-    {
-        return concreteCxt;
-    }
+    inline bool isConcreteCxt() const { return concreteCxt; }
     /// Whether it is an concrete context
-    inline void setNonConcreteCxt()
-    {
-        concreteCxt = false;
-    }
+    inline void setNonConcreteCxt() { concreteCxt = false; }
     /// Whether contains callstring cxt
-    inline bool containCallStr(NodeID cxt) const
-    {
-        return std::find(context.begin(),context.end(),cxt) != context.end();
+    inline bool containCallStr(NodeID cxt) const {
+        return std::find(context.begin(), context.end(), cxt) != context.end();
     }
     /// Get context size
-    inline u32_t cxtSize() const
-    {
-        return context.size();
-    }
+    inline u32_t cxtSize() const { return context.size(); }
     /// set max context limit
-    static inline void setMaxCxtLen(u32_t max)
-    {
-        maximumCxtLen = max;
-    }
+    static inline void setMaxCxtLen(u32_t max) { maximumCxtLen = max; }
     /// Push context
-    inline virtual bool pushContext(NodeID ctx)
-    {
+    inline virtual bool pushContext(NodeID ctx) {
 
-        if(context.size() < maximumCxtLen)
-        {
+        if (context.size() < maximumCxtLen) {
             context.push_back(ctx);
 
-            if(context.size() > maximumCxt)
+            if (context.size() > maximumCxt)
                 maximumCxt = context.size();
             return true;
-        }
-        else   /// handle out of context limit case
+        } else /// handle out of context limit case
         {
-            if(!context.empty())
-            {
+            if (!context.empty()) {
                 setNonConcreteCxt();
                 context.erase(context.begin());
                 context.push_back(ctx);
@@ -267,14 +182,12 @@ public:
     }
 
     /// Match context
-    inline virtual bool matchContext(NodeID ctx)
-    {
+    inline virtual bool matchContext(NodeID ctx) {
         /// if context is empty, then it is the unbalanced parentheses match
-        if(context.empty())
+        if (context.empty())
             return true;
         /// otherwise, we perform balanced parentheses matching
-        else if(context.back() == ctx)
-        {
+        else if (context.back() == ctx) {
             context.pop_back();
             return true;
         }
@@ -283,65 +196,54 @@ public:
 
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
-    inline bool operator< (const ContextCond& rhs) const
-    {
+    inline bool operator<(const ContextCond &rhs) const {
         return context < rhs.context;
     }
     /// Overloading operator[]
-    inline NodeID operator[] (const u32_t index) const
-    {
+    inline NodeID operator[](const u32_t index) const {
         assert(index < context.size());
         return context[index];
     }
     /// Overloading operator=
-    inline ContextCond& operator= (const ContextCond& rhs)
-    {
-        if(*this!=rhs)
-        {
+    inline ContextCond &operator=(const ContextCond &rhs) {
+        if (*this != rhs) {
             context = rhs.getContexts();
             concreteCxt = rhs.isConcreteCxt();
         }
         return *this;
     }
     /// Overloading operator==
-    inline bool operator== (const ContextCond& rhs) const
-    {
+    inline bool operator==(const ContextCond &rhs) const {
         return (context == rhs.getContexts());
     }
     /// Overloading operator!=
-    inline bool operator!= (const ContextCond& rhs) const
-    {
-        return !(*this==rhs);
+    inline bool operator!=(const ContextCond &rhs) const {
+        return !(*this == rhs);
     }
     /// Begin iterators
-    inline const_iterator begin() const
-    {
-        return context.begin();
-    }
+    inline const_iterator begin() const { return context.begin(); }
     /// End iterators
-    inline const_iterator end() const
-    {
-        return context.end();
-    }
+    inline const_iterator end() const { return context.end(); }
     /// Dump context condition
-    inline std::string toString() const
-    {
+    inline std::string toString() const {
         std::string str;
         raw_string_ostream rawstr(str);
         rawstr << "[:";
-        for(const auto &it : context)
-        {
+        for (const auto &it : context) {
             rawstr << it << " ";
         }
         rawstr << " ]";
         return rawstr.str();
     }
-protected:
+
+  protected:
     CallStrCxt context;
-private:
+
+  private:
     static u32_t maximumCxtLen;
     bool concreteCxt;
-public:
+
+  public:
     static u32_t maximumCxt;
 };
 
@@ -351,219 +253,168 @@ public:
 using CxtVar = CondVar<ContextCond>;
 using CxtPtSet = CondStdSet<CxtVar>;
 
-template<class LocCond>
-class CxtStmtDPItem : public StmtDPItem<LocCond>
-{
-private:
+template <class LocCond> class CxtStmtDPItem : public StmtDPItem<LocCond> {
+  private:
     ContextCond context;
-public:
+
+  public:
     /// Constructor
-    CxtStmtDPItem(const CxtVar& var, const LocCond* locCond) : StmtDPItem<LocCond>(var.get_id(),locCond), context(var.get_cond())
-    {
-    }
+    CxtStmtDPItem(const CxtVar &var, const LocCond *locCond)
+        : StmtDPItem<LocCond>(var.get_id(), locCond), context(var.get_cond()) {}
     /// Copy constructor
-    CxtStmtDPItem(const CxtStmtDPItem<LocCond>& dps) :
-        StmtDPItem<LocCond>(dps), context(dps.context)
-    {
-    }
+    CxtStmtDPItem(const CxtStmtDPItem<LocCond> &dps)
+        : StmtDPItem<LocCond>(dps), context(dps.context) {}
     /// Destructor
-    virtual ~CxtStmtDPItem()
-    {
-    }
+    virtual ~CxtStmtDPItem() {}
     /// Get context var
-    inline CxtVar getCondVar() const
-    {
-        CxtVar var(this->context,this->cur);
+    inline CxtVar getCondVar() const {
+        CxtVar var(this->context, this->cur);
         return var;
     }
     /// Get context
-    inline const ContextCond& getCond() const
-    {
-        return this->context;
-    }
+    inline const ContextCond &getCond() const { return this->context; }
     /// Get context
-    inline ContextCond& getCond()
-    {
-        return this->context;
-    }
+    inline ContextCond &getCond() { return this->context; }
     /// Push context
-    inline bool pushContext(NodeID cxt)
-    {
+    inline bool pushContext(NodeID cxt) {
         return this->context.pushContext(cxt);
     }
 
     /// Match context
-    inline bool matchContext(NodeID cxt)
-    {
+    inline bool matchContext(NodeID cxt) {
         return this->context.matchContext(cxt);
     }
 
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
-    inline bool operator< (const CxtStmtDPItem<LocCond>& rhs) const
-    {
+    inline bool operator<(const CxtStmtDPItem<LocCond> &rhs) const {
         if (this->cur != rhs.cur)
             return this->cur < rhs.cur;
-        else if(this->curloc != rhs.getLoc())
+        else if (this->curloc != rhs.getLoc())
             return this->curloc < rhs.getLoc();
         else
             return this->context < rhs.context;
     }
     /// Overloading operator=
-    inline CxtStmtDPItem<LocCond>& operator= (const CxtStmtDPItem<LocCond>& rhs)
-    {
-        if(*this!=rhs)
-        {
+    inline CxtStmtDPItem<LocCond> &
+    operator=(const CxtStmtDPItem<LocCond> &rhs) {
+        if (*this != rhs) {
             StmtDPItem<LocCond>::operator=(rhs);
             this->context = rhs.getCond();
         }
         return *this;
     }
     /// Overloading operator==
-    inline bool operator== (const CxtStmtDPItem<LocCond>& rhs) const
-    {
-        return (this->cur == rhs.cur && this->curloc == rhs.getLoc() && this->context == rhs.context);
+    inline bool operator==(const CxtStmtDPItem<LocCond> &rhs) const {
+        return (this->cur == rhs.cur && this->curloc == rhs.getLoc() &&
+                this->context == rhs.context);
     }
     /// Overloading operator==
-    inline bool operator!= (const CxtStmtDPItem<LocCond>& rhs) const
-    {
-        return !(*this==rhs);
+    inline bool operator!=(const CxtStmtDPItem<LocCond> &rhs) const {
+        return !(*this == rhs);
     }
-    inline void dump() const
-    {
-        SVFUtil::outs() << "statement " << *(this->curloc)  << ", var " << this->cur << " ";
-        SVFUtil::outs() << this->context.toString()  <<"\n";
+    inline void dump() const {
+        SVFUtil::outs() << "statement " << *(this->curloc) << ", var "
+                        << this->cur << " ";
+        SVFUtil::outs() << this->context.toString() << "\n";
     }
 };
 
+class VFPathCond : public ContextCond {
 
-class VFPathCond : public ContextCond
-{
-
-public:
+  public:
     using PathCond = PathCondAllocator::Condition;
-    using EdgeSet = std::vector<std::pair<NodeID, NodeID> >;
+    using EdgeSet = std::vector<std::pair<NodeID, NodeID>>;
 
-public:
+  public:
     /// Constructor
-    VFPathCond(PathCond* p = PathCondAllocator::trueCond()) : ContextCond(), path(p)
-    {
-    }
+    VFPathCond(PathCond *p = PathCondAllocator::trueCond())
+        : ContextCond(), path(p) {}
     /// Copy Constructor
-    VFPathCond(const VFPathCond& cond): ContextCond(cond), path(cond.getPaths()),edges(cond.getVFEdges())
-    {
-    }
+    VFPathCond(const VFPathCond &cond)
+        : ContextCond(cond), path(cond.getPaths()), edges(cond.getVFEdges()) {}
     /// Destructor
-    virtual ~VFPathCond()
-    {
-    }
+    virtual ~VFPathCond() {}
     /// set max path limit
-    static inline void setMaxPathLen(u32_t max)
-    {
-        maximumPathLen = max;
-    }
-    inline u32_t getMaxPathLen() const
-    {
-        return maximumPathLen;
-    }
+    static inline void setMaxPathLen(u32_t max) { maximumPathLen = max; }
+    inline u32_t getMaxPathLen() const { return maximumPathLen; }
     /// Return paths
-    inline PathCond* getPaths() const
-    {
-        return path;
-    }
+    inline PathCond *getPaths() const { return path; }
     /// Return paths
-    inline const EdgeSet& getVFEdges() const
-    {
-        return edges;
-    }
+    inline const EdgeSet &getVFEdges() const { return edges; }
     /// Set paths
-    inline void setPaths(PathCond* p, const EdgeSet& e)
-    {
+    inline void setPaths(PathCond *p, const EdgeSet &e) {
         path = p;
         edges = e;
     }
     /// Get path length
-    inline u32_t pathLen() const
-    {
-        return edges.size();
-    }
+    inline u32_t pathLen() const { return edges.size(); }
     /// Add SVFG Edge
-    inline void addVFEdge(NodeID from, NodeID to)
-    {
+    inline void addVFEdge(NodeID from, NodeID to) {
         //	assert(!hasVFEdge(from,to) && "Edge exit?");
-        if(edges.size() > maximumPath)
+        if (edges.size() > maximumPath)
             maximumPath = edges.size();
 
-        edges.push_back(std::make_pair(from,to));
+        edges.push_back(std::make_pair(from, to));
     }
     /// Has SVFG Edge
-    inline bool hasVFEdge(NodeID from, NodeID to) const
-    {
-        return std::find(edges.begin(),edges.end(),std::make_pair(from,to)) != edges.end();
+    inline bool hasVFEdge(NodeID from, NodeID to) const {
+        return std::find(edges.begin(), edges.end(),
+                         std::make_pair(from, to)) != edges.end();
     }
     /// Whether Node dst has incoming edge
-    inline bool hasIncomingEdge(NodeID node) const
-    {
-        for(const auto & edge : edges)
-        {
-            if(edge.second == node)
+    inline bool hasIncomingEdge(NodeID node) const {
+        for (const auto &edge : edges) {
+            if (edge.second == node)
                 return true;
         }
         return false;
     }
     /// Whether Node dst has outgoing edge
-    inline bool hasOutgoingEdge(NodeID node) const
-    {
-        for(const auto & edge : edges)
-        {
-            if(edge.first == node)
+    inline bool hasOutgoingEdge(NodeID node) const {
+        for (const auto &edge : edges) {
+            if (edge.first == node)
                 return true;
         }
         return false;
     }
-    inline bool addPath(PathCondAllocator* allocator, PathCond* c, NodeID from, NodeID to)
-    {
-        if(pathLen() < maximumPathLen)
-        {
-            if(!hasVFEdge(from,to))
-            {
+    inline bool addPath(PathCondAllocator *allocator, PathCond *c, NodeID from,
+                        NodeID to) {
+        if (pathLen() < maximumPathLen) {
+            if (!hasVFEdge(from, to)) {
                 /// drop condition when existing a loop (vf cycle)
-                if(hasOutgoingEdge(from))
+                if (hasOutgoingEdge(from))
                     c = allocator->getTrueCond();
             }
-            addVFEdge(from,to);
-            return condAnd(allocator,c);
+            addVFEdge(from, to);
+            return condAnd(allocator, c);
         }
-        //	DBOUT(DDDA, SVFUtil::outs() << "\t\t!!path length beyond limits \n");
+        //	DBOUT(DDDA, SVFUtil::outs() << "\t\t!!path length beyond limits
+        //\n");
         return true;
     }
     /// Condition operatoration
     //@{
-    inline bool condAnd(PathCondAllocator* allocator, PathCond* c)
-    {
-        path = allocator->condAnd(path,c);
+    inline bool condAnd(PathCondAllocator *allocator, PathCond *c) {
+        path = allocator->condAnd(path, c);
         return path != allocator->getFalseCond();
     }
-    inline void condOr(PathCondAllocator* allocator, PathCond* c)
-    {
-        path = allocator->condOr(path,c);
+    inline void condOr(PathCondAllocator *allocator, PathCond *c) {
+        path = allocator->condOr(path, c);
     }
     //@}
 
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
-    inline bool operator< (const VFPathCond& rhs) const
-    {
-        if(path != rhs.path)
+    inline bool operator<(const VFPathCond &rhs) const {
+        if (path != rhs.path)
             return path < rhs.path;
         else
             return context < rhs.context;
     }
     /// Overloading operator=
-    inline VFPathCond& operator= (const VFPathCond& rhs)
-    {
-        if(*this != rhs)
-        {
+    inline VFPathCond &operator=(const VFPathCond &rhs) {
+        if (*this != rhs) {
             ContextCond::operator=(rhs);
             path = rhs.getPaths();
             edges = rhs.getVFEdges();
@@ -571,50 +422,43 @@ public:
         return *this;
     }
     /// Overloading operator==
-    inline bool operator== (const VFPathCond& rhs) const
-    {
+    inline bool operator==(const VFPathCond &rhs) const {
         return (context == rhs.getContexts() && path == rhs.getPaths());
     }
     /// Overloading operator!=
-    inline bool operator!= (const VFPathCond& rhs) const
-    {
-        return !(*this==rhs);
+    inline bool operator!=(const VFPathCond &rhs) const {
+        return !(*this == rhs);
     }
     /// Get value-flow edge traces
-    inline std::string vfEdgesTrace() const
-    {
+    inline std::string vfEdgesTrace() const {
         std::string str;
         raw_string_ostream rawstr(str);
-        for(const auto & edge : edges)
-        {
+        for (const auto &edge : edges) {
             rawstr << "(" << edge.first << "," << edge.second << ")";
         }
         return rawstr.str();
     }
     /// Dump context condition
-    inline std::string toString() const
-    {
+    inline std::string toString() const {
         std::string str;
         raw_string_ostream rawstr(str);
         rawstr << "[:";
-        for(unsigned int it : context)
-        {
+        for (unsigned int it : context) {
             rawstr << it << " ";
         }
         rawstr << " | ";
-        rawstr << "" << path << "] " << vfEdgesTrace() ;
+        rawstr << "" << path << "] " << vfEdgesTrace();
         return rawstr.str();
     }
 
-private:
-    PathCond* path;
+  private:
+    PathCond *path;
     EdgeSet edges;
     static u32_t maximumPathLen;
-public:
+
+  public:
     static u32_t maximumPath;
-
 };
-
 
 /*!
  * Path-sensitive DPItem
@@ -622,227 +466,172 @@ public:
 using VFPathVar = CondVar<VFPathCond>;
 using VFPathPtSet = CondStdSet<VFPathVar>;
 
-template<class LocCond>
-class PathStmtDPItem : public StmtDPItem<LocCond>
-{
-private:
+template <class LocCond> class PathStmtDPItem : public StmtDPItem<LocCond> {
+  private:
     VFPathCond vfpath;
-public:
+
+  public:
     using PathCond = VFPathCond::PathCond;
 
     /// Constructor
-    PathStmtDPItem(const VFPathVar& var, const LocCond* locCond) :
-        StmtDPItem<LocCond>(var.get_id(),locCond), vfpath(var.get_cond())
-    {
-    }
+    PathStmtDPItem(const VFPathVar &var, const LocCond *locCond)
+        : StmtDPItem<LocCond>(var.get_id(), locCond), vfpath(var.get_cond()) {}
     /// Copy constructor
-    PathStmtDPItem(const PathStmtDPItem<LocCond>& dps) :
-        StmtDPItem<LocCond>(dps),vfpath(dps.getCond())
-    {
-    }
+    PathStmtDPItem(const PathStmtDPItem<LocCond> &dps)
+        : StmtDPItem<LocCond>(dps), vfpath(dps.getCond()) {}
     /// Destructor
-    virtual ~PathStmtDPItem()
-    {
-    }
-    inline VFPathVar getCondVar() const
-    {
-        VFPathVar var(this->vfpath,this->cur);
+    virtual ~PathStmtDPItem() {}
+    inline VFPathVar getCondVar() const {
+        VFPathVar var(this->vfpath, this->cur);
         return var;
     }
     /// Get value-flow paths
-    inline const VFPathCond& getCond() const
-    {
-        return this->vfpath;
-    }
+    inline const VFPathCond &getCond() const { return this->vfpath; }
     /// Get value-flow paths
-    inline VFPathCond& getCond()
-    {
-        return this->vfpath;
-    }
+    inline VFPathCond &getCond() { return this->vfpath; }
     /// Add a value-flow path (avoid adding duplicated paths)
-    inline bool addVFPath(PathCondAllocator* allocator, PathCond* c, NodeID from, NodeID to)
-    {
-        return this->vfpath.addPath(allocator,c,from,to);
+    inline bool addVFPath(PathCondAllocator *allocator, PathCond *c,
+                          NodeID from, NodeID to) {
+        return this->vfpath.addPath(allocator, c, from, to);
     }
     /// Push context
-    inline bool pushContext(NodeID cxt)
-    {
+    inline bool pushContext(NodeID cxt) {
         return this->vfpath.pushContext(cxt);
     }
     /// Match context
-    bool matchContext(NodeID cxt)
-    {
-        return this->vfpath.matchContext(cxt);
-    }
+    bool matchContext(NodeID cxt) { return this->vfpath.matchContext(cxt); }
 
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
-    inline bool operator< (const PathStmtDPItem<LocCond>& rhs) const
-    {
+    inline bool operator<(const PathStmtDPItem<LocCond> &rhs) const {
         if (this->cur != rhs.getCurNodeID())
             return this->cur < rhs.getCurNodeID();
-        else if(this->curloc != rhs.getLoc())
+        else if (this->curloc != rhs.getLoc())
             return this->curloc < rhs.getLoc();
         else
             return this->vfpath < rhs.getCond();
     }
     /// Overloading operator=
-    inline PathStmtDPItem<LocCond>& operator= (const PathStmtDPItem<LocCond>& rhs)
-    {
-        if(*this!=rhs)
-        {
+    inline PathStmtDPItem<LocCond> &
+    operator=(const PathStmtDPItem<LocCond> &rhs) {
+        if (*this != rhs) {
             StmtDPItem<LocCond>::operator=(rhs);
             this->vfpath = rhs.getCond();
         }
         return *this;
     }
     /// Overloading operator==
-    inline bool operator== (const PathStmtDPItem<LocCond>& rhs) const
-    {
-        return (this->cur == rhs.cur && this->curloc == rhs.getLoc() && this->vfpath==rhs.getCond());
+    inline bool operator==(const PathStmtDPItem<LocCond> &rhs) const {
+        return (this->cur == rhs.cur && this->curloc == rhs.getLoc() &&
+                this->vfpath == rhs.getCond());
     }
     /// Overloading operator!=
-    inline bool operator!= (const PathStmtDPItem<LocCond>& rhs) const
-    {
-        return !(*this==rhs);
+    inline bool operator!=(const PathStmtDPItem<LocCond> &rhs) const {
+        return !(*this == rhs);
     }
     /// Dump dpm info
-    inline void dump() const
-    {
-        SVFUtil::outs() << "statement " << *(this->curloc)  << ", var " << this->cur << " ";
+    inline void dump() const {
+        SVFUtil::outs() << "statement " << *(this->curloc) << ", var "
+                        << this->cur << " ";
         SVFUtil::outs() << this->vfpath.toString() << "\n";
     }
 };
-
 
 /*!
  * Context DPItem
  */
 using CxtVar = CondVar<ContextCond>;
-class CxtDPItem : public DPItem
-{
-private:
+class CxtDPItem : public DPItem {
+  private:
     ContextCond context;
 
-public:
+  public:
     /// Constructor
-    CxtDPItem(NodeID c, const ContextCond& cxt) : DPItem(c),context(cxt)
-    {
-    }
-    CxtDPItem(const CxtVar& var) : DPItem(var.get_id()),context(var.get_cond())
-    {
-    }
+    CxtDPItem(NodeID c, const ContextCond &cxt) : DPItem(c), context(cxt) {}
+    CxtDPItem(const CxtVar &var)
+        : DPItem(var.get_id()), context(var.get_cond()) {}
     /// Copy constructor
-    CxtDPItem(const CxtDPItem& dps) :
-        DPItem(dps.getCurNodeID()), context(dps.context)
-    {
-    }
+    CxtDPItem(const CxtDPItem &dps)
+        : DPItem(dps.getCurNodeID()), context(dps.context) {}
     /// Destructor
-    virtual ~CxtDPItem()
-    {
-    }
+    virtual ~CxtDPItem() {}
 
     /// Get context
-    inline const ContextCond& getContexts() const
-    {
-        return context;
-    }
+    inline const ContextCond &getContexts() const { return context; }
     /// Push context
-    inline void pushContext(NodeID cxt)
-    {
-        context.pushContext(cxt);
-    }
+    inline void pushContext(NodeID cxt) { context.pushContext(cxt); }
 
     /// Match context
-    inline virtual bool matchContext(NodeID cxt)
-    {
+    inline virtual bool matchContext(NodeID cxt) {
         return context.matchContext(cxt);
     }
 
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
-    inline bool operator< (const CxtDPItem& rhs) const
-    {
+    inline bool operator<(const CxtDPItem &rhs) const {
         if (cur != rhs.cur)
             return cur < rhs.cur;
         else
             return context < rhs.context;
     }
     /// Overloading Operator=
-    inline CxtDPItem& operator= (const CxtDPItem& rhs)
-    {
-        if(*this!=rhs)
-        {
+    inline CxtDPItem &operator=(const CxtDPItem &rhs) {
+        if (*this != rhs) {
             cur = rhs.cur;
             context = rhs.context;
         }
         return *this;
     }
     /// Overloading Operator==
-    inline bool operator== (const CxtDPItem& rhs) const
-    {
+    inline bool operator==(const CxtDPItem &rhs) const {
         return (cur == rhs.cur) && (context == rhs.context);
     }
     /// Overloading Operator!=
-    inline bool operator!= (const CxtDPItem& rhs) const
-    {
+    inline bool operator!=(const CxtDPItem &rhs) const {
         return !(*this == rhs);
     }
-
 };
 
 } // End namespace SVF
 
 /// Specialise hash for CxtDPItem.
-template <>
-struct std::hash<SVF::CxtDPItem>
-{
-    size_t operator()(const SVF::CxtDPItem &cdpi) const
-    {
+template <> struct std::hash<SVF::CxtDPItem> {
+    size_t operator()(const SVF::CxtDPItem &cdpi) const {
         std::hash<std::pair<SVF::NodeID, SVF::ContextCond>> h;
         return h(std::make_pair(cdpi.getCurNodeID(), cdpi.getContexts()));
     }
 };
 
 /// Specialise hash for StmtDPItem.
-template <typename LocCond>
-struct std::hash<SVF::StmtDPItem<LocCond>>
-{
-    size_t operator()(const SVF::StmtDPItem<LocCond> &sdpi) const
-    {
+template <typename LocCond> struct std::hash<SVF::StmtDPItem<LocCond>> {
+    size_t operator()(const SVF::StmtDPItem<LocCond> &sdpi) const {
         std::hash<std::pair<SVF::NodeID, const LocCond *>> h;
         return h(std::make_pair(sdpi.getCurNodeID(), sdpi.getLoc()));
     }
 };
 
 /// Specialise hash for CxtStmtDPItem.
-template<class LocCond>
-struct std::hash<SVF::CxtStmtDPItem<LocCond>>
-{
-    size_t operator()(const SVF::CxtStmtDPItem<LocCond> &csdpi) const
-    {
-        std::hash<std::pair<SVF::NodeID, std::pair<const LocCond *, SVF::ContextCond>>> h;
-        return h(std::make_pair(csdpi.getCurNodeID(),
-                                std::make_pair(csdpi.getLoc(), csdpi.getCond())));
+template <class LocCond> struct std::hash<SVF::CxtStmtDPItem<LocCond>> {
+    size_t operator()(const SVF::CxtStmtDPItem<LocCond> &csdpi) const {
+        std::hash<std::pair<SVF::NodeID,
+                            std::pair<const LocCond *, SVF::ContextCond>>>
+            h;
+        return h(
+            std::make_pair(csdpi.getCurNodeID(),
+                           std::make_pair(csdpi.getLoc(), csdpi.getCond())));
     }
 };
 
 /// Specialise hash for ContextCond.
-template <>
-struct std::hash<const SVF::ContextCond>
-{
-    size_t operator()(const SVF::ContextCond &cc) const
-    {
+template <> struct std::hash<const SVF::ContextCond> {
+    size_t operator()(const SVF::ContextCond &cc) const {
         std::hash<SVF::CallStrCxt> h;
         return h(cc.getContexts());
     }
 };
 
-template <>
-struct std::hash<SVF::ContextCond>
-{
-    size_t operator()(const SVF::ContextCond &cc) const
-    {
+template <> struct std::hash<SVF::ContextCond> {
+    size_t operator()(const SVF::ContextCond &cc) const {
         std::hash<SVF::CallStrCxt> h;
         return h(cc.getContexts());
     }

@@ -1,4 +1,5 @@
-//===- TypeBasedHeapCloning.h -- Type filter/type-based heap cloning base ------------//
+//===- TypeBasedHeapCloning.h -- Type filter/type-based heap cloning base
+//------------//
 
 /*
  * TypeBasedHeapCloning.h
@@ -10,23 +11,21 @@
  *      Author: Mohamad Barbar
  */
 
-#include "SVF-FE/DCHG.h"
 #include "Graphs/PAG.h"
 #include "MemoryModel/PointerAnalysisImpl.h"
+#include "SVF-FE/DCHG.h"
 #include "Util/BasicTypes.h"
 
-namespace SVF
-{
+namespace SVF {
 
-class TypeBasedHeapCloning
-{
-public:
+class TypeBasedHeapCloning {
+  public:
     /// Returns raw ctir metadata of a Value. Returns null if it doesn't exist.
     static const MDNode *getRawCTirMetadata(const Value *);
 
-    virtual ~TypeBasedHeapCloning() { };
+    virtual ~TypeBasedHeapCloning(){};
 
-protected:
+  protected:
     /// The undefined type (•); void.
     static const DIType *undefType;
 
@@ -35,11 +34,12 @@ protected:
     /// deref function (mangled) for TBHC alias tests.
     static const std::string mangledDerefFnName;
 
-    /// Constructor. pta is the pointer analysis using this object (i.e. that which is extending).
+    /// Constructor. pta is the pointer analysis using this object (i.e. that
+    /// which is extending).
     TypeBasedHeapCloning(BVDataPTAImpl *pta);
 
-    /// Required by user. Handles back-propagation of newly created clone after all
-    /// metadata has been set. Used by cloneObject.
+    /// Required by user. Handles back-propagation of newly created clone after
+    /// all metadata has been set. Used by cloneObject.
     virtual void backPropagate(NodeID clone) = 0;
 
     /// Class hierarchy graph built from debug information. Required, CHG from
@@ -51,8 +51,8 @@ protected:
     /// PAG *must* be set by extending class once the PAG is available.
     void setPAG(PAG *pag);
 
-    /// Check if an object is a black hole obj or a constant object. Required since
-    /// other implementations obviously do not account for clones.
+    /// Check if an object is a black hole obj or a constant object. Required
+    /// since other implementations obviously do not account for clones.
     bool isBlkObjOrConstantObj(NodeID o) const;
 
     /// Wrapper around DCHGraph::isBase. Purpose is to keep our conditions clean
@@ -69,7 +69,8 @@ protected:
 
     /// Sets the allocation site (in objToAllocation) of o.
     void setAllocationSite(NodeID o, NodeID site);
-    /// Returns the allocation site (from objToAllocation) of o. Asserts existence.
+    /// Returns the allocation site (from objToAllocation) of o. Asserts
+    /// existence.
     NodeID getAllocationSite(NodeID o) const;
 
     /// Returns objects that have clones (any key in objToClones).
@@ -81,10 +82,12 @@ protected:
 
     // Set o as the original object of clone c.
     void setOriginalObj(NodeID c, NodeID o);
-    /// Returns the original object c is cloned from. If c is not a clone, returns itself.
+    /// Returns the original object c is cloned from. If c is not a clone,
+    /// returns itself.
     NodeID getOriginalObj(NodeID c) const;
 
-    /// Returns the filter set of a location. Not const; could create empty PointsTo.
+    /// Returns the filter set of a location. Not const; could create empty
+    /// PointsTo.
     PointsTo &getFilterSet(NodeID loc);
 
     /// Associates gep with base (through objToGeps and memObjToGeps).
@@ -101,12 +104,14 @@ protected:
     /// (through base's getGepObjNode) which will create one.
     const NodeBS getGepObjClones(NodeID base, unsigned offset);
 
-    /// Initialise the pointees of p at loc (which is type tildet *). reuse indicates
-    /// whether reuse is a possibility for this initialisation. Returns whether p changed.
-    bool init(NodeID loc, NodeID p, const DIType *tildet, bool reuse, bool gep=false);
+    /// Initialise the pointees of p at loc (which is type tildet *). reuse
+    /// indicates whether reuse is a possibility for this initialisation.
+    /// Returns whether p changed.
+    bool init(NodeID loc, NodeID p, const DIType *tildet, bool reuse,
+              bool gep = false);
 
-    /// Returns a clone of o with type type. reuse indicates whether we are cloning
-    /// as a result of reuse.
+    /// Returns a clone of o with type type. reuse indicates whether we are
+    /// cloning as a result of reuse.
     NodeID cloneObject(NodeID o, const DIType *type, bool reuse);
 
     /// Add clone dummy object node to PAG.
@@ -142,7 +147,7 @@ protected:
     /// Dump some statistics we tracked.
     void dumpStats(void);
 
-private:
+  private:
     /// PTA extending this class.
     BVDataPTAImpl *pta;
     /// PAG the PTA uses. Just a shortcut for getPAG().
@@ -158,7 +163,8 @@ private:
     Map<NodeID, NodeBS> objToClones;
     /// (Clone) object -> original object (opposite of objToclones).
     Map<NodeID, NodeID> cloneToOriginalObj;
-    /// Maps nodes (a location like a PAG node or SVFG node) to their filter set.
+    /// Maps nodes (a location like a PAG node or SVFG node) to their filter
+    /// set.
     Map<NodeID, PointsTo> locToFilterSet;
     /// Maps objects to the GEP nodes beneath them.
     Map<NodeID, NodeBS> objToGeps;
@@ -169,20 +175,20 @@ private:
     bool isGep(const PAGNode *n) const;
 
     // Bunch of stats to keep track of.
-    unsigned numInit  = 0;
-    unsigned numTBWU  = 0;
+    unsigned numInit = 0;
+    unsigned numTBWU = 0;
     unsigned numTBSSU = 0;
-    unsigned numTBSU  = 0;
+    unsigned numTBSU = 0;
     unsigned numReuse = 0;
-    unsigned numAgg   = 0;
+    unsigned numAgg = 0;
 
     // Previous stats but only upon stack/global objects.
-    unsigned numSGInit  = 0;
-    unsigned numSGTBWU  = 0;
+    unsigned numSGInit = 0;
+    unsigned numSGTBWU = 0;
     unsigned numSGTBSSU = 0;
-    unsigned numSGTBSU  = 0;
+    unsigned numSGTBSU = 0;
     unsigned numSGReuse = 0;
-    unsigned numSGAgg   = 0;
+    unsigned numSGAgg = 0;
 };
 
 } // End namespace SVF

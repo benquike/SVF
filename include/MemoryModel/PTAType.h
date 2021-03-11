@@ -30,66 +30,52 @@
 #ifndef PTATYPE_H_
 #define PTATYPE_H_
 
-#include <set>
-#include <map>
 #include "Graphs/PAG.h"
 #include "Util/BasicTypes.h"
+#include <map>
+#include <set>
 
-namespace SVF
-{
+namespace SVF {
 
 class PAGNode;
 class PAG;
 
-class PTAType
-{
-public:
+class PTAType {
+  public:
     /// Constructor
-    PTAType(const Type *ty): type(ty) {}
+    PTAType(const Type *ty) : type(ty) {}
 
     /// Get the contained llvm type
-    inline const Type *getLLVMType() const
-    {
-        return type;
-    }
+    inline const Type *getLLVMType() const { return type; }
 
     /// Dump the type
-    inline void dump() const
-    {
-        type->dump();
-    }
+    inline void dump() const { type->dump(); }
 
     /// Operator overloading
     //@{
-    inline bool operator==(const PTAType &ty) const
-    {
+    inline bool operator==(const PTAType &ty) const {
         return type == ty.getLLVMType();
     }
 
-    inline bool operator!=(const PTAType &ty) const
-    {
+    inline bool operator!=(const PTAType &ty) const {
         return type != ty.getLLVMType();
     }
 
-    inline bool operator<(const PTAType &ty) const
-    {
+    inline bool operator<(const PTAType &ty) const {
         return type < ty.getLLVMType();
     }
 
-    inline bool operator>(const PTAType &ty) const
-    {
+    inline bool operator>(const PTAType &ty) const {
         return type > ty.getLLVMType();
     }
     //@}
 
-private:
+  private:
     const Type *type;
 };
 
-class TypeSet
-{
-public:
-
+class TypeSet {
+  public:
     using TypeSetTy = OrderedSet<PTAType>;
 
     using iterator = TypeSetTy::iterator;
@@ -97,40 +83,23 @@ public:
 
     // Iterators
     //@{
-    inline iterator begin()
-    {
-        return typeSet.begin();
-    }
-    inline iterator end()
-    {
-        return typeSet.end();
-    }
-    inline const_iterator begin() const
-    {
-        return typeSet.begin();
-    }
-    inline const_iterator end() const
-    {
-        return typeSet.end();
-    }
+    inline iterator begin() { return typeSet.begin(); }
+    inline iterator end() { return typeSet.end(); }
+    inline const_iterator begin() const { return typeSet.begin(); }
+    inline const_iterator end() const { return typeSet.end(); }
     //@}
 
     /// Number of types contained
-    inline u32_t size() const
-    {
-        return typeSet.size();
-    }
+    inline u32_t size() const { return typeSet.size(); }
 
     /// Add a ptatype
-    inline bool addType(const PTAType &type)
-    {
+    inline bool addType(const PTAType &type) {
         std::pair<iterator, bool> ret = typeSet.insert(type);
         return ret.second;
     }
 
     /// Contain a ptatype or not
-    inline bool containType(const PTAType &type) const
-    {
+    inline bool containType(const PTAType &type) const {
         return typeSet.find(type) != typeSet.end();
     }
 
@@ -138,20 +107,14 @@ public:
     // Algorithm set_intersection
     // Complexity: 2 * (N1 + N2) - 1
     // N1, N2: number of element in the two typeset
-    inline bool intersect(const TypeSet *typeset) const
-    {
-        if (size() == 1)
-        {
+    inline bool intersect(const TypeSet *typeset) const {
+        if (size() == 1) {
             auto first = begin();
             return typeset->containType(*first);
-        }
-        else if (typeset->size() == 1)
-        {
+        } else if (typeset->size() == 1) {
             auto first = typeset->begin();
             return containType(*first);
-        }
-        else
-        {
+        } else {
             auto first1 = typeset->begin();
             auto first2 = begin();
             auto last1 = typeset->end();
@@ -163,8 +126,7 @@ public:
             if (*largest1 < *first2 || *largest2 < *first1)
                 return false;
 
-            while (first1 != last1 && first2 != last2)
-            {
+            while (first1 != last1 && first2 != last2) {
                 if (*first1 < *first2)
                     first1++;
                 else if (*first2 < *first1)
@@ -177,22 +139,18 @@ public:
     }
 
     /// Dump all types in the typeset
-    inline void dumpTypes() const
-    {
-        for (auto type : *this)
-        {
-             type.dump();
+    inline void dumpTypes() const {
+        for (auto type : *this) {
+            type.dump();
         }
     }
 
-private:
+  private:
     TypeSetTy typeSet;
 };
 
-class TypeSystem
-{
-public:
-
+class TypeSystem {
+  public:
     using VarToTypeSetMapTy = Map<NodeID, TypeSet *>;
 
     using TypeToVarsMapTy = OrderedMap<PTAType, NodeBS>;
@@ -202,40 +160,23 @@ public:
 
     /// Iterators
     //@{
-    inline iterator begin()
-    {
-        return VarToTypeSetMap.begin();
-    }
-    inline iterator end()
-    {
-        return VarToTypeSetMap.end();
-    }
-    inline const_iterator begin() const
-    {
-        return VarToTypeSetMap.begin();
-    }
-    inline const_iterator end() const
-    {
-        return VarToTypeSetMap.end();
-    }
+    inline iterator begin() { return VarToTypeSetMap.begin(); }
+    inline iterator end() { return VarToTypeSetMap.end(); }
+    inline const_iterator begin() const { return VarToTypeSetMap.begin(); }
+    inline const_iterator end() const { return VarToTypeSetMap.end(); }
     //}@
 
     /// Constructor
-    TypeSystem(const PAG *pag)
-    {
-        translateLLVMTypeToPTAType(pag);
-    }
+    TypeSystem(const PAG *pag) { translateLLVMTypeToPTAType(pag); }
 
     /// Has typeset or not
-    inline bool hasTypeSet(NodeID var) const
-    {
+    inline bool hasTypeSet(NodeID var) const {
         auto it = VarToTypeSetMap.find(var);
         return it != VarToTypeSetMap.end();
     }
 
     /// Get a var's typeset
-    inline const TypeSet *getTypeSet(NodeID var) const
-    {
+    inline const TypeSet *getTypeSet(NodeID var) const {
         auto it = VarToTypeSetMap.find(var);
         assert(it != VarToTypeSetMap.end() && "Can not find typeset for var");
         return it->second;
@@ -243,16 +184,12 @@ public:
 
     /// Add a ptatype for a var
     /// Return true if the ptatype is new for this var
-    inline bool addTypeForVar(NodeID var, const PTAType &type)
-    {
+    inline bool addTypeForVar(NodeID var, const PTAType &type) {
         auto it = VarToTypeSetMap.find(var);
-        if (it != VarToTypeSetMap.end())
-        {
+        if (it != VarToTypeSetMap.end()) {
             TypeSet *typeSet = it->second;
             return typeSet->addType(type);
-        }
-        else
-        {
+        } else {
             auto *typeSet = new TypeSet;
             typeSet->addType(type);
             VarToTypeSetMap[var] = typeSet;
@@ -262,42 +199,34 @@ public:
 
     /// Add a ptatype for a var
     /// Return true if the ptatype is new for this var
-    inline bool addTypeForVar(NodeID var, const Type *type)
-    {
+    inline bool addTypeForVar(NodeID var, const Type *type) {
         PTAType ptaTy(type);
         return addTypeForVar(var, ptaTy);
     }
 
-    void addVarForType(NodeID var, const PTAType &type)
-    {
+    void addVarForType(NodeID var, const PTAType &type) {
         auto it = typeToVarsMap.find(type);
-        if (it == typeToVarsMap.end())
-        {
+        if (it == typeToVarsMap.end()) {
             NodeBS nodes;
             nodes.set(var);
             typeToVarsMap[type] = nodes;
-        }
-        else
-        {
+        } else {
             NodeBS &nodes = it->second;
             nodes.set(var);
         }
     }
 
-    void addVarForType(NodeID var, const Type *type)
-    {
+    void addVarForType(NodeID var, const Type *type) {
         PTAType ptaTy(type);
         return addVarForType(var, ptaTy);
     }
 
-    inline bool hasVarsForType(const PTAType &type) const
-    {
+    inline bool hasVarsForType(const PTAType &type) const {
         auto it = typeToVarsMap.find(type);
         return it != typeToVarsMap.end();
     }
 
-    inline NodeBS &getVarsForType(const PTAType &type)
-    {
+    inline NodeBS &getVarsForType(const PTAType &type) {
         auto it = typeToVarsMap.find(type);
         assert(it != typeToVarsMap.end() && "Can not find vars for type");
         return it->second;
@@ -306,10 +235,8 @@ public:
     //// Debugging function
     //@{
     /// Print each var's id and all its types
-    void printTypeSystem() const
-    {
-        for (auto it : VarToTypeSetMap)
-        {
+    void printTypeSystem() const {
+        for (auto it : VarToTypeSetMap) {
             SVFUtil::errs() << "Var: " << it.first << '\n';
             SVFUtil::errs() << "types:\n";
             const TypeSet *typeSet = it.second;
@@ -319,7 +246,7 @@ public:
     }
     //@}
 
-private:
+  private:
     /*
      * Translate llvm type into ptatype and build the pagnode to ptatype map
      *
@@ -329,10 +256,8 @@ private:
      * RetPN
      * VarArgPN
      */
-    void translateLLVMTypeToPTAType(const PAG *pag)
-    {
-        for (PAG::const_iterator it = pag->begin(); it != pag->end(); ++it)
-        {
+    void translateLLVMTypeToPTAType(const PAG *pag) {
+        for (PAG::const_iterator it = pag->begin(); it != pag->end(); ++it) {
             const PAGNode *pagNode = it->second;
             if (pagNode->hasValue() == false)
                 continue;
@@ -342,14 +267,14 @@ private:
 
             const Type *nodeType = valType;
 
-            if (const auto *gepvalnode = SVFUtil::dyn_cast<GepValPN>(pagNode))
-            {
+            if (const auto *gepvalnode = SVFUtil::dyn_cast<GepValPN>(pagNode)) {
                 nodeType = gepvalnode->getType();
-            }
-            else if (SVFUtil::isa<RetPN>(pagNode))
-            {
-                const llvm::PointerType *ptrTy = SVFUtil::dyn_cast<llvm::PointerType>(valType);
-                const llvm::FunctionType *funTy = SVFUtil::dyn_cast<llvm::FunctionType>(ptrTy->getElementType());
+            } else if (SVFUtil::isa<RetPN>(pagNode)) {
+                const llvm::PointerType *ptrTy =
+                    SVFUtil::dyn_cast<llvm::PointerType>(valType);
+                const llvm::FunctionType *funTy =
+                    SVFUtil::dyn_cast<llvm::FunctionType>(
+                        ptrTy->getElementType());
                 nodeType = funTy->getReturnType();
             }
 
@@ -359,7 +284,7 @@ private:
         }
     }
 
-private:
+  private:
     VarToTypeSetMapTy VarToTypeSetMap;
     OrderedSet<PTAType> allPTATypes;
     TypeToVarsMapTy typeToVarsMap;
