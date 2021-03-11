@@ -154,8 +154,8 @@ int main(int argc, char ** argv)
     SVFModule* svfModule = LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
 
 	/// Build Program Assignment Graph (PAG)
-	PAGBuilder builder;
-	PAG* pag = builder.build(svfModule);
+    PAGBuilder builder;
+    PAG* pag = builder.build(svfModule);
 
     /// Create Andersen's pointer analysis
     Andersen* ander = AndersenWaveDiff::createAndersenWaveDiff(pag);
