@@ -701,7 +701,7 @@ void PAGBuilder::visitCallSite(CallSite cs)
                              pag->getPAGNode(getValueNode(*itA)));
     }
 
-    if(!cs.getType()->isVoidTy()) {
+    if  (!cs.getType()->isVoidTy()) {
         ///
         /// the second argument is a callinstruction
         /// i.e., the value receiting the return value
@@ -822,10 +822,11 @@ void PAGBuilder::handleDirectCall(CallSite cs, const SVFFunction *F) {
     // Connect the Return Node of the callsite with
     // the return value receiving the return value
     if (!cs.getType()->isVoidTy()) {
+        // get the return node (RetPN) of the function
         NodeID srcret = getReturnNode(F);
-        CallBlockNode* icfgNode =
+        CallBlockNode *icfgCallNode =
             pag->getICFG()->getCallBlockNode(cs.getInstruction());
-        addRetEdge(srcret, dstrec, icfgNode);
+        addRetEdge(srcret, dstrec, icfgCallNode);
     }
 
     //Iterators for the actual and formal parameters
