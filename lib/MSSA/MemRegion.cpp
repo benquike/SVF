@@ -98,7 +98,7 @@ const MemRegion* MRGenerator::getMR(const PointsTo& cpts) const
 void MRGenerator::collectGlobals()
 {
     PAG* pag = pta->getPAG();
-    for (auto & nIter : *pag)
+    for (auto& nIter : *pag)
     {
         if(auto* obj = SVFUtil::dyn_cast<ObjPN>(nIter.second))
         {
@@ -152,20 +152,22 @@ void MRGenerator::collectModRefForLoadStore()
     {
         const SVFFunction& fun = *fi;
 
-        /// if this function does not have any caller, then we do not care its MSSA
+        /// if this function does not have any caller,
+        /// we do not care its MSSA
         if (Options::IgnoreDeadFun && isDeadFunction(fun.getLLVMFun()))
             continue;
 
-        for (Function::const_iterator iter = fun.getLLVMFun()->begin(), eiter = fun.getLLVMFun()->end();
-                iter != eiter; ++iter)
+        for (Function::const_iterator iter = fun.getLLVMFun()->begin(),
+                 eiter = fun.getLLVMFun()->end();
+             iter != eiter; ++iter)
         {
             const BasicBlock& bb = *iter;
-            for (const auto & inst : bb)
+            for (const auto& inst : bb)
             {
-                 PAGEdgeList& pagEdgeList = getPAGEdgesFromInst(&inst);
+                PAGEdgeList& pagEdgeList = getPAGEdgesFromInst(&inst);
                 for (const auto *inst : pagEdgeList)
                 {
-                     pagEdgeToFunMap[inst] = &fun;
+                    pagEdgeToFunMap[inst] = &fun;
                     if (const auto *st = SVFUtil::dyn_cast<StorePE>(inst))
                     {
                         PointsTo cpts(pta->getPts(st->getDstID()));
@@ -175,7 +177,6 @@ void MRGenerator::collectModRefForLoadStore()
                         assert(!cpts.empty() && "null pointer!!");
                         addCPtsToStore(cpts, st, &fun);
                     }
-
                     else if (const auto *ld = SVFUtil::dyn_cast<LoadPE>(inst))
                     {
                         PointsTo cpts(pta->getPts(ld->getSrcID()));
@@ -220,7 +221,7 @@ void MRGenerator::collectModRefForCall()
         {
             PTACallGraphNode* subCallGraphNode = callGraph->getCallGraphNode(subNode);
             /// Get mod-ref of all callsites calling callGraphNode
-            modRefAnalysis(subCallGraphNode,worklist);
+            modRefAnalysis(subCallGraphNode, worklist);
         }
     }
 
@@ -491,7 +492,7 @@ NodeBS& MRGenerator::CollectPtsChain(NodeID id)
 {
     NodeID baseId = pta->getPAG()->getBaseObjNode(id);
     auto it = cachedPtsChainMap.find(baseId);
-    if(it!=cachedPtsChainMap.end())
+    if(it != cachedPtsChainMap.end())
         return it->second;
 
     PointsTo& pts = cachedPtsChainMap[baseId];
@@ -560,9 +561,13 @@ bool MRGenerator::isNonLocalObject(NodeID id, const SVFFunction* curFun) const
 /*!
  * Get Mod-Ref of a callee function
  */
-bool MRGenerator::handleCallsiteModRef(NodeBS& mod, NodeBS& ref, const CallBlockNode* cs, const SVFFunction* callee)
+bool MRGenerator::handleCallsiteModRef(NodeBS& mod, NodeBS& ref,
+                                       const CallBlockNode* cs,
+                                       const SVFFunction* callee)
 {
-    /// if a callee is a heap allocator function, then its mod set of this callsite is the heap object.
+    /// if a callee is a heap allocator function,
+    /// then its mod set of this callsite is
+    /// the heap object.
     if(isHeapAllocExtCall(cs->getCallSite()))
     {
         PAGEdgeList& pagEdgeList = getPAGEdgesFromInst(cs->getCallSite());
@@ -572,7 +577,9 @@ bool MRGenerator::handleCallsiteModRef(NodeBS& mod, NodeBS& ref, const CallBlock
                 mod.set(addr->getSrcID());
         }
     }
-    /// otherwise, we find the mod/ref sets from the callee function, who has definition and been processed
+    /// otherwise, we find the mod/ref sets from the
+    /// callee function, who has definition and
+    /// been processed
     else
     {
         mod = getModSideEffectOfFunction(callee);
@@ -590,12 +597,13 @@ bool MRGenerator::handleCallsiteModRef(NodeBS& mod, NodeBS& ref, const CallBlock
  * Call site mod-ref analysis
  * Compute mod-ref of all callsites invoking this call graph node
  */
-void MRGenerator::modRefAnalysis(PTACallGraphNode* callGraphNode, WorkList& worklist)
+void MRGenerator::modRefAnalysis(PTACallGraphNode* callGraphNode,
+                                 WorkList& worklist)
 {
 
     /// add ref/mod set of callee to its invocation callsites at caller
     for(auto it = callGraphNode->InEdgeBegin(), eit = callGraphNode->InEdgeEnd();
-            it!=eit; ++it)
+        it!=eit; ++it)
     {
         PTACallGraphEdge* edge = *it;
 
@@ -606,7 +614,8 @@ void MRGenerator::modRefAnalysis(PTACallGraphNode* callGraphNode, WorkList& work
             NodeBS mod;
             NodeBS ref;
             const CallBlockNode* cs = (*cit);
-            bool modrefchanged = handleCallsiteModRef(mod, ref, cs, callGraphNode->getFunction());
+            bool modrefchanged = handleCallsiteModRef(mod, ref, cs,
+                                                      callGraphNode->getFunction());
             if(modrefchanged)
                 worklist.push(edge->getSrcID());
         }
@@ -617,7 +626,8 @@ void MRGenerator::modRefAnalysis(PTACallGraphNode* callGraphNode, WorkList& work
             NodeBS mod;
             NodeBS ref;
             const CallBlockNode* cs = (*cit);
-            bool modrefchanged = handleCallsiteModRef(mod, ref, cs, callGraphNode->getFunction());
+            bool modrefchanged = handleCallsiteModRef(mod, ref, cs,
+                                                      callGraphNode->getFunction());
             if(modrefchanged)
                 worklist.push(edge->getSrcID());
         }

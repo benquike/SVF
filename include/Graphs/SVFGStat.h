@@ -80,7 +80,8 @@ public:
     {
 
     }
-    virtual void performStat();
+
+    void performStat() override;
 
     virtual void printStat();
 
@@ -100,7 +101,7 @@ public:
 
     virtual ~SVFGStat() {}
 
-    virtual void performStat();
+    void performStat() override;
 
     virtual void printStat();
 

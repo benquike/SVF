@@ -304,16 +304,16 @@ public:
         const_iterator it = InEdges.find(edge);
         if (it != InEdges.end())
             return *it;
-        else
-            return nullptr;
+
+        return nullptr;
     }
     inline EdgeType* hasOutgoingEdge(EdgeType* edge) const
     {
         const_iterator it = OutEdges.find(edge);
         if (it != OutEdges.end())
             return *it;
-        else
-            return nullptr;
+
+        return nullptr;
     }
     //@}
 };

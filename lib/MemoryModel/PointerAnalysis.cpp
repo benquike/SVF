@@ -150,7 +150,7 @@ void PointerAnalysis::initialize()
     else
     {
         auto* cg = new PTACallGraph();
-        CallGraphBuilder bd(cg,pag->getICFG());
+        CallGraphBuilder bd(cg, pag->getICFG());
         ptaCallGraph = bd.buildCallGraph(pag->getModule());
     }
     callGraphSCCDetection();

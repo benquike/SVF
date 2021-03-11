@@ -449,7 +449,8 @@ public:
 
 /*!
  *
- *  StoreCHI is annotated at each store instruction, representing a memory object is modified here
+ *  StoreCHI is annotated at each store instruction,
+ *  representing a memory object is modified here
  */
 template<class Cond>
 class StoreCHI : public MSSACHI<Cond>
@@ -508,8 +509,10 @@ public:
 
 
 /*!
+ * FIXME: wrong comment here
+ *  StoreCHI is annotated at each store instruction,
+ *  representing a memory object is modified here
  *
- *  StoreCHI is annotated at each store instruction, representing a memory object is modified here
  */
 template<class Cond>
 class CallCHI : public MSSACHI<Cond>
@@ -519,10 +522,12 @@ private:
 public:
     /// Constructors for StoreCHI
     //@{
-    CallCHI(const CallBlockNode* cs, const MemRegion* m, Cond c = PathCondAllocator::trueCond()) :
-        MSSACHI<Cond>(MSSADEF::CallMSSACHI,m,c), callsite(cs)
+    CallCHI(const CallBlockNode* cs, const MemRegion* m,
+            Cond c = PathCondAllocator::trueCond()) :
+        MSSACHI<Cond>(MSSADEF::CallMSSACHI, m, c), callsite(cs)
     {
     }
+
     virtual ~CallCHI()
     {
     }
@@ -566,7 +571,8 @@ public:
 };
 
 /*!
- * EntryCHI is annotated at function entry, representing receiving memory objects from callers
+ * EntryCHI is annotated at function entry,
+ * representing receiving memory objects from callers
  */
 template<class Cond>
 class EntryCHI : public MSSACHI<Cond>

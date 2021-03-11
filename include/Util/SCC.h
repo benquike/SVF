@@ -279,12 +279,11 @@ private:
                 NodeID w = _SS.top();
                 if (_D[w] <= _D[v])
                     break;
-                else
-                {
-                    _SS.pop();
-                    this->setInSCC(w,true);
-                    this->rep(w,v);
-                }
+
+                _SS.pop();
+                this->setInSCC(w,true);
+                this->rep(w,v);
+
             }
             _T.push(v);
         }
