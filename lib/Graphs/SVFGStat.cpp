@@ -102,8 +102,9 @@ void MemSSAStat::performStat() {
     for (; it != eit; it++) {
         const MemRegion *region = *it;
         u32_t regionSize = region->getRegionSize();
-        if (regionSize > maxRegionSize)
+        if (regionSize > maxRegionSize) {
             maxRegionSize = regionSize;
+        }
         totalRegionPtsNum += regionSize;
     }
 
@@ -266,36 +267,37 @@ void SVFGStat::processGraph() {
 
     for (auto &it : *graph) {
         numOfNodes++;
-        if (SVFUtil::isa<FormalINSVFGNode>(it.second))
+        if (SVFUtil::isa<FormalINSVFGNode>(it.second)) {
             numOfFormalIn++;
-        else if (SVFUtil::isa<FormalOUTSVFGNode>(it.second))
+        } else if (SVFUtil::isa<FormalOUTSVFGNode>(it.second)) {
             numOfFormalOut++;
-        else if (SVFUtil::isa<FormalParmSVFGNode>(it.second))
+        } else if (SVFUtil::isa<FormalParmSVFGNode>(it.second)) {
             numOfFormalParam++;
-        else if (SVFUtil::isa<FormalRetSVFGNode>(it.second))
+        } else if (SVFUtil::isa<FormalRetSVFGNode>(it.second)) {
             numOfFormalRet++;
-        else if (SVFUtil::isa<ActualINSVFGNode>(it.second))
+        } else if (SVFUtil::isa<ActualINSVFGNode>(it.second)) {
             numOfActualIn++;
-        else if (SVFUtil::isa<ActualOUTSVFGNode>(it.second))
+        } else if (SVFUtil::isa<ActualOUTSVFGNode>(it.second)) {
             numOfActualOut++;
-        else if (SVFUtil::isa<ActualParmSVFGNode>(it.second))
+        } else if (SVFUtil::isa<ActualParmSVFGNode>(it.second)) {
             numOfActualParam++;
-        else if (SVFUtil::isa<ActualRetSVFGNode>(it.second))
+        } else if (SVFUtil::isa<ActualRetSVFGNode>(it.second)) {
             numOfActualRet++;
-        else if (SVFUtil::isa<AddrSVFGNode>(it.second))
+        } else if (SVFUtil::isa<AddrSVFGNode>(it.second)) {
             numOfAddr++;
-        else if (SVFUtil::isa<CopySVFGNode>(it.second))
+        } else if (SVFUtil::isa<CopySVFGNode>(it.second)) {
             numOfCopy++;
-        else if (SVFUtil::isa<GepSVFGNode>(it.second))
+        } else if (SVFUtil::isa<GepSVFGNode>(it.second)) {
             numOfGep++;
-        else if (SVFUtil::isa<LoadSVFGNode>(it.second))
+        } else if (SVFUtil::isa<LoadSVFGNode>(it.second)) {
             numOfLoad++;
-        else if (SVFUtil::isa<StoreSVFGNode>(it.second))
+        } else if (SVFUtil::isa<StoreSVFGNode>(it.second)) {
             numOfStore++;
-        else if (SVFUtil::isa<PHISVFGNode>(it.second))
+        } else if (SVFUtil::isa<PHISVFGNode>(it.second)) {
             numOfPhi++;
-        else if (SVFUtil::isa<MSSAPHISVFGNode>(it.second))
+        } else if (SVFUtil::isa<MSSAPHISVFGNode>(it.second)) {
             numOfMSSAPhi++;
+        }
 
         SVFGNode *node = it.second;
         calculateNodeDegrees(node, nodeHasIndInEdge, nodeHasIndOutEdge);
@@ -306,11 +308,13 @@ void SVFGStat::processGraph() {
         avgOutDegree = totalOutEdge / numOfNodes;
     }
 
-    if (!nodeHasIndInEdge.empty())
+    if (!nodeHasIndInEdge.empty()) {
         avgIndInDegree = totalIndInEdge / nodeHasIndInEdge.size();
+    }
 
-    if (!nodeHasIndOutEdge.empty())
+    if (!nodeHasIndOutEdge.empty()) {
         avgIndOutDegree = totalIndOutEdge / nodeHasIndOutEdge.size();
+    }
 }
 
 void SVFGStat::calculateNodeDegrees(SVFGNode *node, NodeSet &nodeHasIndInEdge,
@@ -318,8 +322,9 @@ void SVFGStat::calculateNodeDegrees(SVFGNode *node, NodeSet &nodeHasIndInEdge,
     // Incoming edge
     const SVFGEdge::SVFGEdgeSetTy &inEdges = node->getInEdges();
     // total in edge
-    if (inEdges.size() > maxInDegree)
+    if (inEdges.size() > maxInDegree) {
         maxInDegree = inEdges.size();
+    }
     totalInEdge += inEdges.size();
 
     // indirect in edge
@@ -335,18 +340,20 @@ void SVFGStat::calculateNodeDegrees(SVFGNode *node, NodeSet &nodeHasIndInEdge,
             totalIndEdgeLabels += cpts.count();
         }
 
-        if (SVFUtil::isa<CallDirSVFGEdge>(edgeIt))
+        if (SVFUtil::isa<CallDirSVFGEdge>(edgeIt)) {
             totalDirCallEdge++;
-        else if (SVFUtil::isa<CallIndSVFGEdge>(edgeIt))
+        } else if (SVFUtil::isa<CallIndSVFGEdge>(edgeIt)) {
             totalIndCallEdge++;
-        else if (SVFUtil::isa<RetDirSVFGEdge>(edgeIt))
+        } else if (SVFUtil::isa<RetDirSVFGEdge>(edgeIt)) {
             totalDirRetEdge++;
-        else if (SVFUtil::isa<RetIndSVFGEdge>(edgeIt))
+        } else if (SVFUtil::isa<RetIndSVFGEdge>(edgeIt)) {
             totalIndRetEdge++;
+        }
     }
 
-    if (indInEdges > maxIndInDegree)
+    if (indInEdges > maxIndInDegree) {
         maxIndInDegree = indInEdges;
+    }
     totalIndInEdge += indInEdges;
 
     /*-----------------------------------------------------*/
@@ -354,8 +361,9 @@ void SVFGStat::calculateNodeDegrees(SVFGNode *node, NodeSet &nodeHasIndInEdge,
     // Outgoing edge
     const SVFGEdge::SVFGEdgeSetTy &outEdges = node->getOutEdges();
     // total out edge
-    if (outEdges.size() > maxOutDegree)
+    if (outEdges.size() > maxOutDegree) {
         maxOutDegree = outEdges.size();
+    }
     totalOutEdge += outEdges.size();
 
     // indirect out edge
@@ -367,8 +375,9 @@ void SVFGStat::calculateNodeDegrees(SVFGNode *node, NodeSet &nodeHasIndInEdge,
         }
     }
 
-    if (indOutEdges > maxIndOutDegree)
+    if (indOutEdges > maxIndOutDegree) {
         maxIndOutDegree = indOutEdges;
+    }
     totalIndOutEdge += indOutEdges;
 }
 
@@ -406,8 +415,9 @@ void SVFGStat::performSCCStat(SVFGEdgeSet insensitiveCalRetEdges) {
             nodeInCycle++;
             sccRepNodeSet.insert(svfgSCC->repNode(it.first));
             const NodeBS &subNodes = svfgSCC->subNodes(it.first);
-            if (subNodes.count() > maxNodeInCycle)
+            if (subNodes.count() > maxNodeInCycle) {
                 maxNodeInCycle = subNodes.count();
+            }
         }
 
         auto edgeIt = it.second->InEdgeBegin();
@@ -425,13 +435,15 @@ void SVFGStat::performSCCStat(SVFGEdgeSet insensitiveCalRetEdges) {
 
             if (edge->isDirectVFGEdge()) {
                 totalDirectEdge++;
-                if (eCycle)
+                if (eCycle) {
                     directEdgeInCycle++;
+                }
             }
             if (edge->isIndirectVFGEdge()) {
                 totalIndirectEdge++;
-                if (eCycle)
+                if (eCycle) {
                     indirectEdgeInCycle++;
+                }
             }
             if (edge->isCallVFGEdge()) {
                 totalCallEdge++;

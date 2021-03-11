@@ -149,59 +149,67 @@ class ConstraintNode : public GenericConsNodeTy {
     ///  Iterators
     //@{
     inline iterator directOutEdgeBegin() override {
-        if (sccEdgeFlag == Copy)
+        if (sccEdgeFlag == Copy) {
             return copyOutEdges.begin();
-        else
+        } else {
             return directOutEdges.begin();
+        }
     }
 
     inline iterator directOutEdgeEnd() override {
-        if (sccEdgeFlag == Copy)
+        if (sccEdgeFlag == Copy) {
             return copyOutEdges.end();
-        else
+        } else {
             return directOutEdges.end();
+        }
     }
 
     inline iterator directInEdgeBegin() override {
-        if (sccEdgeFlag == Copy)
+        if (sccEdgeFlag == Copy) {
             return copyInEdges.begin();
-        else
+        } else {
             return directInEdges.begin();
+        }
     }
 
     inline iterator directInEdgeEnd() override {
-        if (sccEdgeFlag == Copy)
+        if (sccEdgeFlag == Copy) {
             return copyInEdges.end();
-        else
+        } else {
             return directInEdges.end();
+        }
     }
 
     inline const_iterator directOutEdgeBegin() const override {
-        if (sccEdgeFlag == Copy)
+        if (sccEdgeFlag == Copy) {
             return copyOutEdges.begin();
-        else
+        } else {
             return directOutEdges.begin();
+        }
     }
 
     inline const_iterator directOutEdgeEnd() const override {
-        if (sccEdgeFlag == Copy)
+        if (sccEdgeFlag == Copy) {
             return copyOutEdges.end();
-        else
+        } else {
             return directOutEdges.end();
+        }
     }
 
     inline const_iterator directInEdgeBegin() const override {
-        if (sccEdgeFlag == Copy)
+        if (sccEdgeFlag == Copy) {
             return copyInEdges.begin();
-        else
+        } else {
             return directInEdges.begin();
+        }
     }
 
     inline const_iterator directInEdgeEnd() const override {
-        if (sccEdgeFlag == Copy)
+        if (sccEdgeFlag == Copy) {
             return copyInEdges.end();
-        else
+        } else {
             return directInEdges.end();
+        }
     }
 
     ConstraintEdge::ConstraintEdgeSetTy &incomingAddrEdges() {
@@ -285,6 +293,7 @@ class ConstraintNode : public GenericConsNodeTy {
         bool added2 = addIncomingEdge(inEdge);
         assert(added1 && added2 && "edge not added, duplicated adding!!");
     }
+
     inline void addOutgoingAddrEdge(AddrCGEdge *outEdge) {
         addressOutEdges.insert(outEdge);
         addOutgoingEdge(outEdge);
@@ -322,20 +331,22 @@ class ConstraintNode : public GenericConsNodeTy {
     }
 
     inline void removeOutgoingDirectEdge(ConstraintEdge *outEdge) {
-        if (SVFUtil::isa<GepCGEdge>(outEdge))
+        if (SVFUtil::isa<GepCGEdge>(outEdge)) {
             gepOutEdges.erase(outEdge);
-        else
+        } else {
             copyOutEdges.erase(outEdge);
+        }
         Size_t num1 = directOutEdges.erase(outEdge);
         Size_t num2 = removeOutgoingEdge(outEdge);
         assert((num1 && num2) && "edge not in the set, can not remove!!!");
     }
 
     inline void removeIncomingDirectEdge(ConstraintEdge *inEdge) {
-        if (SVFUtil::isa<GepCGEdge>(inEdge))
+        if (SVFUtil::isa<GepCGEdge>(inEdge)) {
             gepInEdges.erase(inEdge);
-        else
+        } else {
             copyInEdges.erase(inEdge);
+        }
         Size_t num1 = directInEdges.erase(inEdge);
         Size_t num2 = removeIncomingEdge(inEdge);
         assert((num1 && num2) && "edge not in the set, can not remove!!!");

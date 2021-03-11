@@ -72,24 +72,25 @@ PAG *PAGBuilderFromFile::build() {
                 token_count++;
             }
 
-            if (token_count == 0)
+            if (token_count == 0) {
                 continue;
 
-            else if (token_count == 2) {
+            } else if (token_count == 2) {
                 NodeID nodeId;
                 string nodetype;
                 istringstream ss(line);
                 ss >> nodeId;
                 ss >> nodetype;
                 outs() << "reading node :" << nodeId << "\n";
-                if (nodetype == "v")
+                if (nodetype == "v") {
                     pag->addDummyValNode(nodeId);
-                else if (nodetype == "o") {
+                } else if (nodetype == "o") {
                     const MemObj *mem = pag->addDummyMemObj(nodeId, nullptr);
                     pag->addFIObjNode(mem);
-                } else
+                } else {
                     assert(false &&
                            "format not support, pls specify node type");
+                }
             }
 
             // do consider gep edge
@@ -117,14 +118,16 @@ PAG *PAGBuilderFromFile::build() {
         myfile.close();
     }
 
-    else
+    else {
         outs() << "Unable to open file\n";
+    }
 
     /// new gep node's id from lower bound, nodeNum may not reflect the total
     /// nodes.
     u32_t lower_bound = gepNodeNumIndex;
-    for (u32_t i = 0; i < lower_bound; i++)
+    for (u32_t i = 0; i < lower_bound; i++) {
         pag->incNodeNum();
+    }
 
     pag->setNodeNumAfterPAGBuild(pag->getTotalNodeNum());
 
@@ -143,33 +146,35 @@ void PAGBuilderFromFile::addEdge(NodeID srcID, NodeID dstID,
 
     /// sanity check for PAG from txt
     assert(SVFUtil::isa<ValPN>(dstNode) && "dst not an value node?");
-    if (edge == "addr")
+    if (edge == "addr") {
         assert(SVFUtil::isa<ObjPN>(srcNode) && "src not an value node?");
-    else
+    } else {
         assert(!SVFUtil::isa<ObjPN>(srcNode) && "src not an object node?");
+    }
 
     if (edge == "addr") {
         pag->addAddrPE(srcID, dstID);
-    } else if (edge == "copy")
+    } else if (edge == "copy") {
         pag->addCopyPE(srcID, dstID);
-    else if (edge == "load")
+    } else if (edge == "load") {
         pag->addLoadPE(srcID, dstID);
-    else if (edge == "store")
+    } else if (edge == "store") {
         pag->addStorePE(srcID, dstID, nullptr);
-    else if (edge == "gep")
+    } else if (edge == "gep") {
         pag->addNormalGepPE(srcID, dstID, LocationSet(offsetOrCSId));
-    else if (edge == "variant-gep")
+    } else if (edge == "variant-gep") {
         pag->addVariantGepPE(srcID, dstID);
-    else if (edge == "call")
+    } else if (edge == "call") {
         pag->addEdge(srcNode, dstNode, new CallPE(srcNode, dstNode, nullptr));
-    else if (edge == "ret")
+    } else if (edge == "ret") {
         pag->addEdge(srcNode, dstNode, new RetPE(srcNode, dstNode, nullptr));
-    else if (edge == "cmp")
+    } else if (edge == "cmp") {
         pag->addCmpPE(srcID, dstID);
-    else if (edge == "binary-op")
+    } else if (edge == "binary-op") {
         pag->addBinaryOPPE(srcID, dstID);
-    else if (edge == "unary-op")
+    } else if (edge == "unary-op") {
         pag->addUnaryOPPE(srcID, dstID);
-    else
+    } else {
         assert(false && "format not support, can not create such edge");
+    }
 }

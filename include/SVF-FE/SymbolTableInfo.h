@@ -133,8 +133,9 @@ class SymbolTableInfo {
 
     /// Get target machine data layout
     inline static DataLayout *getDataLayout(Module *mod) {
-        if (dl == nullptr)
+        if (dl == nullptr) {
             return dl = new DataLayout(mod);
+        }
         return dl;
     }
 
@@ -234,8 +235,9 @@ class SymbolTableInfo {
     }
 
     inline bool hasValSym(const Value *val) {
-        if (isNullPtrSym(val) || isBlackholeSym(val))
+        if (isNullPtrSym(val) || isBlackholeSym(val)) {
             return true;
+        }
 
         return (valSymMap.find(val) != valSymMap.end());
     }
@@ -243,8 +245,9 @@ class SymbolTableInfo {
     /// find the unique defined global across multiple modules
     inline const Value *getGlobalRep(const Value *val) const {
         if (const auto *gvar = SVFUtil::dyn_cast<GlobalVariable>(val)) {
-            if (LLVMModuleSet::getLLVMModuleSet()->hasGlobalRep(gvar))
+            if (LLVMModuleSet::getLLVMModuleSet()->hasGlobalRep(gvar)) {
                 val = LLVMModuleSet::getLLVMModuleSet()->getGlobalRep(gvar);
+            }
         }
         return val;
     }
@@ -300,9 +303,9 @@ class SymbolTableInfo {
     TypeToFieldInfoMap::iterator getStructInfoIter(const Type *T) {
         assert(T);
         auto it = typeToFieldInfo.find(T);
-        if (it != typeToFieldInfo.end())
+        if (it != typeToFieldInfo.end()) {
             return it;
-        else {
+        } else {
             collectTypeInfo(T);
             return typeToFieldInfo.find(T);
         }

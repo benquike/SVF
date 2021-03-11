@@ -101,8 +101,9 @@ class PAGNode : public GenericPAGNodeTy {
 
     /// Return type of the value
     inline virtual const Type *getType() const {
-        if (value)
+        if (value) {
             return value->getType();
+        }
         return nullptr;
     }
 
@@ -118,8 +119,9 @@ class PAGNode : public GenericPAGNodeTy {
     /// Whether it is constant data, i.e., "0", "1.001", "str"
     /// or llvm's metadata, i.e., metadata !4087
     inline bool isConstantData() const {
-        if (hasValue())
+        if (hasValue()) {
             return SVFUtil::isConstantData(value);
+        }
 
         return false;
     }
@@ -134,12 +136,16 @@ class PAGNode : public GenericPAGNodeTy {
     /// is a global or constantexpr node
     virtual inline const Function *getFunction() const {
         if (value) {
-            if (const Instruction *inst = SVFUtil::dyn_cast<Instruction>(value))
+            if (const Instruction *inst =
+                    SVFUtil::dyn_cast<Instruction>(value)) {
                 return inst->getParent()->getParent();
-            else if (const Argument *arg = SVFUtil::dyn_cast<Argument>(value))
+            } else if (const Argument *arg =
+                           SVFUtil::dyn_cast<Argument>(value)) {
                 return arg->getParent();
-            else if (const Function *fun = SVFUtil::dyn_cast<Function>(value))
+            } else if (const Function *fun =
+                           SVFUtil::dyn_cast<Function>(value)) {
                 return fun;
+            }
         }
         return nullptr;
     }
@@ -157,10 +163,11 @@ class PAGNode : public GenericPAGNodeTy {
     /// Has incoming PAG edges
     inline bool hasIncomingEdges(PAGEdge::PEDGEK kind) const {
         auto it = InEdgeKindToSetMap.find(kind);
-        if (it != InEdgeKindToSetMap.end())
+        if (it != InEdgeKindToSetMap.end()) {
             return (!it->second.empty());
-        else
+        } else {
             return false;
+        }
     }
 
     /// Has incoming VariantGepEdges
@@ -193,10 +200,11 @@ class PAGNode : public GenericPAGNodeTy {
     /// Has outgoing PAG edges
     inline bool hasOutgoingEdges(PAGEdge::PEDGEK kind) const {
         auto it = OutEdgeKindToSetMap.find(kind);
-        if (it != OutEdgeKindToSetMap.end())
+        if (it != OutEdgeKindToSetMap.end()) {
             return (!it->second.empty());
-        else
+        } else {
             return false;
+        }
     }
 
     /// Get outgoing PAGEdge iterator
@@ -270,8 +278,9 @@ class ValPN : public PAGNode {
         : PAGNode(val, i, ty) {}
     /// Return name of a LLVM value
     inline const std::string getValueName() const override {
-        if (value && value->hasName())
+        if (value && value->hasName()) {
             return value->getName();
+        }
         return "";
     }
 
@@ -318,8 +327,9 @@ class ObjPN : public PAGNode {
 
     /// Return name of a LLVM value
     virtual const std::string getValueName() const override {
-        if (value && value->hasName())
+        if (value && value->hasName()) {
             return value->getName();
+        }
         return "";
     }
     /// Return type of the value
@@ -365,8 +375,9 @@ class GepValPN : public ValPN {
 
     /// Return name of a LLVM value
     inline const std::string getValueName() const override {
-        if (value && value->hasName())
+        if (value && value->hasName()) {
             return value->getName().str() + "_" + llvm::utostr(getOffset());
+        }
         return "offset_" + llvm::utostr(getOffset());
     }
 
@@ -428,8 +439,9 @@ class GepObjPN : public ObjPN {
 
     /// Return name of a LLVM value
     inline const std::string getValueName() const override {
-        if (value && value->hasName())
+        if (value && value->hasName()) {
             return value->getName().str() + "_" + llvm::itostr(ls.getOffset());
+        }
         return "offset_" + llvm::itostr(ls.getOffset());
     }
 
@@ -467,8 +479,9 @@ class FIObjPN : public ObjPN {
 
     /// Return name of a LLVM value
     inline const std::string getValueName() const override {
-        if (value && value->hasName())
+        if (value && value->hasName()) {
             return value->getName().str() + " (base object)";
+        }
         return " (base object)";
     }
 

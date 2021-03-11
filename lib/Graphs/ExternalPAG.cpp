@@ -73,8 +73,9 @@ bool ExternalPAG::connectCallsiteToExternalPAG(CallSite *cs) {
     std::string functionName = function->getName();
     const SVFFunction *svfFun =
         LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(function);
-    if (!hasExternalPAG(svfFun))
+    if (!hasExternalPAG(svfFun)) {
         return false;
+    }
 
     Map<int, PAGNode *> argNodes = functionToExternalPAGEntries[svfFun];
     PAGNode *retNode = functionToExternalPAGReturns[svfFun];
@@ -116,8 +117,9 @@ bool ExternalPAG::connectCallsiteToExternalPAG(CallSite *cs) {
         NodeID actualArgNodeId = pag->getValueNode(*itA);
 
         const llvm::Value *formalArg = &*itF;
-        if (!SVFUtil::isa<PointerType>(formalArg->getType()))
+        if (!SVFUtil::isa<PointerType>(formalArg->getType())) {
             continue;
+        }
 
         if (SVFUtil::isa<PointerType>((*itA)->getType())) {
             CallBlockNode *icfgNode =
@@ -146,8 +148,9 @@ int getArgNo(const SVFFunction *function, const Value *arg) {
     int argNo = 0;
     for (auto *it = function->getLLVMFun()->arg_begin();
          it != function->getLLVMFun()->arg_end(); ++it, ++argNo) {
-        if (arg->getName() == it->getName())
+        if (arg->getName() == it->getName()) {
             return argNo;
+        }
     }
 
     return -1;
@@ -156,10 +159,11 @@ int getArgNo(const SVFFunction *function, const Value *arg) {
 static void outputPAGNodeNoNewLine(raw_ostream &o, PAGNode *pagNode) {
     o << pagNode->getId() << " ";
     // TODO: is this check enough?
-    if (!ObjPN::classof(pagNode))
+    if (!ObjPN::classof(pagNode)) {
         o << "v";
-    else
+    } else {
         o << "o";
+    }
 }
 
 static void outputPAGNode(raw_ostream &o, PAGNode *pagNode) {
@@ -227,8 +231,9 @@ static void outputPAGEdge(raw_ostream &o, PAGEdge *pagEdge) {
         break;
     }
 
-    if (NormalGepPE::classof(pagEdge))
+    if (NormalGepPE::classof(pagEdge)) {
         offset = static_cast<NormalGepPE *>(pagEdge)->getOffset();
+    }
 
     o << srcId << " " << edgeKind << " " << dstId << " " << offset << "\n";
 }
@@ -245,8 +250,9 @@ void ExternalPAG::dumpFunctions(std::vector<std::string> functions) {
     Set<PAGNode *> callDsts;
     for (auto &it : *pag) {
         PAGNode *currNode = it.second;
-        if (!currNode->hasOutgoingEdges(PAGEdge::PEDGEK::Call))
+        if (!currNode->hasOutgoingEdges(PAGEdge::PEDGEK::Call)) {
             continue;
+        }
 
         // Where are these calls going?
         for (auto it = currNode->getOutgoingEdgesBegin(PAGEdge::PEDGEK::Call);
@@ -301,8 +307,9 @@ void ExternalPAG::dumpFunctions(std::vector<std::string> functions) {
             todoNodes.pop();
 
             // If the node has been dealt with, ignore it.
-            if (nodes.find(currNode) != nodes.end())
+            if (nodes.find(currNode) != nodes.end()) {
                 continue;
+            }
             nodes.insert(currNode);
 
             // Return signifies the end of a path.
@@ -344,12 +351,14 @@ void ExternalPAG::dumpFunctions(std::vector<std::string> functions) {
 bool ExternalPAG::addExternalPAG(const SVFFunction *function) {
     // The function does not exist in the module - bad arg?
     // TODO: maybe some warning?
-    if (function == nullptr)
+    if (function == nullptr) {
         return false;
+    }
 
     PAG *pag = PAG::getPAG();
-    if (hasExternalPAG(function))
+    if (hasExternalPAG(function)) {
         return false;
+    }
 
     outs() << "Adding extpag " << this->getFunctionName() << "\n";
     // Temporarily trick SVF Module into thinking we are reading from

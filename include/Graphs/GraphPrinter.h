@@ -30,9 +30,9 @@
 #ifndef INCLUDE_UTIL_GRAPHPRINTER_H_
 #define INCLUDE_UTIL_GRAPHPRINTER_H_
 
-#include <llvm/Support/ToolOutputFile.h>
 #include <llvm/ADT/GraphTraits.h>
 #include <llvm/Support/FileSystem.h> // for file open flag
+#include <llvm/Support/ToolOutputFile.h>
 #include <system_error>
 
 namespace llvm {

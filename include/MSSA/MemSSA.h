@@ -100,7 +100,7 @@ class MemSSA {
         timeOfCreateMUCHI; ///< Time for generating mu/chi for load/store/calls
     static double timeOfInsertingPHI; ///< Time for inserting phis
     static double timeOfSSARenaming;  ///< Time for SSA rename
-    //@}
+                                      //@}
 
   protected:
     BVDataPTAImpl *pta;

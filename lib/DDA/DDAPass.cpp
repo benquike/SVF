@@ -26,8 +26,9 @@ static llvm::RegisterPass<DDAPass> DDAPA("dda", "Demand-driven Pointer Analysis 
 DDAPass::~DDAPass()
 {
     // _pta->dumpStat();
-    if (_client != nullptr)
+    if (_client != nullptr) {
         delete _client;
+    }
 }
 
 void DDAPass::runOnModule(SVFModule *module) {
@@ -39,8 +40,9 @@ void DDAPass::runOnModule(SVFModule *module) {
     for (u32_t i = PointerAnalysis::FlowS_DDA;
             i < PointerAnalysis::Default_PTA; i++)
     {
-        if (Options::DDASelected.isSet(i))
+        if (Options::DDASelected.isSet(i)) {
             runPointerAnalysis(module, i);
+        }
     }
 }
 
@@ -72,8 +74,9 @@ void DDAPass::selectClient(SVFModule *module) {
             {
                 u32_t buf; // Have a buffer
                 stringstream ss(Options::UserInputQuery); // Insert the user input string into a stream
-                while (ss >> buf)
+                while (ss >> buf) {
                     _client->setQuery(buf);
+                }
             }
         }
     } else {
@@ -117,14 +120,17 @@ void DDAPass::runPointerAnalysis(SVFModule *module, u32_t kind) {
         _client->answerQueries(_pta);
         /// finalize
         _pta->finalize();
-        if(Options::PrintCPts)
+        if(Options::PrintCPts) {
             _pta->dumpCPts();
+        }
 
-        if (_pta->printStat())
+        if (_pta->printStat()) {
             _client->performStat(_pta);
+        }
 
-        if (Options::PrintQueryPts)
+        if (Options::PrintQueryPts) {
             printQueryPTS();
+        }
     }
 }
 
@@ -178,8 +184,9 @@ void DDAPass::collectCxtInsenEdgeForRecur(PointerAnalysis *pta,
         for (; edgeIt != edgeEit; ++edgeIt) {
             const SVFGEdge *edge = *edgeIt;
             if (edge->isCallVFGEdge() || edge->isRetVFGEdge()) {
-                if (edgeInCallGraphSCC(pta, edge))
+                if (edgeInCallGraphSCC(pta, edge)) {
                     insensitveEdges.insert(edge);
+                }
             }
         }
     }
@@ -218,9 +225,10 @@ void DDAPass::collectCxtInsenEdgeForVFCycle(PointerAnalysis *pta,
                                          ->getId();
                         insensitvefunPairs.insert(std::make_pair(src, dst));
                         insensitvefunPairs.insert(std::make_pair(dst, src));
-                    } else
+                    } else {
                         assert(edge->isRetVFGEdge() == false &&
                                "should not be an inter-procedural return edge");
+                    }
                 }
             }
         }
@@ -246,11 +254,12 @@ void DDAPass::collectCxtInsenEdgeForVFCycle(PointerAnalysis *pta,
                                      ->getCallGraphNode(dstFun)
                                      ->getId();
                     if (insensitvefunPairs.find(std::make_pair(src, dst)) !=
-                        insensitvefunPairs.end())
+                        insensitvefunPairs.end()) {
                         insensitveEdges.insert(edge);
-                    else if (insensitvefunPairs.find(std::make_pair(
-                                 dst, src)) != insensitvefunPairs.end())
+                    } else if (insensitvefunPairs.find(std::make_pair(
+                                   dst, src)) != insensitvefunPairs.end()) {
                         insensitveEdges.insert(edge);
+                    }
                 }
             }
         }
@@ -260,14 +269,17 @@ void DDAPass::collectCxtInsenEdgeForVFCycle(PointerAnalysis *pta,
 AliasResult DDAPass::alias(NodeID node1, NodeID node2) {
     PAG *pag = _pta->getPAG();
 
-    if (pag->isValidTopLevelPtr(pag->getPAGNode(node1)))
+    if (pag->isValidTopLevelPtr(pag->getPAGNode(node1))) {
         _pta->computeDDAPts(node1);
+    }
 
-    if (pag->isValidTopLevelPtr(pag->getPAGNode(node2)))
+    if (pag->isValidTopLevelPtr(pag->getPAGNode(node2))) {
         _pta->computeDDAPts(node2);
+    }
 
     return _pta->alias(node1, node2);
 }
+
 /*!
  * Return alias results based on our points-to/alias analysis
  * TODO: Need to handle PartialAlias and MustAlias here.
@@ -282,12 +294,14 @@ AliasResult DDAPass::alias(const Value *V1, const Value *V2) {
     ///       MayAlias will be returned.
     if (pag->hasValueNode(V1) && pag->hasValueNode(V2)) {
         PAGNode *node1 = pag->getPAGNode(pag->getValueNode(V1));
-        if (pag->isValidTopLevelPtr(node1))
+        if (pag->isValidTopLevelPtr(node1)) {
             _pta->computeDDAPts(node1->getId());
+        }
 
         PAGNode *node2 = pag->getPAGNode(pag->getValueNode(V2));
-        if (pag->isValidTopLevelPtr(node2))
+        if (pag->isValidTopLevelPtr(node2)) {
             _pta->computeDDAPts(node2->getId());
+        }
 
         return _pta->alias(V1, V2);
     }

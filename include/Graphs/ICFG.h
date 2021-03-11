@@ -171,10 +171,12 @@ class ICFG : public GenericICFGTy {
     /// Get/Add IntraBlock ICFGNode
     inline IntraBlockNode *getIntraBlockICFGNode(const Instruction *inst) {
         InstToBlockNodeMapTy::const_iterator it = InstToBlockNodeMap.find(inst);
-        if (it == InstToBlockNodeMap.end())
+        if (it == InstToBlockNodeMap.end()) {
             return nullptr;
+        }
         return it->second;
     }
+
     inline IntraBlockNode *addIntraBlockICFGNode(const Instruction *inst) {
         IntraBlockNode *sNode = new IntraBlockNode(totalICFGNode++, inst);
         addICFGNode(sNode);
@@ -186,10 +188,12 @@ class ICFG : public GenericICFGTy {
     inline FunEntryBlockNode *getFunEntryICFGNode(const SVFFunction *fun) {
         FunToFunEntryNodeMapTy::const_iterator it =
             FunToFunEntryNodeMap.find(fun);
-        if (it == FunToFunEntryNodeMap.end())
+        if (it == FunToFunEntryNodeMap.end()) {
             return nullptr;
+        }
         return it->second;
     }
+
     inline FunEntryBlockNode *addFunEntryICFGNode(const SVFFunction *fun) {
         FunEntryBlockNode *sNode = new FunEntryBlockNode(totalICFGNode++, fun);
         addICFGNode(sNode);
@@ -201,10 +205,12 @@ class ICFG : public GenericICFGTy {
     inline FunExitBlockNode *getFunExitICFGNode(const SVFFunction *fun) {
         FunToFunExitNodeMapTy::const_iterator it =
             FunToFunExitNodeMap.find(fun);
-        if (it == FunToFunExitNodeMap.end())
+        if (it == FunToFunExitNodeMap.end()) {
             return nullptr;
+        }
         return it->second;
     }
+
     inline FunExitBlockNode *addFunExitICFGNode(const SVFFunction *fun) {
         FunExitBlockNode *sNode = new FunExitBlockNode(totalICFGNode++, fun);
         addICFGNode(sNode);
@@ -215,10 +221,12 @@ class ICFG : public GenericICFGTy {
     /// Get/Add a call node
     inline CallBlockNode *getCallICFGNode(const Instruction *cs) {
         CSToCallNodeMapTy::const_iterator it = CSToCallNodeMap.find(cs);
-        if (it == CSToCallNodeMap.end())
+        if (it == CSToCallNodeMap.end()) {
             return nullptr;
+        }
         return it->second;
     }
+
     inline CallBlockNode *addCallICFGNode(const Instruction *cs) {
         CallBlockNode *sNode = new CallBlockNode(totalICFGNode++, cs);
         addICFGNode(sNode);
@@ -229,10 +237,13 @@ class ICFG : public GenericICFGTy {
     /// Get/Add a return node
     inline RetBlockNode *getRetICFGNode(const Instruction *cs) {
         CSToRetNodeMapTy::const_iterator it = CSToRetNodeMap.find(cs);
-        if (it == CSToRetNodeMap.end())
+        if (it == CSToRetNodeMap.end()) {
             return nullptr;
+        }
+
         return it->second;
     }
+
     inline RetBlockNode *addRetICFGNode(const Instruction *cs) {
         CallBlockNode *callBlockNode = getCallBlockNode(cs);
         RetBlockNode *sNode =

@@ -194,8 +194,9 @@ inline const PointerType *getRefTypeOfHeapAllocOrStatic(const CallSite cs) {
         int argPos = getHeapAllocHoldingArgPosition(cs);
         const Value *arg = cs.getArgument(argPos);
         if (const PointerType *argType =
-                SVFUtil::dyn_cast<PointerType>(arg->getType()))
+                SVFUtil::dyn_cast<PointerType>(arg->getType())) {
             refType = SVFUtil::dyn_cast<PointerType>(argType->getElementType());
+        }
     }
     // Case 2: heap/static object held by return value.
     else {
@@ -364,9 +365,11 @@ inline bool isProgEntryFunction(const Function *fun) {
 /// Get program entry function from module.
 inline const SVFFunction *getProgEntryFunction(SVFModule *svfModule) {
     for (const auto *fun : *svfModule) {
-        if (isProgEntryFunction(fun))
+        if (isProgEntryFunction(fun)) {
             return fun;
+        }
     }
+
     return nullptr;
 }
 
@@ -439,40 +442,45 @@ const Type *getTypeOfHeapAlloc(const llvm::Instruction *inst);
 //@{
 inline const ConstantExpr *isGepConstantExpr(const Value *val) {
     if (const auto *constExpr = SVFUtil::dyn_cast<ConstantExpr>(val)) {
-        if (constExpr->getOpcode() == Instruction::GetElementPtr)
+        if (constExpr->getOpcode() == Instruction::GetElementPtr) {
             return constExpr;
+        }
     }
     return nullptr;
 }
 
 inline const ConstantExpr *isInt2PtrConstantExpr(const Value *val) {
     if (const auto *constExpr = SVFUtil::dyn_cast<ConstantExpr>(val)) {
-        if (constExpr->getOpcode() == Instruction::IntToPtr)
+        if (constExpr->getOpcode() == Instruction::IntToPtr) {
             return constExpr;
+        }
     }
     return nullptr;
 }
 
 inline const ConstantExpr *isPtr2IntConstantExpr(const Value *val) {
     if (const auto *constExpr = SVFUtil::dyn_cast<ConstantExpr>(val)) {
-        if (constExpr->getOpcode() == Instruction::PtrToInt)
+        if (constExpr->getOpcode() == Instruction::PtrToInt) {
             return constExpr;
+        }
     }
     return nullptr;
 }
 
 inline const ConstantExpr *isCastConstantExpr(const Value *val) {
     if (const auto *constExpr = SVFUtil::dyn_cast<ConstantExpr>(val)) {
-        if (constExpr->getOpcode() == Instruction::BitCast)
+        if (constExpr->getOpcode() == Instruction::BitCast) {
             return constExpr;
+        }
     }
     return nullptr;
 }
 
 inline const ConstantExpr *isSelectConstantExpr(const Value *val) {
     if (const auto *constExpr = SVFUtil::dyn_cast<ConstantExpr>(val)) {
-        if (constExpr->getOpcode() == Instruction::Select)
+        if (constExpr->getOpcode() == Instruction::Select) {
             return constExpr;
+        }
     }
     return nullptr;
 }
@@ -483,8 +491,9 @@ inline const ConstantExpr *isTruncConstantExpr(const Value *val) {
             constExpr->getOpcode() == Instruction::FPTrunc ||
             constExpr->getOpcode() == Instruction::ZExt ||
             constExpr->getOpcode() == Instruction::SExt ||
-            constExpr->getOpcode() == Instruction::FPExt)
+            constExpr->getOpcode() == Instruction::FPExt) {
             return constExpr;
+        }
     }
     return nullptr;
 }
@@ -492,8 +501,9 @@ inline const ConstantExpr *isTruncConstantExpr(const Value *val) {
 inline const ConstantExpr *isCmpConstantExpr(const Value *val) {
     if (const auto *constExpr = SVFUtil::dyn_cast<ConstantExpr>(val)) {
         if (constExpr->getOpcode() == Instruction::ICmp ||
-            constExpr->getOpcode() == Instruction::FCmp)
+            constExpr->getOpcode() == Instruction::FCmp) {
             return constExpr;
+        }
     }
     return nullptr;
 }
@@ -501,8 +511,9 @@ inline const ConstantExpr *isCmpConstantExpr(const Value *val) {
 inline const ConstantExpr *isBinaryConstantExpr(const Value *val) {
     if (const auto *constExpr = SVFUtil::dyn_cast<ConstantExpr>(val)) {
         if ((constExpr->getOpcode() >= Instruction::BinaryOpsBegin) &&
-            (constExpr->getOpcode() <= Instruction::BinaryOpsEnd))
+            (constExpr->getOpcode() <= Instruction::BinaryOpsEnd)) {
             return constExpr;
+        }
     }
     return nullptr;
 }
@@ -510,8 +521,9 @@ inline const ConstantExpr *isBinaryConstantExpr(const Value *val) {
 inline const ConstantExpr *isUnaryConstantExpr(const Value *val) {
     if (const auto *constExpr = SVFUtil::dyn_cast<ConstantExpr>(val)) {
         if ((constExpr->getOpcode() >= Instruction::UnaryOpsBegin) &&
-            (constExpr->getOpcode() <= Instruction::UnaryOpsEnd))
+            (constExpr->getOpcode() <= Instruction::UnaryOpsEnd)) {
             return constExpr;
+        }
     }
     return nullptr;
 }

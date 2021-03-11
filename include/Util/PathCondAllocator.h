@@ -195,10 +195,11 @@ class PathCondAllocator {
     /// testNull like express)
     inline Condition *getEvalBrCond(const BasicBlock *bb,
                                     const BasicBlock *succ) {
-        if (const Value *val = getCurEvalVal())
+        if (const Value *val = getCurEvalVal()) {
             return evaluateBranchCond(bb, succ, val);
-        else
+        } else {
             return getBranchCond(bb, succ);
+        }
     }
     //@}
     /// Evaluate branch conditions
@@ -240,12 +241,14 @@ class PathCondAllocator {
     //@{
     inline bool setCFCond(const BasicBlock *bb, Condition *cond) {
         auto it = bbToCondMap.find(bb);
-        if (it != bbToCondMap.end() && it->second == cond)
+        if (it != bbToCondMap.end() && it->second == cond) {
             return false;
+        }
 
         bbToCondMap[bb] = cond;
         return true;
     }
+
     inline Condition *getCFCond(const BasicBlock *bb) const {
         auto it = bbToCondMap.find(bb);
         if (it == bbToCondMap.end()) {
@@ -274,8 +277,9 @@ class PathCondAllocator {
 
     /// Used internally, not supposed to be exposed to other classes
     static BddCondManager *getBddCondManager() {
-        if (bddCondMgr == nullptr)
+        if (bddCondMgr == nullptr) {
             bddCondMgr = new BddCondManager();
+        }
         return bddCondMgr;
     }
 

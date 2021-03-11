@@ -26,8 +26,9 @@ ContextDDA::ContextDDA(PAG *_pag, DDAClient *client)
  * Destructor
  */
 ContextDDA::~ContextDDA() {
-    if (flowDDA)
+    if (flowDDA) {
         delete flowDDA;
+    }
     flowDDA = nullptr;
 }
 
@@ -61,13 +62,15 @@ const CxtPtSet &ContextDDA::computeDDAPts(const CxtVar &var) {
     DOTIMESTAT(ddaStat->_AnaTimePerQuery = DDAStat::getClk(true) - start);
     DOTIMESTAT(ddaStat->_TotalTimeOfQueries += ddaStat->_AnaTimePerQuery);
 
-    if (isOutOfBudgetQuery() == false)
+    if (isOutOfBudgetQuery() == false) {
         unionPts(var, cpts);
-    else
+    } else {
         handleOutOfBudgetDpm(dpm);
+    }
 
-    if (this->printStat())
+    if (this->printStat()) {
         DOSTAT(stat->performStatPerQuery(id));
+    }
     DBOUT(DGENERAL, stat->printStatPerQuery(id, getBVPointsTo(getPts(var))));
     return this->getPts(var);
 }
@@ -109,14 +112,16 @@ void ContextDDA::handleOutOfBudgetDpm(const CxtLocDPItem &dpm) {
 bool ContextDDA::isCondCompatible(const ContextCond &cxt1,
                                   const ContextCond &cxt2,
                                   bool singleton) const {
-    if (singleton)
+    if (singleton) {
         return true;
+    }
 
     int i = cxt1.cxtSize() - 1;
     int j = cxt2.cxtSize() - 1;
     for (; i >= 0 && j >= 0; i--, j--) {
-        if (cxt1[i] != cxt2[j])
+        if (cxt1[i] != cxt2[j]) {
             return false;
+        }
     }
     return true;
 }
@@ -131,9 +136,9 @@ CxtPtSet ContextDDA::processGepPts(const GepSVFGNode *gep,
          ++piter) {
 
         CxtVar ptd = *piter;
-        if (isBlkObjOrConstantObj(ptd.get_id()))
+        if (isBlkObjOrConstantObj(ptd.get_id())) {
             tmpDstPts.set(ptd);
-        else {
+        } else {
             if (SVFUtil::isa<VariantGepPE>(gep->getPAGEdge())) {
                 setObjFieldInsensitive(ptd.get_id());
                 CxtVar var(ptd.get_cond(), getFIObjNode(ptd.get_id()));
@@ -144,8 +149,9 @@ CxtPtSet ContextDDA::processGepPts(const GepSVFGNode *gep,
                     ptd.get_cond(),
                     getGepObjNode(ptd.get_id(), normalGep->getLocationSet()));
                 tmpDstPts.set(var);
-            } else
+            } else {
                 assert(false && "new gep edge?");
+            }
         }
     }
 
@@ -166,10 +172,11 @@ bool ContextDDA::testIndCallReachability(CxtLocDPItem &dpm,
         CxtVar funptrVar(dpm.getCondVar().get_cond(), id);
         CxtLocDPItem funptrDpm = getDPIm(funptrVar, getDefSVFGNode(node));
         PointsTo pts = getBVPointsTo(findPT(funptrDpm));
-        if (pts.test(getPAG()->getObjectNode(callee->getLLVMFun())))
+        if (pts.test(getPAG()->getObjectNode(callee->getLLVMFun()))) {
             return true;
-        else
+        } else {
             return false;
+        }
     }
     return true;
 }
@@ -183,10 +190,11 @@ CallSiteID ContextDDA::getCSIDAtCall(CxtLocDPItem &, const SVFGEdge *edge) {
 
     CallSiteID svfg_csId = 0;
     if (const CallDirSVFGEdge *callEdge =
-            SVFUtil::dyn_cast<CallDirSVFGEdge>(edge))
+            SVFUtil::dyn_cast<CallDirSVFGEdge>(edge)) {
         svfg_csId = callEdge->getCallSiteId();
-    else
+    } else {
         svfg_csId = SVFUtil::cast<CallIndSVFGEdge>(edge)->getCallSiteId();
+    }
 
     const CallBlockNode *cbn = getSVFG()->getCallSite(svfg_csId);
     const SVFFunction *callee = edge->getDstNode()->getFun();
@@ -206,10 +214,12 @@ CallSiteID ContextDDA::getCSIDAtCall(CxtLocDPItem &, const SVFGEdge *edge) {
 CallSiteID ContextDDA::getCSIDAtRet(CxtLocDPItem &, const SVFGEdge *edge) {
 
     CallSiteID svfg_csId = 0;
-    if (const RetDirSVFGEdge *retEdge = SVFUtil::dyn_cast<RetDirSVFGEdge>(edge))
+    if (const RetDirSVFGEdge *retEdge =
+            SVFUtil::dyn_cast<RetDirSVFGEdge>(edge)) {
         svfg_csId = retEdge->getCallSiteId();
-    else
+    } else {
         svfg_csId = SVFUtil::cast<RetIndSVFGEdge>(edge)->getCallSiteId();
+    }
 
     const CallBlockNode *cbn = getSVFG()->getCallSite(svfg_csId);
     const SVFFunction *callee = edge->getSrcNode()->getFun();
@@ -309,13 +319,18 @@ bool ContextDDA::isHeapCondMemObj(const CxtVar &var, const StoreSVFGNode *) {
             const Function *fun = mallocSite->getFunction();
             const SVFFunction *svfFun =
                 LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(fun);
-            if (_ander->isInRecursion(svfFun))
+            if (_ander->isInRecursion(svfFun)) {
                 return true;
-            if (var.get_cond().isConcreteCxt() == false)
+            }
+
+            if (var.get_cond().isConcreteCxt() == false) {
                 return true;
+            }
+
             if (loopInfoBuilder.getLoopInfo(fun)->getLoopFor(
-                    mallocSite->getParent()))
+                    mallocSite->getParent())) {
                 return true;
+            }
         }
     }
     return false;

@@ -249,8 +249,9 @@ class SVFG : public VFG {
                                          CallSiteID csId,
                                          SVFGEdgeSetTy &edges) {
         SVFGEdge *edge = addInterIndirectVFCallEdge(actualIn, formalIn, csId);
-        if (edge != nullptr)
+        if (edge != nullptr) {
             edges.insert(edge);
+        }
     }
     /// Connect formal-out and actual-out
     virtual inline void connectFOutAndAOut(const FormalOUTSVFGNode *formalOut,
@@ -258,8 +259,9 @@ class SVFG : public VFG {
                                            CallSiteID csId,
                                            SVFGEdgeSetTy &edges) {
         SVFGEdge *edge = addInterIndirectVFRetEdge(formalOut, actualOut, csId);
-        if (edge != nullptr)
+        if (edge != nullptr) {
             edges.insert(edge);
+        }
     }
     //@}
 
@@ -300,8 +302,9 @@ class SVFG : public VFG {
                   outEit = actualIn->OutEdgeEnd();
              outIt != outEit; ++outIt) {
             SVFGEdge *edge = *outIt;
-            if (edge->getDstNode()->getFun() == callee)
+            if (edge->getDstNode()->getFun() == callee) {
                 edges.insert(edge);
+            }
         }
     }
 
@@ -313,8 +316,9 @@ class SVFG : public VFG {
                   inEit = actualOut->InEdgeEnd();
              inIt != inEit; ++inIt) {
             SVFGEdge *edge = *inIt;
-            if (edge->getSrcNode()->getFun() == callee)
+            if (edge->getSrcNode()->getFun() == callee) {
                 edges.insert(edge);
+            }
         }
     }
     //@}
@@ -406,8 +410,9 @@ class SVFG : public VFG {
         addSVFGNode(sNode, pag->getICFG()->getBlockICFGNode(
                                &(phi->getBasicBlock()->front())));
         for (auto it = phi->opVerBegin(), eit = phi->opVerEnd(); it != eit;
-             ++it)
+             ++it) {
             sNode->setOpVer(it->first, it->second);
+        }
         setDef(phi->getResVer(), sNode);
     }
 
@@ -442,7 +447,7 @@ namespace llvm {
 //};
 //
 ///// Inverse GraphTraits specializations for Value flow node, it is used for
-///inverse traversal.
+/// inverse traversal.
 // template<>
 // struct GraphTraits<Inverse<SVF::SVFGNode *> > : public
 // GraphTraits<Inverse<SVF::GenericNode<SVF::SVFGNode,SVF::SVFGEdge>* > > {

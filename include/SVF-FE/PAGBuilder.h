@@ -278,10 +278,11 @@ class PAGBuilder : public llvm::InstVisitor<PAGBuilder> {
     /// Add Store edge
     inline StorePE *addStoreEdge(NodeID src, NodeID dst) {
         IntraBlockNode *node;
-        if (const Instruction *inst = SVFUtil::dyn_cast<Instruction>(curVal))
+        if (const Instruction *inst = SVFUtil::dyn_cast<Instruction>(curVal)) {
             node = pag->getICFG()->getIntraBlockNode(inst);
-        else
+        } else {
             node = nullptr;
+        }
         StorePE *edge = pag->addStorePE(src, dst, node);
         setCurrentBBAndValueForPAGEdge(edge);
         return edge;

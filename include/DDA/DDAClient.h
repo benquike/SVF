@@ -32,11 +32,12 @@ class DDAClient {
     /// Collect candidate pointers for query.
     virtual inline OrderedNodeSet &collectCandidateQueries(PAG *p) {
         setPAG(p);
-        if (solveAll)
+        if (solveAll) {
             candidateQueries = pag->getAllValidPtrs();
-        else {
-            for (const auto &it : userInput)
+        } else {
+            for (const auto &it : userInput) {
                 addCandidate(it);
+            }
         }
         return candidateQueries;
     }
@@ -66,8 +67,9 @@ class DDAClient {
 
   protected:
     void addCandidate(NodeID id) {
-        if (pag->isValidTopLevelPtr(pag->getPAGNode(id)))
+        if (pag->isValidTopLevelPtr(pag->getPAGNode(id))) {
             candidateQueries.insert(id);
+        }
     }
 
     PAG *pag;          ///< PAG graph used by current DDA analysis

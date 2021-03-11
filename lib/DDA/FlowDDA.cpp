@@ -30,13 +30,15 @@ void FlowDDA::computeDDAPts(NodeID id) {
     DOTIMESTAT(ddaStat->_AnaTimePerQuery = DDAStat::getClk(true) - start);
     DOTIMESTAT(ddaStat->_TotalTimeOfQueries += ddaStat->_AnaTimePerQuery);
 
-    if (isOutOfBudgetQuery() == false)
+    if (isOutOfBudgetQuery() == false) {
         unionPts(node->getId(), pts);
-    else
+    } else {
         handleOutOfBudgetDpm(dpm);
+    }
 
-    if (this->printStat())
+    if (this->printStat()) {
         DOSTAT(stat->performStatPerQuery(node->getId()));
+    }
 
     DBOUT(DGENERAL, stat->printStatPerQuery(id, getPts(id)));
 }
@@ -63,8 +65,9 @@ bool FlowDDA::testIndCallReachability(LocDPItem &, const SVFFunction *callee,
     if (getPAG()->isIndirectCallSites(cbn)) {
         if (getPTACallGraph()->hasIndCSCallees(cbn)) {
             const FunctionSet &funset = getPTACallGraph()->getIndCSCallees(cbn);
-            if (funset.find(callee) != funset.end())
+            if (funset.find(callee) != funset.end()) {
                 return true;
+            }
         }
 
         return false;
@@ -119,9 +122,9 @@ PointsTo FlowDDA::processGepPts(const GepSVFGNode *gep,
                                 const PointsTo &srcPts) {
     PointsTo tmpDstPts;
     for (auto ptd : srcPts) {
-        if (isBlkObjOrConstantObj(ptd))
+        if (isBlkObjOrConstantObj(ptd)) {
             tmpDstPts.set(ptd);
-        else {
+        } else {
             if (SVFUtil::isa<VariantGepPE>(gep->getPAGEdge())) {
                 setObjFieldInsensitive(ptd);
                 tmpDstPts.set(getFIObjNode(ptd));
@@ -130,8 +133,9 @@ PointsTo FlowDDA::processGepPts(const GepSVFGNode *gep,
                 NodeID fieldSrcPtdNode =
                     getGepObjNode(ptd, normalGep->getLocationSet());
                 tmpDstPts.set(fieldSrcPtdNode);
-            } else
+            } else {
                 assert(false && "new gep edge?");
+            }
         }
     }
     DBOUT(DDDA, outs() << "\t return created gep objs {");
@@ -167,5 +171,6 @@ bool FlowDDA::isHeapCondMemObj(const NodeID &var, const StoreSVFGNode *) {
         //        }
         return true;
     }
+
     return false;
 }

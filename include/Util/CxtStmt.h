@@ -30,7 +30,11 @@
 #ifndef INCLUDE_UTIL_CXTSTMT_H_
 #define INCLUDE_UTIL_CXTSTMT_H_
 
+#include <string>
+
 #include "Util/BasicTypes.h"
+
+using namespace std;
 
 namespace SVF {
 
@@ -52,10 +56,11 @@ class CxtStmt {
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
     inline bool operator<(const CxtStmt &rhs) const {
-        if (inst != rhs.getStmt())
+        if (inst != rhs.getStmt()) {
             return inst < rhs.getStmt();
-        else
-            return cxt < rhs.getContext();
+        }
+
+        return cxt < rhs.getContext();
     }
     /// Overloading operator=
     inline CxtStmt &operator=(const CxtStmt &rhs) {
@@ -112,12 +117,15 @@ class CxtThreadStmt : public CxtStmt {
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
     inline bool operator<(const CxtThreadStmt &rhs) const {
-        if (tid != rhs.getTid())
+        if (tid != rhs.getTid()) {
             return tid < rhs.getTid();
-        else if (inst != rhs.getStmt())
+        }
+
+        if (inst != rhs.getStmt()) {
             return inst < rhs.getStmt();
-        else
-            return cxt < rhs.getContext();
+        }
+
+        return cxt < rhs.getContext();
     }
     /// Overloading operator=
     inline CxtThreadStmt &operator=(const CxtThreadStmt &rhs) {
@@ -168,10 +176,11 @@ class CxtThread {
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
     inline bool operator<(const CxtThread &rhs) const {
-        if (forksite != rhs.getThread())
+        if (forksite != rhs.getThread()) {
             return forksite < rhs.getThread();
-        else
-            return cxt < rhs.getContext();
+        }
+
+        return cxt < rhs.getContext();
     }
     /// Overloading operator=
     inline CxtThread &operator=(const CxtThread &rhs) {
@@ -215,16 +224,17 @@ class CxtThread {
         string loop = inloop ? ", inloop" : "";
         string cycle = incycle ? ", incycle" : "";
 
-        if (forksite)
+        if (forksite) {
             SVFUtil::outs()
                 << "[ Thread: $" << SVFUtil::getSourceLoc(forksite) << "$ "
                 << *forksite << "\t Contexts: " << cxtToStr() << loop << cycle
                 << "  ]\n";
-        else
+        } else {
             SVFUtil::outs()
                 << "[ Thread: "
                 << "main   "
                 << "\t Contexts: " << cxtToStr() << loop << cycle << "  ]\n";
+        }
     }
 
   protected:
@@ -254,10 +264,11 @@ class CxtProc {
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
     inline bool operator<(const CxtProc &rhs) const {
-        if (fun != rhs.getProc())
+        if (fun != rhs.getProc()) {
             return fun < rhs.getProc();
-        else
-            return cxt < rhs.getContext();
+        }
+
+        return cxt < rhs.getContext();
     }
     /// Overloading operator=
     inline CxtProc &operator=(const CxtProc &rhs) {
@@ -317,12 +328,15 @@ class CxtThreadProc : public CxtProc {
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
     inline bool operator<(const CxtThreadProc &rhs) const {
-        if (tid != rhs.getTid())
+        if (tid != rhs.getTid()) {
             return tid < rhs.getTid();
-        else if (fun != rhs.getProc())
+        }
+
+        if (fun != rhs.getProc()) {
             return fun < rhs.getProc();
-        else
-            return cxt < rhs.getContext();
+        }
+
+        return cxt < rhs.getContext();
     }
     /// Overloading operator=
     inline CxtThreadProc &operator=(const CxtThreadProc &rhs) {

@@ -90,8 +90,9 @@ class LocationSet {
         const ElemNumStridePairVec &vec = ls.getNumStridePair();
         auto it = vec.begin();
         auto eit = vec.end();
-        for (; it != eit; ++it)
+        for (; it != eit; ++it) {
             addElemNumStridePair(*it);
+        }
     }
 
     /// Initialization from FieldInfo
@@ -100,8 +101,9 @@ class LocationSet {
         const ElemNumStridePairVec &vec = fi.getElemNumStridePairVect();
         auto it = vec.begin();
         auto eit = vec.end();
-        for (; it != eit; ++it)
+        for (; it != eit; ++it) {
             addElemNumStridePair(*it);
+        }
     }
 
     ~LocationSet() {}
@@ -114,8 +116,9 @@ class LocationSet {
         ls.byteOffset += getByteOffset();
         auto it = getNumStridePair().begin();
         auto eit = getNumStridePair().end();
-        for (; it != eit; ++it)
+        for (; it != eit; ++it) {
             ls.addElemNumStridePair(*it);
+        }
 
         return ls;
     }
@@ -126,24 +129,25 @@ class LocationSet {
         return *this;
     }
     inline bool operator<(const LocationSet &rhs) const {
-        if (fldIdx != rhs.fldIdx)
+        if (fldIdx != rhs.fldIdx) {
             return (fldIdx < rhs.fldIdx);
-        //        else if (byteOffset != rhs.byteOffset)
-        //            return (byteOffset < rhs.byteOffset);
-        else {
+            //        else if (byteOffset != rhs.byteOffset)
+            //            return (byteOffset < rhs.byteOffset);
+        } else {
             const ElemNumStridePairVec &pairVec = getNumStridePair();
             const ElemNumStridePairVec &rhsPairVec = rhs.getNumStridePair();
-            if (pairVec.size() != rhsPairVec.size())
+            if (pairVec.size() != rhsPairVec.size()) {
                 return (pairVec.size() < rhsPairVec.size());
-            else {
+            } else {
                 auto it = pairVec.begin();
                 auto rhsIt = rhsPairVec.begin();
                 for (; it != pairVec.end() && rhsIt != rhsPairVec.end();
                      ++it, ++rhsIt) {
-                    if ((*it).first != (*rhsIt).first)
+                    if ((*it).first != (*rhsIt).first) {
                         return ((*it).first < (*rhsIt).first);
-                    else if ((*it).second != (*rhsIt).second)
+                    } else if ((*it).second != (*rhsIt).second) {
                         return ((*it).second < (*rhsIt).second);
+                    }
                 }
 
                 return false;
@@ -185,14 +189,15 @@ class LocationSet {
         PointsTo lhsLocations = LHS.computeAllLocations();
         PointsTo rhsLocations = RHS.computeAllLocations();
         if (lhsLocations.intersects(rhsLocations)) {
-            if (lhsLocations == rhsLocations)
+            if (lhsLocations == rhsLocations) {
                 return Same;
-            else if (lhsLocations.contains(rhsLocations))
+            } else if (lhsLocations.contains(rhsLocations)) {
                 return Superset;
-            else if (rhsLocations.contains(lhsLocations))
+            } else if (rhsLocations.contains(lhsLocations)) {
                 return Subset;
-            else
+            } else {
                 return Overlap;
+            }
         } else {
             return NonOverlap;
         }

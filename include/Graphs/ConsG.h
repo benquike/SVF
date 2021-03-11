@@ -110,16 +110,17 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
                         ConstraintEdge::ConstraintEdgeK kind) {
         ConstraintEdge edge(src, dst, kind);
         if (kind == ConstraintEdge::Copy || kind == ConstraintEdge::NormalGep ||
-            kind == ConstraintEdge::VariantGep)
+            kind == ConstraintEdge::VariantGep) {
             return directEdgeSet.find(&edge) != directEdgeSet.end();
-        else if (kind == ConstraintEdge::Addr)
+        } else if (kind == ConstraintEdge::Addr) {
             return AddrCGEdgeSet.find(&edge) != AddrCGEdgeSet.end();
-        else if (kind == ConstraintEdge::Store)
+        } else if (kind == ConstraintEdge::Store) {
             return StoreCGEdgeSet.find(&edge) != StoreCGEdgeSet.end();
-        else if (kind == ConstraintEdge::Load)
+        } else if (kind == ConstraintEdge::Load) {
             return LoadCGEdgeSet.find(&edge) != LoadCGEdgeSet.end();
-        else
+        } else {
             assert(false && "no other kind!");
+        }
         return false;
     }
 
@@ -204,10 +205,11 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
     //@{
     inline NodeID sccRepNode(NodeID id) const {
         auto it = nodeToRepMap.find(id);
-        if (it == nodeToRepMap.end())
+        if (it == nodeToRepMap.end()) {
             return id;
-        else
+        } else {
             return it->second;
+        }
     }
     inline NodeBS &sccSubNodes(NodeID id) {
         nodeToSubsMap[id].set(id);
@@ -243,9 +245,11 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
     /// Check if a given edge is a NormalGepCGEdge with 0 offset.
     inline bool isZeroOffsettedGepCGEdge(ConstraintEdge *edge) const {
         if (NormalGepCGEdge *normalGepCGEdge =
-                SVFUtil::dyn_cast<NormalGepCGEdge>(edge))
-            if (0 == normalGepCGEdge->getLocationSet().getOffset())
+                SVFUtil::dyn_cast<NormalGepCGEdge>(edge)) {
+            if (0 == normalGepCGEdge->getLocationSet().getOffset()) {
                 return true;
+            }
+        }
         return false;
     }
 
@@ -270,16 +274,18 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
     inline NodeID getGepObjNode(NodeID id, const LocationSet &ls) {
         NodeID gep = pag->getGepObjNode(id, ls);
         /// Create a node when it is (1) not exist on graph and (2) not merged
-        if (sccRepNode(gep) == gep && hasConstraintNode(gep) == false)
+        if (sccRepNode(gep) == gep && hasConstraintNode(gep) == false) {
             addConstraintNode(new ConstraintNode(gep), gep);
+        }
         return gep;
     }
     /// Get a field-insensitive node of a memory object
     inline NodeID getFIObjNode(NodeID id) {
         NodeID fi = pag->getFIObjNode(id);
         /// Create a node when it is (1) not exist on graph and (2) not merged
-        if (sccRepNode(fi) == fi && hasConstraintNode(fi) == false)
+        if (sccRepNode(fi) == fi && hasConstraintNode(fi) == false) {
             addConstraintNode(new ConstraintNode(fi), fi);
+        }
         return fi;
     }
     //@}

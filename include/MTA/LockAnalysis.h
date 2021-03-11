@@ -13,9 +13,13 @@
  */
 #include "MTA/MHP.h"
 #include "MTA/TCT.h"
-#include "Util/DataFlowUtil.h"
+// #include "Util/DataFlowUtil.h"
+
 #include <set>
+#include <string>
 #include <vector>
+
+using namespace std;
 
 namespace SVF {
 
@@ -337,6 +341,7 @@ class LockAnalysis {
              it != eit; ++it) {
             tgrlockset.erase(*it);
         }
+
         if (!toBeDeleted.empty())
             return true;
         return false;

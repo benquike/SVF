@@ -50,7 +50,7 @@ class ExtAPI {
         EFT_ALLOC,    // returns a ptr to a newly allocated object
         EFT_REALLOC,  // like L_A0 if arg0 is a non-null ptr, else ALLOC
         EFT_FREE,     // free memory arg0 and all pointers passing into free
-                  // function
+                      // function
         EFT_NOSTRUCT_ALLOC, // like ALLOC but only allocates non-struct data
         EFT_STAT,           // retval points to an unknown static var X
         EFT_STAT2,          // ret -> X -> Y (X, Y - external static vars)
@@ -58,8 +58,8 @@ class ExtAPI {
         EFT_L_A1,
         EFT_L_A2,
         EFT_L_A8,
-        EFT_L_A0__A0R_A1, // stores arg1 into *arg0 and returns arg0 (currently
-                          // only for memset)
+        EFT_L_A0__A0R_A1,  // stores arg1 into *arg0 and returns arg0 (currently
+                           // only for memset)
         EFT_L_A0__A0R_A1R, // copies the data that arg1 points to into the
                            // location
         //  arg0 points to; note that several fields may be
@@ -126,10 +126,11 @@ class ExtAPI {
                 "llvm." + F->getName().split('.').second.split('.').first.str();
         }
         llvm::StringMap<extf_t>::const_iterator it = info.find(funName);
-        if (it == info.end() || !F->isDeclaration())
+        if (it == info.end() || !F->isDeclaration()) {
             return EFT_OTHER;
-        else
-            return it->second;
+        }
+
+        return it->second;
     }
 
     // Does (F) have a static var X (unavailable to us) that its return points
@@ -196,8 +197,9 @@ class ExtAPI {
         assert(F);
         // Check the cache first; everything below is slower.
         auto i_iec = isext_cache.find(F);
-        if (i_iec != isext_cache.end())
+        if (i_iec != isext_cache.end()) {
             return i_iec->second;
+        }
 
         bool res;
         if (F->isDeclaration() || F->isIntrinsic()) {
@@ -207,6 +209,7 @@ class ExtAPI {
             res = t == EFT_ALLOC || t == EFT_REALLOC ||
                   t == EFT_NOSTRUCT_ALLOC || t == EFT_NOOP || t == EFT_FREE;
         }
+
         isext_cache[F] = res;
         return res;
     }

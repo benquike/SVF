@@ -80,8 +80,9 @@ class FlowDDA : public BVDataPTAImpl,
                            const AddrSVFGNode *addr) override {
         NodeID srcID = addr->getPAGSrcNodeID();
         /// whether this object is set field-insensitive during pre-analysis
-        if (isFieldInsensitive(srcID))
+        if (isFieldInsensitive(srcID)) {
             srcID = getFIObjNode(srcID);
+        }
 
         addDDAPts(pts, srcID);
         DBOUT(DDDA, SVFUtil::outs()
@@ -118,10 +119,11 @@ class FlowDDA : public BVDataPTAImpl,
 
     /// Union pts
     bool unionDDAPts(LocDPItem dpm, const PointsTo &targetPts) override {
-        if (isTopLevelPtrStmt(dpm.getLoc()))
+        if (isTopLevelPtrStmt(dpm.getLoc())) {
             return unionPts(dpm.getCurNodeID(), targetPts);
-        else
+        } else {
             return dpmToADCPtSetMap[dpm] |= targetPts;
+        }
     }
 
     const std::string PTAName() const override { return "FlowSensitive DDA"; }

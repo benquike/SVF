@@ -59,10 +59,11 @@ const std::string PTACallGraphEdge::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "CallSite ID: " << getCallSiteID();
-    if (isDirectCallEdge())
+    if (isDirectCallEdge()) {
         rawstr << "direct call";
-    else
+    } else {
         rawstr << "indirect call";
+    }
     rawstr << "[" << getDstID() << "<--" << getSrcID() << "]\t";
     return rawstr.str();
 }
@@ -85,14 +86,16 @@ bool PTACallGraphNode::isReachableFromProgEntry() const {
         auto *node = const_cast<PTACallGraphNode *>(nodeStack.top());
         nodeStack.pop();
 
-        if (SVFUtil::isProgEntryFunction(node->getFunction()))
+        if (SVFUtil::isProgEntryFunction(node->getFunction())) {
             return true;
+        }
 
         for (auto it = node->InEdgeBegin(), eit = node->InEdgeEnd(); it != eit;
              ++it) {
             PTACallGraphEdge *edge = *it;
-            if (visitedNodes.test_and_set(edge->getSrcID()))
+            if (visitedNodes.test_and_set(edge->getSrcID())) {
                 nodeStack.push(edge->getSrcNode());
+            }
         }
     }
 
@@ -148,8 +151,9 @@ PTACallGraphEdge *PTACallGraph::getGraphEdge(PTACallGraphNode *src,
                                              CallSiteID) {
     for (auto iter = src->OutEdgeBegin(); iter != src->OutEdgeEnd(); ++iter) {
         PTACallGraphEdge *edge = (*iter);
-        if (edge->getEdgeKind() == kind && edge->getDstID() == dst->getId())
+        if (edge->getEdgeKind() == kind && edge->getDstID() == dst->getId()) {
             return edge;
+        }
     }
     return nullptr;
 }
@@ -266,10 +270,11 @@ void PTACallGraph::verifyCallGraph() {
         if (!targets.empty()) {
             const CallBlockNode *cs = it.first;
             const SVFFunction *func = cs->getCaller();
-            if (getCallGraphNode(func)->isReachableFromProgEntry() == false)
+            if (getCallGraphNode(func)->isReachableFromProgEntry() == false) {
                 writeWrnMsg(
                     func->getName().str() +
                     " has indirect call site but not reachable from main");
+            }
         }
     }
 }
@@ -290,14 +295,16 @@ bool PTACallGraph::isReachableBetweenFunctions(const SVFFunction *srcFn,
         auto *node = const_cast<PTACallGraphNode *>(nodeStack.top());
         nodeStack.pop();
 
-        if (node->getFunction() == srcFn)
+        if (node->getFunction() == srcFn) {
             return true;
+        }
 
         for (auto it = node->InEdgeBegin(), eit = node->InEdgeEnd(); it != eit;
              ++it) {
             PTACallGraphEdge *edge = *it;
-            if (visitedNodes.test_and_set(edge->getSrcID()))
+            if (visitedNodes.test_and_set(edge->getSrcID())) {
                 nodeStack.push(edge->getSrcNode());
+            }
         }
     }
 

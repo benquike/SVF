@@ -37,14 +37,16 @@ BVDataPTAImpl::BVDataPTAImpl(PAG* p, PointerAnalysis::PTATY type, bool alias_che
     }
     else if (type == FSSPARSE_WPA || type == FSTBHC_WPA)
     {
-        if (Options::INCDFPTData)
+        if (Options::INCDFPTData) {
             ptD = new IncMutDFPTDataTy(false);
-        else
+        } else {
             ptD = new MutDFPTDataTy(false);
+        }
     } else if (type == VFS_WPA) {
         ptD = new MutVersionedPTDataTy(false);
-    } else
+    } else {
         assert(false && "no points-to data available");
+    }
 
     ptaImplTy = BVDataImpl;
 }
@@ -145,10 +147,12 @@ bool BVDataPTAImpl::readFromFile(const string &filename) {
         // Parse a single line in the form of "var -> { obj1 obj2 obj3 }"
         getline(F, line);
         size_t pos = line.find(delimiter1);
-        if (pos == string::npos)
+        if (pos == string::npos) {
             break;
-        if (line.back() != '}')
+        }
+        if (line.back() != '}') {
             break;
+        }
 
         // var
         NodeID var = atoi(line.substr(0, pos).c_str());
@@ -206,8 +210,9 @@ void BVDataPTAImpl::dumpTopLevelPtsTo() {
                 outs() << "\t\tPointsTo: {empty}\n\n";
             } else {
                 outs() << "\t\tPointsTo: { ";
-                for (const auto &it : pts)
+                for (const auto &it : pts) {
                     outs() << it << " ";
+                }
                 outs() << "}\n\n";
             }
         }
@@ -250,8 +255,9 @@ void BVDataPTAImpl::onTheFlyCallGraphSolve(const CallSiteToFunPtrMap &callsites,
             assert(pag->hasValueNode(vtbl));
             NodeID vtblId = pag->getValueNode(vtbl);
             resolveCPPIndCalls(cs, getPts(vtblId), newEdges);
-        } else
+        } else {
             resolveIndCalls(callsite.first, getPts(callsite.second), newEdges);
+        }
     }
 }
 
@@ -288,8 +294,9 @@ AliasResult BVDataPTAImpl::alias(const PointsTo &p1, const PointsTo &p2) {
     expandFIObjs(p2, pts2);
 
     if (containBlackHoleNode(pts1) || containBlackHoleNode(pts2) ||
-        pts1.intersects(pts2))
+        pts1.intersects(pts2)) {
         return llvm::MayAlias;
+    }
 
     return llvm::NoAlias;
 }

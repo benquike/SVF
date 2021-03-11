@@ -1,5 +1,5 @@
 //===- SVFModule.h -- SVFModule*
-//class-----------------------------------------//
+// class-----------------------------------------//
 //
 //                     SVF: Static Value-Flow Analysis
 //
@@ -74,10 +74,11 @@ class SVFModule {
     static inline std::string pagFileName() { return pagReadFromTxt; }
 
     static inline bool pagReadFromTXT() {
-        if (pagReadFromTxt.empty())
+        if (pagReadFromTxt.empty()) {
             return false;
-        else
-            return true;
+        }
+
+        return true;
     }
 
     ///@{
@@ -128,9 +129,9 @@ class SVFModule {
                    "No LLVM module found! Are you reading from a file other "
                    "than LLVM-IR?");
             return moduleIdentifier;
-        } else {
-            return pagReadFromTxt;
         }
+
+        return pagReadFromTxt;
     }
 };
 
