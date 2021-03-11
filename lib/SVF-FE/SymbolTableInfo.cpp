@@ -524,8 +524,7 @@ void SymbolTableInfo::buildMemModel(SVFModule* svfModule)
                     collectSym(phi->getIncomingValue(i));
                 }
             }
-            else if (const auto *gep = SVFUtil::dyn_cast<GetElementPtrInst>(
-                    inst))
+            else if (const auto *gep = SVFUtil::dyn_cast<GetElementPtrInst>(inst))
             {
                 collectSym(gep->getPointerOperand());
             }

@@ -60,14 +60,15 @@ PAG* PAGBuilder::build(SVFModule* svfModule)
 
     svfMod = svfModule;
 
-    /// initial external library information
     /// initial PAG nodes
     initialiseNodes();
-    /// initial PAG edges:
+
+    /// initialize PAG edges:
     ///// handle globals
     visitGlobal(svfModule);
-    ///// collect exception vals in the program
 
+
+    ///// collect exception vals in the program
     ExternalPAG::initialise(svfModule);
 
     /// handle functions
@@ -75,6 +76,8 @@ PAG* PAGBuilder::build(SVFModule* svfModule)
     {
         const SVFFunction& fun = *fit;
         /// collect return node of function fun
+        /// TODO: handle functions with only
+        /// declaration
         if(!SVFUtil::isExtCall(&fun))
         {
             /// Return PAG node will not be created for function which can not
@@ -82,8 +85,8 @@ PAG* PAGBuilder::build(SVFModule* svfModule)
             /// etc. In 176.gcc of SPEC 2000, function build_objc_string() from
             /// c-lang.c shows an example when fun.doesNotReturn() evaluates
             /// to TRUE because of abort().
-            if(fun.getLLVMFun()->doesNotReturn() == false && fun.getLLVMFun()->getReturnType()->isVoidTy() == false)
-                pag->addFunRet(&fun,pag->getPAGNode(pag->getReturnNode(&fun)));
+            if(!fun.getLLVMFun()->doesNotReturn() && !fun.getLLVMFun()->getReturnType()->isVoidTy())
+                pag->addFunRet(&fun, pag->getPAGNode(pag->getReturnNode(&fun)));
 
             /// To be noted, we do not record arguments which are in declared function without body
             /// TODO: what about external functions with PAG imported by commandline?
@@ -107,7 +110,7 @@ PAG* PAGBuilder::build(SVFModule* svfModule)
                     it != eit; ++it)
             {
                 Instruction& inst = *it;
-                setCurrentLocation(&inst,&bb);
+                setCurrentLocation(&inst, &bb);
                 visit(inst);
             }
         }
@@ -123,7 +126,23 @@ PAG* PAGBuilder::build(SVFModule* svfModule)
 }
 
 /*
- * Initial all the nodes from symbol table
+ * Initial all the nodes of the PAG
+ *
+ * 1. create dummy nodes
+ *    - Blackhole obj node
+ *    - Constant obj node
+ *    - Blackhole ptr node
+ *    - nullptr node
+ *
+ * 2. initialize nodes from the symbol table
+ *    - Add each symbol value in symbol table as a node
+ *    - add each obj value in the symbol table as a node
+ *    - add a return node for each function
+ *    - add a vararg node for vararg functions
+ *
+ * 3. connect val nodes with their corresponding object node
+ *    with an AddrEdge
+ *
  */
 void PAGBuilder::initialiseNodes()
 {
@@ -136,46 +155,70 @@ void PAGBuilder::initialiseNodes()
     pag->addBlackholePtrNode();
     addNullPtrNode();
 
-    for (auto iter =symTable->valSyms().begin(); iter != symTable->valSyms().end();
-            ++iter)
+    // add each sym value as a node
+    for (auto iter =symTable->valSyms().begin();
+         iter != symTable->valSyms().end(); ++iter)
     {
-        DBOUT(DPAGBuild, outs() << "add val node " << iter->second << "\n");
-        if(iter->second == symTable->blkPtrSymID() || iter->second == symTable->nullPtrSymID())
+        DBOUT(DPAGBuild, outs() << "add val node "
+              << iter->second << "\n");
+
+        if(iter->second == symTable->blkPtrSymID()
+           || iter->second == symTable->nullPtrSymID())
             continue;
         pag->addValNode(iter->first, iter->second);
     }
 
+    // add each object value as a node
     for (auto iter = symTable->objSyms().begin();
-         iter != symTable->objSyms().end();
-         ++iter)
+         iter != symTable->objSyms().end(); ++iter)
     {
-        DBOUT(DPAGBuild, outs() << "add obj node " << iter->second << "\n");
-        if(iter->second == symTable->blackholeSymID() || iter->second == symTable->constantSymID())
+        DBOUT(DPAGBuild, outs() << "add obj node "
+              << iter->second << "\n");
+
+        if(iter->second == symTable->blackholeSymID()
+           || iter->second == symTable->constantSymID())
             continue;
         pag->addObjNode(iter->first, iter->second);
     }
 
-    for (auto iter = symTable->retSyms().begin(); iter != symTable->retSyms().end();
-         ++iter)
+    // hanlding functions
+    // for each function, we add a return node
+    // TODO: how about external function with only
+    // declaration
+    for (auto iter = symTable->retSyms().begin();
+         iter != symTable->retSyms().end(); ++iter)
     {
         DBOUT(DPAGBuild, outs() << "add ret node " << iter->second << "\n");
-        const SVFFunction* fun = LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(iter->first);
+        const SVFFunction* fun =
+            LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(iter->first);
         pag->addRetNode(fun, iter->second);
     }
 
+    // handle vararg node
     for (auto iter = symTable->varargSyms().begin();
-            iter != symTable->varargSyms().end(); ++iter)
+         iter != symTable->varargSyms().end(); ++iter)
     {
         DBOUT(DPAGBuild, outs() << "add vararg node " << iter->second << "\n");
-        const SVFFunction* fun = LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(iter->first);
+        const SVFFunction* fun =
+            LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(iter->first);
         pag->addVarargNode(fun, iter->second);
     }
 
     /// add address edges for constant nodes.
+    /// TODO: why not put this in a previous loop?
+    /// For object value, both a value sym and an
+    /// object sym are were added in the symbol table
+    /// thus should should be object node and a
+    /// value node.
+    /// This loop connect the value node with the
+    /// object node with an AddrEdge.
+    ///
+    /// FIXME: why put this code here?
     for (auto iter = symTable->objSyms().begin();
          iter != symTable->objSyms().end(); ++iter)
     {
-        DBOUT(DPAGBuild, outs() << "add address edges for constant node " << iter->second << "\n");
+        DBOUT(DPAGBuild, outs() <<
+              "add address edges for constant node " << iter->second << "\n");
         const Value* val = iter->first;
         if (symTable->isConstantObjSym(val))
         {
@@ -431,14 +474,30 @@ void PAGBuilder::InitialGlobal(const GlobalVariable *gvar, Constant *C,
 }
 
 /*!
- *  Visit global variables for building PAG
+ *  \brief Connect value node and object node of global variables.
+ *
+ *  For global variables (function alike) there are 2
+ *  nodes in the PAG: one value node and one object node.
+ *  in this function, we connect the nodes of
+ *  these values in the PAG.
+ *
+ *  More specifiically the following three types of v
+ *  alues in the bitcode
+ *  - global objects: connect them using AddrEdge
+ *  - functions: connect them using AddrEdge
+ *  - aliases: connect them using CopyEdge
  */
 void PAGBuilder::visitGlobal(SVFModule* svfModule)
 {
-
-    /// initialize global variable
-    for (auto I = svfModule->global_begin(), E =
-             svfModule->global_end(); I != E; ++I)
+    ///
+    ///  connect global var with their
+    ///  corresponding object,
+    ///  same as the last loop in
+    ///  PAGBuilder::initialiseNodes
+    ///
+    for (auto I = svfModule->global_begin(),
+             E = svfModule->global_end();
+         I != E; ++I)
     {
         GlobalVariable *gvar = *I;
         NodeID idx = getValueNode(gvar);
@@ -455,9 +514,12 @@ void PAGBuilder::visitGlobal(SVFModule* svfModule)
         }
     }
 
-    /// initialize global functions
-    for (auto I = svfModule->llvmFunBegin(), E =
-             svfModule->llvmFunEnd(); I != E; ++I)
+    ///
+    /// connect functions in the same way as
+    /// other global objects
+    ///
+    for (auto I = svfModule->llvmFunBegin(),
+             E = svfModule->llvmFunEnd(); I != E; ++I)
     {
         const Function *fun = *I;
         NodeID idx = getValueNode(fun);
@@ -468,8 +530,13 @@ void PAGBuilder::visitGlobal(SVFModule* svfModule)
         addAddrEdge(obj, idx);
     }
 
-    // Handle global aliases (due to linkage of multiple bc files), e.g., @x = internal alias @y. We need to add a copy from y to x.
-    for (auto I = svfModule->alias_begin(), E = svfModule->alias_end(); I != E; I++)
+    ///
+    /// Handle global aliases (due to linkage of multiple bc files),
+    /// e.g., @x = internal alias @y. We need
+    /// to add a copy from y to x.
+    ///
+    for (auto I = svfModule->alias_begin(),
+             E = svfModule->alias_end(); I != E; I++)
     {
         NodeID dst = pag->getValueNode(*I);
         NodeID src = pag->getValueNode((*I)->getAliasee());
