@@ -290,13 +290,11 @@ public:
         cmpNodeMap[res].push_back(edge);
     }
     /// Whether this PAGNode is a result operand a of phi node
-    inline bool isCmpNode(const PAGNode* node) const
-    {
+    inline bool isCmpNode(const PAGNode* node) const {
         return cmpNodeMap.find(node) != cmpNodeMap.end();
     }
     /// Get all phi copy edges
-    inline CmpNodeMap& getCmpNodeMap()
-    {
+    inline CmpNodeMap& getCmpNodeMap() {
         return cmpNodeMap;
     }
     //@}
@@ -304,17 +302,19 @@ public:
     /// Get/set method for function/callsite arguments and returns
     //@{
     /// Add function arguments
-    inline void addFunArgs(const SVFFunction* fun, const PAGNode* arg)
-    {
+    inline void addFunArgs(const SVFFunction* fun, const PAGNode* arg) {
         FunEntryBlockNode* funEntryBlockNode = icfg->getFunEntryBlockNode(fun);
         funEntryBlockNode->addFormalParms(arg);
         funArgsListMap[fun].push_back(arg);
     }
 
 
-    /// Add function returns
-    inline void addFunRet(const SVFFunction* fun, const PAGNode* ret)
-    {
+    ///
+    /// \brief: handle function ret node (PAG)
+    ///
+    /// 1. add the PAG ret node to the ICFG FunExitBlockNode of the function
+    /// 2. setup the mapping between the function and PAG ret node
+    inline void addFunRet(const SVFFunction* fun, const PAGNode* ret) {
         FunExitBlockNode* funExitBlockNode = icfg->getFunExitBlockNode(fun);
         funExitBlockNode->addFormalRet(ret);
         funRetMap[fun] = ret;
@@ -720,7 +720,7 @@ public:
     /// Add a unique return node for a procedure
     inline NodeID addRetNode(const SVFFunction* val, NodeID i)
     {
-        PAGNode *node = new RetPN(val,i);
+        PAGNode *node = new RetPN(val, i);
         return addRetNode(val, node, i);
     }
     /// Add a unique vararg node for a procedure

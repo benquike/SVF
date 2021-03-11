@@ -87,7 +87,7 @@ PAG* PAGBuilder::build(SVFModule* svfModule)
             /// to TRUE because of abort().
             if(!fun.getLLVMFun()->doesNotReturn() &&
                !fun.getLLVMFun()->getReturnType()->isVoidTy())
-                pag->addFunRet(&fun,pag->getPAGNode(pag->getReturnNode(&fun)));
+                pag->addFunRet(&fun, pag->getPAGNode(pag->getReturnNode(&fun)));
 
             /// To be noted, we do not record arguments which are in
             /// declared function without body
