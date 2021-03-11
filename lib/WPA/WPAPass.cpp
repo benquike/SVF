@@ -1,4 +1,5 @@
-//===- WPAPass.cpp -- Whole program analysis pass------------------------------//
+//===- WPAPass.cpp -- Whole program analysis
+//pass------------------------------//
 //
 //                     SVF: Static Value-Flow Analysis
 //
@@ -32,19 +33,18 @@
  *
  */
 
-
 #include "Util/Options.h"
 #include "Util/SVFModule.h"
-#include "MemoryModel/PointerAnalysisImpl.h"
 #include "WPA/WPAPass.h"
+#include "MemoryModel/PointerAnalysisImpl.h"
+#include "SVF-FE/PAGBuilder.h"
 #include "WPA/Andersen.h"
 #include "WPA/AndersenSFR.h"
 #include "WPA/FlowSensitive.h"
 #include "WPA/FlowSensitiveTBHC.h"
-#include "WPA/VersionedFlowSensitive.h"
-#include "WPA/TypeAnalysis.h"
 #include "WPA/Steensgaard.h"
-#include "SVF-FE/PAGBuilder.h"
+#include "WPA/TypeAnalysis.h"
+#include "WPA/VersionedFlowSensitive.h"
 
 using namespace SVF;
 
@@ -53,17 +53,14 @@ char WPAPass::ID = 0;
 static llvm::RegisterPass<WPAPass> WHOLEPROGRAMPA("wpa",
         "Whole Program Pointer AnalysWPAis Pass");
 
-
 /*!
  * Destructor
  */
-WPAPass::~WPAPass()
-{
+WPAPass::~WPAPass() {
     PTAVector::const_iterator it = ptaVector.begin();
     PTAVector::const_iterator eit = ptaVector.end();
-    for (; it != eit; ++it)
-    {
-        PointerAnalysis* pta = *it;
+    for (; it != eit; ++it) {
+        PointerAnalysis *pta = *it;
         delete pta;
     }
     ptaVector.clear();
@@ -85,24 +82,23 @@ void WPAPass::runOnModule(SVFModule* svfModule)
 /*!
  * We start from here
  */
-bool WPAPass::runOnModule(Module& module)
-{
-    SVFModule* svfModule = LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(module);
+bool WPAPass::runOnModule(Module &module) {
+    SVFModule *svfModule =
+        LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(module);
     runOnModule(svfModule);
     return false;
 }
 
 /*!
- * Create pointer analysis according to a specified kind and then analyze the module.
+ * Create pointer analysis according to a specified kind and then analyze the
+ * module.
  */
-void WPAPass::runPointerAnalysis(SVFModule* svfModule, u32_t kind)
-{
-	/// Build PAG
-	PAGBuilder builder;
-	PAG* pag = builder.build(svfModule);
+void WPAPass::runPointerAnalysis(SVFModule *svfModule, u32_t kind) {
+    /// Build PAG
+    PAGBuilder builder;
+    PAG *pag = builder.build(svfModule);
     /// Initialize pointer analysis.
-    switch (kind)
-    {
+    switch (kind) {
     case PointerAnalysis::Andersen_WPA:
         _pta = new Andersen(pag);
         break;
@@ -143,7 +139,8 @@ void WPAPass::runPointerAnalysis(SVFModule* svfModule, u32_t kind)
         _pta = new TypeAnalysis(pag);
         break;
     default:
-        assert(false && "This pointer analysis has not been implemented yet.\n");
+        assert(false &&
+               "This pointer analysis has not been implemented yet.\n");
         return;
     }
 
@@ -152,8 +149,9 @@ void WPAPass::runPointerAnalysis(SVFModule* svfModule, u32_t kind)
     if (Options::AnderSVFG)
     {
         SVFGBuilder memSSA(true);
-        assert(SVFUtil::isa<AndersenBase>(_pta) && "supports only andersen/steensgaard for pre-computed SVFG");
-        SVFG *svfg = memSSA.buildFullSVFGWithoutOPT((BVDataPTAImpl*)_pta);
+        assert(SVFUtil::isa<AndersenBase>(_pta) &&
+               "supports only andersen/steensgaard for pre-computed SVFG");
+        SVFG *svfg = memSSA.buildFullSVFGWithoutOPT((BVDataPTAImpl *)_pta);
         /// support mod-ref queries only for -ander
         if (Options::PASelected.isSet(PointerAnalysis::AndersenWaveDiff_WPA))
             _svfg = svfg;
@@ -163,26 +161,24 @@ void WPAPass::runPointerAnalysis(SVFModule* svfModule, u32_t kind)
         PrintAliasPairs(_pta);
 }
 
-void WPAPass::PrintAliasPairs(PointerAnalysis* pta)
-{
-    PAG* pag = pta->getPAG();
-    for (auto lit = pag->begin(), elit = pag->end(); lit != elit; ++lit)
-    {
-        PAGNode* node1 = lit->second;
-        PAGNode* node2 = node1;
-        for (auto rit = lit, erit = pag->end(); rit != erit; ++rit)
-        {
+void WPAPass::PrintAliasPairs(PointerAnalysis *pta) {
+    PAG *pag = pta->getPAG();
+    for (auto lit = pag->begin(), elit = pag->end(); lit != elit; ++lit) {
+        PAGNode *node1 = lit->second;
+        PAGNode *node2 = node1;
+        for (auto rit = lit, erit = pag->end(); rit != erit; ++rit) {
             node2 = rit->second;
-            if(node1==node2)
+            if (node1 == node2)
                 continue;
-            const Function* fun1 = node1->getFunction();
-            const Function* fun2 = node2->getFunction();
+            const Function *fun1 = node1->getFunction();
+            const Function *fun2 = node2->getFunction();
             AliasResult result = pta->alias(node1->getId(), node2->getId());
-            SVFUtil::outs()	<< (result == AliasResult::NoAlias ? "NoAlias" : "MayAlias")
-                            << " var" << node1->getId() << "[" << node1->getValueName()
-                            << "@" << (fun1==nullptr?"":fun1->getName()) << "] --"
-                            << " var" << node2->getId() << "[" << node2->getValueName()
-                            << "@" << (fun2==nullptr?"":fun2->getName()) << "]\n";
+            SVFUtil::outs()
+                << (result == AliasResult::NoAlias ? "NoAlias" : "MayAlias")
+                << " var" << node1->getId() << "[" << node1->getValueName()
+                << "@" << (fun1 == nullptr ? "" : fun1->getName()) << "] --"
+                << " var" << node2->getId() << "[" << node2->getValueName()
+                << "@" << (fun2 == nullptr ? "" : fun2->getName()) << "]\n";
         }
     }
 }
@@ -191,39 +187,36 @@ void WPAPass::PrintAliasPairs(PointerAnalysis* pta)
  * Return alias results based on our points-to/alias analysis
  * TODO: Need to handle PartialAlias and MustAlias here.
  */
-AliasResult WPAPass::alias(const Value* V1, const Value* V2)
-{
+AliasResult WPAPass::alias(const Value *V1, const Value *V2) {
 
     AliasResult result = llvm::MayAlias;
 
-    PAG* pag = _pta->getPAG();
+    PAG *pag = _pta->getPAG();
 
     /// TODO: When this method is invoked during compiler optimizations, the IR
     ///       used for pointer analysis may been changed, so some Values may not
     ///       find corresponding PAG node. In this case, we only check alias
-    ///       between two Values if they both have PAG nodes. Otherwise, MayAlias
-    ///       will be returned.
-    if (pag->hasValueNode(V1) && pag->hasValueNode(V2))
-    {
+    ///       between two Values if they both have PAG nodes. Otherwise,
+    ///       MayAlias will be returned.
+    if (pag->hasValueNode(V1) && pag->hasValueNode(V2)) {
         /// Veto is used by default
         if (Options::AliasRule.getBits() == 0 || Options::AliasRule.isSet(Veto))
         {
             /// Return NoAlias if any PTA gives NoAlias result
             result = llvm::MayAlias;
 
-            for (auto *it : ptaVector)
-            {
+            for (auto *it : ptaVector) {
                 if (it->alias(V1, V2) == llvm::NoAlias)
                     result = llvm::NoAlias;
             }
+
         }
         else if (Options::AliasRule.isSet(Conservative))
         {
             /// Return MayAlias if any PTA gives MayAlias result
             result = llvm::NoAlias;
 
-            for (auto *it : ptaVector)
-            {
+            for (auto *it : ptaVector) {
                 if (it->alias(V1, V2) == llvm::MayAlias)
                     result = llvm::MayAlias;
             }

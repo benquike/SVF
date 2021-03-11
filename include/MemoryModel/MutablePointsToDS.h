@@ -1,5 +1,6 @@
 /// PTData (AbstractPointsToDS.h) implementations with a mutable backend.
-/// Each Key is given a points-to set which is itself updated till the analysis terminates.
+/// Each Key is given a points-to set which is itself updated till the analysis
+/// terminates.
 
 #ifndef MUTABLE_POINTSTO_H_
 #define MUTABLE_POINTSTO_H_
@@ -47,26 +48,20 @@ public:
     using iterator = typename DataSet::iterator;
 
     /// Constructor
-    MutablePTData(bool reversePT = true, PTDataTy ty = PTDataTy::MutBase) : BasePTData(reversePT, ty) { }
+    MutablePTData(bool reversePT = true, PTDataTy ty = PTDataTy::MutBase)
+        : BasePTData(reversePT, ty) {}
 
-    virtual ~MutablePTData() { }
+    virtual ~MutablePTData() {}
 
     /// Return Points-to map
-    virtual inline const PtsMap& getPtsMap() const
-    {
-        return ptsMap;
-    }
+    virtual inline const PtsMap &getPtsMap() const { return ptsMap; }
 
-    inline void clear() override
-    {
+    inline void clear() override {
         ptsMap.clear();
         revPtsMap.clear();
     }
 
-    inline const Data& getPts(const Key& var) override
-    {
-        return ptsMap[var];
-    }
+    inline const DataSet &getPts(const Key &var) override { return ptsMap[var]; }
 
     inline const KeySet& getRevPts(const Data& datum) override
     {
@@ -80,8 +75,7 @@ public:
         return addPts(ptsMap[dstKey], element);
     }
 
-    inline bool unionPts(const Key& dstKey, const Key& srcKey) override
-    {
+    inline bool unionPts(const Key &dstKey, const Key &srcKey) override {
         addRevPts(ptsMap[srcKey], dstKey);
         return unionPts(ptsMap[dstKey], getPts(srcKey));
     }
@@ -92,24 +86,17 @@ public:
         return unionPts(ptsMap[dstKey], srcDataSet);
     }
 
-    inline void dumpPTData() override
-    {
-        dumpPts(ptsMap);
-    }
+    inline void dumpPTData() override { dumpPts(ptsMap); }
 
     void clearPts(const Key& var, const Data& element) override
     {
         ptsMap[var].reset(element);
     }
 
-    void clearFullPts(const Key& var) override
-    {
-        ptsMap[var].clear();
-    }
+    void clearFullPts(const Key &var) override { ptsMap[var].clear(); }
 
     /// Methods to support type inquiry through isa, cast, and dyn_cast:
     ///@{
-
     static inline bool classof(const MutablePTData<Key, KeySet, Data, DataSet> *)
     {
         return true;
@@ -139,7 +126,7 @@ protected:
         }
     }
 
-private:
+  private:
     /// Internal union/add points-to helper methods.
     ///@{
     inline bool unionPts(DataSet& dstDataSet, const DataSet& srcDataSet)
@@ -154,22 +141,23 @@ private:
     {
         if (this->rev) insertKey<Key, KeySet>(tgr, revData);
     }
-    inline void addRevPts(const DataSet &ptsData, const Key& tgr)
-    {
-        if (this->rev)
-        {
-            for(iterator it = ptsData.begin(), eit = ptsData.end(); it!=eit; ++it)
+
+    inline void addRevPts(const DataSet &ptsData, const Key &tgr) {
+        if (this->rev) {
+            for (iterator it = ptsData.begin(), eit = ptsData.end(); it != eit;
+                 ++it)
                 addSingleRevPts(revPtsMap[*it], tgr);
         }
     }
     ///@}
 
-protected:
+  protected:
     PtsMap ptsMap;
     RevPtsMap revPtsMap;
 };
 
 /// DiffPTData implemented with points-to sets which are updated continuously.
+
 template <typename Key, typename KeySet, typename Data, typename DataSet>
 class MutableDiffPTData : public DiffPTData<Key, KeySet, Data, DataSet>
 {
@@ -183,18 +171,13 @@ public:
     MutableDiffPTData(bool reversePT = true, PTDataTy ty = PTDataTy::Diff)
         : BaseDiffPTData(reversePT, ty), mutPTData(reversePT) { }
 
-    virtual ~MutableDiffPTData() { }
+    virtual ~MutableDiffPTData() {}
 
-    virtual inline const PtsMap& getPtsMap() const
-    {
+    virtual inline const PtsMap &getPtsMap() const {
         return mutPTData.getPtsMap();
     }
 
-    inline void clear() override
-    {
-        mutPTData.clear();
-    }
-
+    inline void clear() override { mutPTData.clear(); }
 
     inline const DataSet& getPts(const Key& var) override
     {
@@ -213,8 +196,7 @@ public:
         return mutPTData.addPts(dstKey, element);
     }
 
-    inline bool unionPts(const Key& dstKey, const Key& srcKey) override
-    {
+    inline bool unionPts(const Key &dstKey, const Key &srcKey) override {
         return mutPTData.unionPts(dstKey, srcKey);
     }
 
@@ -228,15 +210,9 @@ public:
         mutPTData.clearPts(var, element);
     }
 
-    void clearFullPts(const Key& var) override
-    {
-        mutPTData.clearFullPts(var);
-    }
+    void clearFullPts(const Key &var) override { mutPTData.clearFullPts(var); }
 
-    inline void dumpPTData() override
-    {
-        mutPTData.dumpPTData();
-    }
+    inline void dumpPTData() override { mutPTData.dumpPTData(); }
 
     inline const DataSet &getDiffPts(Key &var) override
     {
@@ -262,10 +238,7 @@ public:
         dstPropa &= srcPropa;
     }
 
-    inline void clearPropaPts(Key &var) override
-    {
-        getPropaPts(var).clear();
-    }
+    inline void clearPropaPts(Key &var) override { getPropaPts(var).clear(); }
 
     /// Methods to support type inquiry through isa, cast, and dyn_cast:
     ///@{
@@ -280,7 +253,7 @@ public:
     }
     ///@}
 
-protected:
+  protected:
     /// Get diff PTS that can be modified.
     inline DataSet &getMutDiffPts(Key &var)
     {
@@ -314,24 +287,22 @@ public:
     using LocID = typename BaseDFPTData::LocID;
     using PtsMap = typename BaseMutPTData::PtsMap;
     using PtsMapConstIter = typename BaseMutPTData::PtsMapConstIter;
-    using DFPtsMap = Map<LocID, PtsMap>;	///< Data-flow point-to map
+    using DFPtsMap = Map<LocID, PtsMap>; ///< Data-flow point-to map
     using DFPtsMapIter = typename DFPtsMap::iterator;
     using DFPtsMapconstIter = typename DFPtsMap::const_iterator;
 
     /// Constructor
-    MutableDFPTData(bool reversePT = true, PTDataTy ty = BaseDFPTData::MutDataFlow) : BaseDFPTData(reversePT, ty), mutPTData(reversePT) { }
+    MutableDFPTData(bool reversePT = true,
+                    PTDataTy ty = BaseDFPTData::MutDataFlow)
+        : BaseDFPTData(reversePT, ty), mutPTData(reversePT) {}
 
-    virtual ~MutableDFPTData() { }
+    virtual ~MutableDFPTData() {}
 
-    virtual inline const PtsMap& getPtsMap() const
-    {
+    virtual inline const PtsMap &getPtsMap() const {
         return mutPTData.getPtsMap();
     }
 
-    inline void clear() override
-    {
-        mutPTData.clear();
-    }
+    inline void clear() override { mutPTData.clear(); }
 
     inline const DataSet& getPts(const Key& var) override
     {
@@ -344,31 +315,27 @@ public:
         return mutPTData.getRevPts(datum);
     }
 
-    inline bool hasDFInSet(LocID loc) const override
-    {
+    inline bool hasDFInSet(LocID loc) const override {
         return (dfInPtsMap.find(loc) != dfInPtsMap.end());
     }
 
-    inline bool hasDFOutSet(LocID loc) const override
-    {
+    inline bool hasDFOutSet(LocID loc) const override {
         return (dfOutPtsMap.find(loc) != dfOutPtsMap.end());
     }
 
-    inline bool hasDFInSet(LocID loc,const Key& var) const override
-    {
+    inline bool hasDFInSet(LocID loc, const Key &var) const override {
         DFPtsMapconstIter it = dfInPtsMap.find(loc);
-        if ( it == dfInPtsMap.end())
+        if (it == dfInPtsMap.end())
             return false;
-        const PtsMap& ptsMap = it->second;
+        const PtsMap &ptsMap = it->second;
         return (ptsMap.find(var) != ptsMap.end());
     }
 
-    inline bool hasDFOutSet(LocID loc, const Key& var) const override
-    {
+    inline bool hasDFOutSet(LocID loc, const Key &var) const override {
         DFPtsMapconstIter it = dfOutPtsMap.find(loc);
-        if ( it == dfOutPtsMap.end())
+        if (it == dfOutPtsMap.end())
             return false;
-        const PtsMap& ptsMap = it->second;
+        const PtsMap &ptsMap = it->second;
         return (ptsMap.find(var) != ptsMap.end());
     }
 
@@ -386,58 +353,49 @@ public:
 
     /// Get internal flow-sensitive data structures.
     ///@{
-    inline const PtsMap& getDFInPtsMap(LocID loc)
-    {
-        return dfInPtsMap[loc];
-    }
-    inline const PtsMap& getDFOutPtsMap(LocID loc)
-    {
-        return dfOutPtsMap[loc];
-    }
-    inline const DFPtsMap& getDFIn()
-    {
-        return dfInPtsMap;
-    }
-    inline const DFPtsMap& getDFOut()
-    {
-        return dfOutPtsMap;
-    }
+    inline const PtsMap &getDFInPtsMap(LocID loc) { return dfInPtsMap[loc]; }
+    inline const PtsMap &getDFOutPtsMap(LocID loc) { return dfOutPtsMap[loc]; }
+    inline const DFPtsMap &getDFIn() { return dfInPtsMap; }
+    inline const DFPtsMap &getDFOut() { return dfOutPtsMap; }
     ///@}
 
-    inline bool updateDFInFromIn(LocID srcLoc, const Key& srcVar, LocID dstLoc, const Key& dstVar) override
-    {
-        return this->unionPts(getDFInPtsSet(dstLoc,dstVar), getDFInPtsSet(srcLoc,srcVar));
+    inline bool updateDFInFromIn(LocID srcLoc, const Key &srcVar, LocID dstLoc,
+                                 const Key &dstVar) override {
+        return this->unionPts(getDFInPtsSet(dstLoc, dstVar),
+                              getDFInPtsSet(srcLoc, srcVar));
     }
 
-    inline bool updateDFInFromOut(LocID srcLoc, const Key& srcVar, LocID dstLoc, const Key& dstVar) override
-    {
-        return this->unionPts(getDFInPtsSet(dstLoc,dstVar), getDFOutPtsSet(srcLoc,srcVar));
+    inline bool updateDFInFromOut(LocID srcLoc, const Key &srcVar, LocID dstLoc,
+                                  const Key &dstVar) override {
+        return this->unionPts(getDFInPtsSet(dstLoc, dstVar),
+                              getDFOutPtsSet(srcLoc, srcVar));
     }
 
-    inline bool updateDFOutFromIn(LocID srcLoc, const Key& srcVar, LocID dstLoc, const Key& dstVar) override
-    {
-        return this->unionPts(getDFOutPtsSet(dstLoc,dstVar), getDFInPtsSet(srcLoc,srcVar));
+    inline bool updateDFOutFromIn(LocID srcLoc, const Key &srcVar, LocID dstLoc,
+                                  const Key &dstVar) override {
+        return this->unionPts(getDFOutPtsSet(dstLoc, dstVar),
+                              getDFInPtsSet(srcLoc, srcVar));
     }
 
-    inline bool updateAllDFInFromOut(LocID srcLoc, const Key& srcVar, LocID dstLoc, const Key& dstVar) override
-    {
-        return this->updateDFInFromOut(srcLoc,srcVar,dstLoc,dstVar);
+    inline bool updateAllDFInFromOut(LocID srcLoc, const Key &srcVar,
+                                     LocID dstLoc, const Key &dstVar) override {
+        return this->updateDFInFromOut(srcLoc, srcVar, dstLoc, dstVar);
     }
 
-    inline bool updateAllDFInFromIn(LocID srcLoc, const Key& srcVar, LocID dstLoc, const Key& dstVar) override
-    {
-        return this->updateDFInFromIn(srcLoc,srcVar,dstLoc,dstVar);
+    inline bool updateAllDFInFromIn(LocID srcLoc, const Key &srcVar,
+                                    LocID dstLoc, const Key &dstVar) override {
+        return this->updateDFInFromIn(srcLoc, srcVar, dstLoc, dstVar);
     }
 
-    inline bool updateAllDFOutFromIn(LocID loc, const Key& singleton, bool strongUpdates) override
-    {
+    inline bool updateAllDFOutFromIn(LocID loc, const Key &singleton,
+                                     bool strongUpdates) override {
         bool changed = false;
-        if (this->hasDFInSet(loc))
-        {
+        if (this->hasDFInSet(loc)) {
             /// Only variables has new pts from IN set need to be updated.
-            const PtsMap & ptsMap = getDFInPtsMap(loc);
-            for (typename PtsMap::const_iterator ptsIt = ptsMap.begin(), ptsEit = ptsMap.end(); ptsIt != ptsEit; ++ptsIt)
-            {
+            const PtsMap &ptsMap = getDFInPtsMap(loc);
+            for (typename PtsMap::const_iterator ptsIt = ptsMap.begin(),
+                                                 ptsEit = ptsMap.end();
+                 ptsIt != ptsEit; ++ptsIt) {
                 const Key var = ptsIt->first;
                 /// Enable strong updates if it is required to do so
                 if (strongUpdates && var == singleton)
@@ -449,29 +407,26 @@ public:
         return changed;
     }
 
-    inline bool updateTLVPts(LocID srcLoc, const Key& srcVar, const Key& dstVar) override
-    {
-        return this->unionPts(dstVar, this->getDFInPtsSet(srcLoc,srcVar));
+    inline bool updateTLVPts(LocID srcLoc, const Key &srcVar,
+                             const Key &dstVar) override {
+        return this->unionPts(dstVar, this->getDFInPtsSet(srcLoc, srcVar));
     }
 
-    inline bool updateATVPts(const Key& srcVar, LocID dstLoc, const Key& dstVar) override
-    {
-        return (this->unionPts(this->getDFOutPtsSet(dstLoc, dstVar), this->getPts(srcVar)));
+    inline bool updateATVPts(const Key &srcVar, LocID dstLoc,
+                             const Key &dstVar) override {
+        return (this->unionPts(this->getDFOutPtsSet(dstLoc, dstVar),
+                               this->getPts(srcVar)));
     }
 
-    inline void clearAllDFOutUpdatedVar(LocID) override
-    {
-    }
+    inline void clearAllDFOutUpdatedVar(LocID) override {}
 
     /// Override the methods defined in PTData.
     /// Union/add points-to without adding reverse points-to, used internally
     ///@{
-    inline bool addPts(const Key &dstKey, const Key& srcKey) override
-    {
+    inline bool addPts(const Key &dstKey, const Key &srcKey) override {
         return addPts(mutPTData.ptsMap[dstKey], srcKey);
     }
-    inline bool unionPts(const Key& dstKey, const Key& srcKey) override
-    {
+    inline bool unionPts(const Key &dstKey, const Key &srcKey) override {
         return unionPts(mutPTData.ptsMap[dstKey], getPts(srcKey));
     }
 
@@ -484,10 +439,7 @@ public:
     {
         mutPTData.clearPts(var, element);
     }
-    void clearFullPts(const Key& var) override
-    {
-        mutPTData.clearFullPts(var);
-    }
+    void clearFullPts(const Key &var) override { mutPTData.clearFullPts(var); }
     ///@}
 
     /// Methods to support type inquiry through isa, cast, and dyn_cast:
@@ -503,7 +455,7 @@ public:
     }
     ///@}
 
-protected:
+  protected:
     /// Internal union/add points-to helper methods.
     ///@{
     inline bool unionPts(DataSet& dstDataSet, const DataSet& srcDataSet)
@@ -516,45 +468,43 @@ protected:
     }
     ///@}
 
-public:
+  public:
     /// Dump the DF IN/OUT set information for debugging purpose
     ///@{
-    inline void dumpPTData() override
-    {
+    inline void dumpPTData() override {
         /// dump points-to of top-level pointers
         mutPTData.dumpPTData();
         /// dump points-to of address-taken variables
         std::error_code ErrInfo;
         ToolOutputFile F("svfg_pts.data", ErrInfo, llvm::sys::fs::F_None);
-        if (!ErrInfo)
-        {
-            raw_fd_ostream & osm = F.os();
+        if (!ErrInfo) {
+            raw_fd_ostream &osm = F.os();
             NodeBS locs;
-            for(DFPtsMapconstIter it = dfInPtsMap.begin(), eit = dfInPtsMap.end(); it!=eit; ++it)
+            for (DFPtsMapconstIter it = dfInPtsMap.begin(),
+                                   eit = dfInPtsMap.end();
+                 it != eit; ++it)
                 locs.set(it->first);
 
-            for(DFPtsMapconstIter it = dfOutPtsMap.begin(), eit = dfOutPtsMap.end(); it!=eit; ++it)
+            for (DFPtsMapconstIter it = dfOutPtsMap.begin(),
+                                   eit = dfOutPtsMap.end();
+                 it != eit; ++it)
                 locs.set(it->first);
 
-            for (auto loc : locs)
-            {
-                 if (this->hasDFInSet(loc))
-                {
+            for (auto loc : locs) {
+                if (this->hasDFInSet(loc)) {
                     osm << "Loc:" << loc << " IN:{";
                     this->dumpPts(this->getDFInPtsMap(loc), osm);
                     osm << "}\n";
                 }
 
-                if (this->hasDFOutSet(loc))
-                {
+                if (this->hasDFOutSet(loc)) {
                     osm << "Loc:" << loc << " OUT:{";
                     this->dumpPts(this->getDFOutPtsMap(loc), osm);
                     osm << "}\n";
                 }
             }
             F.os().close();
-            if (!F.os().has_error())
-            {
+            if (!F.os().has_error()) {
                 SVFUtil::outs() << "\n";
                 F.keep();
                 return;
@@ -573,13 +523,13 @@ public:
             if (pts.empty())
                 continue;
             O << "<" << var << ",{";
-            SVFUtil::dumpSet(pts,O);
+            SVFUtil::dumpSet(pts, O);
             O << "}> ";
         }
     }
     ///@}
 
-protected:
+  protected:
     /// Data-flow IN set.
     DFPtsMap dfInPtsMap;
     /// Data-flow OUT set.
@@ -606,77 +556,77 @@ public:
     using UpdatedVarconstIter = typename UpdatedVarMap::const_iterator;
     using DataIter = typename DataSet::iterator;
 
-private:
+  private:
     UpdatedVarMap outUpdatedVarMap;
     UpdatedVarMap inUpdatedVarMap;
 
-public:
+  public:
     /// Constructor
-    IncMutableDFPTData(bool reversePT = true, PTDataTy ty = BasePTData::IncMutDataFlow) : BaseMutDFPTData(reversePT, ty) { }
+    IncMutableDFPTData(bool reversePT = true,
+                       PTDataTy ty = BasePTData::IncMutDataFlow)
+        : BaseMutDFPTData(reversePT, ty) {}
 
-    virtual ~IncMutableDFPTData() { }
+    virtual ~IncMutableDFPTData() {}
 
-    inline bool updateDFInFromIn(LocID srcLoc, const Key& srcVar, LocID dstLoc, const Key& dstVar) override
-    {
-        if(varHasNewDFInPts(srcLoc, srcVar) &&
-                this->unionPts(this->getDFInPtsSet(dstLoc,dstVar), this->getDFInPtsSet(srcLoc,srcVar)))
-        {
-            setVarDFInSetUpdated(dstLoc,dstVar);
+    inline bool updateDFInFromIn(LocID srcLoc, const Key &srcVar, LocID dstLoc,
+                                 const Key &dstVar) override {
+        if (varHasNewDFInPts(srcLoc, srcVar) &&
+            this->unionPts(this->getDFInPtsSet(dstLoc, dstVar),
+                           this->getDFInPtsSet(srcLoc, srcVar))) {
+            setVarDFInSetUpdated(dstLoc, dstVar);
             return true;
         }
         return false;
     }
 
-    inline bool updateDFInFromOut(LocID srcLoc, const Key& srcVar, LocID dstLoc, const Key& dstVar) override
-    {
-        if(varHasNewDFOutPts(srcLoc, srcVar) &&
-                this->unionPts(this->getDFInPtsSet(dstLoc,dstVar), this->getDFOutPtsSet(srcLoc,srcVar)))
-        {
-            setVarDFInSetUpdated(dstLoc,dstVar);
+    inline bool updateDFInFromOut(LocID srcLoc, const Key &srcVar, LocID dstLoc,
+                                  const Key &dstVar) override {
+        if (varHasNewDFOutPts(srcLoc, srcVar) &&
+            this->unionPts(this->getDFInPtsSet(dstLoc, dstVar),
+                           this->getDFOutPtsSet(srcLoc, srcVar))) {
+            setVarDFInSetUpdated(dstLoc, dstVar);
             return true;
         }
         return false;
     }
 
-    inline bool updateDFOutFromIn(LocID srcLoc, const Key& srcVar, LocID dstLoc, const Key& dstVar) override
-    {
-        if(varHasNewDFInPts(srcLoc,srcVar))
-        {
-            removeVarFromDFInUpdatedSet(srcLoc,srcVar);
-            if (this->unionPts(this->getDFOutPtsSet(dstLoc,dstVar), this->getDFInPtsSet(srcLoc,srcVar)))
-            {
-                setVarDFOutSetUpdated(dstLoc,dstVar);
+    inline bool updateDFOutFromIn(LocID srcLoc, const Key &srcVar, LocID dstLoc,
+                                  const Key &dstVar) override {
+        if (varHasNewDFInPts(srcLoc, srcVar)) {
+            removeVarFromDFInUpdatedSet(srcLoc, srcVar);
+            if (this->unionPts(this->getDFOutPtsSet(dstLoc, dstVar),
+                               this->getDFInPtsSet(srcLoc, srcVar))) {
+                setVarDFOutSetUpdated(dstLoc, dstVar);
                 return true;
             }
         }
         return false;
     }
 
-    inline bool updateAllDFInFromOut(LocID srcLoc, const Key& srcVar, LocID dstLoc, const Key& dstVar) override
-    {
-        if(this->unionPts(this->getDFInPtsSet(dstLoc,dstVar), this->getDFOutPtsSet(srcLoc,srcVar)))
-        {
-            setVarDFInSetUpdated(dstLoc,dstVar);
+    inline bool updateAllDFInFromOut(LocID srcLoc, const Key &srcVar,
+                                     LocID dstLoc, const Key &dstVar) override {
+        if (this->unionPts(this->getDFInPtsSet(dstLoc, dstVar),
+                           this->getDFOutPtsSet(srcLoc, srcVar))) {
+            setVarDFInSetUpdated(dstLoc, dstVar);
             return true;
         }
         return false;
     }
 
-    inline bool updateAllDFInFromIn(LocID srcLoc, const Key& srcVar, LocID dstLoc, const Key& dstVar) override
-    {
-        if(this->unionPts(this->getDFInPtsSet(dstLoc,dstVar), this->getDFInPtsSet(srcLoc,srcVar)))
-        {
-            setVarDFInSetUpdated(dstLoc,dstVar);
+    inline bool updateAllDFInFromIn(LocID srcLoc, const Key &srcVar,
+                                    LocID dstLoc, const Key &dstVar) override {
+        if (this->unionPts(this->getDFInPtsSet(dstLoc, dstVar),
+                           this->getDFInPtsSet(srcLoc, srcVar))) {
+            setVarDFInSetUpdated(dstLoc, dstVar);
             return true;
         }
         return false;
     }
 
-    inline bool updateAllDFOutFromIn(LocID loc, const Key& singleton, bool strongUpdates) override
-    {
+    inline bool updateAllDFOutFromIn(LocID loc, const Key &singleton,
+                                     bool strongUpdates) override {
         bool changed = false;
-        if (this->hasDFInSet(loc))
-        {
+        if (this->hasDFInSet(loc)) {
             /// Only variables has new pts from IN set need to be updated.
             DataSet pts = getDFInUpdatedVar(loc);
             for (DataIter ptsIt = pts.begin(), ptsEit = pts.end(); ptsIt != ptsEit; ++ptsIt)
@@ -692,20 +642,20 @@ public:
         return changed;
     }
 
-    inline bool updateTLVPts(LocID srcLoc, const Key& srcVar, const Key& dstVar) override
-    {
-        if(varHasNewDFInPts(srcLoc,srcVar))
-        {
-            removeVarFromDFInUpdatedSet(srcLoc,srcVar);
-            return this->mutPTData.unionPts(dstVar, this->getDFInPtsSet(srcLoc,srcVar));
+    inline bool updateTLVPts(LocID srcLoc, const Key &srcVar,
+                             const Key &dstVar) override {
+        if (varHasNewDFInPts(srcLoc, srcVar)) {
+            removeVarFromDFInUpdatedSet(srcLoc, srcVar);
+            return this->mutPTData.unionPts(
+                dstVar, this->getDFInPtsSet(srcLoc, srcVar));
         }
         return false;
     }
 
-    inline bool updateATVPts(const Key& srcVar, LocID dstLoc, const Key& dstVar) override
-    {
-        if (this->unionPts(this->getDFOutPtsSet(dstLoc, dstVar), this->mutPTData.getPts(srcVar)))
-        {
+    inline bool updateATVPts(const Key &srcVar, LocID dstLoc,
+                             const Key &dstVar) override {
+        if (this->unionPts(this->getDFOutPtsSet(dstLoc, dstVar),
+                           this->mutPTData.getPts(srcVar))) {
             setVarDFOutSetUpdated(dstLoc, dstVar);
             return true;
         }
@@ -737,24 +687,22 @@ public:
         return ptd->getPTDTY() == BasePTData::IncMutDataFlow;
     }
     ///@}
-private:
+  private:
     /// Handle address-taken variables whose IN pts changed
     //@{
-    /// Add var into loc's IN updated set. Called when var's pts in loc's IN set changed
-    inline void setVarDFInSetUpdated(LocID loc,const Key& var)
-    {
+    /// Add var into loc's IN updated set. Called when var's pts in loc's IN set
+    /// changed
+    inline void setVarDFInSetUpdated(LocID loc, const Key &var) {
         inUpdatedVarMap[loc].set(var);
     }
     /// Remove var from loc's IN updated set
-    inline void removeVarFromDFInUpdatedSet(LocID loc,const Key& var)
-    {
+    inline void removeVarFromDFInUpdatedSet(LocID loc, const Key &var) {
         UpdatedVarMapIter it = inUpdatedVarMap.find(loc);
         if (it != inUpdatedVarMap.end())
             it->second.reset(var);
     }
     /// Return TRUE if var has new pts in loc's IN set
-    inline bool varHasNewDFInPts(LocID loc,const Key& var)
-    {
+    inline bool varHasNewDFInPts(LocID loc, const Key &var) {
         UpdatedVarMapIter it = inUpdatedVarMap.find(loc);
         if (it != inUpdatedVarMap.end())
             return it->second.test(var);
@@ -769,21 +717,19 @@ private:
 
     /// Handle address-taken variables whose OUT pts changed
     //@{
-    /// Add var into loc's OUT updated set. Called when var's pts in loc's OUT set changed
-    inline void setVarDFOutSetUpdated(LocID loc,const Key& var)
-    {
+    /// Add var into loc's OUT updated set. Called when var's pts in loc's OUT
+    /// set changed
+    inline void setVarDFOutSetUpdated(LocID loc, const Key &var) {
         outUpdatedVarMap[loc].set(var);
     }
     /// Remove var from loc's OUT updated set
-    inline void removeVarFromDFOutUpdatedSet(LocID loc,const Key& var)
-    {
+    inline void removeVarFromDFOutUpdatedSet(LocID loc, const Key &var) {
         UpdatedVarMapIter it = outUpdatedVarMap.find(loc);
         if (it != outUpdatedVarMap.end())
             it->second.reset(var);
     }
     /// Return TRUE if var has new pts in loc's OUT set
-    inline bool varHasNewDFOutPts(LocID loc,const Key& var)
-    {
+    inline bool varHasNewDFOutPts(LocID loc, const Key &var) {
         UpdatedVarMapIter it = outUpdatedVarMap.find(loc);
         if (it != outUpdatedVarMap.end())
             return it->second.test(var);
@@ -808,19 +754,20 @@ class MutableVersionedPTData :
 {
 public:
     using BasePTData = PTData<Key, KeySet, Data, DataSet>;
-        using BaseVersionedPTData =
-            VersionedPTData<Key, KeySet, Data, DataSet,
-                            VersionedKey, VersionedKeySet>;
+    using BaseVersionedPTData =
+        VersionedPTData<Key, KeySet, Data, DataSet,
+                        VersionedKey, VersionedKeySet>;
     using PTDataTy = typename BasePTData::PTDataTy;
 
 
-    MutableVersionedPTData(bool reversePT = true, PTDataTy ty = PTDataTy::MutVersioned)
-        : BaseVersionedPTData(reversePT, ty), tlPTData(reversePT), atPTData(reversePT) { }
+    MutableVersionedPTData(bool reversePT = true,
+                           PTDataTy ty = PTDataTy::MutVersioned)
+        : BaseVersionedPTData(reversePT, ty), tlPTData(reversePT),
+          atPTData(reversePT) {}
 
-    virtual ~MutableVersionedPTData() { }
+    virtual ~MutableVersionedPTData() {}
 
-    inline void clear() override
-    {
+    inline void clear() override {
         tlPTData.clear();
         atPTData.clear();
     }
@@ -857,12 +804,11 @@ public:
         return atPTData.addPts(vk, element);
     }
 
-    bool unionPts(const Key& dstVar, const Key& srcVar) override
-    {
+    bool unionPts(const Key &dstVar, const Key &srcVar) override {
         return tlPTData.unionPts(dstVar, srcVar);
     }
-    bool unionPts(const VersionedKey& dstVar, const VersionedKey& srcVar) override
-    {
+    bool unionPts(const VersionedKey &dstVar,
+                  const VersionedKey &srcVar) override {
         return atPTData.unionPts(dstVar, srcVar);
     }
 
@@ -896,17 +842,12 @@ public:
         atPTData.clearPts(vk, element);
     }
 
-    void clearFullPts(const Key& k) override
-    {
-        tlPTData.clearFullPts(k);
-    }
-    void clearFullPts(const VersionedKey& vk) override
-    {
+    void clearFullPts(const Key &k) override { tlPTData.clearFullPts(k); }
+    void clearFullPts(const VersionedKey &vk) override {
         atPTData.clearFullPts(vk);
     }
 
-    inline void dumpPTData() override
-    {
+    inline void dumpPTData() override {
         SVFUtil::outs() << "== Top-level points-to information\n";
         tlPTData.dumpPTData();
         SVFUtil::outs() << "== Address-taken points-to information\n";
@@ -926,7 +867,7 @@ public:
     }
     ///@}
 
-private:
+  private:
     /// PTData for Keys (top-level pointers, generally).
     MutablePTData<Key, KeySet, Data, DataSet> tlPTData;
     /// PTData for VersionedKeys (address-taken objects, generally).
@@ -935,4 +876,4 @@ private:
 
 } // End namespace SVF
 
-#endif  // MUTABLE_POINTSTO_H_
+#endif // MUTABLE_POINTSTO_H_

@@ -9,8 +9,8 @@
  * Date:
  *     2021-02-27
  *****************************************************************************/
-#include "gtest/gtest.h"
 #include "SVF-FE/PAGBuilder.h"
+#include "gtest/gtest.h"
 
 #include <string>
 #include <vector>
@@ -28,16 +28,15 @@ TEST(CHGTestSuite, BasicTest_0) {
     string test_bc = SVF_BUILD_DIR "/tests/CHG/callsite_cpp.ll";
     vector<string> moduleNameVec{test_bc};
     SVFModule *svfModule =
-    LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
+        LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
     PAGBuilder builder;
     PAG *pag = builder.build(svfModule);
 
     ASSERT_TRUE(pag != nullptr);
-	CHGraph *chg = new CHGraph(pag->getModule());
+    CHGraph *chg = new CHGraph(pag->getModule());
     ASSERT_TRUE(chg != nullptr);
 
     chg->buildCHG();
-
 }
 
 int main(int argc, char *argv[]) {

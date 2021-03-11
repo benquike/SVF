@@ -34,60 +34,60 @@
 #include "Util/BasicTypes.h"
 #include "Util/WorkList.h"
 
-namespace SVF
-{
+namespace SVF {
 
 class PAGNode;
 
-class SaberSVFGBuilder : public SVFGBuilder
-{
+class SaberSVFGBuilder : public SVFGBuilder {
 
-public:
+  public:
     using SVFGNodeSet = Set<const SVFGNode *>;
     using NodeToPTSSMap = Map<NodeID, NodeBS>;
     using WorkList = FIFOWorkList<NodeID>;
 
     /// Constructor
-    SaberSVFGBuilder(): SVFGBuilder(true) {}
+    SaberSVFGBuilder() : SVFGBuilder(true) {}
 
     /// Destructor
     virtual ~SaberSVFGBuilder() {}
 
-    inline bool isGlobalSVFGNode(const SVFGNode* node) const
-    {
-        return globSVFGNodes.find(node)!=globSVFGNodes.end();
+    inline bool isGlobalSVFGNode(const SVFGNode *node) const {
+        return globSVFGNodes.find(node) != globSVFGNodes.end();
     }
 
     /// Add ActualParmVFGNode
-    inline void addActualParmVFGNode(const PAGNode* pagNode, const CallBlockNode* cs)
-    {
-    	svfg->addActualParmVFGNode(pagNode, cs);
+    inline void addActualParmVFGNode(const PAGNode *pagNode,
+                                     const CallBlockNode *cs) {
+        svfg->addActualParmVFGNode(pagNode, cs);
     }
 
-protected:
+  protected:
     /// Re-write create SVFG method
     void buildSVFG() override;
 
-private:
-    /// Remove direct value-flow edge to a dereference point for Saber source-sink memory error detection
-    /// for example, given two statements: p = alloc; q = *p, the direct SVFG edge between them is deleted
-    /// Because those edges only stand for values used at the dereference points but they can not pass the value to other definitions
-    void rmDerefDirSVFGEdges(BVDataPTAImpl* pta);
+  private:
+    /// Remove direct value-flow edge to a dereference point for Saber
+    /// source-sink memory error detection for example, given two statements: p
+    /// = alloc; q = *p, the direct SVFG edge between them is deleted Because
+    /// those edges only stand for values used at the dereference points but
+    /// they can not pass the value to other definitions
+    void rmDerefDirSVFGEdges(BVDataPTAImpl *pta);
 
-    /// Add actual parameter SVFGNode for 1st argument of a deallocation like external function
-    /// In order to path sensitive leak detection
-    virtual void AddExtActualParmSVFGNodes(PTACallGraph* callgraph);
+    /// Add actual parameter SVFGNode for 1st argument of a deallocation like
+    /// external function In order to path sensitive leak detection
+    virtual void AddExtActualParmSVFGNodes(PTACallGraph *callgraph);
 
     /// Collect memory pointed global pointers,
-    /// note that this collection is recursively performed, for example gp-->obj-->obj'
-    /// obj and obj' are both considered global memory
-    void collectGlobals(BVDataPTAImpl* pta);
+    /// note that this collection is recursively performed, for example
+    /// gp-->obj-->obj' obj and obj' are both considered global memory
+    void collectGlobals(BVDataPTAImpl *pta);
 
     /// Whether points-to of a PAGNode points-to global variable
-    bool accessGlobal(BVDataPTAImpl* pta,const PAGNode* pagNode);
+    bool accessGlobal(BVDataPTAImpl *pta, const PAGNode *pagNode);
 
     /// Collect objects along points-to chains
-    NodeBS& CollectPtsChain(BVDataPTAImpl* pta,NodeID id, NodeToPTSSMap& cachedPtsMap);
+    NodeBS &CollectPtsChain(BVDataPTAImpl *pta, NodeID id,
+                            NodeToPTSSMap &cachedPtsMap);
 
     NodeBS globs;
     /// Store all global SVFG nodes

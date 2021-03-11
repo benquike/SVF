@@ -32,52 +32,40 @@
 
 #include "MSSA/MemRegion.h"
 
-namespace SVF
-{
+namespace SVF {
 
 class MSSADEF;
 
 /*!
  * Memory SSA Variable (in the form of SSA versions of each memory region )
  */
-class MRVer
-{
+class MRVer {
 
-public:
+  public:
     using MSSADef = MSSADEF;
-private:
+
+  private:
     /// ver ID 0 is reserved
     static Size_t totalVERNum;
-    const MemRegion* mr;
+    const MemRegion *mr;
     MRVERSION version;
     MRVERID vid;
-    MSSADef* def;
-public:
+    MSSADef *def;
+
+  public:
     /// Constructor
-    MRVer(const MemRegion* m, MRVERSION v, MSSADef* d) :
-        mr(m), version(v), vid(totalVERNum++),def(d)
-    {
-    }
+    MRVer(const MemRegion *m, MRVERSION v, MSSADef *d)
+        : mr(m), version(v), vid(totalVERNum++), def(d) {}
 
     /// Return the memory region
-    inline const MemRegion* getMR() const
-    {
-        return mr;
-    }
+    inline const MemRegion *getMR() const { return mr; }
 
     /// Return SSA version
-    inline MRVERSION getSSAVersion() const
-    {
-        return version;
-    }
+    inline MRVERSION getSSAVersion() const { return version; }
 
     /// Get MSSADef
-    inline MSSADef* getDef() const
-    {
-        return def;
-    }
+    inline MSSADef *getDef() const { return def; }
 };
-
 
 /*!
  * Indirect Memory Read
@@ -85,229 +73,170 @@ public:
  * 2) CallMU at callsite
  * 3) RetMU at function return
  */
-template<class Cond>
-class MSSAMU
-{
+template <class Cond> class MSSAMU {
 
-public:
-    enum MUTYPE
-    {
-        LoadMSSAMU, CallMSSAMU, RetMSSAMU
-    };
+  public:
+    enum MUTYPE { LoadMSSAMU, CallMSSAMU, RetMSSAMU };
 
-protected:
+  protected:
     MUTYPE type;
-    const MemRegion* mr;
-    MRVer* ver;
+    const MemRegion *mr;
+    MRVer *ver;
     Cond cond;
-public:
+
+  public:
     /// Constructor/Destructor for MU
     //@{
-    MSSAMU(MUTYPE t, const MemRegion* m, Cond c) : type(t), mr(m), ver(nullptr), cond(c)
-    {
-    }
-    virtual ~MSSAMU()
-    {
-    }
+    MSSAMU(MUTYPE t, const MemRegion *m, Cond c)
+        : type(t), mr(m), ver(nullptr), cond(c) {}
+    virtual ~MSSAMU() {}
     //@}
 
     /// Return MR
-    inline const MemRegion* getMR() const
-    {
-        return mr;
-    }
+    inline const MemRegion *getMR() const { return mr; }
     /// Return type
-    inline MUTYPE getType() const
-    {
-        return type;
-    }
+    inline MUTYPE getType() const { return type; }
     /// Set Ver
-    inline void setVer(MRVer* v)
-    {
+    inline void setVer(MRVer *v) {
         assert(v->getMR() == mr && "inserting different memory region?");
         ver = v;
     }
     /// Get Ver
-    inline MRVer* getVer() const
-    {
-        assert(ver!=nullptr && "version is nullptr, did not rename?");
+    inline MRVer *getVer() const {
+        assert(ver != nullptr && "version is nullptr, did not rename?");
         return ver;
     }
     /// Return condition
-    inline Cond getCond() const
-    {
-        return cond;
-    }
+    inline Cond getCond() const { return cond; }
 
     /// Avoid adding duplicated mus
-    inline bool operator < (const MSSAMU & rhs) const
-    {
-        return mr > rhs.getMR();
-    }
+    inline bool operator<(const MSSAMU &rhs) const { return mr > rhs.getMR(); }
     /// Print MU
-    virtual void dump()
-    {
-        SVFUtil::outs() << "MU(MR_" << mr->getMRID() << "V_" << ver->getSSAVersion() << ") \t" <<
-                        this->getMR()->dumpStr() << "\n";
+    virtual void dump() {
+        SVFUtil::outs() << "MU(MR_" << mr->getMRID() << "V_"
+                        << ver->getSSAVersion() << ") \t"
+                        << this->getMR()->dumpStr() << "\n";
     }
 };
 
 /*!
- * LoadMU is annotated at each load instruction, representing a memory object is read here
+ * LoadMU is annotated at each load instruction, representing a memory object is
+ * read here
  */
-template<class Cond>
-class LoadMU : public MSSAMU<Cond>
-{
+template <class Cond> class LoadMU : public MSSAMU<Cond> {
 
-private:
-    const LoadPE* inst;
-    const BasicBlock* bb;
+  private:
+    const LoadPE *inst;
+    const BasicBlock *bb;
 
-public:
+  public:
     /// Constructor/Destructor for MU
     //@{
-    LoadMU(const BasicBlock* b,const LoadPE* i, const MemRegion* m, Cond c = PathCondAllocator::trueCond()) :
-        MSSAMU<Cond>(MSSAMU<Cond>::LoadMSSAMU,m,c), inst(i), bb(b)
-    {
-    }
-    virtual ~LoadMU()
-    {
-
-    }
+    LoadMU(const BasicBlock *b, const LoadPE *i, const MemRegion *m,
+           Cond c = PathCondAllocator::trueCond())
+        : MSSAMU<Cond>(MSSAMU<Cond>::LoadMSSAMU, m, c), inst(i), bb(b) {}
+    virtual ~LoadMU() {}
     //@}
 
     /// Return load instruction
-    inline const LoadPE* getLoadInst() const
-    {
-        return inst;
-    }
+    inline const LoadPE *getLoadInst() const { return inst; }
 
     /// Return basic block
-    inline const BasicBlock* getBasicBlock() const
-    {
-        return bb;
-    }
+    inline const BasicBlock *getBasicBlock() const { return bb; }
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const LoadMU *)
-    {
-        return true;
-    }
-    static inline bool classof(const MSSAMU<Cond> *mu)
-    {
+    static inline bool classof(const LoadMU *) { return true; }
+    static inline bool classof(const MSSAMU<Cond> *mu) {
         return mu->getType() == MSSAMU<Cond>::LoadMSSAMU;
     }
     //@}
 
     /// Print MU
-    virtual void dump()
-    {
-        SVFUtil::outs() << "LDMU(MR_" << this->getMR()->getMRID() << "V_" << this->getVer()->getSSAVersion() << ") \t" <<
-                        this->getMR()->dumpStr() << "\n";
+    virtual void dump() {
+        SVFUtil::outs() << "LDMU(MR_" << this->getMR()->getMRID() << "V_"
+                        << this->getVer()->getSSAVersion() << ") \t"
+                        << this->getMR()->dumpStr() << "\n";
     }
 };
 
 /*!
- * CallMU is annotated at callsite, representing a memory object is indirect read by callee
+ * CallMU is annotated at callsite, representing a memory object is indirect
+ * read by callee
  */
-template<class Cond>
-class CallMU : public MSSAMU<Cond>
-{
+template <class Cond> class CallMU : public MSSAMU<Cond> {
 
-private:
-    const CallBlockNode* callsite;
+  private:
+    const CallBlockNode *callsite;
 
-public:
+  public:
     /// Constructor/Destructor for MU
     //@{
-    CallMU(const CallBlockNode* cs, const MemRegion* m, Cond c = PathCondAllocator::trueCond()) :
-        MSSAMU<Cond>(MSSAMU<Cond>::CallMSSAMU,m,c), callsite(cs)
-    {
-    }
-    virtual ~CallMU()
-    {
-
-    }
+    CallMU(const CallBlockNode *cs, const MemRegion *m,
+           Cond c = PathCondAllocator::trueCond())
+        : MSSAMU<Cond>(MSSAMU<Cond>::CallMSSAMU, m, c), callsite(cs) {}
+    virtual ~CallMU() {}
     //@}
 
     /// Return callsite
-    inline const CallBlockNode* getCallSite() const
-    {
-        return callsite;
-    }
+    inline const CallBlockNode *getCallSite() const { return callsite; }
 
     /// Return basic block
-    inline const BasicBlock* getBasicBlock() const
-    {
+    inline const BasicBlock *getBasicBlock() const {
         return callsite->getCallSite()->getParent();
     }
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const CallMU *)
-    {
-        return true;
-    }
-    static inline bool classof(const MSSAMU<Cond> *mu)
-    {
+    static inline bool classof(const CallMU *) { return true; }
+    static inline bool classof(const MSSAMU<Cond> *mu) {
         return mu->getType() == MSSAMU<Cond>::CallMSSAMU;
     }
     //@}
 
     /// Print MU
-    virtual void dump()
-    {
-        SVFUtil::outs() << "CALMU(MR_" << this->getMR()->getMRID() << "V_" << this->getVer()->getSSAVersion() << ") \t" <<
-                        this->getMR()->dumpStr() << "\n";
+    virtual void dump() {
+        SVFUtil::outs() << "CALMU(MR_" << this->getMR()->getMRID() << "V_"
+                        << this->getVer()->getSSAVersion() << ") \t"
+                        << this->getMR()->dumpStr() << "\n";
     }
 };
 
-
 /*!
- * RetMU is annotated at function return, representing memory objects returns to callers
+ * RetMU is annotated at function return, representing memory objects returns to
+ * callers
  */
-template<class Cond>
-class RetMU : public MSSAMU<Cond>
-{
-private:
-    const SVFFunction* fun;
-public:
+template <class Cond> class RetMU : public MSSAMU<Cond> {
+  private:
+    const SVFFunction *fun;
+
+  public:
     /// Constructor/Destructor for MU
     //@{
-    RetMU(const SVFFunction* f, const MemRegion* m, Cond c = PathCondAllocator::trueCond()) :
-        MSSAMU<Cond>(MSSAMU<Cond>::RetMSSAMU,m,c), fun(f)
-    {
-    }
+    RetMU(const SVFFunction *f, const MemRegion *m,
+          Cond c = PathCondAllocator::trueCond())
+        : MSSAMU<Cond>(MSSAMU<Cond>::RetMSSAMU, m, c), fun(f) {}
     virtual ~RetMU() {}
     //@}
 
     /// Return function
-    inline const SVFFunction* getFunction() const
-    {
-        return fun;
-    }
+    inline const SVFFunction *getFunction() const { return fun; }
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const RetMU *)
-    {
-        return true;
-    }
-    static inline bool classof(const MSSAMU<Cond> *mu)
-    {
+    static inline bool classof(const RetMU *) { return true; }
+    static inline bool classof(const MSSAMU<Cond> *mu) {
         return mu->getType() == MSSAMU<Cond>::RetMSSAMU;
     }
     //@}
 
     /// Print MU
-    virtual void dump()
-    {
-        SVFUtil::outs() << "RETMU(MR_" << this->getMR()->getMRID() << "V_" << this->getVer()->getSSAVersion() << ") \t" <<
-                        this->getMR()->dumpStr() << "\n";
+    virtual void dump() {
+        SVFUtil::outs() << "RETMU(MR_" << this->getMR()->getMRID() << "V_"
+                        << this->getVer()->getSSAVersion() << ") \t"
+                        << this->getMR()->dumpStr() << "\n";
     }
 };
-
 
 /*!
  * Indirect Memory Definition
@@ -316,134 +245,102 @@ public:
  *   b) EntryCHI definition at function entry
  * 2) MSSAPHI memory object is defined at joint points of a control flow
  */
-class MSSADEF
-{
+class MSSADEF {
 
-public:
-    enum DEFTYPE
-    {
-        SSACHI,
-        StoreMSSACHI,
-        CallMSSACHI,
-        EntryMSSACHI,
-        SSAPHI
-    };
+  public:
+    enum DEFTYPE { SSACHI, StoreMSSACHI, CallMSSACHI, EntryMSSACHI, SSAPHI };
 
-protected:
+  protected:
     DEFTYPE type;
-    const MemRegion* mr;
-    MRVer* resVer;
+    const MemRegion *mr;
+    MRVer *resVer;
 
-public:
+  public:
     /// Constructor/Destructer for MSSADEF
     //@{
-    MSSADEF(DEFTYPE t, const MemRegion* m): type(t), mr(m), resVer(nullptr)
-    {
-
-    }
+    MSSADEF(DEFTYPE t, const MemRegion *m) : type(t), mr(m), resVer(nullptr) {}
     virtual ~MSSADEF() {}
     //@}
 
     /// Return memory region
-    inline const MemRegion* getMR() const
-    {
-        return mr;
-    }
+    inline const MemRegion *getMR() const { return mr; }
 
     /// Return type of this CHI
-    inline DEFTYPE getType() const
-    {
-        return type;
-    }
+    inline DEFTYPE getType() const { return type; }
 
     /// Set result operand ver
-    inline void setResVer(MRVer* v)
-    {
+    inline void setResVer(MRVer *v) {
         assert(v->getMR() == mr && "inserting different memory region?");
         resVer = v;
     }
 
     /// Set operand vers
-    inline MRVer* getResVer() const
-    {
-        assert(resVer!=nullptr && "version is nullptr, did not rename?");
+    inline MRVer *getResVer() const {
+        assert(resVer != nullptr && "version is nullptr, did not rename?");
         return resVer;
     }
 
     /// Avoid adding duplicated chis and phis
-    inline bool operator < (const MSSADEF & rhs) const
-    {
-        return mr > rhs.getMR();
-    }
+    inline bool operator<(const MSSADEF &rhs) const { return mr > rhs.getMR(); }
 
     /// Print MSSADef
-    virtual void dump()
-    {
-        SVFUtil::outs() << "DEF(MR_" << mr->getMRID() << "V_" << resVer->getSSAVersion() << ")\n";
+    virtual void dump() {
+        SVFUtil::outs() << "DEF(MR_" << mr->getMRID() << "V_"
+                        << resVer->getSSAVersion() << ")\n";
     }
 };
 
 /*!
  * Indirect Memory Write
  */
-template<class Cond>
-class MSSACHI : public MSSADEF
-{
+template <class Cond> class MSSACHI : public MSSADEF {
 
-private:
-    MRVer* opVer;
+  private:
+    MRVer *opVer;
     Cond cond;
-public:
+
+  public:
     using CHITYPE = typename MSSADEF::DEFTYPE;
     /// Constructor/Destructer for MSSACHI
     //@{
-    MSSACHI(CHITYPE t, const MemRegion* m, Cond c): MSSADEF(t,m), opVer(nullptr), cond(c)
-    {
-
-    }
+    MSSACHI(CHITYPE t, const MemRegion *m, Cond c)
+        : MSSADEF(t, m), opVer(nullptr), cond(c) {}
     virtual ~MSSACHI() {}
     //@}
 
     /// Set operand ver
-    inline void setOpVer(MRVer* v)
-    {
-        assert(v->getMR() == this->getMR() && "inserting different memory region?");
+    inline void setOpVer(MRVer *v) {
+        assert(v->getMR() == this->getMR() &&
+               "inserting different memory region?");
         opVer = v;
     }
 
     /// Get operand ver
-    inline MRVer* getOpVer() const
-    {
-        assert(opVer!=nullptr && "version is nullptr, did not rename?");
+    inline MRVer *getOpVer() const {
+        assert(opVer != nullptr && "version is nullptr, did not rename?");
         return opVer;
     }
 
     /// Get condition
-    inline Cond getCond() const
-    {
-        return cond;
-    }
+    inline Cond getCond() const { return cond; }
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const MSSACHI * chi)
-    {
-        return true;
-    }
-    static inline bool classof(const MSSADEF *chi)
-    {
+    static inline bool classof(const MSSACHI *chi) { return true; }
+    static inline bool classof(const MSSADEF *chi) {
         return chi->getType() == MSSADEF::EntryMSSACHI ||
                chi->getType() == MSSADEF::StoreMSSACHI ||
-               chi->getType() == MSSADEF::SSACHI ;
+               chi->getType() == MSSADEF::SSACHI;
     }
     //@}
 
     /// Print CHI
-    virtual void dump()
-    {
-        SVFUtil::outs() << "MR_" << this->getMR()->getMRID() << "V_" << this->getResVer()->getSSAVersion() <<
-                        " = CHI(MR_" << this->getMR()->getMRID() << "V_" << opVer->getSSAVersion() << ") \t" <<
-                        this->getMR()->dumpStr() << "\n";
+    virtual void dump() {
+        SVFUtil::outs() << "MR_" << this->getMR()->getMRID() << "V_"
+                        << this->getResVer()->getSSAVersion() << " = CHI(MR_"
+                        << this->getMR()->getMRID() << "V_"
+                        << opVer->getSSAVersion() << ") \t"
+                        << this->getMR()->dumpStr() << "\n";
     }
 };
 
@@ -452,61 +349,46 @@ public:
  *  StoreCHI is annotated at each store instruction,
  *  representing a memory object is modified here
  */
-template<class Cond>
-class StoreCHI : public MSSACHI<Cond>
-{
-private:
-    const BasicBlock* bb;
-    const StorePE* inst;
-public:
+template <class Cond> class StoreCHI : public MSSACHI<Cond> {
+  private:
+    const BasicBlock *bb;
+    const StorePE *inst;
+
+  public:
     /// Constructors for StoreCHI
     //@{
-    StoreCHI(const BasicBlock* b, const StorePE* i, const MemRegion* m, Cond c = PathCondAllocator::trueCond()) :
-        MSSACHI<Cond>(MSSADEF::StoreMSSACHI,m,c), bb(b), inst(i)
-    {
-    }
-    virtual ~StoreCHI()
-    {
-    }
+    StoreCHI(const BasicBlock *b, const StorePE *i, const MemRegion *m,
+             Cond c = PathCondAllocator::trueCond())
+        : MSSACHI<Cond>(MSSADEF::StoreMSSACHI, m, c), bb(b), inst(i) {}
+    virtual ~StoreCHI() {}
     //@}
 
     /// Get basic block
-    inline const BasicBlock* getBasicBlock() const
-    {
-        return bb;
-    }
+    inline const BasicBlock *getBasicBlock() const { return bb; }
 
     /// Get store instruction
-    inline const StorePE* getStoreInst() const
-    {
-        return inst;
-    }
+    inline const StorePE *getStoreInst() const { return inst; }
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const StoreCHI * chi)
-    {
-        return true;
-    }
-    static inline bool classof(const MSSACHI<Cond> * chi)
-    {
+    static inline bool classof(const StoreCHI *chi) { return true; }
+    static inline bool classof(const MSSACHI<Cond> *chi) {
         return chi->getType() == MSSADEF::StoreMSSACHI;
     }
-    static inline bool classof(const MSSADEF *chi)
-    {
+    static inline bool classof(const MSSADEF *chi) {
         return chi->getType() == MSSADEF::StoreMSSACHI;
     }
     //@}
 
     /// Print CHI
-    virtual void dump()
-    {
-        SVFUtil::outs() << this->getMR()->getMRID() << "V_" << this->getResVer()->getSSAVersion() <<
-                        " = STCHI(MR_" << this->getMR()->getMRID() << "V_" << this->getOpVer()->getSSAVersion() << ") \t" <<
-                        this->getMR()->dumpStr() << "\n";
+    virtual void dump() {
+        SVFUtil::outs() << this->getMR()->getMRID() << "V_"
+                        << this->getResVer()->getSSAVersion() << " = STCHI(MR_"
+                        << this->getMR()->getMRID() << "V_"
+                        << this->getOpVer()->getSSAVersion() << ") \t"
+                        << this->getMR()->dumpStr() << "\n";
     }
 };
-
 
 /*!
  * FIXME: wrong comment here
@@ -514,59 +396,46 @@ public:
  *  representing a memory object is modified here
  *
  */
-template<class Cond>
-class CallCHI : public MSSACHI<Cond>
-{
-private:
-    const CallBlockNode* callsite;
-public:
+template <class Cond> class CallCHI : public MSSACHI<Cond> {
+  private:
+    const CallBlockNode *callsite;
+
+  public:
     /// Constructors for StoreCHI
     //@{
-    CallCHI(const CallBlockNode* cs, const MemRegion* m,
-            Cond c = PathCondAllocator::trueCond()) :
-        MSSACHI<Cond>(MSSADEF::CallMSSACHI, m, c), callsite(cs)
-    {
-    }
+    CallCHI(const CallBlockNode *cs, const MemRegion *m,
+            Cond c = PathCondAllocator::trueCond())
+        : MSSACHI<Cond>(MSSADEF::CallMSSACHI, m, c), callsite(cs) {}
 
-    virtual ~CallCHI()
-    {
-    }
+    virtual ~CallCHI() {}
     //@}
 
     /// Return basic block
-    inline const BasicBlock* getBasicBlock() const
-    {
+    inline const BasicBlock *getBasicBlock() const {
         return callsite->getCallSite()->getParent();
     }
 
     /// Return callsite
-    inline const CallBlockNode* getCallSite() const
-    {
-        return callsite;
-    }
+    inline const CallBlockNode *getCallSite() const { return callsite; }
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const CallCHI * chi)
-    {
-        return true;
-    }
-    static inline bool classof(const MSSACHI<Cond> * chi)
-    {
+    static inline bool classof(const CallCHI *chi) { return true; }
+    static inline bool classof(const MSSACHI<Cond> *chi) {
         return chi->getType() == MSSADEF::CallMSSACHI;
     }
-    static inline bool classof(const MSSADEF *chi)
-    {
+    static inline bool classof(const MSSADEF *chi) {
         return chi->getType() == MSSADEF::CallMSSACHI;
     }
     //@}
 
     /// Print CHI
-    virtual void dump()
-    {
-        SVFUtil::outs() << this->getMR()->getMRID() << "V_" << this->getResVer()->getSSAVersion() <<
-                        " = CALCHI(MR_" << this->getMR()->getMRID() << "V_" << this->getOpVer()->getSSAVersion() << ") \t" <<
-                        this->getMR()->dumpStr() << "\n";
+    virtual void dump() {
+        SVFUtil::outs() << this->getMR()->getMRID() << "V_"
+                        << this->getResVer()->getSSAVersion() << " = CALCHI(MR_"
+                        << this->getMR()->getMRID() << "V_"
+                        << this->getOpVer()->getSSAVersion() << ") \t"
+                        << this->getMR()->dumpStr() << "\n";
     }
 };
 
@@ -574,143 +443,109 @@ public:
  * EntryCHI is annotated at function entry,
  * representing receiving memory objects from callers
  */
-template<class Cond>
-class EntryCHI : public MSSACHI<Cond>
-{
-private:
-    const SVFFunction* fun;
-public:
+template <class Cond> class EntryCHI : public MSSACHI<Cond> {
+  private:
+    const SVFFunction *fun;
+
+  public:
     /// Constructors for EntryCHI
     //@{
-    EntryCHI(const SVFFunction* f, const MemRegion* m, Cond c = PathCondAllocator::trueCond()) :
-        MSSACHI<Cond>(MSSADEF::EntryMSSACHI,m,c),fun(f)
-    {
-    }
-    virtual ~EntryCHI()
-    {
-    }
+    EntryCHI(const SVFFunction *f, const MemRegion *m,
+             Cond c = PathCondAllocator::trueCond())
+        : MSSACHI<Cond>(MSSADEF::EntryMSSACHI, m, c), fun(f) {}
+    virtual ~EntryCHI() {}
     //@}
 
     /// Return function
-    inline const SVFFunction* getFunction() const
-    {
-        return fun;
-    }
+    inline const SVFFunction *getFunction() const { return fun; }
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const EntryCHI * chi)
-    {
-        return true;
-    }
-    static inline bool classof(const MSSACHI<Cond> * chi)
-    {
+    static inline bool classof(const EntryCHI *chi) { return true; }
+    static inline bool classof(const MSSACHI<Cond> *chi) {
         return chi->getType() == MSSADEF::EntryMSSACHI;
     }
-    static inline bool classof(const MSSADEF *chi)
-    {
+    static inline bool classof(const MSSADEF *chi) {
         return chi->getType() == MSSADEF::EntryMSSACHI;
     }
     //@}
 
     /// Print CHI
-    virtual void dump()
-    {
-        SVFUtil::outs() << this->getMR()->getMRID() << "V_" << this->getResVer()->getSSAVersion() <<
-                        " = ENCHI(MR_" << this->getMR()->getMRID() << "V_" << this->getOpVer()->getSSAVersion() << ") \t" <<
-                        this->getMR()->dumpStr() << "\n";
+    virtual void dump() {
+        SVFUtil::outs() << this->getMR()->getMRID() << "V_"
+                        << this->getResVer()->getSSAVersion() << " = ENCHI(MR_"
+                        << this->getMR()->getMRID() << "V_"
+                        << this->getOpVer()->getSSAVersion() << ") \t"
+                        << this->getMR()->dumpStr() << "\n";
     }
 };
 
 /*
  * Memory SSA Select, similar to PHINode
  */
-template<class Cond>
-class MSSAPHI : public MSSADEF
-{
+template <class Cond> class MSSAPHI : public MSSADEF {
 
-public:
+  public:
     using OPVers = Map<u32_t, const MRVer *>;
-private:
-    const BasicBlock* bb;
+
+  private:
+    const BasicBlock *bb;
     OPVers opVers;
     Cond cond;
-public:
+
+  public:
     /// Constructors for PHI
     //@{
-    MSSAPHI(const BasicBlock* b, const MemRegion* m, Cond c = PathCondAllocator::trueCond()) :
-        MSSADEF(MSSADEF::SSAPHI,m), bb(b), cond(c)
-    {
-    }
-    virtual ~MSSAPHI()
-    {
-    }
+    MSSAPHI(const BasicBlock *b, const MemRegion *m,
+            Cond c = PathCondAllocator::trueCond())
+        : MSSADEF(MSSADEF::SSAPHI, m), bb(b), cond(c) {}
+    virtual ~MSSAPHI() {}
     //@}
 
     /// Set operand ver
-    inline void setOpVer(const MRVer* v, u32_t pos)
-    {
-        assert(v->getMR() == this->getMR() && "inserting different memory region?");
+    inline void setOpVer(const MRVer *v, u32_t pos) {
+        assert(v->getMR() == this->getMR() &&
+               "inserting different memory region?");
         opVers[pos] = v;
     }
 
     /// Get operand ver
-    inline const MRVer* getOpVer(u32_t pos) const
-    {
+    inline const MRVer *getOpVer(u32_t pos) const {
         auto it = opVers.find(pos);
-        assert(it!=opVers.end() && "version is nullptr, did not rename?");
+        assert(it != opVers.end() && "version is nullptr, did not rename?");
         return it->second;
     }
 
     /// Get the number of operand ver
-    inline u32_t getOpVerNum() const
-    {
-        return opVers.size();
-    }
+    inline u32_t getOpVerNum() const { return opVers.size(); }
 
     /// Operand ver iterators
     //@{
-    inline OPVers::const_iterator opVerBegin() const
-    {
-        return opVers.begin();
-    }
-    inline OPVers::const_iterator opVerEnd() const
-    {
-        return opVers.end();
-    }
+    inline OPVers::const_iterator opVerBegin() const { return opVers.begin(); }
+    inline OPVers::const_iterator opVerEnd() const { return opVers.end(); }
     //@}
 
     /// Return the basic block
-    inline const BasicBlock* getBasicBlock() const
-    {
-        return bb;
-    }
+    inline const BasicBlock *getBasicBlock() const { return bb; }
 
     /// Return condition
-    inline Cond getCond() const
-    {
-        return cond;
-    }
+    inline Cond getCond() const { return cond; }
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const MSSAPHI * phi)
-    {
-        return true;
-    }
-    static inline bool classof(const MSSADEF *phi)
-    {
-        return phi->getType() == MSSADEF::SSAPHI ;
+    static inline bool classof(const MSSAPHI *phi) { return true; }
+    static inline bool classof(const MSSADEF *phi) {
+        return phi->getType() == MSSADEF::SSAPHI;
     }
     //@}
 
     /// Print PHI
-    virtual void dump()
-    {
-        SVFUtil::outs() << this->getMR()->getMRID() << "V_" << this->getResVer()->getSSAVersion() <<
-                        " = PHI(";
-        for(auto & opVer : opVers)
-            SVFUtil::outs() << "MR_" << this->getMR()->getMRID() << "V_" << opVer.second->getSSAVersion() << ", ";
+    virtual void dump() {
+        SVFUtil::outs() << this->getMR()->getMRID() << "V_"
+                        << this->getResVer()->getSSAVersion() << " = PHI(";
+        for (auto &opVer : opVers)
+            SVFUtil::outs() << "MR_" << this->getMR()->getMRID() << "V_"
+                            << opVer.second->getSSAVersion() << ", ";
 
         SVFUtil::outs() << ")\n";
     }

@@ -7,38 +7,37 @@
  *      Author: Mohamad Barbar
  */
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
-#include "Graphs/PAG.h"
 #include "Graphs/ExternalPAG.h"
-#include "Util/BasicTypes.h"
 #include "Graphs/ICFG.h"
+#include "Graphs/PAG.h"
+#include "Util/BasicTypes.h"
 
 using namespace SVF;
 using namespace SVFUtil;
 
-llvm::cl::list<std::string> ExternalPAGArgs("extpags",
-        llvm::cl::desc("ExternalPAGs to use during PAG construction (format: func1@/path/to/graph,func2@/foo,..."),
-        llvm::cl::CommaSeparated);
+llvm::cl::list<std::string> ExternalPAGArgs(
+    "extpags",
+    llvm::cl::desc("ExternalPAGs to use during PAG construction (format: "
+                   "func1@/path/to/graph,func2@/foo,..."),
+    llvm::cl::CommaSeparated);
 
-llvm::cl::list<std::string> DumpPAGFunctions("dump-function-pags",
-        llvm::cl::desc("Dump PAG for functions"),
-        llvm::cl::CommaSeparated);
+llvm::cl::list<std::string>
+    DumpPAGFunctions("dump-function-pags",
+                     llvm::cl::desc("Dump PAG for functions"),
+                     llvm::cl::CommaSeparated);
 
-
-Map<const SVFFunction*, Map<int, PAGNode *>>
-        ExternalPAG::functionToExternalPAGEntries;
-Map<const SVFFunction*, PAGNode *> ExternalPAG::functionToExternalPAGReturns;
+Map<const SVFFunction *, Map<int, PAGNode *>>
+    ExternalPAG::functionToExternalPAGEntries;
+Map<const SVFFunction *, PAGNode *> ExternalPAG::functionToExternalPAGReturns;
 
 std::vector<std::pair<std::string, std::string>>
-        ExternalPAG::parseExternalPAGs(llvm::cl::list<std::string> &extpagsArgs)
-{
+ExternalPAG::parseExternalPAGs(llvm::cl::list<std::string> &extpagsArgs) {
     std::vector<std::pair<std::string, std::string>> parsedExternalPAGs;
-    for (auto arg = extpagsArgs.begin(); arg != extpagsArgs.end();
-            ++arg)
-    {
+    for (auto arg = extpagsArgs.begin(); arg != extpagsArgs.end(); ++arg) {
         std::stringstream ss(*arg);
         std::string functionName;
         getline(ss, functionName, '@');
@@ -51,15 +50,13 @@ std::vector<std::pair<std::string, std::string>>
     return parsedExternalPAGs;
 }
 
-void ExternalPAG::initialise(SVFModule*)
-{
-    std::vector<std::pair<std::string, std::string>> parsedExternalPAGs
-            = ExternalPAG::parseExternalPAGs(ExternalPAGArgs);
+void ExternalPAG::initialise(SVFModule *) {
+    std::vector<std::pair<std::string, std::string>> parsedExternalPAGs =
+        ExternalPAG::parseExternalPAGs(ExternalPAGArgs);
 
     // Build ext PAGs (and add them) first to use them in PAG construction.
-    for (auto extpagPair= parsedExternalPAGs.begin();
-            extpagPair != parsedExternalPAGs.end(); ++extpagPair)
-    {
+    for (auto extpagPair = parsedExternalPAGs.begin();
+         extpagPair != parsedExternalPAGs.end(); ++extpagPair) {
         std::string fname = extpagPair->first;
         std::string path = extpagPair->second;
 
@@ -69,34 +66,30 @@ void ExternalPAG::initialise(SVFModule*)
     }
 }
 
-bool ExternalPAG::connectCallsiteToExternalPAG(CallSite *cs)
-{
+bool ExternalPAG::connectCallsiteToExternalPAG(CallSite *cs) {
     PAG *pag = PAG::getPAG();
 
-    Function* function = cs->getCalledFunction();
+    Function *function = cs->getCalledFunction();
     std::string functionName = function->getName();
-    const SVFFunction* svfFun = LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(function);
-    if (!hasExternalPAG(svfFun)) return false;
+    const SVFFunction *svfFun =
+        LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(function);
+    if (!hasExternalPAG(svfFun))
+        return false;
 
-    Map<int, PAGNode*> argNodes =
-        functionToExternalPAGEntries[svfFun];
+    Map<int, PAGNode *> argNodes = functionToExternalPAGEntries[svfFun];
     PAGNode *retNode = functionToExternalPAGReturns[svfFun];
 
     // Handle the return.
-    if (llvm::isa<PointerType>(cs->getType()))
-    {
+    if (llvm::isa<PointerType>(cs->getType())) {
         NodeID dstrec = pag->getValueNode(cs->getInstruction());
         // Does it actually return a pointer?
-        if (SVFUtil::isa<PointerType>(function->getReturnType()))
-        {
-            if (retNode != nullptr)
-            {
-                CallBlockNode* icfgNode = pag->getICFG()->getCallBlockNode(cs->getInstruction());
+        if (SVFUtil::isa<PointerType>(function->getReturnType())) {
+            if (retNode != nullptr) {
+                CallBlockNode *icfgNode =
+                    pag->getICFG()->getCallBlockNode(cs->getInstruction());
                 pag->addRetPE(retNode->getId(), dstrec, icfgNode);
             }
-        }
-        else
-        {
+        } else {
             // This is a int2ptr cast during parameter passing
             pag->addBlackHoleAddrPE(dstrec);
         }
@@ -111,10 +104,8 @@ bool ExternalPAG::connectCallsiteToExternalPAG(CallSite *cs)
     // Formal arguments.
     size_t formalNodeIndex = 0;
 
-    for (; itF != ieF ; ++itA, ++itF, ++formalNodeIndex)
-    {
-        if (itA == ieA)
-        {
+    for (; itF != ieF; ++itA, ++itF, ++formalNodeIndex) {
+        if (itA == ieA) {
             // When unneeded args are left empty, e.g. Linux kernel.
             break;
         }
@@ -125,18 +116,18 @@ bool ExternalPAG::connectCallsiteToExternalPAG(CallSite *cs)
         NodeID actualArgNodeId = pag->getValueNode(*itA);
 
         const llvm::Value *formalArg = &*itF;
-        if (!SVFUtil::isa<PointerType>(formalArg->getType())) continue;
+        if (!SVFUtil::isa<PointerType>(formalArg->getType()))
+            continue;
 
-        if (SVFUtil::isa<PointerType>((*itA)->getType()))
-        {
-            CallBlockNode* icfgNode = pag->getICFG()->getCallBlockNode(cs->getInstruction());
+        if (SVFUtil::isa<PointerType>((*itA)->getType())) {
+            CallBlockNode *icfgNode =
+                pag->getICFG()->getCallBlockNode(cs->getInstruction());
             pag->addCallPE(actualArgNodeId, formalArgNode->getId(), icfgNode);
-        }
-        else
-        {
+        } else {
             // This is a int2ptr cast during parameter passing
-            //addFormalParamBlackHoleAddrEdge(formalArgNode->getId(), &*itF);
-            assert(false && "you need to set the current location of this PAGEdge");
+            // addFormalParamBlackHoleAddrEdge(formalArgNode->getId(), &*itF);
+            assert(false &&
+                   "you need to set the current location of this PAGEdge");
             pag->addBlackHoleAddrPE(formalArgNode->getId());
         }
         // TODO proofread.
@@ -145,63 +136,56 @@ bool ExternalPAG::connectCallsiteToExternalPAG(CallSite *cs)
     return true;
 }
 
-bool ExternalPAG::hasExternalPAG(const SVFFunction* function)
-{
-    bool ret = functionToExternalPAGEntries.find(function)
-               != functionToExternalPAGEntries.end();
+bool ExternalPAG::hasExternalPAG(const SVFFunction *function) {
+    bool ret = functionToExternalPAGEntries.find(function) !=
+               functionToExternalPAGEntries.end();
     return ret;
 }
 
-int getArgNo(const SVFFunction* function, const Value *arg)
-{
+int getArgNo(const SVFFunction *function, const Value *arg) {
     int argNo = 0;
-    for (auto *it = function->getLLVMFun()->arg_begin(); it != function->getLLVMFun()->arg_end();
-            ++it, ++argNo)
-    {
-        if (arg->getName() == it->getName()) return argNo;
+    for (auto *it = function->getLLVMFun()->arg_begin();
+         it != function->getLLVMFun()->arg_end(); ++it, ++argNo) {
+        if (arg->getName() == it->getName())
+            return argNo;
     }
 
     return -1;
 }
 
-static void outputPAGNodeNoNewLine(raw_ostream &o, PAGNode *pagNode)
-{
+static void outputPAGNodeNoNewLine(raw_ostream &o, PAGNode *pagNode) {
     o << pagNode->getId() << " ";
     // TODO: is this check enough?
-    if (!ObjPN::classof(pagNode)) o << "v";
-    else o << "o";
+    if (!ObjPN::classof(pagNode))
+        o << "v";
+    else
+        o << "o";
 }
 
-static void outputPAGNode(raw_ostream &o, PAGNode *pagNode)
-{
+static void outputPAGNode(raw_ostream &o, PAGNode *pagNode) {
     outputPAGNodeNoNewLine(o, pagNode);
     o << "\n";
 }
 
-static void outputPAGNode(raw_ostream &o, PAGNode *pagNode, int argno)
-{
+static void outputPAGNode(raw_ostream &o, PAGNode *pagNode, int argno) {
     outputPAGNodeNoNewLine(o, pagNode);
     o << " " << argno;
     o << "\n";
 }
 
-static void outputPAGNode(raw_ostream &o, PAGNode *pagNode,
-                          std::string trail)
-{
+static void outputPAGNode(raw_ostream &o, PAGNode *pagNode, std::string trail) {
     outputPAGNodeNoNewLine(o, pagNode);
     o << " " << trail;
     o << "\n";
 }
 
-static void outputPAGEdge(raw_ostream &o, PAGEdge *pagEdge)
-{
+static void outputPAGEdge(raw_ostream &o, PAGEdge *pagEdge) {
     NodeID srcId = pagEdge->getSrcID();
     NodeID dstId = pagEdge->getDstID();
     u32_t offset = 0;
     std::string edgeKind = "-";
 
-    switch (pagEdge->getEdgeKind())
-    {
+    switch (pagEdge->getEdgeKind()) {
     case PAGEdge::Addr:
         edgeKind = "addr";
         break;
@@ -243,63 +227,59 @@ static void outputPAGEdge(raw_ostream &o, PAGEdge *pagEdge)
         break;
     }
 
-    if (NormalGepPE::classof(pagEdge)) offset =
-            static_cast<NormalGepPE *>(pagEdge)->getOffset();
+    if (NormalGepPE::classof(pagEdge))
+        offset = static_cast<NormalGepPE *>(pagEdge)->getOffset();
 
     o << srcId << " " << edgeKind << " " << dstId << " " << offset << "\n";
 }
 
-
 /*!
  * Dump PAGs for the functions
  */
-void ExternalPAG::dumpFunctions(std::vector<std::string> functions)
-{
+void ExternalPAG::dumpFunctions(std::vector<std::string> functions) {
     PAG *pag = PAG::getPAG();
 
     // Naive: first map functions to entries in PAG, then dump them.
-    Map<const SVFFunction*, std::vector<PAGNode *>> functionToPAGNodes;
+    Map<const SVFFunction *, std::vector<PAGNode *>> functionToPAGNodes;
 
     Set<PAGNode *> callDsts;
-    for (auto & it : *pag)
-    {
+    for (auto &it : *pag) {
         PAGNode *currNode = it.second;
-        if (!currNode->hasOutgoingEdges(PAGEdge::PEDGEK::Call)) continue;
+        if (!currNode->hasOutgoingEdges(PAGEdge::PEDGEK::Call))
+            continue;
 
         // Where are these calls going?
-        for (auto it =
-                 currNode->getOutgoingEdgesBegin(PAGEdge::PEDGEK::Call);
-             it != currNode->getOutgoingEdgesEnd(PAGEdge::PEDGEK::Call); ++it)
-        {
+        for (auto it = currNode->getOutgoingEdgesBegin(PAGEdge::PEDGEK::Call);
+             it != currNode->getOutgoingEdgesEnd(PAGEdge::PEDGEK::Call); ++it) {
             auto *callEdge = static_cast<CallPE *>(*it);
             const Instruction *inst = callEdge->getCallInst()->getCallSite();
-            :: Function* currFunction =
+            ::Function *currFunction =
                 static_cast<const CallInst *>(inst)->getCalledFunction();
 
-            if (currFunction != nullptr)
-            {
+            if (currFunction != nullptr) {
                 // Otherwise, it would be an indirect call which we don't want.
                 std::string currFunctionName = currFunction->getName();
 
                 if (std::find(functions.begin(), functions.end(),
-                              currFunctionName) != functions.end())
-                {
+                              currFunctionName) != functions.end()) {
                     // If the dst has already been added, we'd be duplicating
                     // due to multiple actual->arg call edges.
-                    if (callDsts.find(callEdge->getDstNode()) == callDsts.end())
-                    {
+                    if (callDsts.find(callEdge->getDstNode()) ==
+                        callDsts.end()) {
                         callDsts.insert(callEdge->getDstNode());
-                        const SVFFunction* svfFun = LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(currFunction);
-                        functionToPAGNodes[svfFun].push_back(callEdge->getDstNode());
+                        const SVFFunction *svfFun =
+                            LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(
+                                currFunction);
+                        functionToPAGNodes[svfFun].push_back(
+                            callEdge->getDstNode());
                     }
                 }
             }
         }
     }
 
-    for (auto & functionToPAGNode : functionToPAGNodes)
-    {
-        const SVFFunction* function = functionToPAGNode.first;
+    for (auto &functionToPAGNode : functionToPAGNodes) {
+        const SVFFunction *function = functionToPAGNode.first;
         std::string functionName = functionToPAGNode.first->getName();
 
         // The final nodes and edges we will print.
@@ -311,59 +291,48 @@ void ExternalPAG::dumpFunctions(std::vector<std::string> functions)
         std::vector<PAGNode *> argNodes = functionToPAGNode.second;
         PAGNode *retNode = nullptr;
 
-
         outs() << "PAG for function: " << functionName << "\n";
-        for (auto & argNode : argNodes)
-        {
+        for (auto &argNode : argNodes) {
             todoNodes.push(argNode);
         }
 
-        while (!todoNodes.empty())
-        {
+        while (!todoNodes.empty()) {
             PAGNode *currNode = todoNodes.top();
             todoNodes.pop();
 
             // If the node has been dealt with, ignore it.
-            if (nodes.find(currNode) != nodes.end()) continue;
+            if (nodes.find(currNode) != nodes.end())
+                continue;
             nodes.insert(currNode);
 
             // Return signifies the end of a path.
-            if (RetPN::classof(currNode))
-            {
+            if (RetPN::classof(currNode)) {
                 retNode = currNode;
                 continue;
             }
 
             auto outEdges = currNode->getOutEdges();
-            for (auto *outEdge : outEdges)
-            {
+            for (auto *outEdge : outEdges) {
                 edges.insert(outEdge);
                 todoNodes.push(outEdge->getDstNode());
             }
         }
 
-        for (auto *node : nodes)
-        {
+        for (auto *node : nodes) {
             // TODO: proper file.
             // Argument nodes use extra information: it's argument number.
-            if (std::find(argNodes.begin(), argNodes.end(), node)
-                    != argNodes.end())
-            {
+            if (std::find(argNodes.begin(), argNodes.end(), node) !=
+                argNodes.end()) {
                 outputPAGNode(outs(), node,
                               getArgNo(function, node->getValue()));
-            }
-            else if (node == retNode)
-            {
+            } else if (node == retNode) {
                 outputPAGNode(outs(), node, "ret");
-            }
-            else
-            {
+            } else {
                 outputPAGNode(outs(), node);
             }
         }
 
-        for (auto *edge : edges)
-        {
+        for (auto *edge : edges) {
             // TODO: proper file.
             outputPAGEdge(outs(), edge);
         }
@@ -372,14 +341,15 @@ void ExternalPAG::dumpFunctions(std::vector<std::string> functions)
     }
 }
 
-bool ExternalPAG::addExternalPAG(const SVFFunction* function)
-{
+bool ExternalPAG::addExternalPAG(const SVFFunction *function) {
     // The function does not exist in the module - bad arg?
     // TODO: maybe some warning?
-    if (function == nullptr) return false;
+    if (function == nullptr)
+        return false;
 
     PAG *pag = PAG::getPAG();
-    if (hasExternalPAG(function)) return false;
+    if (hasExternalPAG(function))
+        return false;
 
     outs() << "Adding extpag " << this->getFunctionName() << "\n";
     // Temporarily trick SVF Module into thinking we are reading from
@@ -396,26 +366,23 @@ bool ExternalPAG::addExternalPAG(const SVFFunction* function)
     Map<NodeID, PAGNode *> extToNewNodes;
 
     // Add the value nodes.
-    for (auto extNodeIt : this->getValueNodes())
-    {
+    for (auto extNodeIt : this->getValueNodes()) {
         NodeID newNodeId = pag->addDummyValNode();
         extToNewNodes[extNodeIt] = pag->getPAGNode(newNodeId);
     }
 
     // Add the object nodes.
-    for (auto extNodeIt : this->getObjectNodes())
-    {
+    for (auto extNodeIt : this->getObjectNodes()) {
         // TODO: fix obj node - there's more to it?
         NodeID newNodeId = pag->addDummyObjNode();
         extToNewNodes[extNodeIt] = pag->getPAGNode(newNodeId);
     }
 
     // Add the edges.
-    for (const auto& extEdgeIt : this->getEdges())
-    {
+    for (const auto &extEdgeIt : this->getEdges()) {
         NodeID extSrcId = std::get<0>(extEdgeIt);
         NodeID extDstId = std::get<1>(extEdgeIt);
-        const std::string& extEdgeType = std::get<2>(extEdgeIt);
+        const std::string &extEdgeType = std::get<2>(extEdgeIt);
         int extOffsetOrCSId = std::get<3>(extEdgeIt);
 
         PAGNode *srcNode = extToNewNodes[extSrcId];
@@ -423,60 +390,38 @@ bool ExternalPAG::addExternalPAG(const SVFFunction* function)
         NodeID srcId = srcNode->getId();
         NodeID dstId = dstNode->getId();
 
-        if (extEdgeType == "addr")
-        {
+        if (extEdgeType == "addr") {
             pag->addAddrPE(srcId, dstId);
-        }
-        else if (extEdgeType == "copy")
-        {
+        } else if (extEdgeType == "copy") {
             pag->addCopyPE(srcId, dstId);
-        }
-        else if (extEdgeType == "load")
-        {
+        } else if (extEdgeType == "load") {
             pag->addLoadPE(srcId, dstId);
-        }
-        else if (extEdgeType == "store")
-        {
+        } else if (extEdgeType == "store") {
             pag->addStorePE(srcId, dstId, nullptr);
-        }
-        else if (extEdgeType == "gep")
-        {
+        } else if (extEdgeType == "gep") {
             pag->addNormalGepPE(srcId, dstId, LocationSet(extOffsetOrCSId));
-        }
-        else if (extEdgeType == "variant-gep")
-        {
+        } else if (extEdgeType == "variant-gep") {
             pag->addVariantGepPE(srcId, dstId);
-        }
-        else if (extEdgeType == "call")
-        {
-            pag->addEdge(srcNode, dstNode, new CallPE(srcNode, dstNode, nullptr));
-        }
-        else if (extEdgeType == "ret")
-        {
-            pag->addEdge(srcNode, dstNode, new RetPE(srcNode, dstNode, nullptr));
-        }
-        else if (extEdgeType == "cmp")
-        {
+        } else if (extEdgeType == "call") {
+            pag->addEdge(srcNode, dstNode,
+                         new CallPE(srcNode, dstNode, nullptr));
+        } else if (extEdgeType == "ret") {
+            pag->addEdge(srcNode, dstNode,
+                         new RetPE(srcNode, dstNode, nullptr));
+        } else if (extEdgeType == "cmp") {
             pag->addCmpPE(srcId, dstId);
-        }
-        else if (extEdgeType == "binary-op")
-        {
+        } else if (extEdgeType == "binary-op") {
             pag->addBinaryOPPE(srcId, dstId);
-        }
-        else if (extEdgeType == "unary-op")
-        {
+        } else if (extEdgeType == "unary-op") {
             pag->addUnaryOPPE(srcId, dstId);
-        }
-        else
-        {
+        } else {
             outs() << "Bad edge type found during extpag addition\n";
         }
     }
 
     // Record the arg nodes.
     Map<int, PAGNode *> argNodes;
-    for (auto & argNodeIt : this->getArgNodes())
-    {
+    for (auto &argNodeIt : this->getArgNodes()) {
         int index = argNodeIt.first;
         NodeID extNodeId = argNodeIt.second;
         argNodes[index] = extToNewNodes[extNodeId];
@@ -485,8 +430,7 @@ bool ExternalPAG::addExternalPAG(const SVFFunction* function)
     functionToExternalPAGEntries[function] = argNodes;
 
     // Record the return node.
-    if (this->hasReturnNode())
-    {
+    if (this->hasReturnNode()) {
         functionToExternalPAGReturns[function] =
             extToNewNodes[this->getReturnNode()];
     }
@@ -498,39 +442,33 @@ bool ExternalPAG::addExternalPAG(const SVFFunction* function)
 }
 
 // Very similar implementation to the PAGBuilderFromFile.
-void ExternalPAG::readFromFile(std::string filename)
-{
+void ExternalPAG::readFromFile(std::string filename) {
     std::string line;
     std::ifstream pagFile(filename.c_str());
 
-    if (!pagFile.is_open())
-    {
+    if (!pagFile.is_open()) {
         outs() << "ExternalPAG::buildFromFile: could not open " << filename
                << "\n";
         return;
     }
 
-    while (pagFile.good())
-    {
+    while (pagFile.good()) {
         std::getline(pagFile, line);
 
         Size_t tokenCount = 0;
         std::string tmps;
         std::istringstream ss(line);
-        while (ss.good())
-        {
+        while (ss.good()) {
             ss >> tmps;
             tokenCount++;
         }
 
-        if (tokenCount == 0)
-        {
+        if (tokenCount == 0) {
             // Empty line.
             continue;
         }
 
-        if (tokenCount == 2 || tokenCount == 3)
-        {
+        if (tokenCount == 2 || tokenCount == 3) {
             // It's a node.
             NodeID nodeId;
             std::string nodeType;
@@ -538,47 +476,32 @@ void ExternalPAG::readFromFile(std::string filename)
             ss >> nodeId;
             ss >> nodeType;
 
-            if (nodeType == "v")
-            {
+            if (nodeType == "v") {
                 valueNodes.insert(nodeId);
-            }
-            else if (nodeType == "o")
-            {
+            } else if (nodeType == "o") {
                 objectNodes.insert(nodeId);
-            }
-            else
-            {
-                assert(false
-                       && "format not supported, please specify node type");
+            } else {
+                assert(false &&
+                       "format not supported, please specify node type");
             }
 
-
-            if (tokenCount == 3)
-            {
+            if (tokenCount == 3) {
                 // If there are 3 tokens, it should be 0, 1, 2, ... or ret.
                 std::string argNoOrRet;
                 ss >> argNoOrRet;
 
-                if (argNoOrRet == "ret")
-                {
+                if (argNoOrRet == "ret") {
                     setReturnNode(nodeId);
-                }
-                else if (std::all_of(argNoOrRet.begin(), argNoOrRet.end(),
-                                     ::isdigit))
-                {
+                } else if (std::all_of(argNoOrRet.begin(), argNoOrRet.end(),
+                                       ::isdigit)) {
                     int argNo = std::stoi(argNoOrRet);
                     argNodes[argNo] = nodeId;
+                } else {
+                    assert(false &&
+                           "format not supported, not arg number or ret");
                 }
-                else
-                {
-                    assert(false
-                           && "format not supported, not arg number or ret");
-                }
-
             }
-        }
-        else if (tokenCount == 4)
-        {
+        } else if (tokenCount == 4) {
             // It's an edge
             NodeID nodeSrc;
             NodeID nodeDst;
@@ -590,17 +513,12 @@ void ExternalPAG::readFromFile(std::string filename)
             ss >> nodeDst;
             ss >> offsetOrCSId;
 
-            edges.insert(
-                std::tuple<NodeID, NodeID, std::string, int>(nodeSrc, nodeDst,
-                        edge,
-                        offsetOrCSId));
-        }
-        else
-        {
-            if (!line.empty())
-            {
-                outs() << "format not supported, token count = "
-                       << tokenCount << "\n";
+            edges.insert(std::tuple<NodeID, NodeID, std::string, int>(
+                nodeSrc, nodeDst, edge, offsetOrCSId));
+        } else {
+            if (!line.empty()) {
+                outs() << "format not supported, token count = " << tokenCount
+                       << "\n";
                 assert(false && "format not supported");
             }
         }
@@ -608,10 +526,8 @@ void ExternalPAG::readFromFile(std::string filename)
 
     /*
     TODO: might need to include elsewhere.
-    /// new gep node's id from lower bound, nodeNum may not reflect the total nodes
-    u32_t lower_bound = 1000;
-    for(u32_t i = 0; i < lower_bound; i++)
+    /// new gep node's id from lower bound, nodeNum may not reflect the total
+    nodes u32_t lower_bound = 1000; for(u32_t i = 0; i < lower_bound; i++)
         pag->incNodeNum();
     */
 }
-

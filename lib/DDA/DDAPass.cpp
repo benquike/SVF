@@ -8,13 +8,14 @@
 #include "Util/Options.h"
 #include "MemoryModel/PointerAnalysisImpl.h"
 #include "DDA/DDAPass.h"
-#include "DDA/FlowDDA.h"
 #include "DDA/ContextDDA.h"
 #include "DDA/DDAClient.h"
+#include "DDA/FlowDDA.h"
+#include "MemoryModel/PointerAnalysisImpl.h"
 #include "SVF-FE/PAGBuilder.h"
 
-#include <sstream>
 #include <limits.h>
+#include <sstream>
 
 using namespace SVF;
 using namespace SVFUtil;
@@ -22,7 +23,6 @@ using namespace SVFUtil;
 char DDAPass::ID = 0;
 
 static llvm::RegisterPass<DDAPass> DDAPA("dda", "Demand-driven Pointer Analysis Pass");
-
 DDAPass::~DDAPass()
 {
     // _pta->dumpStat();
@@ -30,11 +30,9 @@ DDAPass::~DDAPass()
         delete _client;
 }
 
-
-void DDAPass::runOnModule(SVFModule* module)
-{
+void DDAPass::runOnModule(SVFModule *module) {
     /// initialization for llvm alias analyzer
-    //InitializeAliasAnalysis(this, SymbolTableInfo::getDataLayout(&module));
+    // InitializeAliasAnalysis(this, SymbolTableInfo::getDataLayout(&module));
 
     selectClient(module);
 
@@ -46,16 +44,15 @@ void DDAPass::runOnModule(SVFModule* module)
     }
 }
 
-bool DDAPass::runOnModule(Module& module)
-{
-    SVFModule* svfModule = LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(module);
+bool DDAPass::runOnModule(Module &module) {
+    SVFModule *svfModule =
+        LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(module);
     runOnModule(svfModule);
     return false;
 }
 
 /// select a client to initialize queries
-void DDAPass::selectClient(SVFModule* module)
-{
+void DDAPass::selectClient(SVFModule *module) {
 
     if (!Options::UserInputQuery.empty())
     {
@@ -69,8 +66,7 @@ void DDAPass::selectClient(SVFModule* module)
             _client = new AliasDDAClient(module);
         }
         /// allow user specify queries
-        else
-        {
+        else {
             _client = new DDAClient(module);
             if (Options::UserInputQuery != "all")
             {
@@ -80,9 +76,7 @@ void DDAPass::selectClient(SVFModule* module)
                     _client->setQuery(buf);
             }
         }
-    }
-    else
-    {
+    } else {
         assert(false && "Please specify query options!");
     }
 
@@ -90,25 +84,21 @@ void DDAPass::selectClient(SVFModule* module)
 }
 
 /// Create pointer analysis according to specified kind and analyze the module.
-void DDAPass::runPointerAnalysis(SVFModule* module, u32_t kind)
-{
+void DDAPass::runPointerAnalysis(SVFModule *module, u32_t kind) {
 
-	PAGBuilder builder;
-	PAG* pag = builder.build(module);
+    PAGBuilder builder;
+    PAG *pag = builder.build(module);
 
     VFPathCond::setMaxPathLen(Options::MaxPathLen);
     ContextCond::setMaxCxtLen(Options::MaxContextLen);
 
     /// Initialize pointer analysis.
-    switch (kind)
-    {
-    case PointerAnalysis::Cxt_DDA:
-    {
+    switch (kind) {
+    case PointerAnalysis::Cxt_DDA: {
         _pta = new ContextDDA(pag, _client);
         break;
     }
-    case PointerAnalysis::FlowS_DDA:
-    {
+    case PointerAnalysis::FlowS_DDA: {
         _pta = new FlowDDA(pag, _client);
         break;
     }
@@ -120,14 +110,12 @@ void DDAPass::runPointerAnalysis(SVFModule* module, u32_t kind)
     if(Options::WPANum)
     {
         _client->collectWPANum(module);
-    }
-    else
-    {
-        ///initialize
+    } else {
+        /// initialize
         _pta->initialize();
-        ///compute points-to
+        /// compute points-to
         _client->answerQueries(_pta);
-        ///finalize
+        /// finalize
         _pta->finalize();
         if(Options::PrintCPts)
             _pta->dumpCPts();
@@ -139,7 +127,6 @@ void DDAPass::runPointerAnalysis(SVFModule* module, u32_t kind)
             printQueryPTS();
     }
 }
-
 
 /*!
  * Initialize context insensitive Edge for DDA
@@ -155,25 +142,24 @@ void DDAPass::initCxtInsensitiveEdges(PointerAnalysis* pta, const SVFG* svfg,con
 /*!
  * Whether SVFG edge in a SCC cycle
  */
-bool DDAPass::edgeInSVFGSCC(const SVFGSCC* svfgSCC,const SVFGEdge* edge)
-{
-    return (svfgSCC->repNode(edge->getSrcID()) == svfgSCC->repNode(edge->getDstID()));
+bool DDAPass::edgeInSVFGSCC(const SVFGSCC *svfgSCC, const SVFGEdge *edge) {
+    return (svfgSCC->repNode(edge->getSrcID()) ==
+            svfgSCC->repNode(edge->getDstID()));
 }
 
 /*!
  *  Whether call graph edge in SVFG SCC
  */
-bool DDAPass::edgeInCallGraphSCC(PointerAnalysis* pta,const SVFGEdge* edge)
-{
-	const SVFFunction* srcFun = edge->getSrcNode()->getICFGNode()->getFun();
-	const SVFFunction* dstFun = edge->getDstNode()->getICFGNode()->getFun();
+bool DDAPass::edgeInCallGraphSCC(PointerAnalysis *pta, const SVFGEdge *edge) {
+    const SVFFunction *srcFun = edge->getSrcNode()->getICFGNode()->getFun();
+    const SVFFunction *dstFun = edge->getDstNode()->getICFGNode()->getFun();
 
-    if(srcFun && dstFun)
-    {
-        return pta->inSameCallGraphSCC(srcFun,dstFun);
+    if (srcFun && dstFun) {
+        return pta->inSameCallGraphSCC(srcFun, dstFun);
     }
 
-    assert(edge->isRetVFGEdge() == false && "should not be an inter-procedural return edge" );
+    assert(edge->isRetVFGEdge() == false &&
+           "should not be an inter-procedural return edge");
 
     return false;
 }
@@ -181,20 +167,18 @@ bool DDAPass::edgeInCallGraphSCC(PointerAnalysis* pta,const SVFGEdge* edge)
 /*!
  * Mark insensitive edge for function recursions
  */
-void DDAPass::collectCxtInsenEdgeForRecur(PointerAnalysis* pta, const SVFG* svfg,SVFGEdgeSet& insensitveEdges)
-{
+void DDAPass::collectCxtInsenEdgeForRecur(PointerAnalysis *pta,
+                                          const SVFG *svfg,
+                                          SVFGEdgeSet &insensitveEdges) {
 
-    for (auto it : *svfg)
-    {
+    for (auto it : *svfg) {
 
         auto edgeIt = it.second->InEdgeBegin();
         auto edgeEit = it.second->InEdgeEnd();
-        for (; edgeIt != edgeEit; ++edgeIt)
-        {
-            const SVFGEdge* edge = *edgeIt;
-            if(edge->isCallVFGEdge() || edge->isRetVFGEdge())
-            {
-                if(edgeInCallGraphSCC(pta,edge))
+        for (; edgeIt != edgeEit; ++edgeIt) {
+            const SVFGEdge *edge = *edgeIt;
+            if (edge->isCallVFGEdge() || edge->isRetVFGEdge()) {
+                if (edgeInCallGraphSCC(pta, edge))
                     insensitveEdges.insert(edge);
             }
         }
@@ -204,61 +188,68 @@ void DDAPass::collectCxtInsenEdgeForRecur(PointerAnalysis* pta, const SVFG* svfg
 /*!
  * Mark insensitive edge for value-flow cycles
  */
-void DDAPass::collectCxtInsenEdgeForVFCycle(PointerAnalysis* pta, const SVFG* svfg,const SVFGSCC* svfgSCC, SVFGEdgeSet& insensitveEdges)
-{
+void DDAPass::collectCxtInsenEdgeForVFCycle(PointerAnalysis *pta,
+                                            const SVFG *svfg,
+                                            const SVFGSCC *svfgSCC,
+                                            SVFGEdgeSet &insensitveEdges) {
 
     OrderedSet<NodePair> insensitvefunPairs;
 
-    for (auto it : *svfg)
-    {
+    for (auto it : *svfg) {
 
         auto edgeIt = it.second->InEdgeBegin();
         auto edgeEit = it.second->InEdgeEnd();
-        for (; edgeIt != edgeEit; ++edgeIt)
-        {
-            const SVFGEdge* edge = *edgeIt;
-            if(edge->isCallVFGEdge() || edge->isRetVFGEdge())
-            {
-                if(this->edgeInSVFGSCC(svfgSCC,edge))
-                {
+        for (; edgeIt != edgeEit; ++edgeIt) {
+            const SVFGEdge *edge = *edgeIt;
+            if (edge->isCallVFGEdge() || edge->isRetVFGEdge()) {
+                if (this->edgeInSVFGSCC(svfgSCC, edge)) {
 
-                	const SVFFunction* srcFun = edge->getSrcNode()->getICFGNode()->getFun();
-                	const SVFFunction* dstFun = edge->getDstNode()->getICFGNode()->getFun();
+                    const SVFFunction *srcFun =
+                        edge->getSrcNode()->getICFGNode()->getFun();
+                    const SVFFunction *dstFun =
+                        edge->getDstNode()->getICFGNode()->getFun();
 
-                    if(srcFun && dstFun)
-                    {
-                        NodeID src = pta->getPTACallGraph()->getCallGraphNode(srcFun)->getId();
-                        NodeID dst = pta->getPTACallGraph()->getCallGraphNode(dstFun)->getId();
-                        insensitvefunPairs.insert(std::make_pair(src,dst));
-                        insensitvefunPairs.insert(std::make_pair(dst,src));
-                    }
-                    else
-                        assert(edge->isRetVFGEdge() == false && "should not be an inter-procedural return edge" );
+                    if (srcFun && dstFun) {
+                        NodeID src = pta->getPTACallGraph()
+                                         ->getCallGraphNode(srcFun)
+                                         ->getId();
+                        NodeID dst = pta->getPTACallGraph()
+                                         ->getCallGraphNode(dstFun)
+                                         ->getId();
+                        insensitvefunPairs.insert(std::make_pair(src, dst));
+                        insensitvefunPairs.insert(std::make_pair(dst, src));
+                    } else
+                        assert(edge->isRetVFGEdge() == false &&
+                               "should not be an inter-procedural return edge");
                 }
             }
         }
     }
 
-    for(auto it : *svfg)
-    {
+    for (auto it : *svfg) {
         auto edgeIt = it.second->InEdgeBegin();
         auto edgeEit = it.second->InEdgeEnd();
-        for (; edgeIt != edgeEit; ++edgeIt)
-        {
-            const SVFGEdge* edge = *edgeIt;
+        for (; edgeIt != edgeEit; ++edgeIt) {
+            const SVFGEdge *edge = *edgeIt;
 
-            if(edge->isCallVFGEdge() || edge->isRetVFGEdge())
-            {
-                const SVFFunction* srcFun = edge->getSrcNode()->getICFGNode()->getFun();
-                const SVFFunction* dstFun = edge->getDstNode()->getICFGNode()->getFun();
+            if (edge->isCallVFGEdge() || edge->isRetVFGEdge()) {
+                const SVFFunction *srcFun =
+                    edge->getSrcNode()->getICFGNode()->getFun();
+                const SVFFunction *dstFun =
+                    edge->getDstNode()->getICFGNode()->getFun();
 
-                if(srcFun && dstFun)
-                {
-                    NodeID src = pta->getPTACallGraph()->getCallGraphNode(srcFun)->getId();
-                    NodeID dst = pta->getPTACallGraph()->getCallGraphNode(dstFun)->getId();
-                    if(insensitvefunPairs.find(std::make_pair(src,dst))!=insensitvefunPairs.end())
+                if (srcFun && dstFun) {
+                    NodeID src = pta->getPTACallGraph()
+                                     ->getCallGraphNode(srcFun)
+                                     ->getId();
+                    NodeID dst = pta->getPTACallGraph()
+                                     ->getCallGraphNode(dstFun)
+                                     ->getId();
+                    if (insensitvefunPairs.find(std::make_pair(src, dst)) !=
+                        insensitvefunPairs.end())
                         insensitveEdges.insert(edge);
-                    else if(insensitvefunPairs.find(std::make_pair(dst,src))!=insensitvefunPairs.end())
+                    else if (insensitvefunPairs.find(std::make_pair(
+                                 dst, src)) != insensitvefunPairs.end())
                         insensitveEdges.insert(edge);
                 }
             }
@@ -266,42 +257,39 @@ void DDAPass::collectCxtInsenEdgeForVFCycle(PointerAnalysis* pta, const SVFG* sv
     }
 }
 
-AliasResult DDAPass::alias(NodeID node1, NodeID node2)
-{
-    PAG* pag = _pta->getPAG();
+AliasResult DDAPass::alias(NodeID node1, NodeID node2) {
+    PAG *pag = _pta->getPAG();
 
-    if(pag->isValidTopLevelPtr(pag->getPAGNode(node1)))
+    if (pag->isValidTopLevelPtr(pag->getPAGNode(node1)))
         _pta->computeDDAPts(node1);
 
-    if(pag->isValidTopLevelPtr(pag->getPAGNode(node2)))
+    if (pag->isValidTopLevelPtr(pag->getPAGNode(node2)))
         _pta->computeDDAPts(node2);
 
-    return _pta->alias(node1,node2);
+    return _pta->alias(node1, node2);
 }
 /*!
  * Return alias results based on our points-to/alias analysis
  * TODO: Need to handle PartialAlias and MustAlias here.
  */
-AliasResult DDAPass::alias(const Value* V1, const Value* V2)
-{
-    PAG* pag = _pta->getPAG();
+AliasResult DDAPass::alias(const Value *V1, const Value *V2) {
+    PAG *pag = _pta->getPAG();
 
     /// TODO: When this method is invoked during compiler optimizations, the IR
     ///       used for pointer analysis may been changed, so some Values may not
     ///       find corresponding PAG node. In this case, we only check alias
-    ///       between two Values if they both have PAG nodes. Otherwise, MayAlias
-    ///       will be returned.
-    if (pag->hasValueNode(V1) && pag->hasValueNode(V2))
-    {
-        PAGNode* node1 = pag->getPAGNode(pag->getValueNode(V1));
-        if(pag->isValidTopLevelPtr(node1))
+    ///       between two Values if they both have PAG nodes. Otherwise,
+    ///       MayAlias will be returned.
+    if (pag->hasValueNode(V1) && pag->hasValueNode(V2)) {
+        PAGNode *node1 = pag->getPAGNode(pag->getValueNode(V1));
+        if (pag->isValidTopLevelPtr(node1))
             _pta->computeDDAPts(node1->getId());
 
-        PAGNode* node2 = pag->getPAGNode(pag->getValueNode(V2));
-        if(pag->isValidTopLevelPtr(node2))
+        PAGNode *node2 = pag->getPAGNode(pag->getValueNode(V2));
+        if (pag->isValidTopLevelPtr(node2))
             _pta->computeDDAPts(node2->getId());
 
-        return _pta->alias(V1,V2);
+        return _pta->alias(V1, V2);
     }
 
     return llvm::MayAlias;
@@ -310,12 +298,10 @@ AliasResult DDAPass::alias(const Value* V1, const Value* V2)
 /*!
  * Print queries' pts
  */
-void DDAPass::printQueryPTS()
-{
-    const OrderedNodeSet& candidates = _client->getCandidateQueries();
-    for (auto it : candidates)
-    {
-        const PointsTo& pts = _pta->getPts(it);
-        _pta->dumpPts(it,pts);
+void DDAPass::printQueryPTS() {
+    const OrderedNodeSet &candidates = _client->getCandidateQueries();
+    for (auto it : candidates) {
+        const PointsTo &pts = _pta->getPts(it);
+        _pta->dumpPts(it, pts);
     }
 }

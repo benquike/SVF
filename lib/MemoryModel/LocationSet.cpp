@@ -35,52 +35,46 @@
 
 using namespace SVF;
 
-
 /*!
  * Add element num and stride pair
  */
-void LocationSet::addElemNumStridePair(const NodePair& pair)
-{
+void LocationSet::addElemNumStridePair(const NodePair &pair) {
     /// The pair will not be added if any number of a stride is zero,
-    /// because they will not have effect on the locations represented by this LocationSet.
+    /// because they will not have effect on the locations represented by this
+    /// LocationSet.
     if (pair.first == 0 || pair.second == 0)
         return;
 
     if (Options::SingleStride)
     {
         if (numStridePair.empty())
-            numStridePair.push_back(std::make_pair(StInfo::getMaxFieldLimit(),pair.second));
-        else
-        {
+            numStridePair.push_back(
+                std::make_pair(StInfo::getMaxFieldLimit(), pair.second));
+        else {
             /// Find the GCD stride
             NodeID existStride = (*numStridePair.begin()).second;
             NodeID newStride = gcd(pair.second, existStride);
-            if (newStride != existStride)
-            {
+            if (newStride != existStride) {
                 numStridePair.pop_back();
-                numStridePair.push_back(std::make_pair(StInfo::getMaxFieldLimit(),newStride));
+                numStridePair.push_back(
+                    std::make_pair(StInfo::getMaxFieldLimit(), newStride));
             }
         }
-    }
-    else
-    {
+    } else {
         numStridePair.push_back(pair);
     }
 }
 
-
 /*!
  * Return TRUE if it successfully increases any index by 1
  */
-bool LocationSet::increaseIfNotReachUpperBound(std::vector<NodeID>& indices,
-        const ElemNumStridePairVec& pairVec) const
-{
+bool LocationSet::increaseIfNotReachUpperBound(
+    std::vector<NodeID> &indices, const ElemNumStridePairVec &pairVec) const {
     assert(indices.size() == pairVec.size() && "vector size not match");
 
     /// Check if all indices reach upper bound
     bool reachUpperBound = true;
-    for (u32_t i = 0; i < indices.size(); i++)
-    {
+    for (u32_t i = 0; i < indices.size(); i++) {
         assert(pairVec[i].first > 0 && "number must be greater than 0");
         if (indices[i] < (pairVec[i].first - 1))
             reachUpperBound = false;
@@ -88,18 +82,13 @@ bool LocationSet::increaseIfNotReachUpperBound(std::vector<NodeID>& indices,
 
     /// Increase index if not reach upper bound
     bool increased = false;
-    if (reachUpperBound == false)
-    {
+    if (reachUpperBound == false) {
         u32_t i = 0;
-        while (increased == false)
-        {
-            if (indices[i] < (pairVec[i].first - 1))
-            {
+        while (increased == false) {
+            if (indices[i] < (pairVec[i].first - 1)) {
                 indices[i] += 1;
                 increased = true;
-            }
-            else
-            {
+            } else {
                 indices[i] = 0;
                 i++;
             }
@@ -109,45 +98,35 @@ bool LocationSet::increaseIfNotReachUpperBound(std::vector<NodeID>& indices,
     return increased;
 }
 
-
 /*!
  * Compute all possible locations according to offset and number-stride pairs.
  */
-PointsTo LocationSet::computeAllLocations() const
-{
+PointsTo LocationSet::computeAllLocations() const {
 
     PointsTo result;
     result.set(getOffset());
 
-    if (isConstantOffset() == false)
-    {
-        const ElemNumStridePairVec& lhsVec = getNumStridePair();
+    if (isConstantOffset() == false) {
+        const ElemNumStridePairVec &lhsVec = getNumStridePair();
         std::vector<NodeID> indices;
         u32_t size = lhsVec.size();
-        while (size)
-        {
+        while (size) {
             indices.push_back(0);
             size--;
         }
 
-        do
-        {
+        do {
             u32_t i = 0;
             NodeID ofst = getOffset();
-            while (i < lhsVec.size())
-            {
+            while (i < lhsVec.size()) {
                 ofst += (lhsVec[i].second * indices[i]);
                 i++;
             }
 
             result.set(ofst);
 
-        }
-        while (increaseIfNotReachUpperBound(indices, lhsVec));
+        } while (increaseIfNotReachUpperBound(indices, lhsVec));
     }
 
     return result;
 }
-
-
-

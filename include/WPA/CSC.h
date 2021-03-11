@@ -1,4 +1,5 @@
-//===- CSC.h -- Cycle Stride Calculation algorithm---------------------------------------//
+//===- CSC.h -- Cycle Stride Calculation
+//algorithm---------------------------------------//
 //
 //                     SVF: Static Value-Flow Analysis
 //
@@ -30,66 +31,58 @@
 #ifndef PROJECT_CSC_H
 #define PROJECT_CSC_H
 
-#include "Util/SCC.h"
-#include "Util/BasicTypes.h"    // for NodeBS
 #include "Graphs/ConsG.h"
+#include "Util/BasicTypes.h" // for NodeBS
+#include "Util/SCC.h"
 #include "Util/WorkList.h"
 #include <limits.h>
-#include <stack>
 #include <map>
+#include <stack>
 
-namespace SVF
-{
+namespace SVF {
 
 using CGSCC = SCCDetection<ConstraintGraph *>;
 
 /*!
  * class CSC: cycle stride calculation
  */
-class CSC
-{
-public:
+class CSC {
+  public:
     using IdToIdMap = Map<NodeID, NodeID>;
     using WorkStack = FILOWorkList<NodeID>;
     using iterator = typename IdToIdMap::iterator;
 
-private:
-    ConstraintGraph* _consG;
-    CGSCC* _scc;
+  private:
+    ConstraintGraph *_consG;
+    CGSCC *_scc;
 
     NodeID _I;
-    IdToIdMap _D;       // the sum of weight of a path relevant to a certain node, while accessing the node via DFS
-    NodeStack _S;       // a stack holding a DFS branch
-    NodeSet _visited;   // a set holding visited nodes
-//    NodeStrides nodeStrides;
-//    IdToIdMap pwcReps;
+    IdToIdMap _D;     // the sum of weight of a path relevant to a certain node,
+                      // while accessing the node via DFS
+    NodeStack _S;     // a stack holding a DFS branch
+    NodeSet _visited; // a set holding visited nodes
+    //    NodeStrides nodeStrides;
+    //    IdToIdMap pwcReps;
 
-public:
-    CSC(ConstraintGraph* g, CGSCC* c)
-        : _consG(g), _scc(c), _I(0) {}
+  public:
+    CSC(ConstraintGraph *g, CGSCC *c) : _consG(g), _scc(c), _I(0) {}
 
-    void find(NodeStack& candidates);
+    void find(NodeStack &candidates);
     void visit(NodeID nodeId, Size_t _w);
     void clear();
 
-    bool isVisited(NodeID nId)
-    {
-        return _visited.find(nId) != _visited.end();
-    }
+    bool isVisited(NodeID nId) { return _visited.find(nId) != _visited.end(); }
 
-    void setVisited(NodeID nId)
-    {
-        _visited.insert(nId);
-    }
-//    inline iterator begin() { return pwcReps.begin(); }
-//
-//    inline iterator end() { return pwcReps.end(); }
+    void setVisited(NodeID nId) { _visited.insert(nId); }
+    //    inline iterator begin() { return pwcReps.begin(); }
+    //
+    //    inline iterator end() { return pwcReps.end(); }
 
-//    NodeStrides &getNodeStrides() { return nodeStrides; }
+    //    NodeStrides &getNodeStrides() { return nodeStrides; }
 
-//    const NodeSet& getPWCReps() const { return  _pwcReps; }
+    //    const NodeSet& getPWCReps() const { return  _pwcReps; }
 };
 
 } // End namespace SVF
 
-#endif //PROJECT_CSC_H
+#endif // PROJECT_CSC_H

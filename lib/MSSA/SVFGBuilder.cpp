@@ -41,8 +41,7 @@ using namespace SVFUtil;
 SVFG* SVFGBuilder::globalSvfg = nullptr;
 
 
-SVFG* SVFGBuilder::buildPTROnlySVFG(BVDataPTAImpl* pta)
-{
+SVFG *SVFGBuilder::buildPTROnlySVFG(BVDataPTAImpl *pta) {
     return build(pta, VFG::PTRONLYSVFGK);
 }
 
@@ -52,8 +51,7 @@ SVFG* SVFGBuilder::buildPTROnlySVFGWithoutOPT(BVDataPTAImpl* pta)
     return build(pta, VFG::PTRONLYSVFGK);
 }
 
-SVFG* SVFGBuilder::buildFullSVFG(BVDataPTAImpl* pta)
-{
+SVFG *SVFGBuilder::buildFullSVFG(BVDataPTAImpl *pta) {
     return build(pta, VFG::ORIGSVFGK);
 }
 
@@ -63,23 +61,20 @@ SVFG* SVFGBuilder::buildFullSVFGWithoutOPT(BVDataPTAImpl* pta)
     return build(pta, VFG::ORIGSVFGK);
 }
 
-
 /*!
  * Create SVFG
  */
-void SVFGBuilder::buildSVFG()
-{
-    MemSSA* mssa = svfg->getMSSA();
+void SVFGBuilder::buildSVFG() {
+    MemSSA *mssa = svfg->getMSSA();
     svfg->buildSVFG();
-    if(mssa->getPTA()->printStat())
+    if (mssa->getPTA()->printStat())
         svfg->performStat();
 }
 
 /// Create DDA SVFG
-SVFG* SVFGBuilder::build(BVDataPTAImpl* pta, VFG::VFGK kind)
-{
+SVFG *SVFGBuilder::build(BVDataPTAImpl *pta, VFG::VFGK kind) {
 
-    MemSSA* mssa = buildMSSA(pta, (VFG::PTRONLYSVFGK==kind));
+    MemSSA *mssa = buildMSSA(pta, (VFG::PTRONLYSVFGK == kind));
 
     DBOUT(DGENERAL, outs() << pasMsg("Build Sparse Value-Flow Graph \n"));
     if(Options::SingleVFG)
@@ -109,7 +104,6 @@ SVFG* SVFGBuilder::build(BVDataPTAImpl* pta, VFG::VFGK kind)
 
     svfg->setDumpVFG(Options::DumpVFG);
 
-
     if(Options::DumpVFG)
     	svfg->dump("svfg_final");
 
@@ -119,26 +113,21 @@ SVFG* SVFGBuilder::build(BVDataPTAImpl* pta, VFG::VFGK kind)
 /*!
  * Release memory
  */
-void SVFGBuilder::releaseMemory()
-{
-    svfg->clearMSSA();
-}
+void SVFGBuilder::releaseMemory() { svfg->clearMSSA(); }
 
-MemSSA* SVFGBuilder::buildMSSA(BVDataPTAImpl* pta, bool ptrOnlyMSSA)
-{
+MemSSA *SVFGBuilder::buildMSSA(BVDataPTAImpl *pta, bool ptrOnlyMSSA) {
 
     DBOUT(DGENERAL, outs() << pasMsg("Build Memory SSA \n"));
 
-    auto* mssa = new MemSSA(pta, ptrOnlyMSSA);
+    auto *mssa = new MemSSA(pta, ptrOnlyMSSA);
 
     DominatorTree dt;
     MemSSADF df;
 
-    SVFModule* svfModule = mssa->getPTA()->getModule();
-    for (const auto *fun : *svfModule)
-    {
+    SVFModule *svfModule = mssa->getPTA()->getModule();
+    for (const auto *fun : *svfModule) {
 
-         if (isExtCall(fun))
+        if (isExtCall(fun))
             continue;
 
         dt.recalculate(*fun->getLLVMFun());
@@ -152,5 +141,3 @@ MemSSA* SVFGBuilder::buildMSSA(BVDataPTAImpl* pta, bool ptrOnlyMSSA)
 
     return mssa;
 }
-
-

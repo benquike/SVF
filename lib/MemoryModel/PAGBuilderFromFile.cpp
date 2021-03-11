@@ -28,9 +28,9 @@
  */
 
 #include "MemoryModel/PAGBuilderFromFile.h"
-#include <fstream>	// for PAGBuilderFromFile
-#include <string>	// for PAGBuilderFromFile
-#include <sstream>	// for PAGBuilderFromFile
+#include <fstream> // for PAGBuilderFromFile
+#include <sstream> // for PAGBuilderFromFile
+#include <string>  // for PAGBuilderFromFile
 
 using namespace std;
 using namespace SVF;
@@ -56,22 +56,18 @@ static u32_t gepNodeNumIndex = 100000;
 6 store 8 0
 8 load 9 0
  */
-PAG* PAGBuilderFromFile::build()
-{
+PAG *PAGBuilderFromFile::build() {
 
     string line;
     ifstream myfile(file.c_str());
-    if (myfile.is_open())
-    {
-        while (myfile.good())
-        {
+    if (myfile.is_open()) {
+        while (myfile.good()) {
             getline(myfile, line);
 
             Size_t token_count = 0;
             string tmps;
             istringstream ss(line);
-            while (ss.good())
-            {
+            while (ss.good()) {
                 ss >> tmps;
                 token_count++;
             }
@@ -79,8 +75,7 @@ PAG* PAGBuilderFromFile::build()
             if (token_count == 0)
                 continue;
 
-            else if (token_count == 2)
-            {
+            else if (token_count == 2) {
                 NodeID nodeId;
                 string nodetype;
                 istringstream ss(line);
@@ -89,18 +84,16 @@ PAG* PAGBuilderFromFile::build()
                 outs() << "reading node :" << nodeId << "\n";
                 if (nodetype == "v")
                     pag->addDummyValNode(nodeId);
-                else if (nodetype == "o")
-                {
-                    const MemObj* mem = pag->addDummyMemObj(nodeId, nullptr);
+                else if (nodetype == "o") {
+                    const MemObj *mem = pag->addDummyMemObj(nodeId, nullptr);
                     pag->addFIObjNode(mem);
-                }
-                else
-                    assert(false && "format not support, pls specify node type");
+                } else
+                    assert(false &&
+                           "format not support, pls specify node type");
             }
 
             // do consider gep edge
-            else if (token_count == 4)
-            {
+            else if (token_count == 4) {
                 NodeID nodeSrc;
                 NodeID nodeDst;
                 Size_t offsetOrCSId;
@@ -113,11 +106,8 @@ PAG* PAGBuilderFromFile::build()
                 outs() << "reading edge :" << nodeSrc << " " << edge << " "
                        << nodeDst << " offsetOrCSId=" << offsetOrCSId << " \n";
                 addEdge(nodeSrc, nodeDst, offsetOrCSId, edge);
-            }
-            else
-            {
-                if (!line.empty())
-                {
+            } else {
+                if (!line.empty()) {
                     outs() << "format not supported, token count = "
                            << token_count << "\n";
                     assert(false && "format not supported");
@@ -130,9 +120,10 @@ PAG* PAGBuilderFromFile::build()
     else
         outs() << "Unable to open file\n";
 
-    /// new gep node's id from lower bound, nodeNum may not reflect the total nodes.
+    /// new gep node's id from lower bound, nodeNum may not reflect the total
+    /// nodes.
     u32_t lower_bound = gepNodeNumIndex;
-    for(u32_t i = 0; i < lower_bound; i++)
+    for (u32_t i = 0; i < lower_bound; i++)
         pag->incNodeNum();
 
     pag->setNodeNumAfterPAGBuild(pag->getTotalNodeNum());
@@ -144,25 +135,22 @@ PAG* PAGBuilderFromFile::build()
  * Add PAG edge according to a file format
  */
 void PAGBuilderFromFile::addEdge(NodeID srcID, NodeID dstID,
-                                 Size_t offsetOrCSId, std::string edge)
-{
+                                 Size_t offsetOrCSId, std::string edge) {
 
-    //check whether these two nodes available
-    PAGNode* srcNode = pag->getPAGNode(srcID);
-    PAGNode* dstNode = pag->getPAGNode(dstID);
+    // check whether these two nodes available
+    PAGNode *srcNode = pag->getPAGNode(srcID);
+    PAGNode *dstNode = pag->getPAGNode(dstID);
 
     /// sanity check for PAG from txt
     assert(SVFUtil::isa<ValPN>(dstNode) && "dst not an value node?");
-    if(edge=="addr")
+    if (edge == "addr")
         assert(SVFUtil::isa<ObjPN>(srcNode) && "src not an value node?");
     else
         assert(!SVFUtil::isa<ObjPN>(srcNode) && "src not an object node?");
 
-    if (edge == "addr")
-    {
+    if (edge == "addr") {
         pag->addAddrPE(srcID, dstID);
-    }
-    else if (edge == "copy")
+    } else if (edge == "copy")
         pag->addCopyPE(srcID, dstID);
     else if (edge == "load")
         pag->addLoadPE(srcID, dstID);
@@ -185,4 +173,3 @@ void PAGBuilderFromFile::addEdge(NodeID srcID, NodeID dstID,
     else
         assert(false && "format not support, can not create such edge");
 }
-

@@ -32,17 +32,16 @@
 using namespace SVF;
 using namespace SVFUtil;
 
-void DoubleFreeChecker::reportBug(ProgSlice* slice)
-{
+void DoubleFreeChecker::reportBug(ProgSlice *slice) {
 
-    if(slice->isSatisfiableForPairs() == false)
-    {
-        const SVFGNode* src = slice->getSource();
-        const CallBlockNode* cs = getSrcCSID(src);
-        SVFUtil::errs() << bugMsg2("\t Double Free :") <<  " memory allocation at : ("
+    if (slice->isSatisfiableForPairs() == false) {
+        const SVFGNode *src = slice->getSource();
+        const CallBlockNode *cs = getSrcCSID(src);
+        SVFUtil::errs() << bugMsg2("\t Double Free :")
+                        << " memory allocation at : ("
                         << getSourceLoc(cs->getCallSite()) << ")\n";
-        SVFUtil::errs() << "\t\t double free path: \n" << slice->evalFinalCond() << "\n";
+        SVFUtil::errs() << "\t\t double free path: \n"
+                        << slice->evalFinalCond() << "\n";
         slice->annotatePaths();
     }
 }
-

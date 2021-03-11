@@ -1,17 +1,19 @@
 /// Contains abstract classes for:
 /// PTData: basic points-to data structure derived by all others.
-/// DiffPTData: PTData which only propagates new changes, not entire points-to sets.
-/// DFPTData: flow-sensitive PTData as defined by Hardekopf and Lin (CGO '11).
+/// DiffPTData: PTData which only propagates new changes, not entire points-to
+/// sets. DFPTData: flow-sensitive PTData as defined by Hardekopf and Lin (CGO
+/// '11).
 ///
 /// Hierarchy (square brackets indicate abstract class):
 ///
 ///       +------------> [PTData] <----------------+---------------------+
 ///       |                 ^                      |                     |
 ///       |                 |                      |                     |
-/// MutablePTData      [DiffPTData]            [DFPTData]         [VersionedPTData]
+/// MutablePTData      [DiffPTData]            [DFPTData] [VersionedPTData]
 ///                         ^                      ^                     ^
 ///                         |                      |                     |
-///                 MutableDiffPTData        MutableDFPTData    MutableVersionedPTData
+///                 MutableDiffPTData        MutableDFPTData
+///                 MutableVersionedPTData
 ///                                                ^
 ///                                                |
 ///                                        IncMutableDFPTData
@@ -42,8 +44,7 @@ class PTData
 public:
 
     /// Types of a points-to data structures.
-    enum PTDataTy
-    {
+    enum PTDataTy {
         Base,
         MutBase,
         Diff,
@@ -55,15 +56,13 @@ public:
         MutVersioned,
     };
 
-    PTData(bool reversePT = true, PTDataTy ty = PTDataTy::Base) : rev(reversePT), ptdTy(ty) { }
+    PTData(bool reversePT = true, PTDataTy ty = PTDataTy::Base)
+        : rev(reversePT), ptdTy(ty) {}
 
-    virtual ~PTData() { }
+    virtual ~PTData() {}
 
     /// Get the type of points-to data structure that this is.
-    inline PTDataTy getPTDTY() const
-    {
-        return ptdTy;
-    }
+    inline PTDataTy getPTDTY() const { return ptdTy; }
 
     /// Clears all points-to sets as if nothing is stored.
     virtual void clear() = 0;
@@ -83,13 +82,14 @@ public:
 
     /// Clears element from the points-to set of var.
     virtual void clearPts(const Key& var, const Data& element) = 0;
+
     /// Fully clears the points-to set of var.
-    virtual void clearFullPts(const Key& var) = 0;
+    virtual void clearFullPts(const Key &var) = 0;
 
     /// Dump stored keys and points-to sets.
     virtual void dumpPTData() = 0;
 
-protected:
+  protected:
     /// Whether we maintain reverse points-to sets or not.
     bool rev;
     PTDataTy ptdTy;
@@ -109,7 +109,7 @@ public:
     DiffPTData(bool reversePT = true, PTDataTy ty = PTDataTy::Diff)
         : BasePTData(reversePT, ty) { }
 
-    virtual ~DiffPTData() { }
+    virtual ~DiffPTData() {}
 
     /// Get diff points to.
     virtual const DataSet& getDiffPts(Key& var) = 0;
@@ -117,14 +117,15 @@ public:
     /// Compute diff points to. Return TRUE if diff is not empty.
     /// 1. calculate diff: diff = all - propa.
     /// 2. update propagated pts: propa = all.
+
     virtual bool computeDiffPts(Key& var, const DataSet& all) = 0;
 
     /// Update dst's propagated points-to set with src's.
     /// The final result is the intersection of these two sets.
-    virtual void updatePropaPtsMap(Key& src, Key& dst) = 0;
+    virtual void updatePropaPtsMap(Key &src, Key &dst) = 0;
 
     /// Clear propagated points-to set of var.
-    virtual void clearPropaPts(Key& var) = 0;
+    virtual void clearPropaPts(Key &var) = 0;
 
     /// Methods to support type inquiry through isa, cast, and dyn_cast:
     ///@{
@@ -135,9 +136,11 @@ public:
     static inline bool classof(const PTData<Key, KeySet, Data, DataSet>* ptd)
     {
         return ptd->getPTDTY() == PTDataTy::Diff || ptd->getPTDTY() == PTDataTy::MutDiff;
+
     }
     ///@}
 };
+
 
 /// Data-flow points-to data structure for flow-sensitive analysis as defined by Hardekopf and Lin (CGO 11).
 /// Points-to information is maintained at each program point (statement).
@@ -156,7 +159,7 @@ public:
     DFPTData(bool reversePT = true, PTDataTy ty = BasePTData::DataFlow)
         : BasePTData(reversePT, ty) { }
 
-    virtual ~DFPTData() { }
+    virtual ~DFPTData() {}
 
     /// Determine whether the DF IN/OUT sets have points-to sets.
     ///@{
@@ -173,29 +176,41 @@ public:
     ///@}
 
     /// Update points-to for IN/OUT set
-    /// IN[loc:var] represents the points-to of variable var in the IN set of location loc.
-    /// union(ptsDst, ptsSrc) represents ptsDst = ptsDst U ptsSrc.
+    /// IN[loc:var] represents the points-to of variable var in the IN set of
+    /// location loc. union(ptsDst, ptsSrc) represents ptsDst = ptsDst U ptsSrc.
     ///@{
     /// Union (IN[dstLoc:dstVar], IN[srcLoc:srcVar]).
-    virtual bool updateDFInFromIn(LocID srcLoc, const Key& srcVar, LocID dstLoc, const Key& dstVar) = 0;
-    /// Union (IN[dstLoc::dstVar], IN[srcLoc:srcVar]. There is no flag check, unlike the above.
-    virtual bool updateAllDFInFromIn(LocID srcLoc, const Key& srcVar, LocID dstLoc, const Key& dstVar) = 0;
+    virtual bool updateDFInFromIn(LocID srcLoc, const Key &srcVar, LocID dstLoc,
+                                  const Key &dstVar) = 0;
+    /// Union (IN[dstLoc::dstVar], IN[srcLoc:srcVar]. There is no flag check,
+    /// unlike the above.
+    virtual bool updateAllDFInFromIn(LocID srcLoc, const Key &srcVar,
+                                     LocID dstLoc, const Key &dstVar) = 0;
     /// Union (IN[dstLoc:dstVar], OUT[srcLoc:srcVar]).
-    virtual bool updateDFInFromOut(LocID srcLoc, const Key& srcVar, LocID dstLoc, const Key& dstVar) = 0;
-    /// Union (IN[dstLoc::dstVar], OUT[srcLoc:srcVar]. There is no flag check, unlike the above.
-    virtual bool updateAllDFInFromOut(LocID srcLoc, const Key& srcVar, LocID dstLoc, const Key& dstVar) = 0;
+    virtual bool updateDFInFromOut(LocID srcLoc, const Key &srcVar,
+                                   LocID dstLoc, const Key &dstVar) = 0;
+    /// Union (IN[dstLoc::dstVar], OUT[srcLoc:srcVar]. There is no flag check,
+    /// unlike the above.
+    virtual bool updateAllDFInFromOut(LocID srcLoc, const Key &srcVar,
+                                      LocID dstLoc, const Key &dstVar) = 0;
 
     /// Union (OUT[dstLoc:dstVar], IN[srcLoc:srcVar]).
-    virtual bool updateDFOutFromIn(LocID srcLoc, const Key& srcVar, LocID dstLoc, const Key& dstVar) = 0;
-    /// For each variable var in IN at loc, do updateDFOutFromIn(loc, var, loc, var).
-    virtual bool updateAllDFOutFromIn(LocID loc, const Key& singleton, bool strongUpdates) = 0;
+    virtual bool updateDFOutFromIn(LocID srcLoc, const Key &srcVar,
+                                   LocID dstLoc, const Key &dstVar) = 0;
+    /// For each variable var in IN at loc, do updateDFOutFromIn(loc, var, loc,
+    /// var).
+    virtual bool updateAllDFOutFromIn(LocID loc, const Key &singleton,
+                                      bool strongUpdates) = 0;
 
     virtual void clearAllDFOutUpdatedVar(LocID) = 0;
 
     /// Update points-to set of top-level pointers with IN[srcLoc:srcVar].
-    virtual bool updateTLVPts(LocID srcLoc, const Key& srcVar, const Key& dstVar) = 0;
-    /// Update address-taken variables OUT[dstLoc:dstVar] with points-to of top-level pointers
-    virtual bool updateATVPts(const Key& srcVar, LocID dstLoc, const Key& dstVar) = 0;
+    virtual bool updateTLVPts(LocID srcLoc, const Key &srcVar,
+                              const Key &dstVar) = 0;
+    /// Update address-taken variables OUT[dstLoc:dstVar] with points-to of
+    /// top-level pointers
+    virtual bool updateATVPts(const Key &srcVar, LocID dstLoc,
+                              const Key &dstVar) = 0;
     ///@}
 
     /// Methods to support type inquiry through isa, cast, and dyn_cast:
@@ -227,7 +242,7 @@ public:
     VersionedPTData(bool reversePT = true, PTDataTy ty = PTDataTy::Versioned)
         : BasePTData(reversePT, ty) { }
 
-    virtual ~VersionedPTData() { }
+    virtual ~VersionedPTData() {}
 
     virtual const DataSet& getPts(const VersionedKey& vk) = 0;
     virtual const VersionedKeySet& getVersionedKeyRevPts(const Data& datum) = 0;
@@ -258,4 +273,4 @@ public:
 
 } // End namespace SVF
 
-#endif  // ABSTRACT_POINTSTO_H_
+#endif // ABSTRACT_POINTSTO_H_

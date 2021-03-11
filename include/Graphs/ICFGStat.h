@@ -29,17 +29,15 @@
 #ifndef INCLUDE_UTIL_ICFGSTAT_H_
 #define INCLUDE_UTIL_ICFGSTAT_H_
 
-#include "MemoryModel/PTAStat.h"
 #include "Graphs/ICFG.h"
+#include "MemoryModel/PTAStat.h"
 #include <iomanip>
 
-namespace SVF
-{
+namespace SVF {
 
-class ICFGStat : public PTAStat
-{
+class ICFGStat : public PTAStat {
 
-private:
+  private:
     ICFG *icfg;
     int numOfNodes;
     int numOfCallNodes;
@@ -53,11 +51,10 @@ private:
     int numOfRetEdges;
     int numOfIntraEdges;
 
-public:
+  public:
     using ICFGNodeSet = Set<const ICFGNode *>;
 
-    ICFGStat(ICFG *cfg) : PTAStat(nullptr), icfg(cfg)
-    {
+    ICFGStat(ICFG *cfg) : PTAStat(nullptr), icfg(cfg) {
         numOfNodes = 0;
         numOfCallNodes = 0;
         numOfRetNodes = 0;
@@ -69,11 +66,9 @@ public:
         numOfCallEdges = 0;
         numOfRetEdges = 0;
         numOfIntraEdges = 0;
-
     }
 
-    void performStat()
-    {
+    void performStat() {
 
         countStat();
 
@@ -92,8 +87,7 @@ public:
         printStat("ICFG Stat");
     }
 
-    void performStatforIFDS()
-    {
+    void performStatforIFDS() {
 
         countStat();
         PTNumStatMap["ICFGNode(N)"] = numOfNodes;
@@ -102,12 +96,10 @@ public:
         printStat("IFDS Stat");
     }
 
-    void countStat()
-    {
+    void countStat() {
         ICFG::ICFGNodeIDToNodeMapTy::iterator it = icfg->begin();
         ICFG::ICFGNodeIDToNodeMapTy::iterator eit = icfg->end();
-        for (; it != eit; ++it)
-        {
+        for (; it != eit; ++it) {
             numOfNodes++;
 
             ICFGNode *node = it->second;
@@ -123,13 +115,11 @@ public:
             else if (SVFUtil::isa<FunExitBlockNode>(node))
                 numOfExitNodes++;
 
-
             ICFGEdge::ICFGEdgeSetTy::iterator edgeIt =
                 it->second->OutEdgeBegin();
             ICFGEdge::ICFGEdgeSetTy::iterator edgeEit =
                 it->second->OutEdgeEnd();
-            for (; edgeIt != edgeEit; ++edgeIt)
-            {
+            for (; edgeIt != edgeEit; ++edgeIt) {
                 const ICFGEdge *edge = *edgeIt;
                 numOfEdges++;
                 if (edge->isCallCFGEdge())
@@ -142,16 +132,17 @@ public:
         }
     }
 
-    void printStat(string statname)
-    {
+    void printStat(string statname) {
 
         std::cout << "\n************ " << statname << " ***************\n";
         std::cout.flags(std::ios::left);
         unsigned field_width = 20;
-        for(NUMStatMap::iterator it = PTNumStatMap.begin(), eit = PTNumStatMap.end(); it!=eit; ++it)
-        {
+        for (NUMStatMap::iterator it = PTNumStatMap.begin(),
+                                  eit = PTNumStatMap.end();
+             it != eit; ++it) {
             // format out put with width 20 space
-            std::cout << std::setw(field_width) << it->first << it->second << "\n";
+            std::cout << std::setw(field_width) << it->first << it->second
+                      << "\n";
         }
         PTNumStatMap.clear();
         std::cout.flush();
@@ -161,4 +152,3 @@ public:
 } // End namespace SVF
 
 #endif /* INCLUDE_UTIL_ICFGSTAT_H_ */
-

@@ -34,59 +34,53 @@
 using namespace SVF;
 using namespace SVFUtil;
 
-
 /*!
  * Initialize sources
  */
-void LeakChecker::initSrcs()
-{
+void LeakChecker::initSrcs() {
 
-    PAG* pag = getPAG();
-    ICFG* icfg = pag->getICFG();
-    for(auto it = pag->getCallSiteRets().begin(),
-            eit = pag->getCallSiteRets().end(); it!=eit; ++it)
-    {
-        const RetBlockNode* cs = it->first;
-        /// if this callsite return reside in a dead function then we do not care about its leaks
-        /// for example instruction p = malloc is in a dead function, then program won't allocate this memory
-        if(isPtrInDeadFunction(cs->getCallSite()))
+    PAG *pag = getPAG();
+    ICFG *icfg = pag->getICFG();
+    for (auto it = pag->getCallSiteRets().begin(),
+              eit = pag->getCallSiteRets().end();
+         it != eit; ++it) {
+        const RetBlockNode *cs = it->first;
+        /// if this callsite return reside in a dead function then we do not
+        /// care about its leaks for example instruction p = malloc is in a dead
+        /// function, then program won't allocate this memory
+        if (isPtrInDeadFunction(cs->getCallSite()))
             continue;
 
         PTACallGraph::FunctionSet callees;
-        getCallgraph()->getCallees(cs->getCallBlockNode(),callees);
-        for(const auto *fun : callees)
-        {
-             if (isSourceLikeFun(fun))
-            {
+        getCallgraph()->getCallees(cs->getCallBlockNode(), callees);
+        for (const auto *fun : callees) {
+            if (isSourceLikeFun(fun)) {
                 CSWorkList worklist;
                 SVFGNodeBS visited;
                 worklist.push(it->first->getCallBlockNode());
-                while (!worklist.empty())
-                {
-                    const CallBlockNode* cs = worklist.pop();
-                    const RetBlockNode* retBlockNode = icfg->getRetBlockNode(cs->getCallSite());
-                    const PAGNode* pagNode = pag->getCallSiteRet(retBlockNode);
-                    const SVFGNode* node = getSVFG()->getDefSVFGNode(pagNode);
+                while (!worklist.empty()) {
+                    const CallBlockNode *cs = worklist.pop();
+                    const RetBlockNode *retBlockNode =
+                        icfg->getRetBlockNode(cs->getCallSite());
+                    const PAGNode *pagNode = pag->getCallSiteRet(retBlockNode);
+                    const SVFGNode *node = getSVFG()->getDefSVFGNode(pagNode);
                     if (visited.test(node->getId()) == 0)
                         visited.set(node->getId());
                     else
                         continue;
 
                     CallSiteSet csSet;
-                    // if this node is in an allocation wrapper, find all its call nodes
-                    if (isInAWrapper(node, csSet))
-                    {
-                        for (const auto *it : csSet)
-                        {
+                    // if this node is in an allocation wrapper, find all its
+                    // call nodes
+                    if (isInAWrapper(node, csSet)) {
+                        for (const auto *it : csSet) {
                             worklist.push(it);
                         }
                     }
                     // otherwise, this is the source we are interested
-                    else
-                    {
+                    else {
                         // exclude sources in dead functions
-                        if (isPtrInDeadFunction(cs->getCallSite()) == false)
-                        {
+                        if (isPtrInDeadFunction(cs->getCallSite()) == false) {
                             addToSources(node);
                             addSrcToCSID(node, cs);
                         }
@@ -95,65 +89,59 @@ void LeakChecker::initSrcs()
             }
         }
     }
-
 }
 
 /*!
  * Initialize sinks
  */
-void LeakChecker::initSnks()
-{
+void LeakChecker::initSnks() {
 
-    PAG* pag = getPAG();
+    PAG *pag = getPAG();
 
-    for(auto & it : pag->getCallSiteArgsMap())
-    {
+    for (auto &it : pag->getCallSiteArgsMap()) {
 
         PTACallGraph::FunctionSet callees;
-        getCallgraph()->getCallees(it.first,callees);
-        for(const auto *fun : callees)
-        {
-            	if (isSinkLikeFun(fun)) {
-				PAG::PAGNodeList &arglist = it.second;
-				assert(!arglist.empty()	&& "no actual parameter at deallocation site?");
-				/// we only choose pointer parameters among all the actual parameters
-				for (const auto *pagNode : arglist) {
-						if (pagNode->isPointer()) {
-						const SVFGNode *snk = getSVFG()->getActualParmVFGNode(pagNode, it.first);
-						addToSinks(snk);
-					}
-				}
-			}
+        getCallgraph()->getCallees(it.first, callees);
+        for (const auto *fun : callees) {
+            if (isSinkLikeFun(fun)) {
+                PAG::PAGNodeList &arglist = it.second;
+                assert(!arglist.empty() &&
+                       "no actual parameter at deallocation site?");
+                /// we only choose pointer parameters among all the actual
+                /// parameters
+                for (const auto *pagNode : arglist) {
+                    if (pagNode->isPointer()) {
+                        const SVFGNode *snk =
+                            getSVFG()->getActualParmVFGNode(pagNode, it.first);
+                        addToSinks(snk);
+                    }
+                }
+            }
         }
     }
 }
 
-
-void LeakChecker::reportNeverFree(const SVFGNode* src)
-{
-    const CallBlockNode* cs = getSrcCSID(src);
-    SVFUtil::errs() << bugMsg1("\t NeverFree :") <<  " memory allocation at : ("
+void LeakChecker::reportNeverFree(const SVFGNode *src) {
+    const CallBlockNode *cs = getSrcCSID(src);
+    SVFUtil::errs() << bugMsg1("\t NeverFree :") << " memory allocation at : ("
                     << getSourceLoc(cs->getCallSite()) << ")\n";
 }
 
-void LeakChecker::reportPartialLeak(const SVFGNode* src)
-{
-    const CallBlockNode* cs = getSrcCSID(src);
-    SVFUtil::errs() << bugMsg2("\t PartialLeak :") <<  " memory allocation at : ("
+void LeakChecker::reportPartialLeak(const SVFGNode *src) {
+    const CallBlockNode *cs = getSrcCSID(src);
+    SVFUtil::errs() << bugMsg2("\t PartialLeak :")
+                    << " memory allocation at : ("
                     << getSourceLoc(cs->getCallSite()) << ")\n";
 }
 
-void LeakChecker::reportBug(ProgSlice* slice)
-{
+void LeakChecker::reportBug(ProgSlice *slice) {
 
-    if(isAllPathReachable() == false && isSomePathReachable() == false)
-    {
+    if (isAllPathReachable() == false && isSomePathReachable() == false) {
         reportNeverFree(slice->getSource());
-    }
-    else if (isAllPathReachable() == false && isSomePathReachable() == true)
-    {
+    } else if (isAllPathReachable() == false && isSomePathReachable() == true) {
         reportPartialLeak(slice->getSource());
-        SVFUtil::errs() << "\t\t conditional free path: \n" << slice->evalFinalCond() << "\n";
+        SVFUtil::errs() << "\t\t conditional free path: \n"
+                        << slice->evalFinalCond() << "\n";
         slice->annotatePaths();
     }
 
@@ -161,121 +149,102 @@ void LeakChecker::reportBug(ProgSlice* slice)
         testsValidation(slice);
 }
 
-
 /*!
  * Validate test cases for regression test purpose
  */
-void LeakChecker::testsValidation(const ProgSlice* slice)
-{
-    const SVFGNode* source = slice->getSource();
-    const CallBlockNode* cs = getSrcCSID(source);
-    const SVFFunction* fun = getCallee(cs->getCallSite());
-    if(fun==nullptr)
+void LeakChecker::testsValidation(const ProgSlice *slice) {
+    const SVFGNode *source = slice->getSource();
+    const CallBlockNode *cs = getSrcCSID(source);
+    const SVFFunction *fun = getCallee(cs->getCallSite());
+    if (fun == nullptr)
         return;
 
-    validateSuccessTests(source,fun);
-    validateExpectedFailureTests(source,fun);
+    validateSuccessTests(source, fun);
+    validateExpectedFailureTests(source, fun);
 }
 
+void LeakChecker::validateSuccessTests(const SVFGNode *source,
+                                       const SVFFunction *fun) {
 
-void LeakChecker::validateSuccessTests(const SVFGNode* source, const SVFFunction* fun)
-{
-
-    const CallBlockNode* cs = getSrcCSID(source);
+    const CallBlockNode *cs = getSrcCSID(source);
 
     bool success = false;
 
-    if(fun->getName() == "SAFEMALLOC")
-    {
-        if(isAllPathReachable() == true && isSomePathReachable() == true)
+    if (fun->getName() == "SAFEMALLOC") {
+        if (isAllPathReachable() == true && isSomePathReachable() == true)
             success = true;
-    }
-    else if(fun->getName() == "NFRMALLOC")
-    {
-        if(isAllPathReachable() == false && isSomePathReachable() == false)
+    } else if (fun->getName() == "NFRMALLOC") {
+        if (isAllPathReachable() == false && isSomePathReachable() == false)
             success = true;
-    }
-    else if(fun->getName() == "PLKMALLOC")
-    {
-        if(isAllPathReachable() == false && isSomePathReachable() == true)
+    } else if (fun->getName() == "PLKMALLOC") {
+        if (isAllPathReachable() == false && isSomePathReachable() == true)
             success = true;
-    }
-    else if(fun->getName() == "CLKMALLOC")
-    {
-        if(isAllPathReachable() == false && isSomePathReachable() == false)
+    } else if (fun->getName() == "CLKMALLOC") {
+        if (isAllPathReachable() == false && isSomePathReachable() == false)
             success = true;
-    }
-    else if(fun->getName() == "NFRLEAKFP" || fun->getName() == "PLKLEAKFP"
-            || fun->getName() == "LEAKFN")
-    {
+    } else if (fun->getName() == "NFRLEAKFP" || fun->getName() == "PLKLEAKFP" ||
+               fun->getName() == "LEAKFN") {
         return;
-    }
-    else
-    {
-        writeWrnMsg("\t can not validate, check function not found, please put it at the right place!!");
+    } else {
+        writeWrnMsg("\t can not validate, check function not found, please put "
+                    "it at the right place!!");
         return;
     }
 
     std::string funName = source->getFun()->getName();
 
     if (success)
-        outs() << sucMsg("\t SUCCESS :") << funName << " check <src id:" << source->getId()
+        outs() << sucMsg("\t SUCCESS :") << funName
+               << " check <src id:" << source->getId()
                << ", cs id:" << *getSrcCSID(source)->getCallSite() << "> at ("
                << getSourceLoc(cs->getCallSite()) << ")\n";
-    else
-    {
-        SVFUtil::errs() << errMsg("\t FAILURE :") << funName << " check <src id:" << source->getId()
-                        << ", cs id:" << *getSrcCSID(source)->getCallSite() << "> at ("
-                        << getSourceLoc(cs->getCallSite()) << ")\n";
+    else {
+        SVFUtil::errs() << errMsg("\t FAILURE :") << funName
+                        << " check <src id:" << source->getId()
+                        << ", cs id:" << *getSrcCSID(source)->getCallSite()
+                        << "> at (" << getSourceLoc(cs->getCallSite()) << ")\n";
         assert(false && "test case failed!");
     }
 }
 
-void LeakChecker::validateExpectedFailureTests(const SVFGNode* source, const SVFFunction* fun)
-{
+void LeakChecker::validateExpectedFailureTests(const SVFGNode *source,
+                                               const SVFFunction *fun) {
 
-    const CallBlockNode* cs = getSrcCSID(source);
+    const CallBlockNode *cs = getSrcCSID(source);
 
     bool expectedFailure = false;
 
-    if(fun->getName() == "NFRLEAKFP")
-    {
-        if(isAllPathReachable() == false && isSomePathReachable() == false)
+    if (fun->getName() == "NFRLEAKFP") {
+        if (isAllPathReachable() == false && isSomePathReachable() == false)
             expectedFailure = true;
-    }
-    else if(fun->getName() == "PLKLEAKFP")
-    {
-        if(isAllPathReachable() == false && isSomePathReachable() == true)
+    } else if (fun->getName() == "PLKLEAKFP") {
+        if (isAllPathReachable() == false && isSomePathReachable() == true)
             expectedFailure = true;
-    }
-    else if(fun->getName() == "LEAKFN")
-    {
-        if(isAllPathReachable() == true && isSomePathReachable() == true)
+    } else if (fun->getName() == "LEAKFN") {
+        if (isAllPathReachable() == true && isSomePathReachable() == true)
             expectedFailure = true;
-    }
-    else if(fun->getName() == "SAFEMALLOC" || fun->getName() == "NFRMALLOC"
-            || fun->getName() == "PLKMALLOC" || fun->getName() == "CLKLEAKFN")
-    {
+    } else if (fun->getName() == "SAFEMALLOC" ||
+               fun->getName() == "NFRMALLOC" || fun->getName() == "PLKMALLOC" ||
+               fun->getName() == "CLKLEAKFN") {
         return;
-    }
-    else
-    {
-        writeWrnMsg("\t can not validate, check function not found, please put it at the right place!!");
+    } else {
+        writeWrnMsg("\t can not validate, check function not found, please put "
+                    "it at the right place!!");
         return;
     }
 
     std::string funName = source->getFun()->getName();
 
     if (expectedFailure)
-        outs() << sucMsg("\t EXPECTED-FAILURE :") << funName << " check <src id:" << source->getId()
+        outs() << sucMsg("\t EXPECTED-FAILURE :") << funName
+               << " check <src id:" << source->getId()
                << ", cs id:" << *getSrcCSID(source)->getCallSite() << "> at ("
                << getSourceLoc(cs->getCallSite()) << ")\n";
-    else
-    {
+    else {
         SVFUtil::errs() << errMsg("\t UNEXPECTED FAILURE :") << funName
                         << " check <src id:" << source->getId()
-                        << ", cs id:" << *getSrcCSID(source)->getCallSite() << "> at ("
-                        << getSourceLoc(cs->getCallSite()) << ")\n";
+                        << ", cs id:" << *getSrcCSID(source)->getCallSite()
+                        << "> at (" << getSourceLoc(cs->getCallSite()) << ")\n";
         assert(false && "test case failed!");
     }
 }
