@@ -59,18 +59,20 @@ void MemObj::init(const Value *val) {
 
     // We consider two types of objects:
     // (1) A heap/static object from a callsite
-    if (I && isNonInstricCallSite(I))
+    if (I && isNonInstricCallSite(I)) {
         refTy = getRefTypeOfHeapAllocOrStatic(I);
-    // (2) Other objects (e.g., alloca, global, etc.)
-    else
+        // (2) Other objects (e.g., alloca, global, etc.)
+    } else {
         refTy = SVFUtil::dyn_cast<PointerType>(val->getType());
+    }
 
     if (refTy) {
         Type *objTy = refTy->getElementType();
-        if(Options::LocMemModel)
+        if(Options::LocMemModel) {
             typeInfo = new LocObjTypeInfo(val, objTy, Options::MaxFieldLimit);
-        else
+        } else {
             typeInfo = new ObjTypeInfo(val, objTy, Options::MaxFieldLimit);
+        }
         typeInfo->init(val);
     } else {
         writeWrnMsg("try to create an object with a non-pointer type.");
@@ -88,10 +90,11 @@ SymbolTableInfo* SymbolTableInfo::SymbolInfo()
 {
     if (symInfo == nullptr)
     {
-        if(Options::LocMemModel)
+        if(Options::LocMemModel) {
             symInfo = new LocSymTableInfo();
-        else
+        } else {
             symInfo = new SymbolTableInfo();
+        }
         symInfo->setModelConstants(Options::ModelConsts);
     }
     return symInfo;
@@ -104,12 +107,13 @@ void SymbolTableInfo::collectTypeInfo(const Type *ty) {
     assert(typeToFieldInfo.find(ty) == typeToFieldInfo.end() &&
            "this type has been collected before");
 
-    if (const auto *aty = SVFUtil::dyn_cast<ArrayType>(ty))
+    if (const auto *aty = SVFUtil::dyn_cast<ArrayType>(ty)) {
         collectArrayInfo(aty);
-    else if (const auto *sty = SVFUtil::dyn_cast<StructType>(ty))
+    } else if (const auto *sty = SVFUtil::dyn_cast<StructType>(ty)) {
         collectStructInfo(sty);
-    else
+    } else {
         collectSimpleTypeInfo(ty);
+    }
 }
 
 /*!
@@ -253,8 +257,9 @@ bool SymbolTableInfo::computeGepOffset(const User *V, LocationSet &ls) {
         // Handling array types, skipe array handling here
         // We treat whole array as one, then we can distinguish different field
         // of an array of struct e.g. s[1].f1 is differet from s[0].f2
-        if (SVFUtil::isa<ArrayType>(*gi))
+        if (SVFUtil::isa<ArrayType>(*gi)) {
             continue;
+        }
 
         // The int-value object of the current index operand
         //  (may not be constant for arrays).
@@ -304,8 +309,9 @@ bool SymbolTableInfo::computeGepOffset(const User *V, LocationSet &ls) {
  */
 u32_t SymbolTableInfo::getFields(std::vector<LocationSet> &fields,
                                  const Type *T, u32_t msz) {
-    if (!SVFUtil::isa<PointerType>(T))
+    if (!SVFUtil::isa<PointerType>(T)) {
         return 0;
+    }
 
     T = T->getContainedType(0);
     const std::vector<FieldInfo> &stVec =
@@ -314,8 +320,9 @@ u32_t SymbolTableInfo::getFields(std::vector<LocationSet> &fields,
     if (msz < sz) {
         /// Replace fields with T's flatten fields.
         fields.clear();
-        for (const auto &it : stVec)
+        for (const auto &it : stVec) {
             fields.push_back(LocationSet(it));
+        }
     }
 
     return sz;
@@ -363,8 +370,9 @@ const Type *SymbolTableInfo::getBaseTypeAndFlattenedFields(
         getFields(fields, T, 0);
     }
 
-    while (const auto *ptype = SVFUtil::dyn_cast<PointerType>(T))
+    while (const auto *ptype = SVFUtil::dyn_cast<PointerType>(T)) {
         T = ptype->getElementType();
+    }
     return T;
 }
 
@@ -384,10 +392,11 @@ LocationSet SymbolTableInfo::getModulusOffset(const MemObj *obj,
         offset = abs(offset);
     }
     u32_t maxOffset = obj->getMaxFieldOffsetLimit();
-    if (maxOffset != 0)
+    if (maxOffset != 0) {
         offset = offset % maxOffset;
-    else
+    } else {
         offset = 0;
+    }
 
     return LocationSet(offset);
 }
@@ -411,8 +420,9 @@ void SymbolTableInfo::prePassSchedule(SVFModule *svfModule) {
     for (auto F = svfModule->llvmFunBegin(), E = svfModule->llvmFunEnd();
          F != E; ++F) {
         Function *fun = *F;
-        if (fun->isDeclaration())
+        if (fun->isDeclaration()) {
             continue;
+        }
         p2->runOnFunction(*fun);
     }
 }
@@ -466,8 +476,9 @@ void SymbolTableInfo::buildMemModel(SVFModule *svfModule) {
         Function *fun = *F;
         collectSym(fun);
         collectRet(fun);
-        if (fun->getFunctionType()->isVarArg())
+        if (fun->getFunctionType()->isVarArg()) {
             collectVararg(fun);
+        }
 
         // Add symbols for all formal parameters.
         for (Function::arg_iterator I = fun->arg_begin(), E = fun->arg_end();
@@ -503,20 +514,24 @@ void SymbolTableInfo::buildMemModel(SVFModule *svfModule) {
                 collectSym(sel->getFalseValue());
             } else if (const auto *binary =
                            SVFUtil::dyn_cast<BinaryOperator>(inst)) {
-                for (u32_t i = 0; i < binary->getNumOperands(); i++)
+                for (u32_t i = 0; i < binary->getNumOperands(); i++) {
                     collectSym(binary->getOperand(i));
+                }
             } else if (const auto *unary =
                            SVFUtil::dyn_cast<UnaryOperator>(inst)) {
-                for (u32_t i = 0; i < unary->getNumOperands(); i++)
+                for (u32_t i = 0; i < unary->getNumOperands(); i++) {
                     collectSym(unary->getOperand(i));
+                }
             } else if (const auto *cmp = SVFUtil::dyn_cast<CmpInst>(inst)) {
-                for (u32_t i = 0; i < cmp->getNumOperands(); i++)
+                for (u32_t i = 0; i < cmp->getNumOperands(); i++) {
                     collectSym(cmp->getOperand(i));
+                }
             } else if (const auto *cast = SVFUtil::dyn_cast<CastInst>(inst)) {
                 collectSym(cast->getOperand(0));
             } else if (const auto *ret = SVFUtil::dyn_cast<ReturnInst>(inst)) {
-                if (ret->getReturnValue())
+                if (ret->getReturnValue()) {
                     collectSym(ret->getReturnValue());
+                }
             } else if (const auto *br = SVFUtil::dyn_cast<BranchInst>(inst)) {
                 Value *opnd = br->isConditional() ? br->getCondition()
                                                   : br->getOperand(0);
@@ -555,12 +570,14 @@ void SymbolTableInfo::buildMemModel(SVFModule *svfModule) {
 void SymbolTableInfo::destroy() {
 
     for (auto &iter : objMap) {
-        if (iter.second)
+        if (iter.second) {
             delete iter.second;
+        }
     }
     for (auto &iter : typeToFieldInfo) {
-        if (iter.second)
+        if (iter.second) {
             delete iter.second;
+        }
     }
 }
 
@@ -575,8 +592,9 @@ void SymbolTableInfo::collectSym(const Value *val) {
     DBOUT(DMemModel, outs() << "collect sym from ##" << *val << " \n");
 
     // special sym here
-    if (isNullPtrSym(val) || isBlackholeSym(val))
+    if (isNullPtrSym(val) || isBlackholeSym(val)) {
         return;
+    }
 
     // TODO handle constant expression value here??
     handleCE(val);
@@ -602,12 +620,14 @@ void SymbolTableInfo::collectVal(const Value *val) {
         symTyMap.insert(std::make_pair(id, ValSym));
         DBOUT(DMemModel, outs() << "create a new value sym " << id << "\n");
         ///  handle global constant expression here
-        if (const auto *globalVar = SVFUtil::dyn_cast<GlobalVariable>(val))
+        if (const auto *globalVar = SVFUtil::dyn_cast<GlobalVariable>(val)) {
             handleGlobalCE(globalVar);
+        }
     }
 
-    if (isConstantObjSym(val))
+    if (isConstantObjSym(val)) {
         collectObj(val);
+    }
 }
 
 /*!
@@ -687,11 +707,13 @@ bool SymbolTableInfo::isBlackholeSym(const Value *val) {
  */
 bool SymbolTableInfo::isConstantObjSym(const Value *val) {
     if (const auto *v = SVFUtil::dyn_cast<GlobalVariable>(val)) {
-        if (cppUtil::isValVtbl(const_cast<GlobalVariable *>(v)))
+        if (cppUtil::isValVtbl(const_cast<GlobalVariable *>(v))) {
             return false;
+        }
         if (!v->hasInitializer()) {
-            if (v->isExternalLinkage(v->getLinkage()))
+            if (v->isExternalLinkage(v->getLinkage())) {
                 return false;
+            }
 
             return true;
         }
@@ -702,8 +724,9 @@ bool SymbolTableInfo::isConstantObjSym(const Value *val) {
             const Type *elemTy = field.getFlattenElemTy();
             assert(!SVFUtil::isa<FunctionType>(elemTy) &&
                    "Initializer of a global is a function?");
-            if (SVFUtil::isa<PointerType>(elemTy))
+            if (SVFUtil::isa<PointerType>(elemTy)) {
                 return false;
+            }
         }
 
         return v->isConstant();
@@ -766,10 +789,11 @@ void SymbolTableInfo::handleCE(const Value *val) {
             // we don't handle constant agrgregate like constant vectors
             collectVal(ref);
         } else {
-            if (SVFUtil::isa<ConstantExpr>(val))
+            if (SVFUtil::isa<ConstantExpr>(val)) {
                 assert(
                     false &&
                     "we don't handle all other constant expression for now!");
+            }
             collectVal(ref);
         }
     }
@@ -1007,10 +1031,11 @@ void SymbolTableInfo::dump()
 u32_t SymbolTableInfo::getTypeSizeInBytes(const Type *type) {
 
     // if the type has size then simply return it, otherwise just return 0
-    if (type->isSized())
+    if (type->isSized()) {
         return getDataLayout(
                    LLVMModuleSet::getLLVMModuleSet()->getMainLLVMModule())
             ->getTypeStoreSize(const_cast<Type *>(type));
+    }
 
     return 0;
 }
@@ -1022,8 +1047,9 @@ u32_t SymbolTableInfo::getTypeSizeInBytes(const StructType *sty,
         getDataLayout(LLVMModuleSet::getLLVMModuleSet()->getMainLLVMModule())
             ->getStructLayout(const_cast<StructType *>(sty));
     /// if this struct type does not have any element, i.e., opaque
-    if (sty->isOpaque())
+    if (sty->isOpaque()) {
         return 0;
+    }
 
     return stTySL->getElementOffset(field_idx);
 }

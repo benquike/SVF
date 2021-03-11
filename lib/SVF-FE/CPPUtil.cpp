@@ -81,12 +81,15 @@ static string getBeforeParenthesis(const string &name) {
 
     s32_t paren_num = 1, pos;
     for (pos = lastRightParen - 1; pos >= 0; pos--) {
-        if (name[pos] == ')')
+        if (name[pos] == ')') {
             paren_num++;
-        if (name[pos] == '(')
+        }
+        if (name[pos] == '(') {
             paren_num--;
-        if (paren_num == 0)
+        }
+        if (paren_num == 0) {
             break;
+        }
     }
     return name.substr(0, pos);
 }
@@ -97,23 +100,28 @@ string cppUtil::getBeforeBrackets(const string &name) {
     }
     s32_t bracket_num = 1, pos;
     for (pos = name.size() - 2; pos >= 0; pos--) {
-        if (name[pos] == '>')
+        if (name[pos] == '>') {
             bracket_num++;
-        if (name[pos] == '<')
+        }
+        if (name[pos] == '<') {
             bracket_num--;
-        if (bracket_num == 0)
+        }
+        if (bracket_num == 0) {
             break;
+        }
     }
     return name.substr(0, pos);
 }
 
 bool cppUtil::isValVtbl(const Value *val) {
-    if (!SVFUtil::isa<GlobalVariable>(val))
+    if (!SVFUtil::isa<GlobalVariable>(val)) {
         return false;
+    }
     string valName = val->getName().str();
     if (valName.compare(0, vtblLabelBeforeDemangle.size(),
-                        vtblLabelBeforeDemangle) == 0)
+                        vtblLabelBeforeDemangle) == 0) {
         return true;
+    }
     return false;
 }
 
@@ -199,10 +207,11 @@ bool cppUtil::isLoadVtblInst(const LoadInst *loadInst) {
     const Type *valTy = loadSrc->getType();
     const Type *elemTy = valTy;
     for (s32_t i = 0; i < 3; ++i) {
-        if (const auto *ptrTy = SVFUtil::dyn_cast<PointerType>(elemTy))
+        if (const auto *ptrTy = SVFUtil::dyn_cast<PointerType>(elemTy)) {
             elemTy = ptrTy->getElementType();
-        else
+        } else {
             return false;
+        }
     }
     if (const auto *functy = SVFUtil::dyn_cast<FunctionType>(elemTy)) {
         const Type *paramty = functy->getParamType(0);
@@ -224,8 +233,9 @@ bool cppUtil::isLoadVtblInst(const LoadInst *loadInst) {
 bool cppUtil::isVirtualCallSite(CallSite cs) {
     // the callsite must be an indirect one with at least one argument (this
     // ptr)
-    if (cs.getCalledFunction() != nullptr || cs.arg_empty())
+    if (cs.getCalledFunction() != nullptr || cs.arg_empty()) {
         return false;
+    }
 
     // When compiled with ctir, we'd be using the DCHG which has its own
     // virtual annotations.
@@ -239,8 +249,9 @@ bool cppUtil::isVirtualCallSite(CallSite cs) {
         const Value *vfuncptr = vfuncloadinst->getPointerOperand();
         if (const auto *vfuncptrgepinst =
                 SVFUtil::dyn_cast<GetElementPtrInst>(vfuncptr)) {
-            if (vfuncptrgepinst->getNumIndices() != 1)
+            if (vfuncptrgepinst->getNumIndices() != 1) {
                 return false;
+            }
             const Value *vtbl = vfuncptrgepinst->getPointerOperand();
             if (SVFUtil::isa<LoadInst>(vtbl)) {
                 return true;
@@ -327,9 +338,10 @@ bool cppUtil::isSameThisPtrInConstructor(const Argument *thisPtr1,
             for (const User *storeU : store->getPointerOperand()->users()) {
                 if (const auto *load = SVFUtil::dyn_cast<LoadInst>(storeU)) {
                     if (load->getNextNode() &&
-                        SVFUtil::isa<CastInst>(load->getNextNode()))
+                        SVFUtil::isa<CastInst>(load->getNextNode())) {
                         return SVFUtil::cast<CastInst>(load->getNextNode()) ==
                                (thisPtr2->stripPointerCasts());
+                    }
                 }
             }
         }
@@ -374,8 +386,9 @@ u64_t cppUtil::getVCallIdx(CallSite cs) {
     if (idx == nullptr) {
         SVFUtil::errs() << "vcall gep idx not constantint\n";
         idx_value = 0;
-    } else
+    } else {
         idx_value = idx->getSExtValue();
+    }
     return idx_value;
 }
 
@@ -414,8 +427,9 @@ string cppUtil::getClassNameFromVtblObj(const Value *value) {
 }
 
 bool cppUtil::isConstructor(const Function *F) {
-    if (F->isDeclaration())
+    if (F->isDeclaration()) {
         return false;
+    }
     string funcName = F->getName().str();
     if (funcName.compare(0, vfunPreLabel.size(), vfunPreLabel) != 0) {
         return false;
@@ -429,16 +443,18 @@ bool cppUtil::isConstructor(const Function *F) {
     } else {
         dname.className = getBeforeBrackets(dname.className.substr(colon + 2));
     }
-    if (!dname.className.empty() && (dname.className == dname.funcName))
+    if (!dname.className.empty() && (dname.className == dname.funcName)) {
         /// TODO: on mac os function name is an empty string after demangling
         return true;
+    }
 
     return false;
 }
 
 bool cppUtil::isDestructor(const Function *F) {
-    if (F->isDeclaration())
+    if (F->isDeclaration()) {
         return false;
+    }
     string funcName = F->getName().str();
     if (funcName.compare(0, vfunPreLabel.size(), vfunPreLabel) != 0) {
         return false;
@@ -455,8 +471,9 @@ bool cppUtil::isDestructor(const Function *F) {
     if (!dname.className.empty() && !dname.funcName.empty() &&
         dname.className.size() + 1 == dname.funcName.size() &&
         dname.funcName.compare(0, 1, "~") == 0 &&
-        dname.className == dname.funcName.substr(1))
+        dname.className == dname.funcName.substr(1)) {
         return true;
+    }
 
     return false;
 }
@@ -502,8 +519,9 @@ bool cppUtil::VCallInCtorOrDtor(CallSite cs) {
     const Function *func = cs.getCaller();
     if (isConstructor(func) || isDestructor(func)) {
         struct DemangledName dname = demangle(func->getName().str());
-        if (classNameOfThisPtr == dname.className)
+        if (classNameOfThisPtr == dname.className) {
             return true;
+        }
     }
     return false;
 }

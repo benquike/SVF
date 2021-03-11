@@ -87,8 +87,9 @@ PostDominatorTree *PTACFInfoBuilder::getPostDT(const Function *f) {
         "external function (without body) does not have a PostDominatorTree");
 
     auto *fun = const_cast<Function *>(f);
-    if (f->isDeclaration())
+    if (f->isDeclaration()) {
         return nullptr;
+    }
     auto it = funToPDTMap.find(fun);
     if (it == funToPDTMap.end()) {
         auto *PDT = new PostDominatorTree(*fun);

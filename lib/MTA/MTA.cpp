@@ -175,6 +175,7 @@ void MTA::detect(SVFModule *module) {
             loadneedcheck = true;
             needcheckinst.insert(store);
         }
+
         if (loadneedcheck)
             needcheckinst.insert(load);
     }

@@ -13,7 +13,7 @@
  */
 #include "MTA/MHP.h"
 #include "MTA/TCT.h"
-// #include "Util/DataFlowUtil.h"
+#include "SVF-FE/DataFlowUtil.h"
 
 #include <set>
 #include <string>

@@ -91,8 +91,9 @@ static ConstantExpr *hasConstantGEP(Value *V) {
         }
 
         for (unsigned index = 0; index < CE->getNumOperands(); ++index) {
-            if (hasConstantGEP(CE->getOperand(index)))
+            if (hasConstantGEP(CE->getOperand(index))) {
                 return CE;
+            }
         }
     }
 
@@ -272,8 +273,9 @@ bool BreakConstantGEPs::runOnModule(Module &module) {
         //
         // Determine whether we will modify anything.
         //
-        if (Worklist.size())
+        if (Worklist.size()) {
             modified = true;
+        }
 
         //
         // While the worklist is not empty, take an item from it, convert the
@@ -311,8 +313,9 @@ bool BreakConstantGEPs::runOnModule(Module &module) {
                         for (unsigned i2 = index;
                              i2 < PHI->getNumIncomingValues(); ++i2) {
                             if ((PHI->getIncomingBlock(i2)) ==
-                                PHI->getIncomingBlock(index))
+                                PHI->getIncomingBlock(index)) {
                                 PHI->setIncomingValue(i2, NewInst);
+                            }
                         }
                         Worklist.push_back(NewInst);
                     }
