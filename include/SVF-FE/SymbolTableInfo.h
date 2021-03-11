@@ -185,24 +185,23 @@ public:
 
     bool isConstantObjSym(const Value *val);
 
-    static inline bool isBlkPtr(NodeID id)
-    {
+    static inline bool isBlkPtr(NodeID id) {
         return (id == BlkPtr);
     }
-    static inline bool isNullPtr(NodeID id)
-    {
+
+    static inline bool isNullPtr(NodeID id) {
         return (id == NullPtr);
     }
-    static inline bool isBlkObj(NodeID id)
-    {
+
+    static inline bool isBlkObj(NodeID id) {
         return (id == BlackHole);
     }
-    static inline bool isConstantObj(NodeID id)
-    {
+
+    static inline bool isConstantObj(NodeID id) {
         return (id == ConstantObj);
     }
-    static inline bool isBlkObjOrConstantObj(NodeID id)
-    {
+
+    static inline bool isBlkObjOrConstantObj(NodeID id) {
         return (isBlkObj(id) || isConstantObj(id));
     }
 
@@ -261,27 +260,28 @@ public:
 
     /// Get different kinds of syms
     //@{
-    SymID getValSym(const Value *val)
-    {
+    /// FIXME: rename this API to getValSymID
+    SymID getValSym(const Value *val) {
 
-        if(isNullPtrSym(val))
+        if(isNullPtrSym(val)) {
             return nullPtrSymID();
-        else if(isBlackholeSym(val))
-            return blkPtrSymID();
-        else
-        {
-            auto iter =  valSymMap.find(val);
-            assert(iter!=valSymMap.end() &&"value sym not found");
-            return iter->second;
         }
+
+        if(isBlackholeSym(val)) {
+            return blkPtrSymID();
+        }
+
+        auto iter =  valSymMap.find(val);
+        assert(iter!=valSymMap.end() && "value sym not found");
+        return iter->second;
     }
 
     inline bool hasValSym(const Value* val)
     {
         if (isNullPtrSym(val) || isBlackholeSym(val))
             return true;
-        else
-            return (valSymMap.find(val) != valSymMap.end());
+
+        return (valSymMap.find(val) != valSymMap.end());
     }
 
     /// find the unique defined global across multiple modules

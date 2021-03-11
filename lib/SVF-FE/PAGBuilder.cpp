@@ -260,10 +260,8 @@ bool PAGBuilder::computeGepOffset(const User *V, LocationSet& ls)
  */
 void PAGBuilder::processCE(const Value *val)
 {
-    if (const auto* ref = SVFUtil::dyn_cast<Constant>(val))
-    {
-        if (const ConstantExpr* gepce = isGepConstantExpr(ref))
-        {
+    if (const auto* ref = SVFUtil::dyn_cast<Constant>(val)) {
+        if (const ConstantExpr* gepce = isGepConstantExpr(ref)) {
             DBOUT(DPAGBuild,
                   outs() << "handle gep constant expression " << *ref << "\n");
             const Constant* opnd = gepce->getOperand(0);
@@ -281,9 +279,7 @@ void PAGBuilder::processCE(const Value *val)
              */
             addGepEdge(pag->getValueNode(opnd), pag->getValueNode(gepce), ls, constGep);
             setCurrentLocation(cval, cbb);
-        }
-        else if (const ConstantExpr* castce = isCastConstantExpr(ref))
-        {
+        } else if (const ConstantExpr* castce = isCastConstantExpr(ref)) {
             DBOUT(DPAGBuild,
                   outs() << "handle cast constant expression " << *ref << "\n");
             const Constant* opnd = castce->getOperand(0);
@@ -293,9 +289,7 @@ void PAGBuilder::processCE(const Value *val)
             setCurrentLocation(castce, nullptr);
             addCopyEdge(pag->getValueNode(opnd), pag->getValueNode(castce));
             setCurrentLocation(cval, cbb);
-        }
-        else if (const ConstantExpr* selectce = isSelectConstantExpr(ref))
-        {
+        } else if (const ConstantExpr* selectce = isSelectConstantExpr(ref)) {
             DBOUT(DPAGBuild,
                   outs() << "handle select constant expression " << *ref << "\n");
             const Constant* src1 = selectce->getOperand(1);
@@ -315,12 +309,9 @@ void PAGBuilder::processCE(const Value *val)
             setCurrentLocation(cval, cbb);
         }
         // if we meet a int2ptr, then it points-to black hole
-        else if (const ConstantExpr* int2Ptrce = isInt2PtrConstantExpr(ref))
-        {
+        else if (const ConstantExpr* int2Ptrce = isInt2PtrConstantExpr(ref)) {
             addGlobalBlackHoleAddrEdge(pag->getValueNode(int2Ptrce), int2Ptrce);
-        }
-        else if (const ConstantExpr* ptr2Intce = isPtr2IntConstantExpr(ref))
-        {
+        } else if (const ConstantExpr* ptr2Intce = isPtr2IntConstantExpr(ref)) {
             const Constant* opnd = ptr2Intce->getOperand(0);
             processCE(opnd);
             const BasicBlock* cbb = getCurrentBB();
@@ -328,9 +319,7 @@ void PAGBuilder::processCE(const Value *val)
             setCurrentLocation(ptr2Intce, nullptr);
             addCopyEdge(pag->getValueNode(opnd), pag->getValueNode(ptr2Intce));
             setCurrentLocation(cval, cbb);
-        }
-        else if(isTruncConstantExpr(ref) || isCmpConstantExpr(ref))
-        {
+        } else if(isTruncConstantExpr(ref) || isCmpConstantExpr(ref)) {
             // we don't handle trunc and cmp instruction for now
             const Value* cval = getCurrentValue();
             const BasicBlock* cbb = getCurrentBB();
@@ -338,9 +327,7 @@ void PAGBuilder::processCE(const Value *val)
             NodeID dst = pag->getValueNode(ref);
             addBlackHoleAddrEdge(dst);
             setCurrentLocation(cval, cbb);
-        }
-        else if (isBinaryConstantExpr(ref))
-        {
+        } else if (isBinaryConstantExpr(ref)) {
             // we don't handle binary constant expression like add(x,y) now
             const Value* cval = getCurrentValue();
             const BasicBlock* cbb = getCurrentBB();
@@ -348,9 +335,7 @@ void PAGBuilder::processCE(const Value *val)
             NodeID dst = pag->getValueNode(ref);
             addBlackHoleAddrEdge(dst);
             setCurrentLocation(cval, cbb);
-        }
-        else if (isUnaryConstantExpr(ref))
-        {
+        } else if (isUnaryConstantExpr(ref)) {
             // we don't handle unary constant expression like fneg(x) now
             const Value* cval = getCurrentValue();
             const BasicBlock* cbb = getCurrentBB();
@@ -358,13 +343,9 @@ void PAGBuilder::processCE(const Value *val)
             NodeID dst = pag->getValueNode(ref);
             addBlackHoleAddrEdge(dst);
             setCurrentLocation(cval, cbb);
-        }
-        else if (SVFUtil::isa<ConstantAggregate>(ref))
-        {
+        } else if (SVFUtil::isa<ConstantAggregate>(ref)) {
             // we don't handle constant agrgregate like constant vectors
-        }
-        else if (SVFUtil::isa<BlockAddress>(ref))
-        {
+        } else if (SVFUtil::isa<BlockAddress>(ref)) {
 			// blockaddress instruction (e.g. i8* blockaddress(@run_vm, %182))
 			// is treated as constant data object for now, see LLVMUtil.h:397, SymbolTableInfo.cpp:674 and PAGBuilder.cpp:183-194
 			const Value *cval = getCurrentValue();
@@ -373,9 +354,7 @@ void PAGBuilder::processCE(const Value *val)
 			NodeID dst = pag->getValueNode(ref);
 			addAddrEdge(pag->getConstantNode(), dst);
 			setCurrentLocation(cval, cbb);
-        }
-        else
-        {
+        } else {
             if(SVFUtil::isa<ConstantExpr>(val))
                 assert(false && "we don't handle all other constant expression for now!");
         }
