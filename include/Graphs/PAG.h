@@ -522,68 +522,76 @@ public:
         return getGNode(id);
     }
 
-    /// Get PAG Node according to LLVM value
+    /// Get PAG Node ID according to LLVM value
     //@{
-    ///getNode - Return the node corresponding to the specified pointer.
-    inline NodeID getValueNode(const Value *V)
-    {
+    /// getNode - Return the node ID corresponding
+    /// to the specified pointer.
+    /// FIXME: rename the API
+    inline NodeID getValueNode(const Value *V) {
         return symInfo->getValSym(V);
     }
-    inline bool hasValueNode(const Value* V)
-    {
+
+    inline bool hasValueNode(const Value* V) {
         return symInfo->hasValSym(V);
     }
+
+
     /// getObject - Return the obj node id refer to the memory object for the
     /// specified global, heap or alloca instruction according to llvm value.
-    inline NodeID getObjectNode(const Value *V)
-    {
+    inline NodeID getObjectNode(const Value *V) {
         return symInfo->getObjSym(V);
     }
+
+
     /// getObject - return mem object id
-    inline NodeID getObjectNode(const MemObj *mem)
-    {
+    inline NodeID getObjectNode(const MemObj *mem) {
         return mem->getSymId();
     }
+
+
     /// Get memory object - Return memory object according to pag node id
     /// return whole allocated memory object if this node is a gep obj node
     /// return nullptr is this node is not a ObjPN type
     //@{
-    inline const MemObj* getObject(NodeID id) const
-    {
+    inline const MemObj* getObject(NodeID id) const {
         const PAGNode* node = getPAGNode(id);
         if(const ObjPN* objPN = SVFUtil::dyn_cast<ObjPN>(node))
             return getObject(objPN);
 
         return nullptr;
     }
-    inline const MemObj* getObject(const ObjPN* node) const
-    {
+
+    inline const MemObj* getObject(const ObjPN* node) const {
         return node->getMemObj();
     }
     //@}
 
     /// GetReturnNode - Return the unique node representing the return value of a function
-    inline NodeID getReturnNode(const SVFFunction* func) const
-    {
+    inline NodeID getReturnNode(const SVFFunction* func) const {
         return symInfo->getRetSym(func->getLLVMFun());
     }
+
+
     /// getVarargNode - Return the unique node representing the variadic argument of a variadic function.
-    inline NodeID getVarargNode(const SVFFunction* func) const
-    {
+    inline NodeID getVarargNode(const SVFFunction* func) const {
         return symInfo->getVarargSym(func->getLLVMFun());
     }
+
+
     /// Get a field PAG Object node according to base mem obj and offset
     NodeID getGepObjNode(const MemObj* obj, const LocationSet& ls);
+
+
     /// Get a field obj PAG node according to a mem obj and a given offset
-    NodeID getGepObjNode(NodeID id, const LocationSet& ls) ;
+    NodeID getGepObjNode(NodeID id, const LocationSet& ls);
+
     /// Get a field-insensitive obj PAG node according to a mem obj
     //@{
-    inline NodeID getFIObjNode(const MemObj* obj) const
-    {
+    inline NodeID getFIObjNode(const MemObj* obj) const {
         return obj->getSymId();
     }
-    inline NodeID getFIObjNode(NodeID id) const
-    {
+
+    inline NodeID getFIObjNode(NodeID id) const {
         PAGNode* node = pag->getPAGNode(id);
         assert(SVFUtil::isa<ObjPN>(node) && "need an object node");
         auto* obj = SVFUtil::cast<ObjPN>(node);
@@ -593,81 +601,75 @@ public:
 
     /// Get black hole and constant id
     //@{
-    inline NodeID getBlackHoleNode() const
-    {
+    inline NodeID getBlackHoleNode() const {
         return symInfo->blackholeSymID();
     }
-    inline NodeID getConstantNode() const
-    {
+
+
+    inline NodeID getConstantNode() const {
         return symInfo->constantSymID();
     }
-    inline NodeID getBlkPtr() const
-    {
+
+    inline NodeID getBlkPtr() const {
         return symInfo->blkPtrSymID();
     }
-    inline NodeID getNullPtr() const
-    {
+
+    inline NodeID getNullPtr() const {
         return symInfo->nullPtrSymID();
     }
-    inline bool isBlkPtr(NodeID id) const
-    {
+
+    inline bool isBlkPtr(NodeID id) const {
         return (SymbolTableInfo::isBlkPtr(id));
     }
-    inline bool isNullPtr(NodeID id) const
-    {
+
+    inline bool isNullPtr(NodeID id) const {
         return (SymbolTableInfo::isNullPtr(id));
     }
-    inline bool isBlkObjOrConstantObj(NodeID id) const
-    {
+
+    inline bool isBlkObjOrConstantObj(NodeID id) const {
         return (isBlkObj(id) || isConstantObj(id));
     }
-    inline bool isBlkObj(NodeID id) const
-    {
+
+    inline bool isBlkObj(NodeID id) const {
         return SymbolTableInfo::isBlkObj(id);
     }
-    inline bool isConstantObj(NodeID id) const
-    {
+
+
+    inline bool isConstantObj(NodeID id) const {
         const MemObj* obj = getObject(id);
         assert(obj && "not an object node?");
         return SymbolTableInfo::isConstantObj(id) || obj->isConstant();
     }
-    inline bool isNonPointerObj(NodeID id) const
-    {
+
+    inline bool isNonPointerObj(NodeID id) const {
         PAGNode* node = getPAGNode(id);
-        if (FIObjPN* fiNode = SVFUtil::dyn_cast<FIObjPN>(node))
-        {
+        if (FIObjPN* fiNode = SVFUtil::dyn_cast<FIObjPN>(node)) {
             return (fiNode->getMemObj()->hasPtrObj() == false);
-        }
-        else if (GepObjPN* gepNode = SVFUtil::dyn_cast<GepObjPN>(node))
-        {
+        } else if (GepObjPN* gepNode = SVFUtil::dyn_cast<GepObjPN>(node)) {
             return (gepNode->getMemObj()->isNonPtrFieldObj(gepNode->getLocationSet()));
-        }
-        else if (SVFUtil::isa<DummyObjPN>(node))
-        {
+        } else if (SVFUtil::isa<DummyObjPN>(node)) {
             return false;
-        }
-        else
-        {
+        } else {
             assert(false && "expecting a object node");
             return false;
         }
     }
-    inline const MemObj* getBlackHoleObj() const
-    {
+
+    inline const MemObj* getBlackHoleObj() const {
         return symInfo->getBlkObj();
     }
-    inline const MemObj* getConstantObj() const
-    {
+
+
+    inline const MemObj* getConstantObj() const {
         return symInfo->getConstantObj();
     }
     //@}
 
-    inline u32_t getNodeNumAfterPAGBuild() const
-    {
+    inline u32_t getNodeNumAfterPAGBuild() const {
         return nodeNumAfterPAGBuild;
     }
-    inline void setNodeNumAfterPAGBuild(u32_t num)
-    {
+
+    inline void setNodeNumAfterPAGBuild(u32_t num) {
         nodeNumAfterPAGBuild = num;
     }
 
@@ -676,12 +678,12 @@ public:
     /// Get a base pointer node given a field pointer
     NodeID getBaseValNode(NodeID nodeId);
     LocationSet getLocationSetFromBaseNode(NodeID nodeId);
-    inline NodeID getBaseObjNode(NodeID id) const
-    {
+
+    inline NodeID getBaseObjNode(NodeID id) const {
         return getBaseObj(id)->getSymId();
     }
-    inline const MemObj* getBaseObj(NodeID id) const
-    {
+
+    inline const MemObj* getBaseObj(NodeID id) const {
         const PAGNode* node = pag->getPAGNode(id);
         assert(SVFUtil::isa<ObjPN>(node) && "need an object node");
         const auto* obj = SVFUtil::cast<ObjPN>(node);
@@ -699,102 +701,114 @@ public:
     /// add node into PAG
     //@{
     /// Add a PAG node into Node map
-    inline NodeID addNode(PAGNode* node, NodeID i)
-    {
+    inline NodeID addNode(PAGNode* node, NodeID i) {
         addGNode(i, node);
         return i;
     }
+
+
     /// Add a value (pointer) node
-    inline NodeID addValNode(const Value* val, NodeID i)
-    {
+    inline NodeID addValNode(const Value* val, NodeID i) {
         PAGNode *node = new ValPN(val,i);
         return addValNode(val, node, i);
     }
+
+
     /// Add a memory obj node
-    inline NodeID addObjNode(const Value* val, NodeID i)
-    {
+    inline NodeID addObjNode(const Value* val, NodeID i) {
         MemObj* mem = symInfo->getObj(symInfo->getObjSym(val));
         assert(((mem->getSymId() == i) || (symInfo->getGlobalRep(val)!=val)) && "not same object id?");
         return addFIObjNode(mem);
     }
+
+
     /// Add a unique return node for a procedure
-    inline NodeID addRetNode(const SVFFunction* val, NodeID i)
-    {
+    inline NodeID addRetNode(const SVFFunction* val, NodeID i) {
         PAGNode *node = new RetPN(val, i);
         return addRetNode(val, node, i);
     }
+
+
     /// Add a unique vararg node for a procedure
-    inline NodeID addVarargNode(const SVFFunction* val, NodeID i)
-    {
+    inline NodeID addVarargNode(const SVFFunction* val, NodeID i) {
         PAGNode *node = new VarArgPN(val,i);
         return addNode(node,i);
     }
 
     /// Add a temp field value node, this method can only invoked by getGepValNode
-    NodeID addGepValNode(const Value* curInst,const Value* val, const LocationSet& ls, NodeID i, const Type *type, u32_t fieldidx);
+        NodeID addGepValNode(const Value* curInst,const Value* val,
+                             const LocationSet& ls, NodeID i,
+                             const Type *type, u32_t fieldidx);
+
     /// Add a field obj node, this method can only invoked by getGepObjNode
     NodeID addGepObjNode(const MemObj* obj, const LocationSet& ls);
+
     /// Add a field-insensitive node, this method can only invoked by getFIGepObjNode
     NodeID addFIObjNode(const MemObj* obj);
     //@}
 
     ///  Add a dummy value/object node according to node ID (llvm value is null)
     //@{
-    inline NodeID addDummyValNode()
-    {
+    inline NodeID addDummyValNode() {
         return addDummyValNode(NodeIDAllocator::get()->allocateValueId());
     }
-    inline NodeID addDummyValNode(NodeID i)
-    {
+
+    inline NodeID addDummyValNode(NodeID i) {
         return addValNode(nullptr, new DummyValPN(i), i);
     }
-    inline NodeID addDummyObjNode(const Type* type = nullptr)
-    {
+
+    inline NodeID addDummyObjNode(const Type* type = nullptr) {
         return addDummyObjNode(NodeIDAllocator::get()->allocateObjectId(), type);
     }
-    inline NodeID addDummyObjNode(NodeID i, const Type* type)
-    {
+
+    inline NodeID addDummyObjNode(NodeID i, const Type* type) {
         const MemObj* mem = addDummyMemObj(i, type);
         return addObjNode(nullptr, new DummyObjPN(i,mem), i);
     }
-    inline const MemObj* addDummyMemObj(NodeID i, const Type* type)
-    {
+
+    inline const MemObj* addDummyMemObj(NodeID i, const Type* type) {
         return SymbolTableInfo::SymbolInfo()->createDummyObj(i,type);
     }
-    inline NodeID addBlackholeObjNode()
-    {
-        return addObjNode(nullptr, new DummyObjPN(getBlackHoleNode(),getBlackHoleObj()), getBlackHoleNode());
+
+
+    inline NodeID addBlackholeObjNode() {
+        return addObjNode(nullptr,
+                          new DummyObjPN(getBlackHoleNode(),
+                                         getBlackHoleObj()),
+                          getBlackHoleNode());
     }
-    inline NodeID addConstantObjNode()
-    {
-        return addObjNode(nullptr, new DummyObjPN(getConstantNode(),getConstantObj()), getConstantNode());
+
+    inline NodeID addConstantObjNode() {
+        return addObjNode(nullptr, new DummyObjPN(getConstantNode(),
+                                                  getConstantObj()),
+                          getConstantNode());
     }
-    inline NodeID addBlackholePtrNode()
-    {
+
+
+    inline NodeID addBlackholePtrNode() {
         return addDummyValNode(getBlkPtr());
     }
     //@}
 
     /// Add a value (pointer) node
-    inline NodeID addValNode(const Value*, PAGNode *node, NodeID i)
-    {
+    inline NodeID addValNode(const Value*, PAGNode *node, NodeID i) {
 		assert(i<UINT_MAX && "exceeding the maximum node limits");
         return addNode(node,i);
     }
+
     /// Add a memory obj node
-    inline NodeID addObjNode(const Value*, PAGNode *node, NodeID i)
-    {
+    inline NodeID addObjNode(const Value*, PAGNode *node, NodeID i) {
 		assert(i<UINT_MAX && "exceeding the maximum node limits");
         return addNode(node,i);
     }
+
     /// Add a unique return node for a procedure
-    inline NodeID addRetNode(const SVFFunction*, PAGNode *node, NodeID i)
-    {
+    inline NodeID addRetNode(const SVFFunction*, PAGNode *node, NodeID i) {
         return addNode(node, i);
     }
+
     /// Add a unique vararg node for a procedure
-    inline NodeID addVarargNode(const SVFFunction*, PAGNode *node, NodeID i)
-    {
+    inline NodeID addVarargNode(const SVFFunction*, PAGNode *node, NodeID i) {
         return addNode(node,i);
     }
 
@@ -805,24 +819,33 @@ public:
 
     //// Return true if this edge exits
     PAGEdge* hasNonlabeledEdge(PAGNode* src, PAGNode* dst, PAGEdge::PEDGEK kind);
+
     /// Return true if this labeled edge exits, including store, call and load
     /// two store edge can have same dst and src but located in different basic blocks, thus flags are needed to distinguish them
-    PAGEdge* hasLabeledEdge(PAGNode* src, PAGNode* dst, PAGEdge::PEDGEK kind, const ICFGNode* cs);
+    PAGEdge* hasLabeledEdge(PAGNode* src, PAGNode* dst,
+                            PAGEdge::PEDGEK kind, const ICFGNode* cs);
 
     /// Add Address edge
     AddrPE* addAddrPE(NodeID src, NodeID dst);
+
     /// Add Copy edge
     CopyPE* addCopyPE(NodeID src, NodeID dst);
+
     /// Add Copy edge
     CmpPE* addCmpPE(NodeID src, NodeID dst);
+
     /// Add Copy edge
     BinaryOPPE* addBinaryOPPE(NodeID src, NodeID dst);
+
     /// Add Unary edge
     UnaryOPPE* addUnaryOPPE(NodeID src, NodeID dst);
+
     /// Add Load edge
     LoadPE* addLoadPE(NodeID src, NodeID dst);
+
     /// Add Store edge
     StorePE* addStorePE(NodeID src, NodeID dst, const IntraBlockNode* val);
+
     /// Add Call edge
     CallPE* addCallPE(NodeID src, NodeID dst, const CallBlockNode* cs);
     /// Add Return edge
@@ -850,8 +873,7 @@ public:
     //@}
 
     /// Return graph name
-    inline std::string getGraphName() const
-    {
+    inline std::string getGraphName() const {
         return "PAG";
     }
 
@@ -883,7 +905,7 @@ template<> struct GraphTraits<Inverse<SVF::PAGNode *> > : public GraphTraits<Inv
 
 template<> struct GraphTraits<SVF::PAG*> : public GraphTraits<SVF::GenericGraph<SVF::PAGNode,SVF::PAGEdge>* >
 {
-    typedef SVF::PAGNode *NodeRef;
+    using NodeRef = SVF::PAGNode *;
 };
 
 } // End namespace llvm
