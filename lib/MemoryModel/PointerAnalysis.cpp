@@ -585,16 +585,24 @@ void PointerAnalysis::connectVCallToVFns(const CallBlockNode *cs,
         if (getIndCallMap()[cs].count(callee) > 0) {
             continue;
         }
-        if (SVFUtil::getLLVMCallSite(cs->getCallSite()).arg_size() ==
-                callee->arg_size() ||
-            (SVFUtil::getLLVMCallSite(cs->getCallSite())
-                 .getFunctionType()
-                 ->isVarArg() &&
-             callee->isVarArg())) {
+
+        CallSite llvmCS = SVFUtil::getLLVMCallSite(cs->getCallSite());
+        // here we only check the number of args
+        if (llvmCS.arg_size() == callee->arg_size() ||
+            (llvmCS.getFunctionType()->isVarArg() && callee->isVarArg())) {
+
+            // save callee to the output variable newEdges
             newEdges[cs].insert(callee);
+
+            // insert the callee to the internal map
             getIndCallMap()[cs].insert(callee);
+
             const CallBlockNode *callBlockNode =
                 pag->getICFG()->getCallBlockNode(cs->getCallSite());
+
+            assert(cs == callBlockNode && "Duplicated calc check");
+
+            // update the CallGraph
             ptaCallGraph->addIndirectCallGraphEdge(callBlockNode,
                                                    cs->getCaller(), callee);
         }
