@@ -696,7 +696,7 @@ const CHGraph::CHNodeSetTy &CHGraph::getCSClasses(CallSite cs) {
 static bool checkArgTypes(CallSite cs, const Function *fn) {
 
     // here we skip the first argument (i.e., this pointer)
-    for (unsigned i = 1; i < cs.arg_size(); i++) {
+    for (unsigned i = 1; i < fn->arg_size(); i++) {
         auto *cs_arg = cs.getArgOperand(i);
         auto *fn_arg = fn->getArg(i);
         if (cs_arg->getType() != fn_arg->getType()) {
