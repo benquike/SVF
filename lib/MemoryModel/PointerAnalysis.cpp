@@ -489,10 +489,9 @@ bool PointerAnalysis::matchArgs(const CallBlockNode *cs,
  * Get virtual functions "vfns" based on CHA
  */
 void PointerAnalysis::getVFnsFromCHA(const CallBlockNode *cs, VFunSet &vfns) {
-    if (chgraph->csHasVFnsBasedonCHA(
-            SVFUtil::getLLVMCallSite(cs->getCallSite()))) {
-        vfns = chgraph->getCSVFsBasedonCHA(
-            SVFUtil::getLLVMCallSite(cs->getCallSite()));
+    CallSite llvmCS = SVFUtil::getLLVMCallSite(cs->getCallSite());
+    if (chgraph->csHasVFnsBasedonCHA(llvmCS)) {
+        vfns = chgraph->getCSVFsBasedonCHA(llvmCS);
     }
 }
 
@@ -502,11 +501,10 @@ void PointerAnalysis::getVFnsFromCHA(const CallBlockNode *cs, VFunSet &vfns) {
 void PointerAnalysis::getVFnsFromPts(const CallBlockNode *cs,
                                      const PointsTo &target, VFunSet &vfns) {
 
-    if (chgraph->csHasVtblsBasedonCHA(
-            SVFUtil::getLLVMCallSite(cs->getCallSite()))) {
+    CallSite llvmCS = SVFUtil::getLLVMCallSite(cs->getCallSite());
+    if (chgraph->csHasVtblsBasedonCHA(llvmCS)) {
         Set<const GlobalValue *> vtbls;
-        const VTableSet &chaVtbls = chgraph->getCSVtblsBasedonCHA(
-            SVFUtil::getLLVMCallSite(cs->getCallSite()));
+        const VTableSet &chaVtbls = chgraph->getCSVtblsBasedonCHA(llvmCS);
         for (auto it : target) {
             const PAGNode *ptdnode = pag->getPAGNode(it);
             if (ptdnode->hasValue()) {
@@ -535,12 +533,11 @@ void PointerAnalysis::connectVCallToVFns(const CallBlockNode *cs,
         if (getIndCallMap()[cs].count(callee) > 0) {
             continue;
         }
-        if (SVFUtil::getLLVMCallSite(cs->getCallSite()).arg_size() ==
-                callee->arg_size() ||
-            (SVFUtil::getLLVMCallSite(cs->getCallSite())
-                 .getFunctionType()
-                 ->isVarArg() &&
-             callee->isVarArg())) {
+
+        CallSite llvmCS = SVFUtil::getLLVMCallSite(cs->getCallSite());
+
+        if (llvmCS.arg_size() == callee->arg_size() ||
+            (llvmCS.getFunctionType()->isVarArg() && callee->isVarArg())) {
             newEdges[cs].insert(callee);
             getIndCallMap()[cs].insert(callee);
             const CallBlockNode *callBlockNode =
