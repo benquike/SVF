@@ -248,10 +248,10 @@ void BVDataPTAImpl::onTheFlyCallGraphSolve(const CallSiteToFunPtrMap &callsites,
                                            CallEdgeMap &newEdges) {
     for (auto callsite : callsites) {
         const CallBlockNode *cs = callsite.first;
+        CallSite llvmCS = SVFUtil::getLLVMCallSite(cs->getCallSite());
 
-        if (isVirtualCallSite(SVFUtil::getLLVMCallSite(cs->getCallSite()))) {
-            const Value *vtbl =
-                getVCallVtblPtr(SVFUtil::getLLVMCallSite(cs->getCallSite()));
+        if (isVirtualCallSite(llvmCS)) {
+            const Value *vtbl = getVCallVtblPtr(llvmCS);
             assert(pag->hasValueNode(vtbl));
             NodeID vtblId = pag->getValueNode(vtbl);
             resolveCPPIndCalls(cs, getPts(vtblId), newEdges);
