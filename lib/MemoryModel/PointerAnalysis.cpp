@@ -581,19 +581,13 @@ void PointerAnalysis::connectVCallToVFns(const CallBlockNode *cs,
     //// connect all valid functions
     for (const auto *callee : vfns) {
         callee = getDefFunForMultipleModule(callee->getLLVMFun());
-
-        /// OK, it is already setup
         if (getIndCallMap()[cs].count(callee) > 0) {
-            llvm::outs() << ">>> CallSite already setup, skipping\n";
             continue;
         }
-
-        llvm::outs() << ">>> new CallSite, setting up the callgraph\n";
 
         CallSite llvmCS = SVFUtil::getLLVMCallSite(cs->getCallSite());
 
         // here we only check the number of args
-        // if the # of args does not match, skip this one
         if (llvmCS.arg_size() == callee->arg_size() ||
             (llvmCS.getFunctionType()->isVarArg() && callee->isVarArg())) {
 
@@ -616,32 +610,12 @@ void PointerAnalysis::resolveCPPIndCalls(const CallBlockNode *cs,
     assert(isVirtualCallSite(SVFUtil::getLLVMCallSite(cs->getCallSite())) &&
            "not cpp virtual call");
 
-    llvm::outs() << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n";
-    llvm::outs() << "<<< trying to resolve a cpp indirect call\n";
-    llvm::outs() << "<<< In function: "
-                 <<  llvm::demangle(cs->getFun()->getName().str()) << "\n";
-    llvm::outs() << "Instruction: \n";
-    llvm::outs() << *cs->getCallSite() << "\n";
-
     VFunSet vfns;
     if (connectVCallOnCHA || vcall_cha) {
-        llvm::outs() << ">>> vcall_cha enabled, trying to resolve virtual targets using vtable analysis\n";
         getVFnsFromCHA(cs, vfns);
     } else {
-        llvm::outs() << ">>> vcall_cha enabled, trying to resolve virtual targets using pointer analysis\n";
         getVFnsFromPts(cs, target, vfns);
     }
-
-
-    llvm::outs() << "Targets: \n";
-    for (const auto *tgt:vfns) {
-        llvm::outs() << "\t - " << llvm::demangle(tgt->getName().str()) << "\n";
-    }
-
-    llvm::outs() << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-
-    /// connect the targets in the callgraph
-    /// and update newEdges
     connectVCallToVFns(cs, vfns, newEdges);
 }
 

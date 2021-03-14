@@ -26,9 +26,6 @@
  *  Created on: Apr 15, 2014
  *      Author: Yulei Sui
  */
-
-#include <sstream>
-
 #include "MSSA/SVFGBuilder.h"
 #include "Graphs/SVFG.h"
 #include "MSSA/MemSSA.h"
@@ -122,14 +119,8 @@ SVFG *SVFGBuilder::build(BVDataPTAImpl *pta, VFG::VFGK kind) {
 
     svfg->setDumpVFG(DumpVFG);
 
-    if (DumpVFG) {
-        static int svfg_seq = 0;
-        std::stringstream ss;
-        ss << "svfg_final_" << svfg_seq ++;
-        std::string fname = ss.str();
-        llvm::outs() << "writing svfg to " << fname << ".dot\n";
-        svfg->dump(fname);
-    }
+    if (DumpVFG)
+        svfg->dump("svfg_final");
 
     return svfg;
 }
