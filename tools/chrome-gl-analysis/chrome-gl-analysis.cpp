@@ -298,6 +298,8 @@ int main(int argc, char **argv) {
     const SVFFunction *svfFunction = getFunctionByName(svfModule, fname);
     Function *llvmFunction = svfFunction->getLLVMFun();
 
+    llvm::out() << "conditions.size(): " << conditions.size() << "\n";
+
     for (const auto *c : conditions) {
         llvm::outs() << "condition: " << *c << "\n";
         analyzeArgFlowToCondition(svfg, c, llvmFunction);

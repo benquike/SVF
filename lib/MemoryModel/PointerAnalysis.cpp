@@ -616,6 +616,8 @@ void PointerAnalysis::resolveCPPIndCalls(const CallBlockNode *cs,
     } else {
         getVFnsFromPts(cs, target, vfns);
     }
+
+    // update the intenral map and (pta) callgraph
     connectVCallToVFns(cs, vfns, newEdges);
 }
 
