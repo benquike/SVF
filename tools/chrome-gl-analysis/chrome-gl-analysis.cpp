@@ -250,12 +250,10 @@ void analyzeArgFlowToCondition(const SVFG *vfg, const Value *val,
 
             // we need to check whether is
             if (const auto *arg = SVFUtil::dyn_cast<Argument>(llvmValue)) {
-                if (arg->getParent() == function) {
-                    llvm::outs() << "\tArg #:" << arg->getArgNo()
-                                 << " of "
-                                 << llvm::demangle(function->getName().str()) <<  "\n";
-                }
-
+                llvm::outs() << "\tArg #:" << arg->getArgNo()
+                             << " of "
+                             << llvm::demangle(function->getName().str())
+                             << "\n";
             }
         }
     }
