@@ -236,8 +236,15 @@ void BVDataPTAImpl::dumpAllPts() {
 
 /*!
  * On the fly call graph construction
- * callsites is candidate indirect callsites need to be analyzed based on
- * points-to results newEdges is the new indirect call edges discovered
+ * callsites are indirect callsites to be analyzed based on
+ * points-to or CPP vtable analysis
+ * results newEdges is the new indirect call edges discovered
+ *
+ * If a callsite is a c++ virtual call, c++ specific analysis
+ * is prioritized,
+ * which will check whether c++ vtable analysis is enabled, if so
+ * that analysis will be used, otherwise, pointer analysis
+ * is the fallback solution.
  */
 void BVDataPTAImpl::onTheFlyCallGraphSolve(const CallSiteToFunPtrMap &callsites,
                                            CallEdgeMap &newEdges) {

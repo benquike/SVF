@@ -535,30 +535,49 @@ bool FlowSensitive::isStrongUpdate(const SVFGNode *node, NodeID &singleton) {
 }
 
 /*!
- * Update call graph
+ * Update call graph and SVFG by connecting the
+ * actual param and ret nodes with the formal
+ * param and ret nodes
  */
 bool FlowSensitive::updateCallGraph(const CallSiteToFunPtrMap &callsites) {
     double start = stat->getClk();
-    CallEdgeMap newEdges;
-    onTheFlyCallGraphSolve(callsites, newEdges);
+    CallEdgeMap callGraphNewEdges;
 
-    SVFGEdgeSetTy svfgEdges;
-    connectCallerAndCallee(newEdges, svfgEdges);
+    ///
+    /// find out the new targets at
+    /// indirect callsites in the callgraph
+    /// results are saved in callGraphNewEdges
+    ///
+    onTheFlyCallGraphSolve(callsites, callGraphNewEdges);
 
-    updateConnectedNodes(svfgEdges);
+    SVFGEdgeSetTy svfgNewEdges;
+
+    ///
+    /// connect caller and collee in the SVFG
+    /// using the results collected in callGraphNewEdges
+    /// including actual and formal paramenter nodes
+    /// and ret nodes
+    ///
+    connectCallerAndCallee(callGraphNewEdges, svfgNewEdges);
+
+    ///
+    /// Update the worklist for the next step,
+    /// if needed
+    ///
+    updateConnectedNodes(svfgNewEdges);
 
     double end = stat->getClk();
     updateCallGraphTime += (end - start) / TIMEINTERVAL;
-    return (!newEdges.empty());
+    return (!callGraphNewEdges.empty());
 }
 
 /*!
  *  Handle parameter passing in SVFG
  */
-void FlowSensitive::connectCallerAndCallee(const CallEdgeMap &newEdges,
-                                           SVFGEdgeSetTy &edges) {
-    auto iter = newEdges.begin();
-    auto eiter = newEdges.end();
+void FlowSensitive::connectCallerAndCallee(const CallEdgeMap &callGraphNewEdges,
+                                           SVFGEdgeSetTy &svfgNewEdges) {
+    auto iter = callGraphNewEdges.begin();
+    auto eiter = callGraphNewEdges.end();
     for (; iter != eiter; iter++) {
         const CallBlockNode *cs = iter->first;
         const FunctionSet &functions = iter->second;
