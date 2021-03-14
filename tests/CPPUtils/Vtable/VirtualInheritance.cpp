@@ -92,8 +92,6 @@ void left_dispatch(Left *l) {
 
 
 
-
-
 int main(int argc, char *argv[]) {
     Right r;
     Middle m;
