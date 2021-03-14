@@ -26,7 +26,10 @@
  *  Created on: Apr 15, 2014
  *      Author: Yulei Sui
  */
+
+#include <sstream>
 #include "Util/Options.h"
+#include "MSSA/MemSSA.h"
 #include "Util/SVFModule.h"
 #include "SVF-FE/LLVMUtil.h"
 #include "MSSA/MemSSA.h"

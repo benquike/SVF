@@ -584,9 +584,15 @@ void FlowSensitive::connectCallerAndCallee(const CallEdgeMap &callGraphNewEdges,
     auto eiter = callGraphNewEdges.end();
     for (; iter != eiter; iter++) {
         const CallBlockNode *cs = iter->first;
+
+        // llvm::outs() << ">>> connecting indirect targets at callsite:"
+        //              << cs->toString() << "\n";
+
         const FunctionSet &functions = iter->second;
         for (const auto *func : functions) {
-            svfg->connectCallerAndCallee(cs, func, edges);
+            // llvm::outs() << ">>>>> target: "
+            //              << llvm::demangle(func->getName().str()) << "\n";
+            svfg->connectCallerAndCallee(cs, func, svfgNewEdges);
         }
     }
 }

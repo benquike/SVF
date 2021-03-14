@@ -614,11 +614,14 @@ void SVFG::getInterVFEdgesForIndirectCallSite(
 void SVFG::connectCallerAndCallee(const CallBlockNode *cs,
                                   const SVFFunction *callee,
                                   SVFGEdgeSetTy &edges) {
+
+    // this handles indirect targets
     VFG::connectCallerAndCallee(cs, callee, edges);
 
     CallSiteID csId = getCallSiteID(cs, callee);
 
     // connect actual in and formal in
+    // using pointer analysis
     if (hasFuncEntryChi(callee) && hasCallSiteMu(cs)) {
         SVFG::ActualINSVFGNodeSet &actualInNodes = getActualINSVFGNodes(cs);
         const SVFG::FormalINSVFGNodeSet &formalInNodes =
