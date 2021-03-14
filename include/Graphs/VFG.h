@@ -417,9 +417,6 @@ class VFG : public GenericVFGTy {
     /// Create VFG nodes
     void addVFGNodes();
 
-    void connectCPPVirtualFuncWithCS();
-    void handleVirtualTargetInPAG(const CallBlockNode *cbn,
-                                  const SVFFunction *callee);
     /// Get PAGEdge set
     virtual inline PAGEdge::PAGEdgeSetTy &getPAGEdgeSet(PAGEdge::PEDGEK kind) {
         if (isPtrOnlySVFG()) {
