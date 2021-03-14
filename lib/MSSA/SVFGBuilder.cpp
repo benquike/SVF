@@ -49,7 +49,7 @@ static llvm::cl::opt<bool> SingleVFG(
     llvm::cl::desc("Create a single VFG shared by multiple analysis"));
 
 static llvm::cl::opt<bool>
-    OPTSVFG("optSVFG", llvm::cl::init(true),
+    OPTSVFG("optSVFG", llvm::cl::init(false),
             llvm::cl::desc("unoptimized SVFG with formal-in and actual-out"));
 
 static llvm::cl::opt<bool> DumpVFG("dump-svfg", llvm::cl::init(false),

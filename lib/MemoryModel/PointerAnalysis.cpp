@@ -102,7 +102,7 @@ static llvm::cl::opt<bool>
                      llvm::cl::desc("Enable alias check functions"));
 
 static llvm::cl::opt<bool> EnableThreadCallGraph(
-    "enable-tcg", llvm::cl::init(true),
+    "enable-tcg", llvm::cl::init(false),
     llvm::cl::desc("Enable pointer analysis to use thread call graph"));
 
 static llvm::cl::opt<bool>
