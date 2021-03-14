@@ -812,8 +812,16 @@ void VFG::connectCallerAndCallee(const CallBlockNode *callBlockNode,
             const PAGNode *cs_arg = *csArgIt;
             const PAGNode *fun_arg = *funArgIt;
             if (fun_arg->isPointer() && cs_arg->isPointer()) {
+
+                llvm::outs() << ">>>>>>> connecting " << cs_arg->toString()
+                             << " ::with:: " << fun_arg->toString() << "\n";
+
                 connectAParamAndFParam(cs_arg, fun_arg, callBlockNode, csId,
-                                       edges);
+                                   edges);
+            } else {
+                llvm::outs() << ">>>>>>> Not a pointer, not connecting "
+                             << cs_arg->toString()
+                             << " ::with:: " << fun_arg->toString() << "\n";
             }
         }
         assert(funArgIt == funArgEit &&

@@ -253,11 +253,17 @@ void BVDataPTAImpl::onTheFlyCallGraphSolve(const CallSiteToFunPtrMap &callsites,
         CallSite llvmCS = SVFUtil::getLLVMCallSite(cs->getCallSite());
 
         if (isVirtualCallSite(llvmCS)) {
+            llvm::outs() << ">>> OK, this is a CPP virtual callsite, "
+                         << " trying to resolve the target using "
+                         << " PointerAnalysis::resolveCPPIndCalls\n";
             const Value *vtbl = getVCallVtblPtr(llvmCS);
             assert(pag->hasValueNode(vtbl));
             NodeID vtblId = pag->getValueNode(vtbl);
             resolveCPPIndCalls(cs, getPts(vtblId), newEdges);
         } else {
+            llvm::outs() << ">>> OK, this is a non-virtual callsite, "
+                         << "trying to resolve the target using "
+                         <<"PointerAnalysis::resolveIndCalls\n";
             resolveIndCalls(callsite.first, getPts(callsite.second), newEdges);
         }
     }
