@@ -30,6 +30,7 @@
 #include "Graphs/VFG.h"
 #include "SVF-FE/LLVMUtil.h"
 #include "Util/SVFModule.h"
+#include <llvm-10/llvm/Demangle/Demangle.h>
 
 using namespace SVF;
 using namespace SVFUtil;
@@ -200,7 +201,7 @@ const std::string FormalParmVFGNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "FormalParmVFGNode ID: " << getId() << " ";
-    rawstr << "Fun[" << getFun()->getName() << "]";
+    rawstr << "Fun[" << llvm::demangle(getFun()->getName().str()) << "]";
     rawstr << param->toString();
     return rawstr.str();
 }
@@ -218,7 +219,7 @@ const std::string FormalRetVFGNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "FormalRetVFGNode ID: " << getId() << " ";
-    rawstr << "Fun[" << getFun()->getName() << "]";
+    rawstr << "Fun[" << llvm::demangle(getFun()->getName().str()) << "]";
     rawstr << param->toString();
     return rawstr.str();
 }

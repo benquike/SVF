@@ -44,6 +44,7 @@
 #include "MemoryModel/PointerAnalysisImpl.h"
 #include "WPA/FlowSensitiveTBHC.h"
 #include <fstream>
+#include <llvm/Demangle/Demangle.h>
 #include <sstream>
 
 using namespace SVF;
