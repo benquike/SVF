@@ -32,6 +32,7 @@
 #include "SVF-FE/LLVMUtil.h"
 
 #include "Util/Conditions.h"
+#include <llvm/Demangle/Demangle.h>
 #include <sys/resource.h> /// increase stack size
 
 using namespace SVF;
@@ -235,7 +236,7 @@ std::string SVFUtil::getSourceLoc(const Value *val) {
             rawstr << argument->getArgNo() << "rd";
         else
             rawstr << argument->getArgNo() << "th";
-        rawstr << " arg " << argument->getParent()->getName() << " "
+        rawstr << " arg " << llvm::demangle(argument->getParent()->getName().str()) << " "
                << getSourceLocOfFunction(argument->getParent());
     } else if (const auto *gvar = SVFUtil::dyn_cast<GlobalVariable>(val)) {
         rawstr << "Glob ";

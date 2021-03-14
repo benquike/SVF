@@ -32,6 +32,7 @@
 #include "Graphs/SVFGStat.h"
 #include "SVF-FE/LLVMUtil.h"
 #include "Util/SVFModule.h"
+#include <llvm/Demangle/Demangle.h>
 
 using namespace SVF;
 using namespace SVFUtil;
@@ -47,7 +48,7 @@ const std::string FormalINSVFGNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "FormalINSVFGNode ID: " << getId()
-           << " {fun: " << getFun()->getName() << "}";
+           << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
     rawstr << getEntryChi()->getMR()->getMRID() << "V_"
            << getEntryChi()->getResVer()->getSSAVersion() << " = ENCHI(MR_"
            << getEntryChi()->getMR()->getMRID() << "V_"
@@ -60,7 +61,7 @@ const std::string FormalOUTSVFGNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "FormalOUTSVFGNode ID: " << getId()
-           << " {fun: " << getFun()->getName() << "}";
+           << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
     rawstr << "RETMU(" << getRetMU()->getMR()->getMRID() << "V_"
            << getRetMU()->getVer()->getSSAVersion() << ")\n";
     rawstr << getRetMU()->getMR()->dumpStr() << "\n";
@@ -72,7 +73,7 @@ const std::string ActualINSVFGNode::toString() const {
     raw_string_ostream rawstr(str);
     rawstr << "ActualINSVFGNode ID: " << getId()
            << " at callsite: " << *getCallSite()->getCallSite()
-           << " {fun: " << getFun()->getName() << "}";
+           << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
     rawstr << "CSMU(" << getCallMU()->getMR()->getMRID() << "V_"
            << getCallMU()->getVer()->getSSAVersion() << ")\n";
     rawstr << getCallMU()->getMR()->dumpStr() << "\n";
@@ -85,7 +86,7 @@ const std::string ActualOUTSVFGNode::toString() const {
     raw_string_ostream rawstr(str);
     rawstr << "ActualOUTSVFGNode ID: " << getId()
            << " at callsite: " << *getCallSite()->getCallSite()
-           << " {fun: " << getFun()->getName() << "}";
+           << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
     rawstr << getCallCHI()->getMR()->getMRID() << "V_"
            << getCallCHI()->getResVer()->getSSAVersion() << " = CSCHI(MR_"
            << getCallCHI()->getMR()->getMRID() << "V_"
@@ -99,7 +100,7 @@ const std::string MSSAPHISVFGNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "MSSAPHISVFGNode ID: " << getId()
-           << " {fun: " << getFun()->getName() << "}";
+           << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
     rawstr << "MR_" << getRes()->getMR()->getMRID() << "V_"
            << getRes()->getResVer()->getSSAVersion() << " = PHI(";
     for (auto it = opVerBegin(), eit = opVerEnd(); it != eit; it++) {
@@ -117,7 +118,7 @@ const std::string IntraMSSAPHISVFGNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "IntraMSSAPHISVFGNode ID: " << getId()
-           << " {fun: " << getFun()->getName() << "}";
+           << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
     rawstr << MSSAPHISVFGNode::toString();
     return rawstr.str();
 }
@@ -131,7 +132,7 @@ const std::string InterMSSAPHISVFGNode::toString() const {
     } else {
         rawstr << "ActualOUTPHISVFGNode ID: " << getId()
                << " at callsite: " << *getCallSite()->getCallSite()
-               << " {fun: " << getFun()->getName() << "}";
+               << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
     }
     rawstr << MSSAPHISVFGNode::toString();
     return rawstr.str();

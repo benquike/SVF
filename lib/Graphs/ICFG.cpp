@@ -32,6 +32,7 @@
 #include "Graphs/PTACallGraph.h"
 #include "SVF-FE/LLVMUtil.h"
 #include "Util/SVFModule.h"
+#include <llvm/Demangle/Demangle.h>
 
 using namespace SVF;
 using namespace SVFUtil;
@@ -72,7 +73,8 @@ const std::string IntraBlockNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "IntraBlockNode ID: " << getId();
-    rawstr << value2String(getInst()) << " {fun: " << getFun()->getName() << "}";
+
+    rawstr << value2String(getInst()) << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
     return rawstr.str();
 }
 
@@ -86,7 +88,8 @@ const std::string FunEntryBlockNode::toString() const {
     } else {
         rawstr << " Entry(" << getSourceLoc(getFun()->getLLVMFun()) << ")\n";
     }
-    rawstr << " {fun: " << getFun()->getName() << "}";
+    rawstr << " {fun: "
+           << llvm::demangle(getFun()->getName().str()) << "}";
     return rawstr.str();
 }
 
@@ -103,7 +106,8 @@ const std::string FunExitBlockNode::toString() const {
                       getFunExitBB(getFun()->getLLVMFun())->getFirstNonPHI())
                << ")\n";
     }
-    rawstr << " {fun: " << getFun()->getName() << "}";
+    rawstr << " {fun: "
+           << llvm::demangle(getFun()->getName().str()) << "}";
     return rawstr.str();
 }
 
@@ -111,7 +115,7 @@ const std::string CallBlockNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "CallBlockNode ID: " << getId();
-    rawstr << value2String(getCallSite()) << " {fun: " << getFun()->getName() << "}";
+    rawstr << value2String(getCallSite()) << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
     return rawstr.str();
 }
 
@@ -119,7 +123,7 @@ const std::string RetBlockNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "RetBlockNode ID: " << getId();
-    rawstr << value2String(getCallSite()) << " {fun: " << getFun()->getName() << "}";
+    rawstr << value2String(getCallSite()) << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
     return rawstr.str();
 }
 
