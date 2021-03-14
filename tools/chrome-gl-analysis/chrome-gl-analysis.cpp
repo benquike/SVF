@@ -6,11 +6,14 @@
  // Hui Peng <peng124@purdue.edu>
  */
 #include <iostream>
+#include <llvm/Demangle/Demangle.h>
 
 #include "Graphs/SVFG.h"
 #include "SVF-FE/LLVMUtil.h"
 #include "SVF-FE/PAGBuilder.h"
 #include "WPA/FlowSensitive.h"
+
+using llvm::ImmutableCallSite;
 
 using namespace llvm;
 using namespace std;
@@ -27,10 +30,9 @@ static llvm::cl::opt<std::string> Entry("e",
 /**
  * return the SVFFunction with a name `name`
  * */
-const SVFFunction *getFunctionByName(SVFModule *mod, string &name) {
+const SVFFunction *getFunctionByName(SVFModule *mod, const string &name) {
 
-    for (auto it = mod->begin(); it != mod->end(); it++) {
-        const SVFFunction *fun = *it;
+    for (const auto *fun : *mod) {
         Function *llvmFun = fun->getLLVMFun();
         if (llvmFun->getName().str() == name) {
             return fun;
@@ -65,7 +67,8 @@ BasicBlock *getEntryBlock(Function *llvmFun) {
  **/
 
 template <class InstVisitorClass>
-void traverseFunctionICFG(ICFG *icfg, SVFModule *mod, string &functionName,
+void traverseFunctionICFG(ICFG *icfg, SVFModule *mod,
+                          const string &functionName,
                           InstVisitorClass &visitor) {
     const SVFFunction *svfFun = getFunctionByName(mod, functionName);
     if (svfFun == nullptr) {
@@ -94,7 +97,7 @@ void traverseFunctionICFG(ICFG *icfg, SVFModule *mod, string &functionName,
             const Instruction *llvmInst = ibnode->getInst();
             visitor.visit(const_cast<Instruction *>(llvmInst));
         } else if (const auto *cbnode =
-                       SVFUtil::dyn_cast<CallBlockNode>(vNode)) {
+                   SVFUtil::dyn_cast<CallBlockNode>(vNode)) {
             const Instruction *inst = cbnode->getCallSite();
             visitor.visit(const_cast<Instruction *>(inst));
         } else {
@@ -102,9 +105,10 @@ void traverseFunctionICFG(ICFG *icfg, SVFModule *mod, string &functionName,
                  << endl;
         }
 
-        for (ICFGNode::const_iterator it = vNode->OutEdgeBegin(),
-                                      eit = vNode->OutEdgeEnd();
+        for (auto it = vNode->OutEdgeBegin(),
+                 eit = vNode->OutEdgeEnd();
              it != eit; ++it) {
+
             ICFGEdge *edge = *it;
             ICFGNode *succNode = edge->getDstNode();
             if (visited.find(succNode) == visited.end()) {
@@ -136,11 +140,13 @@ void traverseOnVFG(const SVFG *vfg, const Value *val) {
         const VFGNode *vNode = worklist.pop();
         visited.insert(vNode);
 
-        for (VFGNode::const_iterator it = vNode->InEdgeBegin(),
-                                     eit = vNode->InEdgeEnd();
+        for (auto it = vNode->InEdgeBegin(),
+                 eit = vNode->InEdgeEnd();
              it != eit; ++it) {
+
             VFGEdge *edge = *it;
             VFGNode *succNode = edge->getSrcNode();
+
             if (visited.find(succNode) == visited.end()) {
                 worklist.push(succNode);
             }
@@ -148,11 +154,8 @@ void traverseOnVFG(const SVFG *vfg, const Value *val) {
     }
 
     /// Collect all LLVM Values
-    for (Set<const VFGNode *>::const_iterator it = visited.begin(),
-                                              eit = visited.end();
-         it != eit; ++it) {
-        const VFGNode *node = *it;
-        /// can only query VFGNode involving top-level pointers (starting with %
+    for (const auto *node : visited) {
+         /// can only query VFGNode involving top-level pointers (starting with %
         /// or
         /// @ in LLVM IR) PAGNode* pNode = vfg->getLHSTopLevPtr(node); Value*
         /// val = pNode->getValue();
@@ -197,8 +200,8 @@ class MyCallToFuncVisitor : public InstVisitor<MyCallToFuncVisitor> {
 
     void visitCallInst(CallInst &callInst) {
         // llvm::outs() << callInst << "\n";
-        llvm::ImmutableCallSite cs(&callInst);
-        if (auto *f = cs.getCalledFunction()) {
+        ImmutableCallSite cs(&callInst);
+        if (const auto *f = cs.getCalledFunction()) {
             if (f->getName().str() == fname) {
                 res.insert(cs.getInstruction());
             }
@@ -245,8 +248,14 @@ void analyzeArgFlowToCondition(const SVFG *vfg, const Value *val,
 
             const Value *llvmValue = param->getValue();
 
+            // we need to check whether is
             if (const auto *arg = SVFUtil::dyn_cast<Argument>(llvmValue)) {
-                llvm::outs() << "\tArg flowing in#:" << arg->getArgNo() << "\n";
+                if (arg->getParent() == function) {
+                    llvm::outs() << "\tArg #:" << arg->getArgNo()
+                                 << " of "
+                                 << llvm::demangle(function->getName().str()) <<  "\n";
+                }
+
             }
         }
     }
@@ -274,7 +283,7 @@ int main(int argc, char **argv) {
     PAG *pag = builder.build(svfModule);
 
     // Andersen *ander = AndersenWaveDiff::createAndersenWaveDiff(pag);
-    FlowSensitive *fs_pta = FlowSensitive::createFSWPA(pag);
+    FlowSensitive *fs_pta = FlowSensitive::createFSWPA(pag, true);
 
     /// Call Graph
     PTACallGraph *callgraph = fs_pta->getPTACallGraph();
@@ -282,8 +291,12 @@ int main(int argc, char **argv) {
     /// ICFG
     ICFG *icfg = pag->getICFG();
 
+    // SVFG *svfg = fs_pta->getSVFG();
+    // svfg_0->dump("svfg0_dump");
+
     SVFGBuilder svfBuilder;
     SVFG *svfg = svfBuilder.buildFullSVFGWithoutOPT(fs_pta);
+    // svfg->dump("svfg1_dump");
 
     set<const llvm::Value *> conditions;
 
@@ -293,10 +306,18 @@ int main(int argc, char **argv) {
         fname = Entry;
     }
 
+    string chf0 = "_ZN4Base5checkEii";
+    string chf1 = "_ZN5Child5checkEii";
+
     MyBrConditionVisitor brVisitor(conditions);
-    traverseFunctionICFG(icfg, svfModule, fname, brVisitor);
+    // traverseFunctionICFG(icfg, svfModule, fname, brVisitor);
+    //
+    traverseFunctionICFG(icfg, svfModule, chf0, brVisitor);
+    traverseFunctionICFG(icfg, svfModule, chf1, brVisitor);
     const SVFFunction *svfFunction = getFunctionByName(svfModule, fname);
     Function *llvmFunction = svfFunction->getLLVMFun();
+
+    llvm::outs() << "conditions.size() : " << conditions.size() << "\n";
 
     for (const auto *c : conditions) {
         llvm::outs() << "condition: " << *c << "\n";
