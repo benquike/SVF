@@ -582,7 +582,7 @@ void FlowSensitive::connectCallerAndCallee(const CallEdgeMap &callGraphNewEdges,
         const CallBlockNode *cs = iter->first;
         const FunctionSet &functions = iter->second;
         for (const auto *func : functions) {
-            svfg->connectCallerAndCallee(cs, func, edges);
+            svfg->connectCallerAndCallee(cs, func, svfgNewEdges);
         }
     }
 }
