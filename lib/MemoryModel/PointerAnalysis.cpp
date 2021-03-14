@@ -69,6 +69,7 @@ const std::string PointerAnalysis::aliasTestFailMayAliasMangled = "_Z21EXPECTEDF
 const std::string PointerAnalysis::aliasTestFailNoAlias         = "EXPECTEDFAIL_NOALIAS";
 const std::string PointerAnalysis::aliasTestFailNoAliasMangled  = "_Z20EXPECTEDFAIL_NOALIASPvS_";
 
+
 /*!
  * Constructor
  */

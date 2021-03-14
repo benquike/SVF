@@ -37,7 +37,6 @@
 using namespace SVF;
 using namespace SVFUtil;
 
-
 SVFG* SVFGBuilder::globalSvfg = nullptr;
 
 
