@@ -303,8 +303,6 @@ PHIVFGNode::PHIVFGNode(NodeID id, const PAGNode *r, VFGNodeK k)
 VFG::VFG(PTACallGraph *cg, VFGK k)
     : totalVFGNode(0), callgraph(cg), pag(PAG::getPAG()), kind(k),
       dumpVFG(false) {
-    // TODO: rename this function to include PAG
-    connectCPPVirtualFuncWithCS();
 
     DBOUT(DGENERAL, outs() << pasMsg("\tCreate VFG Top Level Node\n"));
     addVFGNodes();
@@ -317,65 +315,6 @@ VFG::VFG(PTACallGraph *cg, VFGK k)
  * Memory has been cleaned up at GenericGraph
  */
 void VFG::destroy() { pag = nullptr; }
-
-// pretty much a copy of PAGBuilder::handleDirectCall
-void VFG::handleVirtualTargetInPAG(const CallBlockNode *cbn,
-                                   const SVFFunction *callee) {
-
-    auto dstrec = pag->getValueNode(cbn->getCallSite());
-    const auto *callInst = cbn->getCallSite();
-    CallBlockNode *icfgCbn = pag->getICFG()->getCallBlockNode(callInst);
-    if (!callee->getLLVMFun()->getReturnType()->isVoidTy()) {
-        auto src = pag->getReturnNode(callee);
-        pag->addRetPE(src, dstrec, icfgCbn);
-    }
-
-    llvm::ImmutableCallSite cs(cbn->getCallSite());
-
-    auto itA = cs.arg_begin();
-    auto ieA = cs.arg_end();
-    auto itF = callee->getLLVMFun()->arg_begin();
-    auto ieF = callee->getLLVMFun()->arg_end();
-
-    for (; itF != ieF; ++itA, ++itF) {
-        // Some programs (e.g. Linux kernel) leave unneeded parameters empty.
-        if (itA == ieA) {
-            break;
-        }
-        const Value *AA = *itA;
-        const Value *FA = &*itF; // current actual/formal arg
-
-        auto dstFA = pag->getValueNode(FA);
-        auto srcAA = pag->getValueNode(AA);
-
-        // Add a CallEdge between a formal argument and real argument
-        // what a "good" name.
-        pag->addCallPE(srcAA, dstFA, icfgCbn);
-    }
-
-    if (callee->getLLVMFun()->isVarArg()) {
-        auto vaF = pag->getVarargNode(callee);
-        for (; itA != ieA; ++itA) {
-            Value *AA = *itA;
-            auto vnAA = pag->getValueNode(AA);
-            pag->addCallPE(vnAA, vaF, icfgCbn);
-        }
-    }
-
-    if (itA != ieA) {
-        assert(false && "Too many args passed to Non-VarArg function");
-    }
-}
-
-void VFG::connectCPPVirtualFuncWithCS() {
-    auto &indCallMap = callgraph->getIndCallMap();
-
-    for (auto &[cbn, vfs] : indCallMap) {
-        for (const auto *callee : vfs) {
-            handleVirtualTargetInPAG(cbn, callee);
-        }
-    }
-}
 
 /*!
  * \brief: create nodes for the VFG
