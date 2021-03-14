@@ -110,7 +110,8 @@ class PAGNode : public GenericPAGNodeTy {
     inline bool hasValue() const { return value != nullptr; }
     /// Whether it is a pointer
     virtual inline bool isPointer() const {
-        return isTopLevelPtr() || isAddressTakenPtr();
+        return true;
+        // return isTopLevelPtr() || isAddressTakenPtr();
     }
     /// Whether it is a top-level pointer
     inline bool isTopLevelPtr() const { return isTLPointer; }
