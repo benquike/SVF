@@ -138,7 +138,9 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     friend class ExternalPAG;
 
     /// Constructor
-    PAG(SymbolTableInfo *symInfo, bool buildFromFile=false);
+    PAG(SymbolTableInfo *symInfo, ICFG *icfg=nullptr, bool buildFromFile=false);
+    PAG(SVFModule *svfMod, ICFG *icfg=nullptr, bool buildFromFile=false);
+
 
     u32_t totalPTAPAGEdge;
 

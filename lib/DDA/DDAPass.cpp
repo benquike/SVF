@@ -126,11 +126,8 @@ void DDAPass::selectClient(SVFModule *module) {
 
 /// Create pointer analysis according to specified kind and analyze the module.
 void DDAPass::runPointerAnalysis(SVFModule *module, u32_t kind) {
-
-    SymbolTableInfo symbolTableInfo(module);
-    PAG _pag(&symbolTableInfo, false);
-    PAGBuilder builder(&_pag);
-    PAG *pag = builder.build();
+    PAG _pag(module);
+    PAG *pag = &_pag;
 
     VFPathCond::setMaxPathLen(maxPathLen);
     ContextCond::setMaxCxtLen(maxContextLen);

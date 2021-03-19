@@ -34,6 +34,7 @@
 #include "Graphs/ExternalPAG.h"
 #include "SVF-FE/ICFGBuilder.h"
 #include "SVF-FE/LLVMUtil.h"
+#include "SVF-FE/PAGBuilder.h"
 
 using namespace SVF;
 using namespace SVFUtil;
@@ -327,12 +328,23 @@ const std::string TDJoinPE::toString() const {
     return rawstr.str();
 }
 
-PAG::PAG(SymbolTableInfo *symInfo, bool buildFromFile)
+PAG::PAG(SymbolTableInfo *symInfo, ICFG *icfg, bool buildFromFile)
     : symbolTableInfo(symInfo), fromFile(buildFromFile),
-      nodeNumAfterPAGBuild(0), totalPTAPAGEdge(0) {
-    icfg = new ICFG(this);
-    ICFGBuilder builder(icfg);
-    builder.build(symbolTableInfo->getModule());
+      nodeNumAfterPAGBuild(0), icfg(icfg), totalPTAPAGEdge(0) {
+    if (icfg == nullptr) {
+        icfg = new ICFG(this);
+        ICFGBuilder builder(icfg);
+        builder.build(symbolTableInfo->getModule());
+    }
+
+    // build the PAG
+    PAGBuilder _builder(this);
+    _builder.build();
+}
+
+PAG::PAG(SVFModule *svfMod, ICFG *icfg, bool buildFromFile)
+    : PAG(SymbolTableInfo::SymbolInfo(svfMod), icfg, buildFromFile) {
+
 }
 
 /*!
@@ -387,7 +399,7 @@ BinaryOPPE *PAG::addBinaryOPPE(NodeID src, NodeID dst) {
     PAGNode *srcNode = getPAGNode(src);
     PAGNode *dstNode = getPAGNode(dst);
     if (PAGEdge *edge =
-            hasNonlabeledEdge(srcNode, dstNode, PAGEdge::BinaryOp)) {
+        hasNonlabeledEdge(srcNode, dstNode, PAGEdge::BinaryOp)) {
         return SVFUtil::cast<BinaryOPPE>(edge);
     } else {
         BinaryOPPE *binaryOP = new BinaryOPPE(srcNode, dstNode, this);
@@ -434,7 +446,7 @@ StorePE *PAG::addStorePE(NodeID src, NodeID dst, const IntraBlockNode *curVal) {
     PAGNode *srcNode = getPAGNode(src);
     PAGNode *dstNode = getPAGNode(dst);
     if (PAGEdge *edge =
-            hasLabeledEdge(srcNode, dstNode, PAGEdge::Store, curVal)) {
+        hasLabeledEdge(srcNode, dstNode, PAGEdge::Store, curVal)) {
         return SVFUtil::cast<StorePE>(edge);
     }
 
@@ -492,7 +504,7 @@ TDForkPE *PAG::addThreadForkPE(NodeID src, NodeID dst,
     PAGNode *srcNode = getPAGNode(src);
     PAGNode *dstNode = getPAGNode(dst);
     if (PAGEdge *edge =
-            hasLabeledEdge(srcNode, dstNode, PAGEdge::ThreadFork, cs)) {
+        hasLabeledEdge(srcNode, dstNode, PAGEdge::ThreadFork, cs)) {
         return SVFUtil::cast<TDForkPE>(edge);
     }
 
@@ -510,7 +522,7 @@ TDJoinPE *PAG::addThreadJoinPE(NodeID src, NodeID dst,
     PAGNode *srcNode = getPAGNode(src);
     PAGNode *dstNode = getPAGNode(dst);
     if (PAGEdge *edge =
-            hasLabeledEdge(srcNode, dstNode, PAGEdge::ThreadJoin, cs)) {
+        hasLabeledEdge(srcNode, dstNode, PAGEdge::ThreadJoin, cs)) {
         return SVFUtil::cast<TDJoinPE>(edge);
     }
 
@@ -546,7 +558,7 @@ NormalGepPE *PAG::addNormalGepPE(NodeID src, NodeID dst,
     PAGNode *baseNode = getPAGNode(getBaseValNode(src));
     PAGNode *dstNode = getPAGNode(dst);
     if (PAGEdge *edge =
-            hasNonlabeledEdge(baseNode, dstNode, PAGEdge::NormalGep)) {
+        hasNonlabeledEdge(baseNode, dstNode, PAGEdge::NormalGep)) {
         return SVFUtil::cast<NormalGepPE>(edge);
     }
 
@@ -564,7 +576,7 @@ VariantGepPE *PAG::addVariantGepPE(NodeID src, NodeID dst) {
     PAGNode *baseNode = getPAGNode(getBaseValNode(src));
     PAGNode *dstNode = getPAGNode(dst);
     if (PAGEdge *edge =
-            hasNonlabeledEdge(baseNode, dstNode, PAGEdge::VariantGep)) {
+        hasNonlabeledEdge(baseNode, dstNode, PAGEdge::VariantGep)) {
         return SVFUtil::cast<VariantGepPE>(edge);
     }
 
@@ -711,8 +723,8 @@ PAGEdge *PAG::hasLabeledEdge(PAGNode *src, PAGNode *dst, PAGEdge::PEDGEK kind,
 bool PAG::addEdge(PAGNode *src, PAGNode *dst, PAGEdge *edge) {
 
     DBOUT(DPAGBuild, outs() << "add edge from " << src->getId() << " kind :"
-                            << src->getNodeKind() << " to " << dst->getId()
-                            << " kind :" << dst->getNodeKind() << "\n");
+          << src->getNodeKind() << " to " << dst->getId()
+          << " kind :" << dst->getNodeKind() << "\n");
     src->addOutEdge(edge);
     dst->addInEdge(edge);
     bool added = PAGEdgeKindToSetMap[edge->getEdgeKind()].insert(edge).second;
@@ -825,7 +837,8 @@ void PAG::destroy() {
             delete edgeIt;
         }
     }
-    symbolTableInfo = nullptr;
+
+    delete icfg;
 }
 
 /*!

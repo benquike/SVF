@@ -101,11 +101,19 @@ class SymbolTableInfo {
     /// Constructor
     SymbolTableInfo(SVFModule *mod)
         : mod(mod), modelConstants(false), totalSymNum(0),
-          maxStruct(nullptr), maxStSize(0) {}
-    /// Singleton design here to make sure we only have one instance during any
-    /// analysis
+          maxStruct(nullptr), maxStSize(0) {
+        // start building the memory model
+        // in the co construtor
+        buildMemModel();
+    }
+
+    /// Get a SymbolTableInfo instance,
+    //  depending on the program option,
+    //  an instance of either LocSymTableInfo
+    //  or SymbolTableInfo will be returned
     //@{
     static SymbolTableInfo *SymbolInfo(SVFModule *mod);
+
 
     virtual ~SymbolTableInfo() { destroy(); }
     //@}
