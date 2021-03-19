@@ -54,11 +54,10 @@ int main(int argc, char **argv) {
     cl::ParseCommandLineOptions(arg_num, arg_value,
                                 "Demand-Driven Points-to Analysis\n");
 
-    SVFModule *svfModule =
-        LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
+    SVFProject proj(moduleNameVec);
 
     DDAPass *dda = new DDAPass();
-    dda->runOnModule(svfModule);
+    dda->runOnModule(&proj);
 
     return 0;
 }

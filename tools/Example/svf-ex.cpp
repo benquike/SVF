@@ -143,14 +143,11 @@ int main(int argc, char **argv) {
                                 "Whole Program Points-to Analysis\n");
 
     // how to manage the momory of SVFModule?
-    SVFModule *svfModule =
-        LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
-
-    PAG _pag(svfModule);
-    PAG *pag = &_pag;
+    SVFProject proj(moduleNameVec);
+    PAG *pag = proj.getPAG();
 
     /// Create Andersen's pointer analysis
-    Andersen *ander = AndersenWaveDiff::createAndersenWaveDiff(pag);
+    Andersen *ander = AndersenWaveDiff::createAndersenWaveDiff(&proj);
 
     /// Query aliases
     /// aliasQuery(ander,value1,value2);

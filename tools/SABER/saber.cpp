@@ -65,25 +65,20 @@ int main(int argc, char **argv) {
     cl::ParseCommandLineOptions(arg_num, arg_value,
                                 "Source-Sink Bug Detector\n");
 
-    SVFModule *svfModule =
-        LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
-
-    PAG _pag(svfModule);
-    PAG *pag = &_pag;
+    SVFProject proj(moduleNameVec);
 
     LeakChecker *saber;
 
     if (LEAKCHECKER)
-        saber = new LeakChecker(pag);
+        saber = new LeakChecker(&proj);
     else if (FILECHECKER)
-        saber = new FileChecker(pag);
+        saber = new FileChecker(&proj);
     else if (DFREECHECKER)
-        saber = new DoubleFreeChecker(pag);
+        saber = new DoubleFreeChecker(&proj);
     else
-        saber = new LeakChecker(pag); // if no checker is specified, we use leak
-                                   // checker as the default one.
-
-    saber->runOnModule(svfModule);
+        saber = new LeakChecker(&proj); // if no checker is specified, we use leak
+                                        // checker as the default one.
+    saber->runOnModule(proj.getSVFModule());
 
     return 0;
 }
