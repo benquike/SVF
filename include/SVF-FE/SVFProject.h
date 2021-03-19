@@ -38,15 +38,13 @@ class PAG;
 class SVFProject {
   private:
     vector<string> modNameVec;
-    SymbolTableInfo *symTableInfo;
-    SVFModule *svfModule;
+    SymbolTableInfo *symTableInfo = nullptr;
+    SVFModule *svfModule = nullptr;
 
+    PAG *pag = nullptr;
+    ICFG  *icfg = nullptr;
 
-    PAG *pag;
-    ICFG  *icfg;
-
-
-    ThreadAPI *threadAPI;
+    ThreadAPI *threadAPI = nullptr;
     // bool _built = false;
 
   public:
@@ -65,9 +63,7 @@ class SVFProject {
       svfModule = new SVFModule(module);
     }
 
-    virtual ~SVFProject() {
-      // TODO
-    }
+    virtual ~SVFProject();
 
 
     SVFModule *getSVFModule() const {
