@@ -127,7 +127,7 @@ void traverseFunctionICFG(ICFG *icfg, SVFModule *mod,
  * the VFG from val
  */
 void traverseOnVFG(const SVFG *vfg, const Value *val) {
-    PAG *pag = PAG::getPAG();
+    PAG *pag = vfg->getPAG();
 
     PAGNode *pNode = pag->getPAGNode(pag->getValueNode(val));
     const VFGNode *vNode = vfg->getDefSVFGNode(pNode);
@@ -211,7 +211,7 @@ class MyCallToFuncVisitor : public InstVisitor<MyCallToFuncVisitor> {
 
 void analyzeArgFlowToCondition(const SVFG *vfg, const Value *val,
                                const Function *function) {
-    PAG *pag = PAG::getPAG();
+    PAG *pag = vfg->getPAG();
 
     PAGNode *pNode = pag->getPAGNode(pag->getValueNode(val));
     const VFGNode *vNode = vfg->getDefSVFGNode(pNode);
@@ -276,9 +276,11 @@ int main(int argc, char **argv) {
     SVFModule *svfModule =
         LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
 
+    SymbolTableInfo _symbolTableInfo(svfModule);
     /// Build Program Assignment Graph (PAG)
-    PAGBuilder builder;
-    PAG *pag = builder.build(svfModule);
+    PAG _pag(&_symbolTableInfo);
+    PAGBuilder _builder(&_pag);
+    PAG *pag = _builder.build();
 
     // Andersen *ander = AndersenWaveDiff::createAndersenWaveDiff(pag);
     FlowSensitive *fs_pta = FlowSensitive::createFSWPA(pag, true);
