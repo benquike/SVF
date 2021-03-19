@@ -31,23 +31,23 @@ namespace SVF {
 
 /// Constructors
 SVFModule::SVFModule(string moduleName)
-    : moduleIdentifier(std::move(moduleName)) {
+    : moduleIdentifier(moduleName) {
 
-    LLVMModuleSet *llvmModSet = new LLVMModuleSet(this);
+    llvmModSet = new LLVMModuleSet(this);
     llvmModSet->buildSVFModule(moduleName);
 }
 
 SVFModule::SVFModule(vector<string> &modVec)
     : moduleIdentifier(*modVec.begin()) {
 
-    LLVMModuleSet *llvmModSet = new LLVMModuleSet(this);
+    llvmModSet = new LLVMModuleSet(this);
     llvmModSet->buildSVFModule(modVec);
 }
 
 SVFModule::SVFModule(Module &module)
     : moduleIdentifier(module.getModuleIdentifier()) {
 
-    LLVMModuleSet *llvmModSet = new LLVMModuleSet(this);
+    llvmModSet = new LLVMModuleSet(this);
     llvmModSet->buildSVFModule(module);
 }
 
