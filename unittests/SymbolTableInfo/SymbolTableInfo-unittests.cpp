@@ -19,31 +19,15 @@
  *     2021-03-19
  *****************************************************************************/
 
-#include "SVF-FE/PAGBuilder.h"
 #include "gtest/gtest.h"
 
-#include <string>
-#include <vector>
-
-// #include "WPA/FlowSensitive.h"
-
-#include "SVF-FE/CHG.h"
 #include "config.h"
 
-using namespace SVF;
-using namespace std;
+TEST(SymbolTableInfoTests, Construction_0) {
 
-TEST(CHGTestSuite, BasicTest_0) {
-    string test_bc = SVF_BUILD_DIR "/tests/CHG/callsite_cpp.ll";
-    SVFProject proj(test_bc);
-
-    CHGraph *chg = new CHGraph(proj.getSymbolTableInfo());
-    ASSERT_TRUE(chg != nullptr);
-
-    chg->buildCHG();
 }
 
 int main(int argc, char *argv[]) {
-    ::testing::InitGoogleTest(&argc, argv);
+    ::testing::InitGoogleTest();
     return RUN_ALL_TESTS();
 }
