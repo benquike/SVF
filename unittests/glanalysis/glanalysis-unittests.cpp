@@ -32,10 +32,8 @@ TEST(GLAnalysis, DumpVTargets) {
 
     SVFModule *svfModule =
         LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
-    SymbolTableInfo symbolTableInfo(svfModule);
-    PAG _pag(&symbolTableInfo, false);
-    PAGBuilder builder(&_pag);
-    PAG *pag = builder.build();
+    PAG _pag(svfModule);
+    PAG *pag = &_pag;
 
     ASSERT_TRUE(pag != nullptr);
     CHGraph *chg = new CHGraph(pag->getSymbolTableInfo());

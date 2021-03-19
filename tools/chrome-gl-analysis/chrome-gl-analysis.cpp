@@ -276,11 +276,9 @@ int main(int argc, char **argv) {
     SVFModule *svfModule =
         LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
 
-    SymbolTableInfo _symbolTableInfo(svfModule);
     /// Build Program Assignment Graph (PAG)
-    PAG _pag(&_symbolTableInfo);
-    PAGBuilder _builder(&_pag);
-    PAG *pag = _builder.build();
+    PAG _pag(svfModule);
+    PAG *pag = &_pag;
 
     // Andersen *ander = AndersenWaveDiff::createAndersenWaveDiff(pag);
     FlowSensitive *fs_pta = FlowSensitive::createFSWPA(pag, true);

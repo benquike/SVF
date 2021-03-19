@@ -67,10 +67,9 @@ int main(int argc, char **argv) {
 
     SVFModule *svfModule =
         LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
-    SymbolTableInfo symbolTableInfo(svfModule);
-    PAG _pag(&symbolTableInfo);
-    PAGBuilder _builder(&_pag);
-    PAG *pag = _builder.build();
+
+    PAG _pag(svfModule);
+    PAG *pag = &_pag;
 
     LeakChecker *saber;
 
