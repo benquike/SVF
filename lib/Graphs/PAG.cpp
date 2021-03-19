@@ -266,9 +266,10 @@ const std::string TDJoinPE::toString() const {
     return rawstr.str();
 }
 
-PAG::PAG(SymbolTableInfo *symInfo, ICFG *icfg, bool buildFromFile)
-    : symbolTableInfo(symInfo), fromFile(buildFromFile),
-      nodeNumAfterPAGBuild(0), icfg(icfg), totalPTAPAGEdge(0) {
+PAG::PAG(SVFProject *proj, bool buildFromFile)
+    : fromFile(buildFromFile), nodeNumAfterPAGBuild(0),
+      icfg(proj->getICFG()), symbolTableInfo(proj->getSymbolTableInfo()),
+      proj(proj), totalPTAPAGEdge(0) {
     if (icfg == nullptr) {
         icfg = new ICFG(this);
         ICFGBuilder builder(icfg);
@@ -276,13 +277,8 @@ PAG::PAG(SymbolTableInfo *symInfo, ICFG *icfg, bool buildFromFile)
     }
 
     // build the PAG
-    PAGBuilder _builder(this);
+    PAGBuilder _builder(proj);
     _builder.build();
-}
-
-PAG::PAG(SVFModule *svfMod, ICFG *icfg, bool buildFromFile)
-    : PAG(SymbolTableInfo::SymbolInfo(svfMod), icfg, buildFromFile) {
-
 }
 
 /*!
@@ -861,7 +857,7 @@ bool PAG::isValidPointer(NodeID nodeId) const {
 bool PAG::isValidTopLevelPtr(const PAGNode *node) {
     if (node->isTopLevelPtr()) {
         if (isValidPointer(node->getId()) && node->hasValue()) {
-            if (SVFUtil::ArgInNoCallerFunction(node->getValue())) {
+            if (SVFUtil::ArgInNoCallerFunction(node->getValue(), getModule())) {
                 return false;
             }
             return true;
@@ -977,7 +973,7 @@ void PAG::initializeExternalPAGs() {
 
         ExternalPAG extpag = ExternalPAG(fname, this);
         extpag.readFromFile(path);
-        extpag.addExternalPAG(getFunction(fname));
+        extpag.addExternalPAG(getFunction(getModule()->getLLVMModSet(), fname));
     }
 }
 
@@ -1002,8 +998,9 @@ bool PAG::connectCallsiteToExternalPAG(CallSite *cs) {
 
     Function *function = cs->getCalledFunction();
     std::string functionName = function->getName();
+    SVFModule *svfMod = getModule();
     const SVFFunction *svfFun =
-        LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(function);
+        svfMod->getLLVMModSet()->getSVFFunction(function);
     if (!hasExternalPAG(svfFun)) {
         return false;
     }
@@ -1196,8 +1193,9 @@ void PAG::dumpFunctions(std::vector<std::string> &functions) {
                     if (callDsts.find(callEdge->getDstNode()) ==
                         callDsts.end()) {
                         callDsts.insert(callEdge->getDstNode());
+                        SVFModule *mod = getModule();
                         const SVFFunction *svfFun =
-                            LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(
+                            mod->getLLVMModSet()->getSVFFunction(
                                 currFunction);
                         functionToPAGNodes[svfFun].push_back(
                             callEdge->getDstNode());

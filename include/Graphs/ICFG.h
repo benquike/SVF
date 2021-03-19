@@ -182,12 +182,7 @@ class ICFG : public GenericICFGTy {
         return it->second;
     }
 
-    inline IntraBlockNode *addIntraBlockICFGNode(const Instruction *inst) {
-        IntraBlockNode *sNode = new IntraBlockNode(totalICFGNode++, inst);
-        addICFGNode(sNode);
-        InstToBlockNodeMap[inst] = sNode;
-        return sNode;
-    }
+    inline IntraBlockNode *addIntraBlockICFGNode(const Instruction *inst);
 
     /// Get/Add a function entry node
     inline FunEntryBlockNode *getFunEntryICFGNode(const SVFFunction *fun) {
@@ -232,12 +227,7 @@ class ICFG : public GenericICFGTy {
         return it->second;
     }
 
-    inline CallBlockNode *addCallICFGNode(const Instruction *cs) {
-        CallBlockNode *sNode = new CallBlockNode(totalICFGNode++, cs);
-        addICFGNode(sNode);
-        CSToCallNodeMap[cs] = sNode;
-        return sNode;
-    }
+    inline CallBlockNode *addCallICFGNode(const Instruction *cs);
 
     /// Get/Add a return node
     inline RetBlockNode *getRetICFGNode(const Instruction *cs) {
@@ -249,15 +239,7 @@ class ICFG : public GenericICFGTy {
         return it->second;
     }
 
-    inline RetBlockNode *addRetICFGNode(const Instruction *cs) {
-        CallBlockNode *callBlockNode = getCallBlockNode(cs);
-        RetBlockNode *sNode =
-            new RetBlockNode(totalICFGNode++, cs, callBlockNode);
-        callBlockNode->setRetBlockNode(sNode);
-        addICFGNode(sNode);
-        CSToRetNodeMap[cs] = sNode;
-        return sNode;
-    }
+    inline RetBlockNode *addRetICFGNode(const Instruction *cs);
 };
 
 } // End namespace SVF

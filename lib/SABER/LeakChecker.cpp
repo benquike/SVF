@@ -48,7 +48,7 @@ void LeakChecker::initSrcs() {
         /// if this callsite return reside in a dead function then we do not
         /// care about its leaks for example instruction p = malloc is in a dead
         /// function, then program won't allocate this memory
-        if (isPtrInDeadFunction(cs->getCallSite()))
+        if (isPtrInDeadFunction(cs->getCallSite(), pag->getModule()))
             continue;
 
         PTACallGraph::FunctionSet callees;
@@ -80,7 +80,9 @@ void LeakChecker::initSrcs() {
                     // otherwise, this is the source we are interested
                     else {
                         // exclude sources in dead functions
-                        if (isPtrInDeadFunction(cs->getCallSite()) == false) {
+                        bool ptrInDF = isPtrInDeadFunction(cs->getCallSite(),
+                                                           pag->getModule());
+                        if (!ptrInDF) {
                             addToSources(node);
                             addSrcToCSID(node, cs);
                         }
@@ -155,7 +157,8 @@ void LeakChecker::reportBug(ProgSlice *slice) {
 void LeakChecker::testsValidation(const ProgSlice *slice) {
     const SVFGNode *source = slice->getSource();
     const CallBlockNode *cs = getSrcCSID(source);
-    const SVFFunction *fun = getCallee(cs->getCallSite());
+    LLVMModuleSet *modSet = pag->getModule()->getLLVMModSet();
+    const SVFFunction *fun = getCallee(modSet, cs->getCallSite());
     if (fun == nullptr)
         return;
 

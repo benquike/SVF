@@ -25,7 +25,12 @@
  *
  *  Created on: Apr 11, 2013
  *      Author: Yulei Sui, dye
+ *
+ *  Updated by:
+ *     Hui Peng <peng124@purdue.edu>
+ *     2021-03-19
  */
+
 
 #ifndef AnalysisUtil_H_
 #define AnalysisUtil_H_
@@ -165,50 +170,57 @@ inline CallSite getLLVMCallSite(const Instruction *inst) {
 }
 
 /// Get the corresponding Function based on its name
-inline const SVFFunction *getFunction(StringRef name) {
+/// FIXME:  move this as a member method of LLVMModuleSet
+inline const SVFFunction *getFunction(LLVMModuleSet *llvmModSet,
+                                      StringRef name) {
     Function *fun = nullptr;
-    LLVMModuleSet *llvmModuleset = LLVMModuleSet::getLLVMModuleSet();
 
-    for (u32_t i = 0; i < llvmModuleset->getModuleNum(); ++i) {
-        Module *mod = llvmModuleset->getModule(i);
+    for (u32_t i = 0; i < llvmModSet->getModuleNum(); ++i) {
+        Module *mod = llvmModSet->getModule(i);
         fun = mod->getFunction(name);
         if (fun) {
-            return llvmModuleset->getSVFFunction(fun);
+            return llvmModSet->getSVFFunction(fun);
         }
     }
     return nullptr;
 }
 
 /// Get the definition of a function across multiple modules
-inline const SVFFunction *getDefFunForMultipleModule(const Function *fun) {
+/// FIXME:  move this as a member method of LLVMModuleSet
+inline const SVFFunction *getDefFunForMultipleModule(LLVMModuleSet *llvmModSet,
+                                                     const Function *fun) {
     if (fun == nullptr) {
         return nullptr;
     }
-    LLVMModuleSet *llvmModuleset = LLVMModuleSet::getLLVMModuleSet();
-    const SVFFunction *svfFun = llvmModuleset->getSVFFunction(fun);
-    if (fun->isDeclaration() && llvmModuleset->hasDefinition(fun)) {
-        svfFun = LLVMModuleSet::getLLVMModuleSet()->getDefinition(fun);
+
+    const SVFFunction *svfFun = llvmModSet->getSVFFunction(fun);
+    if (fun->isDeclaration() && llvmModSet->hasDefinition(fun)) {
+        svfFun = llvmModSet->getDefinition(fun);
     }
     return svfFun;
 }
 
 /// Return callee of a callsite. Return null if this is an indirect call
+/// FIXME:  move this as a member method of LLVMModuleSet
 //@{
-inline const SVFFunction *getCallee(const CallSite cs) {
+inline const SVFFunction *getCallee(LLVMModuleSet *llvmModSet,
+                                    const CallSite cs) {
     // FIXME: do we need to strip-off the casts here to discover more library
     // functions
     auto *callee =
         SVFUtil::dyn_cast<Function>(cs.getCalledValue()->stripPointerCasts());
-    return getDefFunForMultipleModule(callee);
+    return getDefFunForMultipleModule(llvmModSet, callee);
 }
 
-inline const SVFFunction *getCallee(const Instruction *inst) {
+/// FIXME:  move this as a member method of LLVMModuleSet
+inline const SVFFunction *getCallee(LLVMModuleSet *llvmModSet,
+                                    const Instruction *inst) {
     if (!isCallSite(inst)) {
         return nullptr;
     }
 
     CallSite cs(const_cast<Instruction *>(inst));
-    return getCallee(cs);
+    return getCallee(llvmModSet, cs);
 }
 //@}
 

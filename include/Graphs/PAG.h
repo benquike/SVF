@@ -33,6 +33,7 @@
 #include "Graphs/ICFG.h"
 #include "PAGEdge.h"
 #include "PAGNode.h"
+#include "SVF-FE/SVFProject.h"
 #include "Util/NodeIDAllocator.h"
 #include "Util/SVFUtil.h"
 
@@ -83,7 +84,6 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
         functionToExternalPAGEntries;
     Map<const SVFFunction *, PAGNode *> functionToExternalPAGReturns;
 
-    SymbolTableInfo *symbolTableInfo;
     /// ValueNodes - This map indicates the Node that a particular Value* is
     /// represented by.  This contains entries for all pointers.
     PAGEdge::PAGKindToEdgeSetMapTy
@@ -129,6 +129,9 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
         nodeNumAfterPAGBuild; // initial node number after building PAG,
                               // excluding later added nodes, e.g., gepobj nodes
     ICFG *icfg;               // ICFG
+    SymbolTableInfo *symbolTableInfo;
+    SVFProject *proj;
+
     CallSiteSet callSiteSet;  /// all the callsites of a program
 
     /// Clean up memory
@@ -138,9 +141,7 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     friend class ExternalPAG;
 
     /// Constructor
-    PAG(SymbolTableInfo *symInfo, ICFG *icfg=nullptr, bool buildFromFile=false);
-    PAG(SVFModule *svfMod, ICFG *icfg=nullptr, bool buildFromFile=false);
-
+    PAG(SVFProject *proj, bool buildFromFile=false);
 
     u32_t totalPTAPAGEdge;
 

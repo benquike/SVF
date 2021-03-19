@@ -32,13 +32,13 @@
 
 #include "Graphs/GenericGraph.h"
 #include "Graphs/ICFG.h"
+#include "SVF-FE/SVFProject.h"
 #include "Util/BasicTypes.h"
 #include <set>
 
 namespace SVF {
 
 class PTACallGraphNode;
-class SVFModule;
 
 /*
  * Call Graph edge representing a calling relation between two functions
@@ -90,7 +90,7 @@ class PTACallGraphEdge : public GenericCallGraphEdgeTy {
     //@{
     void addDirectCallSite(const CallBlockNode *call);
 
-    void addInDirectCallSite(const CallBlockNode *call);
+    void addInDirectCallSite(const CallBlockNode *call, SVFProject *proj);
     //@}
 
     /// Iterators for direct and indirect callsites
@@ -205,6 +205,8 @@ class PTACallGraph : public GenericCallGraphTy {
     IdToCallSiteMap idToCSMap;   ///< Map a callsite ID to a pair of call
                                         ///< instruction and callee
     CallSiteID totalCallSiteNum; ///< CallSiteIDs, start from 1;
+    PAG *pag;
+
 
   protected:
     FunToCallGraphNodeMap funToCallGraphNodeMap; ///< Call Graph node map
@@ -215,12 +217,14 @@ class PTACallGraph : public GenericCallGraphTy {
     NodeID callGraphNodeNum;
     Size_t numOfResolvedIndCallEdge;
 
+    SVFProject *proj;
+
     /// Clean up memory
     void destroy();
 
   public:
     /// Constructor
-    PTACallGraph(CGEK k = NormCallGraph);
+    PTACallGraph(SVFProject *proj, CGEK k = NormCallGraph);
 
     /// Add callgraph Node
     void addCallGraphNode(const SVFFunction *fun);
@@ -387,6 +391,7 @@ class PTACallGraph : public GenericCallGraphTy {
                                        PTACallGraphEdge::CallInstSet &csSet);
     //@}
 
+    PAG *getPAG() { return pag; }
     /// Whether its reachable between two functions
     bool isReachableBetweenFunctions(const SVFFunction *srcFn,
                                      const SVFFunction *dstFn) const;

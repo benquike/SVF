@@ -48,9 +48,10 @@ class LeakChecker : public SrcSnkDDA {
     enum LEAK_TYPE { NEVER_FREE_LEAK, CONTEXT_LEAK, PATH_LEAK, GLOBAL_LEAK };
 
     /// Constructor
-    LeakChecker(PAG *pag): SrcSnkDDA(pag) {}
+    LeakChecker(SVFProject *proj): SrcSnkDDA(proj) { }
     /// Destructor
-    virtual ~LeakChecker() {}
+    virtual ~LeakChecker() {
+    }
 
     /// We start from here
     virtual bool runOnModule(SVFModule *module) {
@@ -66,11 +67,11 @@ class LeakChecker : public SrcSnkDDA {
     void initSnks() override;
     /// Whether the function is a heap allocator/reallocator (allocate memory)
     inline bool isSourceLikeFun(const SVFFunction *fun) override {
-        return SaberCheckerAPI::getCheckerAPI()->isMemAlloc(fun);
+        return svfgBuilder.isMemAlloc(fun);
     }
     /// Whether the function is a heap deallocator (free/release memory)
     inline bool isSinkLikeFun(const SVFFunction *fun) override {
-        return SaberCheckerAPI::getCheckerAPI()->isMemDealloc(fun);
+        return svfgBuilder.isMemDealloc(fun);
     }
     /// A SVFG node is source if it is an actualRet at malloc site
     inline bool isSource(const SVFGNode *node) override {

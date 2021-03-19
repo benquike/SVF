@@ -57,14 +57,11 @@ class SaberCheckerAPI {
     /// API map, from a string to threadAPI type
     TDAPIMap tdAPIMap;
 
-    /// Constructor
-    SaberCheckerAPI() { init(); }
+    SVFModule *svfMod;
 
     /// Initialize the map
     void init();
 
-    /// Static reference
-    static SaberCheckerAPI *ckAPI;
 
     /// Get the function type of a function
     inline CHECKER_TYPE getType(const SVFFunction *F) const {
@@ -77,12 +74,11 @@ class SaberCheckerAPI {
     }
 
   public:
-    /// Return a static reference
-    static SaberCheckerAPI *getCheckerAPI() {
-        if (ckAPI == nullptr) {
-            ckAPI = new SaberCheckerAPI();
-        }
-        return ckAPI;
+
+    /// Constructor
+    SaberCheckerAPI(SVFModule *svfMod)
+        :svfMod(svfMod) {
+        init();
     }
 
     /// Return true if this call is a memory allocation
@@ -90,9 +86,12 @@ class SaberCheckerAPI {
     inline bool isMemAlloc(const SVFFunction *fun) const {
         return getType(fun) == CK_ALLOC;
     }
+
     inline bool isMemAlloc(const Instruction *inst) const {
-        return getType(SVFUtil::getCallee(inst)) == CK_ALLOC;
+        auto *modSet = svfMod->getLLVMModSet();
+        return getType(SVFUtil::getCallee(modSet, inst)) == CK_ALLOC;
     }
+
     inline bool isMemAlloc(const CallBlockNode *cs) const {
         return isMemAlloc(cs->getCallSite());
     }
@@ -103,9 +102,12 @@ class SaberCheckerAPI {
     inline bool isMemDealloc(const SVFFunction *fun) const {
         return getType(fun) == CK_FREE;
     }
+
     inline bool isMemDealloc(const Instruction *inst) const {
-        return getType(SVFUtil::getCallee(inst)) == CK_FREE;
+        auto *modSet = svfMod->getLLVMModSet();
+        return getType(SVFUtil::getCallee(modSet, inst)) == CK_FREE;
     }
+
     inline bool isMemDealloc(const CallBlockNode *cs) const {
         return isMemDealloc(cs->getCallSite());
     }
@@ -116,9 +118,12 @@ class SaberCheckerAPI {
     inline bool isFOpen(const SVFFunction *fun) const {
         return getType(fun) == CK_FOPEN;
     }
+
     inline bool isFOpen(const Instruction *inst) const {
-        return getType(SVFUtil::getCallee(inst)) == CK_FOPEN;
+        auto *modSet = svfMod->getLLVMModSet();
+        return getType(SVFUtil::getCallee(modSet,inst)) == CK_FOPEN;
     }
+
     inline bool isFOpen(const CallBlockNode *cs) const {
         return isFOpen(cs->getCallSite());
     }
@@ -129,9 +134,12 @@ class SaberCheckerAPI {
     inline bool isFClose(const SVFFunction *fun) const {
         return getType(fun) == CK_FCLOSE;
     }
+
     inline bool isFClose(const Instruction *inst) const {
-        return getType(SVFUtil::getCallee(inst)) == CK_FCLOSE;
+        auto *modSet = svfMod->getLLVMModSet();
+        return getType(SVFUtil::getCallee(modSet, inst)) == CK_FCLOSE;
     }
+
     inline bool isFClose(const CallBlockNode *cs) const {
         return isFClose(cs->getCallSite());
     }

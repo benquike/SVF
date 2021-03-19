@@ -26,7 +26,12 @@
  *
  *  Created on: 23 Mar.2020
  *      Author: Yulei Sui
+ *
+ *  Updated by:
+ *     Hui Peng <peng124@purdue.edu>
+ *     2021-03-19
  */
+
 
 #ifndef INCLUDE_SVF_FE_LLVMMODULE_H_
 #define INCLUDE_SVF_FE_LLVMMODULE_H_
@@ -45,7 +50,6 @@ class LLVMModuleSet {
     using GlobalDefToRepMapTy = Map<const GlobalVariable *, GlobalVariable *>;
 
   private:
-    static LLVMModuleSet *llvmModuleSet;
     SVFModule *svfModule;
     std::unique_ptr<LLVMContext> cxts;
     std::vector<std::unique_ptr<Module>> owned_modules;
@@ -58,26 +62,16 @@ class LLVMModuleSet {
     /// Global definition to a rep definition map
     GlobalDefToRepMapTy GlobalDefToRepMap;
 
-    /// Constructor
-    LLVMModuleSet() : svfModule(nullptr), cxts(nullptr) {}
-
     void build();
 
   public:
-    static inline LLVMModuleSet *getLLVMModuleSet() {
-        if (llvmModuleSet == nullptr)
-            llvmModuleSet = new LLVMModuleSet();
-        return llvmModuleSet;
-    }
 
-    static void releaseLLVMModuleSet() {
-        if (llvmModuleSet)
-            delete llvmModuleSet;
-        llvmModuleSet = nullptr;
-    }
+    /// Constructor
+    LLVMModuleSet(SVFModule *svfMod) : svfModule(svfMod), cxts(nullptr) {}
 
     SVFModule *buildSVFModule(Module &mod);
     SVFModule *buildSVFModule(const std::vector<std::string> &moduleNameVec);
+    SVFModule *buildSVFModule(const std::string &moduleName);
 
     inline SVFModule *getSVFModule() {
         assert(svfModule && "svfModule has not been built yet!");
@@ -181,8 +175,7 @@ class LLVMModuleSet {
         // correct ctir module flag, short-circuit and return false.
         for (u32_t i = 0; i < getModuleNum(); ++i) {
             llvm::Metadata *ctirModuleFlag =
-                llvmModuleSet->getModule(i)->getModuleFlag(
-                    cppUtil::ctir::derefMDName);
+                getModule(i)->getModuleFlag(cppUtil::ctir::derefMDName);
             if (ctirModuleFlag == nullptr) {
                 return false;
             }

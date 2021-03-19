@@ -39,15 +39,15 @@ using namespace SVF;
  * 3) stack
  * 4) heap
  */
-bool SVFUtil::isObject(const Value *ref) {
+bool SVFUtil::isObject(const Value *ref, SVFModule *svfMod) {
     bool createobj = false;
     if (SVFUtil::isa<Instruction>(ref) &&
-        SVFUtil::isStaticExtCall(SVFUtil::cast<Instruction>(ref))) {
+        SVFUtil::isStaticExtCall(SVFUtil::cast<Instruction>(ref), svfMod)) {
         /// a call to external function
         createobj = true;
     } else if (SVFUtil::isa<Instruction>(ref) &&
                SVFUtil::isHeapAllocExtCallViaRet(
-                   SVFUtil::cast<Instruction>(ref))) {
+                   SVFUtil::cast<Instruction>(ref), svfMod)) {
         // a call to heap allocation function
         createobj = true;
     } else if (SVFUtil::isa<GlobalVariable>(ref)) {
@@ -124,7 +124,7 @@ bool SVFUtil::functionDoesNotRet(const Function *fun) {
 /*!
  * Return true if this is a function without any possible caller
  */
-bool SVFUtil::isDeadFunction(const Function *fun) {
+bool SVFUtil::isDeadFunction(const Function *fun, SVFModule *svfMod) {
     if (fun->hasAddressTaken())
         return false;
     if (isProgEntryFunction(fun))
@@ -134,9 +134,9 @@ bool SVFUtil::isDeadFunction(const Function *fun) {
         if (SVFUtil::isCallSite(*i))
             return false;
     }
-    if (LLVMModuleSet::getLLVMModuleSet()->hasDeclaration(fun)) {
+    if (svfMod->getLLVMModSet()->hasDeclaration(fun)) {
         const SVFModule::FunctionSetType &decls =
-            LLVMModuleSet::getLLVMModuleSet()->getDeclaration(fun);
+            svfMod->getLLVMModSet()->getDeclaration(fun);
         for (const auto *it : decls) {
             const Function *decl = it->getLLVMFun();
             if (decl->hasAddressTaken())
@@ -156,12 +156,12 @@ bool SVFUtil::isDeadFunction(const Function *fun) {
  * Return true if this is a value in a dead function (function without any
  * caller)
  */
-bool SVFUtil::isPtrInDeadFunction(const Value *value) {
+bool SVFUtil::isPtrInDeadFunction(const Value *value, SVFModule *svfMod) {
     if (const auto *inst = SVFUtil::dyn_cast<Instruction>(value)) {
-        if (isDeadFunction(inst->getParent()->getParent()))
+        if (isDeadFunction(inst->getParent()->getParent(), svfMod))
             return true;
     } else if (const auto *arg = SVFUtil::dyn_cast<Argument>(value)) {
-        if (isDeadFunction(arg->getParent()))
+        if (isDeadFunction(arg->getParent(), svfMod))
             return true;
     }
     return false;
@@ -246,19 +246,20 @@ void SVFUtil::getPrevInsts(const Instruction *curInst,
 /*!
  * Return the type of the object from a heap allocation
  */
-const Type *SVFUtil::getTypeOfHeapAlloc(const Instruction *inst) {
+const Type *SVFUtil::getTypeOfHeapAlloc(const Instruction *inst, SVFModule *svfMod) {
     const PointerType *type = SVFUtil::dyn_cast<PointerType>(inst->getType());
 
-    if (isHeapAllocExtCallViaRet(inst)) {
+    if (isHeapAllocExtCallViaRet(inst, svfMod)) {
         const Instruction *nextInst = inst->getNextNode();
         if (nextInst && nextInst->getOpcode() == Instruction::BitCast)
             // we only consider bitcast instructions and ignore others (e.g.,
             // IntToPtr and ZExt)
             type =
                 SVFUtil::dyn_cast<PointerType>(inst->getNextNode()->getType());
-    } else if (isHeapAllocExtCallViaArg(inst)) {
+    } else if (isHeapAllocExtCallViaArg(inst, svfMod)) {
         CallSite cs = getLLVMCallSite(inst);
-        int arg_pos = getHeapAllocHoldingArgPosition(getCallee(cs));
+        int arg_pos = getHeapAllocHoldingArgPosition(
+            getCallee(svfMod->getLLVMModSet(), cs));
         const Value *arg = cs.getArgument(arg_pos);
         type = SVFUtil::dyn_cast<PointerType>(arg->getType());
     } else {

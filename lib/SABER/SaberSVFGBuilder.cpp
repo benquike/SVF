@@ -174,8 +174,7 @@ void SaberSVFGBuilder::AddExtActualParmSVFGNodes(PTACallGraph *callgraph) {
         callgraph->getCallees(it.first, callees);
         for (const auto *fun : callees) {
 
-            if (SaberCheckerAPI::getCheckerAPI()->isMemDealloc(fun) ||
-                SaberCheckerAPI::getCheckerAPI()->isFClose(fun)) {
+            if (isMemDealloc(fun) || isFClose(fun)) {
                 PAG::PAGNodeList &arglist = it.second;
                 for (const auto *pagNode : arglist) {
                     if (pagNode->isPointer()) {

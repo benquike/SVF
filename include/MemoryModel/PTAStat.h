@@ -174,6 +174,7 @@ class PTAStat {
     virtual void printStatPerQuery(NodeID, const PointsTo &) {}
 
     virtual void callgraphStat();
+    PointerAnalysis *getPTA() const { return pta; }
 
   private:
     void bitcastInstStat();

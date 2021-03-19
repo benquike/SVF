@@ -56,7 +56,7 @@ void MemObj::init(const Value *val) {
     // We consider two types of objects:
     // (1) A heap/static object from a callsite
     if (I && isNonInstricCallSite(I)) {
-        refTy = getRefTypeOfHeapAllocOrStatic(I);
+        refTy = getRefTypeOfHeapAllocOrStatic(I, symbolTableInfo->getModule());
         // (2) Other objects (e.g., alloca, global, etc.)
     } else {
         refTy = SVFUtil::dyn_cast<PointerType>(val->getType());
@@ -239,7 +239,7 @@ bool SymbolTableInfo::computeGepOffset(const User *V, LocationSet &ls) {
 
     const auto *gepOp = SVFUtil::dyn_cast<const llvm::GEPOperator>(V);
     auto dl = std::make_unique<DataLayout>(
-        LLVMModuleSet::getLLVMModuleSet()->getMainLLVMModule());
+        getModule()->getLLVMModSet()->getMainLLVMModule());
     llvm::APInt byteOffset(
         dl->getIndexSizeInBits(gepOp->getPointerAddressSpace()), 0,
         true);
@@ -401,11 +401,11 @@ LocationSet SymbolTableInfo::getModulusOffset(const MemObj *obj,
  */
 void SymbolTableInfo::prePassSchedule(SVFModule *svfModule) {
     /// BreakConstantGEPs Pass
+    LLVMModuleSet *modSet = getModule()->getLLVMModSet();
     std::unique_ptr<BreakConstantGEPs> p1 =
         std::make_unique<BreakConstantGEPs>();
-    for (u32_t i = 0; i < LLVMModuleSet::getLLVMModuleSet()->getModuleNum();
-         ++i) {
-        Module *module = LLVMModuleSet::getLLVMModuleSet()->getModule(i);
+    for (u32_t i = 0; i < modSet->getModuleNum(); ++i) {
+        Module *module = modSet->getModule(i);
         p1->runOnModule(*module);
     }
 
@@ -599,7 +599,7 @@ void SymbolTableInfo::collectSym(const Value *val) {
     collectVal(val);
 
     // create an object If it is a heap, stack, global, function.
-    if (isObject(val)) {
+    if (isObject(val, getModule())) {
         collectObj(val);
     }
 }
@@ -1032,7 +1032,7 @@ u32_t SymbolTableInfo::getTypeSizeInBytes(const Type *type) {
     // if the type has size then simply return it, otherwise just return 0
     if (type->isSized()) {
         auto dl = std::make_shared<DataLayout>(
-            LLVMModuleSet::getLLVMModuleSet()->getMainLLVMModule());
+            getModule()->getLLVMModSet()->getMainLLVMModule());
         return dl->getTypeStoreSize(const_cast<Type *>(type));
     }
 
@@ -1043,7 +1043,7 @@ u32_t SymbolTableInfo::getTypeSizeInBytes(const StructType *sty,
                                           u32_t field_idx) {
 
     auto dl = std::make_shared<DataLayout>(
-        LLVMModuleSet::getLLVMModuleSet()->getMainLLVMModule());
+        getModule()->getLLVMModSet()->getMainLLVMModule());
     const StructLayout *stTySL =
         dl->getStructLayout(const_cast<StructType *>(sty));
     /// if this struct type does not have any element, i.e., opaque

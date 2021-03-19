@@ -148,10 +148,9 @@ class IntraBlockNode : public ICFGNode {
     const Instruction *inst;
 
   public:
-    IntraBlockNode(NodeID id, const Instruction *i)
+    IntraBlockNode(NodeID id, const Instruction *i, SVFModule *svfMod)
         : ICFGNode(id, IntraBlock), inst(i) {
-        fun = LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(
-            inst->getFunction());
+        fun = svfMod->getLLVMModSet()->getSVFFunction(inst->getFunction());
         bb = inst->getParent();
     }
 
@@ -296,13 +295,14 @@ class CallBlockNode : public InterBlockNode {
   private:
     const Instruction *cs;
     const RetBlockNode *ret;
+    const SVFModule *svfMod;
     ActualParmVFGNodeVec APNodes;
 
   public:
-    CallBlockNode(NodeID id, const Instruction *c)
-        : InterBlockNode(id, FunCallBlock), cs(c), ret(nullptr) {
-        fun = LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(
-            cs->getFunction());
+    CallBlockNode(NodeID id, const Instruction *c, SVFModule *svfMod)
+        : InterBlockNode(id, FunCallBlock), cs(c),
+          ret(nullptr), svfMod(svfMod) {
+        fun = svfMod->getLLVMModSet()->getSVFFunction(cs->getFunction());
         bb = cs->getParent();
     }
 
@@ -320,8 +320,7 @@ class CallBlockNode : public InterBlockNode {
 
     /// Return callsite
     inline const SVFFunction *getCaller() const {
-        return LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(
-            cs->getFunction());
+        return svfMod->getLLVMModSet()->getSVFFunction(cs->getFunction());
     }
 
     /// Return Basic Block
@@ -329,7 +328,7 @@ class CallBlockNode : public InterBlockNode {
 
     /// Return true if this is an indirect call
     inline bool isIndirectCall() const {
-        return nullptr == SVFUtil::getCallee(cs);
+        return nullptr == SVFUtil::getCallee(svfMod->getLLVMModSet(), cs);
     }
 
     /// Return the set of actual parameters
@@ -371,11 +370,11 @@ class RetBlockNode : public InterBlockNode {
     const CallBlockNode *callBlockNode;
 
   public:
-    RetBlockNode(NodeID id, const Instruction *c, CallBlockNode *cb)
+    RetBlockNode(NodeID id, const Instruction *c,
+                 CallBlockNode *cb, SVFModule *svfMod)
         : InterBlockNode(id, FunRetBlock), cs(c), actualRet(nullptr),
           callBlockNode(cb) {
-        fun = LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(
-            cs->getFunction());
+        fun = svfMod->getLLVMModSet()->getSVFFunction(cs->getFunction());
         bb = cs->getParent();
     }
 

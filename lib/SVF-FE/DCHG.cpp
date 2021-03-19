@@ -439,10 +439,9 @@ DCHEdge *DCHGraph::hasEdge(const DIType *t1, const DIType *t2,
 void DCHGraph::buildCHG(bool extend) {
     extended = extend;
     DebugInfoFinder finder;
-    for (u32_t i = 0; i < LLVMModuleSet::getLLVMModuleSet()->getModuleNum();
-         ++i) {
-        finder.processModule(
-            *(LLVMModuleSet::getLLVMModuleSet()->getModule(i)));
+    LLVMModuleSet *modSet = svfMod->getLLVMModSet();
+    for (u32_t i = 0; i < modSet->getModuleNum(); ++i) {
+        finder.processModule(*(modSet->getModule(i)));
     }
 
     // Create the void node regardless of whether it appears.
@@ -480,9 +479,8 @@ void DCHGraph::buildCHG(bool extend) {
         }
     }
 
-    for (u32_t i = 0; i < LLVMModuleSet::getLLVMModuleSet()->getModuleNum();
-         ++i) {
-        buildVTables(*(LLVMModuleSet::getLLVMModuleSet()->getModule(i)));
+    for (u32_t i = 0; i < modSet->getModuleNum(); ++i) {
+        buildVTables(*(modSet->getModule(i)));
     }
 
     // Build the void/char/everything else relation.
@@ -546,6 +544,8 @@ const VTableSet &DCHGraph::getCSVtblsBasedonCHA(CallSite cs) {
 
 void DCHGraph::getVFnsFromVtbls(CallSite cs, const VTableSet &vtbls,
                                 VFunSet &virtualFunctions) {
+    LLVMModuleSet *modSet = svfMod->getLLVMModSet();
+
     size_t idx = cppUtil::getVCallIdx(cs);
     std::string funName = cppUtil::getFunNameOfVCallSite(cs);
     for (const GlobalValue *vtbl : vtbls) {
@@ -591,7 +591,7 @@ void DCHGraph::getVFnsFromVtbls(CallSite cs, const VTableSet &vtbls,
                  */
                 if (funName.empty()) {
                     virtualFunctions.insert(
-                        SVFUtil::getFunction(callee->getName()));
+                        SVFUtil::getFunction(modSet, callee->getName()));
                 } else if (funName[0] == '~') {
                     /*
                      * if the virtual callsite is calling a destructor, then all
@@ -606,7 +606,7 @@ void DCHGraph::getVFnsFromVtbls(CallSite cs, const VTableSet &vtbls,
                      */
                     if (calleeName[0] == '~') {
                         virtualFunctions.insert(
-                            SVFUtil::getFunction(callee->getName()));
+                            SVFUtil::getFunction(modSet, callee->getName()));
                     }
                 } else {
                     /*
@@ -616,7 +616,7 @@ void DCHGraph::getVFnsFromVtbls(CallSite cs, const VTableSet &vtbls,
                      */
                     if (funName == calleeName) {
                         virtualFunctions.insert(
-                            SVFUtil::getFunction(callee->getName()));
+                            SVFUtil::getFunction(modSet, callee->getName()));
                     }
                 }
             }

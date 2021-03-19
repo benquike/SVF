@@ -142,6 +142,7 @@ class PointerAnalysis {
     /// Module
     SVFModule *svfMod;
     /// Pointer analysis Type
+
     PTATY ptaTy;
     /// PTA implementation type.
     PTAImplTy ptaImplTy;
@@ -154,12 +155,13 @@ class PointerAnalysis {
     /// Interprocedural control-flow graph
 
     ICFG *icfg;
+
     /// CHGraph
     CommonCHGraph *chgraph;
     /// TypeSystem
     TypeSystem *typeSystem;
 
-
+    SVFProject *proj;
 
   public:
     /// Return number of resolved indirect call edges
@@ -172,7 +174,8 @@ class PointerAnalysis {
     inline CallGraphSCC *getCallGraphSCC() const { return callGraphSCC; }
 
     /// Constructor
-    PointerAnalysis(PAG *pag, PTATY ty = Default_PTA, bool alias_check = true);
+    PointerAnalysis(SVFProject *proj,
+                    PTATY ty = Default_PTA, bool alias_check = true);
 
     /// Type of pointer analysis
     inline PTATY getAnalysisTy() const { return ptaTy; }
@@ -182,15 +185,19 @@ class PointerAnalysis {
 
     /// Get/set PAG
     ///@{
-    inline PAG *getPAG() const { return pag; }
+    inline PAG *getPAG() const { return proj->getPAG(); }
     //@}
+
+    SVFProject *getSVFProject() {  return proj; }
 
     /// Get PTA stat
     inline PTAStat *getStat() const { return stat; }
     /// Module
-    inline SVFModule *getModule() const { return svfMod; }
+    inline SVFModule *getModule() const { return proj->getSVFModule(); }
     /// Get all Valid Pointers for resolution
-    inline OrderedNodeSet &getAllValidPtrs() { return pag->getAllValidPtrs(); }
+    inline OrderedNodeSet &getAllValidPtrs() {
+        return getPAG()->getAllValidPtrs();
+    }
 
     /// Destructor
     virtual ~PointerAnalysis();
@@ -249,11 +256,11 @@ class PointerAnalysis {
   protected:
     /// Return all indirect callsites
     inline const CallSiteToFunPtrMap &getIndirectCallsites() const {
-        return pag->getIndirectCallsites();
+        return getPAG()->getIndirectCallsites();
     }
     /// Return function pointer PAGNode at a callsite cs
     inline NodeID getFunPtr(const CallBlockNode *cs) const {
-        return pag->getFunPtr(cs);
+        return getPAG()->getFunPtr(cs);
     }
     /// Alias check functions to verify correctness of pointer analysis
     //@{
@@ -275,29 +282,29 @@ class PointerAnalysis {
     /// Determine whether a points-to contains a black hole or constant node
     //@{
     inline bool containBlackHoleNode(const PointsTo &pts) {
-        return pts.test(pag->getBlackHoleNodeID());
+        return pts.test(getPAG()->getBlackHoleNodeID());
     }
     inline bool containConstantNode(const PointsTo &pts) {
-        return pts.test(pag->getConstantNodeID());
+        return pts.test(getPAG()->getConstantNodeID());
     }
     virtual inline bool isBlkObjOrConstantObj(NodeID ptd) const {
-        return pag->isBlkObjOrConstantObj(ptd);
+        return getPAG()->isBlkObjOrConstantObj(ptd);
     }
     inline bool isNonPointerObj(NodeID ptd) const {
-        return pag->isNonPointerObj(ptd);
+        return getPAG()->isNonPointerObj(ptd);
     }
     //@}
 
     /// Whether this object is heap or array
     //@{
     inline bool isHeapMemObj(NodeID id) const {
-        const MemObj *mem = pag->getObject(id);
+        const MemObj *mem = getPAG()->getObject(id);
         assert(mem && "memory object is null??");
         return mem->isHeap();
     }
 
     inline bool isArrayMemObj(NodeID id) const {
-        const MemObj *mem = pag->getObject(id);
+        const MemObj *mem = getPAG()->getObject(id);
         assert(mem && "memory object is null??");
         return mem->isArray();
     }
@@ -306,22 +313,32 @@ class PointerAnalysis {
     /// For field-sensitivity
     ///@{
     inline bool isFIObjNode(NodeID id) const {
-        return (SVFUtil::isa<FIObjPN>(pag->getPAGNode(id)));
+        return (SVFUtil::isa<FIObjPN>(getPAG()->getPAGNode(id)));
     }
-    inline NodeID getBaseObjNode(NodeID id) { return pag->getBaseObjNode(id); }
-    inline NodeID getFIObjNode(NodeID id) { return pag->getFIObjNode(id); }
+
+    inline NodeID getBaseObjNode(NodeID id) {
+        return getPAG()->getBaseObjNode(id);
+    }
+
+    inline NodeID getFIObjNode(NodeID id) {
+        return getPAG()->getFIObjNode(id);
+    }
+
     inline NodeID getGepObjNode(NodeID id, const LocationSet &ls) {
-        return pag->getGepObjNode(id, ls);
+        return getPAG()->getGepObjNode(id, ls);
     }
+
     virtual inline const NodeBS &getAllFieldsObjNode(NodeID id) {
-        return pag->getAllFieldsObjNode(id);
+        return getPAG()->getAllFieldsObjNode(id);
     }
+
     inline void setObjFieldInsensitive(NodeID id) {
-        auto *mem = const_cast<MemObj *>(pag->getBaseObj(id));
+        auto *mem = const_cast<MemObj *>(getPAG()->getBaseObj(id));
         mem->setFieldInsensitive();
     }
+
     inline bool isFieldInsensitive(NodeID id) const {
-        const MemObj *mem = pag->getBaseObj(id);
+        const MemObj *mem = getPAG()->getBaseObj(id);
         return mem->isFieldInsensitive();
     }
     ///@}

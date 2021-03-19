@@ -32,6 +32,7 @@
 
 #include "Graphs/SVFGOPT.h"
 #include "SABER/ProgSlice.h"
+#include "SABER/SaberCheckerAPI.h"
 #include "SABER/SaberSVFGBuilder.h"
 #include "Util/CFLSolver.h"
 #include "WPA/Andersen.h"
@@ -44,7 +45,7 @@ using CFLSrcSnkSolver = CFLSolver<SVFG *, CxtDPItem>;
  * General source-sink analysis, which serves as a base analysis to be extended
  * for various clients
  */
-class SrcSnkDDA : public CFLSrcSnkSolver {
+class SrcSnkDDA : virtual public CFLSrcSnkSolver {
 
   public:
     using SVFGNodeSet = ProgSlice::SVFGNodeSet;
@@ -72,13 +73,17 @@ class SrcSnkDDA : public CFLSrcSnkSolver {
     SaberSVFGBuilder svfgBuilder;
     SVFG *svfg;
     PTACallGraph *ptaCallGraph;
+    SVFProject *proj;
 
   public:
     /// Constructor
-    SrcSnkDDA(PAG *pag) : _curSlice(nullptr), pag(pag),
-                          svfg(nullptr), ptaCallGraph(nullptr) {
-        pathCondAllocator = new PathCondAllocator();
+    SrcSnkDDA(SVFProject *proj)
+        : _curSlice(nullptr), pag(proj->getPAG()),
+          svfgBuilder(pag), svfg(nullptr),
+          ptaCallGraph(nullptr), proj(proj) {
+        pathCondAllocator = new PathCondAllocator(pag->getModule());
     }
+
     /// Destructor
     virtual ~SrcSnkDDA() {
         if (svfg != nullptr)
@@ -97,6 +102,7 @@ class SrcSnkDDA : public CFLSrcSnkSolver {
         // if(pathCondAllocator)
         //    delete pathCondAllocator;
         // pathCondAllocator = nullptr;
+        delete pathCondAllocator;
     }
 
     /// Start analysis here

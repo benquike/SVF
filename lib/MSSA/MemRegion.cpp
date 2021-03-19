@@ -140,8 +140,9 @@ void MRGenerator::collectModRefForLoadStore() {
         const SVFFunction &fun = *fi;
 
         /// if this function does not have any caller,
-        /// we do not care its MSSA
-        if (Options::IgnoreDeadFun && isDeadFunction(fun.getLLVMFun()))
+        /// then we do not care its MSSA
+        if (Options::IgnoreDeadFun &&
+            isDeadFunction(fun.getLLVMFun(), pta->getModule()))
             continue;
 
         for (Function::const_iterator iter = fun.getLLVMFun()->begin(),
@@ -488,10 +489,10 @@ bool MRGenerator::isNonLocalObject(NodeID id, const SVFFunction *curFun) const {
     /// or a local variable is in function recursion cycles
     else if (obj->isStack()) {
         if (const auto *local =
-                SVFUtil::dyn_cast<AllocaInst>(obj->getRefVal())) {
+            SVFUtil::dyn_cast<AllocaInst>(obj->getRefVal())) {
+            LLVMModuleSet *modSet = pta->getModule()->getLLVMModSet();
             const SVFFunction *fun =
-                LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(
-                    local->getFunction());
+                modSet->getSVFFunction(local->getFunction());
             if (fun != curFun)
                 return true;
 
@@ -512,7 +513,7 @@ bool MRGenerator::handleCallsiteModRef(NodeBS &mod, NodeBS &ref,
     /// if a callee is a heap allocator function,
     /// then its mod set of this callsite is
     /// the heap object.
-    if (isHeapAllocExtCall(cs->getCallSite())) {
+    if (isHeapAllocExtCall(cs->getCallSite(), pta->getModule())) {
         PAGEdgeList &pagEdgeList = getPAGEdgesFromInst(cs->getCallSite());
         for (const auto *edge : pagEdgeList) {
             if (const auto *addr = SVFUtil::dyn_cast<AddrPE>(edge))
@@ -578,8 +579,8 @@ void MRGenerator::modRefAnalysis(PTACallGraphNode *callGraphNode,
  * Obtain the mod sets for a call, used for external ModRefInfo queries
  */
 PointsTo MRGenerator::getModInfoForCall(const CallBlockNode *cs) {
-    if (isExtCall(cs->getCallSite()) &&
-        !isHeapAllocExtCall(cs->getCallSite())) {
+    if (isExtCall(cs->getCallSite(), pta->getModule()) &&
+        !isHeapAllocExtCall(cs->getCallSite(), pta->getModule())) {
         PAGEdgeList &pagEdgeList = getPAGEdgesFromInst(cs->getCallSite());
         PointsTo mods;
         for (const auto *edge : pagEdgeList) {
@@ -595,8 +596,8 @@ PointsTo MRGenerator::getModInfoForCall(const CallBlockNode *cs) {
  * Obtain the ref sets for a call, used for external ModRefInfo queries
  */
 PointsTo MRGenerator::getRefInfoForCall(const CallBlockNode *cs) {
-    if (isExtCall(cs->getCallSite()) &&
-        !isHeapAllocExtCall(cs->getCallSite())) {
+    if (isExtCall(cs->getCallSite(), pta->getModule()) &&
+        !isHeapAllocExtCall(cs->getCallSite(), pta->getModule())) {
         PAGEdgeList &pagEdgeList = getPAGEdgesFromInst(cs->getCallSite());
         PointsTo refs;
         for (const auto *edge : pagEdgeList) {

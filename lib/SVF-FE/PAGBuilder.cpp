@@ -192,6 +192,7 @@ void PAGBuilder::initialiseNodes() {
     DBOUT(DPAGBuild, outs() << "Initialise PAG Nodes ...\n");
 
     SymbolTableInfo *symTable = pag->getSymbolTableInfo();
+    LLVMModuleSet *modSet = svfMod->getLLVMModSet();
 
     pag->addBlackholeObjNode();
     pag->addConstantObjNode();
@@ -233,8 +234,7 @@ void PAGBuilder::initialiseNodes() {
     for (auto iter = symTable->retSyms().begin();
          iter != symTable->retSyms().end(); ++iter) {
         DBOUT(DPAGBuild, outs() << "add ret node " << iter->second << "\n");
-        const SVFFunction *fun =
-            LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(iter->first);
+        const SVFFunction *fun = modSet->getSVFFunction(iter->first);
         pag->addRetNode(fun, iter->second);
     }
 
@@ -246,8 +246,7 @@ void PAGBuilder::initialiseNodes() {
     for (auto iter = symTable->varargSyms().begin();
          iter != symTable->varargSyms().end(); ++iter) {
         DBOUT(DPAGBuild, outs() << "add vararg node " << iter->second << "\n");
-        const SVFFunction *fun =
-            LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(iter->first);
+        const SVFFunction *fun = modSet->getSVFFunction(iter->first);
         pag->addVarargNode(fun, iter->second);
     }
 
@@ -771,7 +770,8 @@ void PAGBuilder::visitCallSite(CallSite cs) {
     }
 
     // extract direct callees?
-    const SVFFunction *callee = getCallee(cs);
+    LLVMModuleSet *modSet = svfMod->getLLVMModSet();
+    const SVFFunction *callee = getCallee(modSet, cs);
 
     if (callee) {
         if (isExtCall(callee)) {
@@ -800,11 +800,10 @@ void PAGBuilder::visitReturnInst(ReturnInst &inst) {
     assert(!SVFUtil::isa<PointerType>(inst.getType()));
 
     DBOUT(DPAGBuild, outs() << "process return  " << inst << " \n");
-
+    LLVMModuleSet *modSet = svfMod->getLLVMModSet();
     if (Value *src = inst.getReturnValue()) {
         const SVFFunction *F =
-            LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(
-                inst.getParent()->getParent());
+            modSet->getSVFFunction(inst.getParent()->getParent());
 
         NodeID rnF = getReturnNode(F);
         NodeID vnS = getValueNode(src);
@@ -996,16 +995,18 @@ void PAGBuilder::addComplexConsForExt(Value *D, Value *S, u32_t sz) {
  */
 void PAGBuilder::handleExtCall(CallSite cs, const SVFFunction *callee) {
     const Instruction *inst = cs.getInstruction();
-    if (isHeapAllocOrStaticExtCall(cs)) {
+
+    if (isHeapAllocOrStaticExtCall(cs, svfMod)) {
         // case 1: ret = new obj
-        if (isHeapAllocExtCallViaRet(cs) || isStaticExtCall(cs)) {
+        if (isHeapAllocExtCallViaRet(cs, svfMod) ||
+            isStaticExtCall(cs, svfMod)) {
             NodeID val = getValueNode(inst);
             NodeID obj = getObjectNode(inst);
             addAddrEdge(obj, val);
         }
         // case 2: *arg = new obj
         else {
-            assert(isHeapAllocExtCallViaArg(cs) &&
+            assert(isHeapAllocExtCallViaArg(cs, svfMod) &&
                    "Must be heap alloc call via arg.");
             int arg_pos = getHeapAllocHoldingArgPosition(callee);
             const Value *arg = cs.getArgument(arg_pos);
@@ -1315,11 +1316,13 @@ void PAGBuilder::handleExtCall(CallSite cs, const SVFFunction *callee) {
         }
 
         /// create inter-procedural PAG edges for thread forks
-        if (isThreadForkCall(inst)) {
+        if (proj->isThreadForkCall(inst)) {
             if (const Function *forkedFun =
-                    getLLVMFunction(getForkedFun(inst))) {
-                forkedFun = getDefFunForMultipleModule(forkedFun)->getLLVMFun();
-                const Value *actualParm = getActualParmAtForkSite(inst);
+                getLLVMFunction(proj->getForkedFun(inst))) {
+                LLVMModuleSet *modSet = svfMod->getLLVMModSet();
+                forkedFun = getDefFunForMultipleModule(modSet,
+                                                       forkedFun)->getLLVMFun();
+                const Value *actualParm = proj->getActualParmAtForkSite(inst);
                 /// pthread_create has 1 arg.
                 /// apr_thread_create has 2 arg.
                 assert(
@@ -1354,14 +1357,14 @@ void PAGBuilder::handleExtCall(CallSite cs, const SVFFunction *callee) {
         }
 
         /// create inter-procedural PAG edges for hare_parallel_for calls
-        else if (isHareParForCall(inst)) {
+        else if (proj->isHareParForCall(inst)) {
             if (const Function *taskFunc =
-                    getLLVMFunction(getTaskFuncAtHareParForSite(inst))) {
+                    getLLVMFunction(proj->getTaskFuncAtHareParForSite(inst))) {
                 /// The task function of hare_parallel_for has 3 args.
                 assert((taskFunc->arg_size() == 3) &&
                        "Size of formal parameter of hare_parallel_for's task "
                        "routine should be 3");
-                const Value *actualParm = getTaskDataAtHareParForSite(inst);
+                const Value *actualParm = proj->getTaskDataAtHareParForSite(inst);
                 const Argument *formalParm = &(*taskFunc->arg_begin());
                 /// Connect actual parameter to formal parameter of the start
                 /// routine
@@ -1482,6 +1485,7 @@ void PAGBuilder::setCurrentBBAndValueForPAGEdge(PAGEdge *edge) {
         return;
     }
 
+    LLVMModuleSet *modSet = svfMod->getLLVMModSet();
     assert(curVal && "current Val is nullptr?");
     edge->setBB(curBB);
     edge->setValue(curVal);
@@ -1511,8 +1515,7 @@ void PAGBuilder::setCurrentBBAndValueForPAGEdge(PAGEdge *edge) {
         icfgNode = pag->getICFG()->getBlockICFGNode(curInst);
     } else if (const auto *arg = SVFUtil::dyn_cast<Argument>(curVal)) {
         assert(curBB && (&curBB->getParent()->getEntryBlock() == curBB));
-        const SVFFunction *fun =
-            LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(arg->getParent());
+        const SVFFunction *fun = modSet->getSVFFunction(arg->getParent());
         icfgNode = pag->getICFG()->getFunEntryBlockNode(fun);
     } else if (SVFUtil::isa<ConstantExpr>(curVal)) {
         if (!curBB) {

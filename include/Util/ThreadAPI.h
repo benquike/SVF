@@ -31,6 +31,7 @@
 #define THREADAPI_H_
 
 #include "Util/BasicTypes.h"
+#include "Util/SVFUtil.h"
 
 namespace SVF {
 
@@ -70,14 +71,9 @@ class ThreadAPI {
     /// API map, from a string to threadAPI type
     TDAPIMap tdAPIMap;
 
-    /// Constructor
-    ThreadAPI() { init(); }
 
     /// Initialize the map
     void init();
-
-    /// Static reference
-    static ThreadAPI *tdAPI;
 
     /// Get the function type if it is a threadAPI function
     inline TD_TYPE getType(const SVFFunction *F) const {
@@ -89,26 +85,18 @@ class ThreadAPI {
         return TD_DUMMY;
     }
 
-  public:
-    /// Return a static reference
-    static ThreadAPI *getThreadAPI() {
-        if (tdAPI == nullptr) {
-            tdAPI = new ThreadAPI();
-        }
-        return tdAPI;
-    }
+    SVFModule *svfMod;
 
-    /// Return the callee/callsite/func
-    //@{
-    const SVFFunction *getCallee(const Instruction *inst) const;
-    const SVFFunction *getCallee(const CallSite cs) const;
-    const CallSite getLLVMCallSite(const Instruction *inst) const;
-    //@}
+  public:
+
+    /// Constructor
+    ThreadAPI(SVFModule *svfMod) : svfMod(svfMod) { init(); }
 
     /// Return true if this call create a new thread
     //@{
     inline bool isTDFork(const Instruction *inst) const {
-        return getType(getCallee(inst)) == TD_FORK;
+        auto type = getType(SVFUtil::getCallee(svfMod->getLLVMModSet(), inst));
+        return type == TD_FORK;
     }
     inline bool isTDFork(CallSite cs) const {
         return isTDFork(cs.getInstruction());
@@ -118,7 +106,8 @@ class ThreadAPI {
     /// Return true if this call proceeds a hare_parallel_for
     //@{
     inline bool isHareParFor(const Instruction *inst) const {
-        return getType(getCallee(inst)) == HARE_PAR_FOR;
+        auto type = getType(SVFUtil::getCallee(svfMod->getLLVMModSet(), inst));
+        return type == HARE_PAR_FOR;
     }
     inline bool isHareParFor(CallSite cs) const {
         return isTDFork(cs.getInstruction());
@@ -131,7 +120,7 @@ class ThreadAPI {
     /// Note that, it is the pthread_t pointer
     inline const Value *getForkedThread(const Instruction *inst) const {
         assert(isTDFork(inst) && "not a thread fork function!");
-        CallSite cs = getLLVMCallSite(inst);
+        CallSite cs = SVFUtil::getLLVMCallSite(inst);
         return cs.getArgument(0);
     }
 
@@ -143,7 +132,7 @@ class ThreadAPI {
     /// Note that, it could be function type or a void* pointer
     inline const Value *getForkedFun(const Instruction *inst) const {
         assert(isTDFork(inst) && "not a thread fork function!");
-        CallSite cs = getLLVMCallSite(inst);
+        CallSite cs = SVFUtil::getLLVMCallSite(inst);
         return cs.getArgument(2)->stripPointerCasts();
     }
 
@@ -155,7 +144,7 @@ class ThreadAPI {
     /// Note that, it is the sole argument of start routine ( a void* pointer )
     inline const Value *getActualParmAtForkSite(const Instruction *inst) const {
         assert(isTDFork(inst) && "not a thread fork function!");
-        CallSite cs = getLLVMCallSite(inst);
+        CallSite cs = SVFUtil::getLLVMCallSite(inst);
         return cs.getArgument(3);
     }
     inline const Value *getActualParmAtForkSite(CallSite cs) const {
@@ -169,7 +158,7 @@ class ThreadAPI {
     inline const Value *
     getTaskFuncAtHareParForSite(const Instruction *inst) const {
         assert(isHareParFor(inst) && "not a hare_parallel_for function!");
-        CallSite cs = getLLVMCallSite(inst);
+        CallSite cs = SVFUtil::getLLVMCallSite(inst);
         return cs.getArgument(4)->stripPointerCasts();
     }
     inline const Value *getTaskFuncAtHareParForSite(CallSite cs) const {
@@ -183,7 +172,7 @@ class ThreadAPI {
     inline const Value *
     getTaskDataAtHareParForSite(const Instruction *inst) const {
         assert(isHareParFor(inst) && "not a hare_parallel_for function!");
-        CallSite cs = getLLVMCallSite(inst);
+        CallSite cs = SVFUtil::getLLVMCallSite(inst);
         return cs.getArgument(5);
     }
 
@@ -195,7 +184,8 @@ class ThreadAPI {
     /// Return true if this call wait for a worker thread
     //@{
     inline bool isTDJoin(const Instruction *inst) const {
-        return getType(getCallee(inst)) == TD_JOIN;
+        auto type = getType(SVFUtil::getCallee(svfMod->getLLVMModSet(), inst));
+        return  type == TD_JOIN;
     }
 
     inline bool isTDJoin(CallSite cs) const {
@@ -209,7 +199,7 @@ class ThreadAPI {
     /// Note that, it is the pthread_t pointer
     inline const Value *getJoinedThread(const Instruction *inst) const {
         assert(isTDJoin(inst) && "not a thread join function!");
-        CallSite cs = getLLVMCallSite(inst);
+        CallSite cs = SVFUtil::getLLVMCallSite(inst);
         Value *join = cs.getArgument(0);
         if (SVFUtil::isa<LoadInst>(join))
             return SVFUtil::cast<LoadInst>(join)->getPointerOperand();
@@ -228,7 +218,7 @@ class ThreadAPI {
     /// Note that, it is the pthread_t pointer
     inline const Value *getRetParmAtJoinedSite(const Instruction *inst) const {
         assert(isTDJoin(inst) && "not a thread join function!");
-        CallSite cs = getLLVMCallSite(inst);
+        CallSite cs = SVFUtil::getLLVMCallSite(inst);
         return cs.getArgument(1);
     }
 
@@ -240,33 +230,39 @@ class ThreadAPI {
     /// Return true if this call exits/terminate a thread
     //@{
     inline bool isTDExit(const Instruction *inst) const {
-        return getType(getCallee(inst)) == TD_EXIT;
+        auto type = getType(SVFUtil::getCallee(svfMod->getLLVMModSet(), inst));
+        return type == TD_EXIT;
     }
 
     inline bool isTDExit(CallSite cs) const {
-        return getType(getCallee(cs)) == TD_EXIT;
+        auto type = getType(SVFUtil::getCallee(svfMod->getLLVMModSet(), cs));
+        return type == TD_EXIT;
     }
     //@}
 
     /// Return true if this call acquire a lock
     //@{
     inline bool isTDAcquire(const Instruction *inst) const {
-        return getType(getCallee(inst)) == TD_ACQUIRE;
+        auto type = getType(SVFUtil::getCallee(svfMod->getLLVMModSet(), inst));
+        return type == TD_ACQUIRE;
     }
 
     inline bool isTDAcquire(CallSite cs) const {
-        return getType(getCallee(cs)) == TD_ACQUIRE;
+        auto type = getType(SVFUtil::getCallee(svfMod->getLLVMModSet(), cs));
+        return type == TD_ACQUIRE;
     }
     //@}
 
     /// Return true if this call release a lock
     //@{
     inline bool isTDRelease(const Instruction *inst) const {
-        return getType(getCallee(inst)) == TD_RELEASE;
+        auto type = getType(SVFUtil::getCallee(svfMod->getLLVMModSet(), inst));
+        return type == TD_RELEASE;
     }
 
     inline bool isTDRelease(CallSite cs) const {
-        return getType(getCallee(cs)) == TD_RELEASE;
+        auto type = getType(SVFUtil::getCallee(svfMod->getLLVMModSet(), cs));
+        return type == TD_RELEASE;
     }
     //@}
 
@@ -276,7 +272,7 @@ class ThreadAPI {
     inline const Value *getLockVal(const Instruction *inst) const {
         assert((isTDAcquire(inst) || isTDRelease(inst)) &&
                "not a lock acquire or release function");
-        CallSite cs = getLLVMCallSite(inst);
+        CallSite cs = SVFUtil::getLLVMCallSite(inst);
         return cs.getArgument(0);
     }
 
@@ -288,11 +284,13 @@ class ThreadAPI {
     /// Return true if this call waits for a barrier
     //@{
     inline bool isTDBarWait(const Instruction *inst) const {
-        return getType(getCallee(inst)) == TD_BAR_WAIT;
+        auto type = getType(SVFUtil::getCallee(svfMod->getLLVMModSet(), inst));
+        return type == TD_BAR_WAIT;
     }
 
     inline bool isTDBarWait(CallSite cs) const {
-        return getType(getCallee(cs)) == TD_BAR_WAIT;
+        auto type = getType(SVFUtil::getCallee(svfMod->getLLVMModSet(), cs));
+        return type == TD_BAR_WAIT;
     }
     //@}
 

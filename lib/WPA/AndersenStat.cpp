@@ -208,6 +208,8 @@ void AndersenStat::constraintGraphStat() {
  */
 void AndersenStat::statNullPtr() {
 
+    SVFModule *svfMod = getPTA()->getModule();
+
     _NumOfNullPtr = 0;
     for (auto &iter : *pta->getPAG()) {
         NodeID pagNodeId = iter.first;
@@ -233,7 +235,7 @@ void AndersenStat::statNullPtr() {
                 if (!SVFUtil::isa<DummyValPN>(pagNode) &&
                     !SVFUtil::isa<DummyObjPN>(pagNode)) {
                     // if a pointer is in dead function, we do not care
-                    if (isPtrInDeadFunction(pagNode->getValue()) == false) {
+                    if (!isPtrInDeadFunction(pagNode->getValue(), svfMod)) {
                         _NumOfNullPtr++;
                         rawstr
                             << "##Null Pointer : (NodeID " << pagNode->getId()

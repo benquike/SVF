@@ -151,7 +151,7 @@ class ThreadCallGraph : public PTACallGraph {
     using CallInstToParForEdgesMap = Map<const CallBlockNode *, ParForEdgeSet>;
 
     /// Constructor
-    ThreadCallGraph();
+    ThreadCallGraph(SVFProject *proj);
     /// Destructor
     virtual ~ThreadCallGraph() {}
 

@@ -35,12 +35,13 @@
 using namespace SVF;
 using namespace SVFUtil;
 
-PTACallGraph *CallGraphBuilder::buildCallGraph(SVFModule *svfModule) {
+PTACallGraph *CallGraphBuilder::buildCallGraph() {
     /// create nodes
+    SVFModule *svfModule = proj->getSVFModule();
+    LLVMModuleSet *modSet = svfModule->getLLVMModSet();
     for (auto F = svfModule->llvmFunBegin(), E = svfModule->llvmFunEnd();
          F != E; ++F) {
-        const SVFFunction *fun =
-            LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(*F);
+        const SVFFunction *fun = modSet->getSVFFunction(*F);
         callgraph->addCallGraphNode(fun);
     }
 
@@ -52,11 +53,10 @@ PTACallGraph *CallGraphBuilder::buildCallGraph(SVFModule *svfModule) {
              ++I) {
             const Instruction *inst = &*I;
             if (SVFUtil::isNonInstricCallSite(inst)) {
-                if (const SVFFunction *callee = getCallee(inst)) {
+                if (const SVFFunction *callee = getCallee(modSet, inst)) {
                     const CallBlockNode *callBlockNode =
                         icfg->getCallBlockNode(inst);
-                    const SVFFunction *caller =
-                        LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(fun);
+                    const SVFFunction *caller = modSet->getSVFFunction(fun);
                     callgraph->addDirectCallGraphEdge(callBlockNode, caller,
                                                       callee);
                 }
@@ -68,14 +68,16 @@ PTACallGraph *CallGraphBuilder::buildCallGraph(SVFModule *svfModule) {
 }
 
 PTACallGraph *
-ThreadCallGraphBuilder::buildThreadCallGraph(SVFModule *svfModule) {
+ThreadCallGraphBuilder::buildThreadCallGraph() {
 
-    buildCallGraph(svfModule);
+    SVFModule *svfModule = proj->getSVFModule();
+
+    buildCallGraph();
 
     auto *cg = dyn_cast<ThreadCallGraph>(callgraph);
     assert(cg && "not a thread callgraph?");
 
-    ThreadAPI *tdAPI = ThreadAPI::getThreadAPI();
+    ThreadAPI *tdAPI = proj->getThreadAPI();
     for (auto fi = svfModule->llvmFunBegin(), efi = svfModule->llvmFunEnd();
          fi != efi; ++fi) {
         const Function *fun = *fi;

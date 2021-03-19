@@ -40,8 +40,6 @@
 using namespace std;
 using namespace SVF;
 
-ThreadAPI *ThreadAPI::tdAPI = nullptr;
-
 namespace {
 
 /// string and type pair
@@ -119,26 +117,6 @@ void ThreadAPI::init() {
     }
 }
 
-/*!
- *
- */
-const SVFFunction *ThreadAPI::getCallee(const Instruction *inst) const {
-    return SVFUtil::getCallee(inst);
-}
-
-/*!
- *
- */
-const SVFFunction *ThreadAPI::getCallee(const CallSite cs) const {
-    return SVFUtil::getCallee(cs);
-}
-
-/*!
- *
- */
-const CallSite ThreadAPI::getLLVMCallSite(const Instruction *inst) const {
-    return SVFUtil::getLLVMCallSite(inst);
-}
 
 /*!
  *
@@ -196,7 +174,9 @@ void ThreadAPI::performAPIStat(SVFModule *module) {
             const Instruction *inst = &*II;
             if (!SVFUtil::isa<CallInst>(inst))
                 continue;
-            const SVFFunction *fun = getCallee(inst);
+
+            const SVFFunction *fun =
+                SVFUtil::getCallee(svfMod->getLLVMModSet(), inst);
             TD_TYPE type = getType(fun);
             switch (type) {
             case TD_FORK: {

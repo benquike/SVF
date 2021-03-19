@@ -16,12 +16,12 @@
 
 using namespace SVF;
 
-FlowSensitiveTBHC::FlowSensitiveTBHC(PAG* _pag, PTATY type)
-    : FlowSensitive(_pag, type), TypeBasedHeapCloning(this)
-{
-    // Using `this` as the argument for TypeBasedHeapCloning is okay. As PointerAnalysis, it's
-    // already constructed. TypeBasedHeapCloning also doesn't use pta in the constructor so it
-    // just needs to be allocated, which it is.
+FlowSensitiveTBHC::FlowSensitiveTBHC(SVFProject *proj, PTATY type)
+    : FlowSensitive(proj, type), TypeBasedHeapCloning(this) {
+    // Using `this` as the argument for TypeBasedHeapCloning is okay. As
+    // PointerAnalysis, it's already constructed. TypeBasedHeapCloning also
+    // doesn't use pta in the constructor so it just needs to be allocated,
+    // which it is.
     allReuse = Options::TBHCAllReuse;
     storeReuse = allReuse || Options::TBHCStoreReuse;
 }
@@ -31,7 +31,7 @@ void FlowSensitiveTBHC::analyze() { FlowSensitive::analyze(); }
 void FlowSensitiveTBHC::initialize() {
     PointerAnalysis::initialize();
     AndersenWaveDiff *ander =
-        AndersenWaveDiff::createAndersenWaveDiff(getPAG());
+        AndersenWaveDiff::createAndersenWaveDiff(proj);
     svfg = svfgBuilder.buildFullSVFG(ander);
     setGraph(svfg);
     stat = new FlowSensitiveStat(this);

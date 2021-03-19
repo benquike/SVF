@@ -32,10 +32,16 @@
 #define SVFMODULE_H_
 
 #include <utility>
+#include <vector>
+#include <string>
 
 #include "Util/BasicTypes.h"
 
+using namespace std;
+
 namespace SVF {
+
+class LLVMModuleSet;
 
 class SVFModule {
   public:
@@ -64,10 +70,14 @@ class SVFModule {
     AliasSetType AliasSet;               ///< The Aliases in the module
     LLVMFun2SVFFunMap
         LLVMFunc2SVFFunc; ///< Map an LLVM Function to an SVF Function
+
+    LLVMModuleSet *llvmModSet;
+
   public:
     /// Constructors
-    SVFModule(std::string moduleName = "")
-        : moduleIdentifier(std::move(moduleName)) {}
+    SVFModule(string moduleName = "");
+    SVFModule(vector<string> &modVec);
+    SVFModule(Module &module);
 
     static inline void setPagFromTXT(std::string txt) { pagReadFromTxt = txt; }
 
@@ -122,6 +132,10 @@ class SVFModule {
     alias_iterator alias_end() { return AliasSet.end(); }
     const_alias_iterator alias_end() const { return AliasSet.end(); }
     ///@}
+
+    LLVMModuleSet *getLLVMModSet() const {
+        return llvmModSet;
+    }
 
     const std::string &getModuleIdentifier() const {
         if (pagReadFromTxt.empty()) {

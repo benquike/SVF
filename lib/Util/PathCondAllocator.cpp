@@ -48,10 +48,10 @@ BddCondManager* PathCondAllocator::bddCondMgr = nullptr;
 /*!
  * Allocate path condition for each branch
  */
-void PathCondAllocator::allocate(const SVFModule *M) {
+void PathCondAllocator::allocate() {
     DBOUT(DGENERAL, outs() << pasMsg("path condition allocation starts\n"));
 
-    for (const auto *func : *M) {
+    for (const auto *func : *svfMod) {
         if (!SVFUtil::isExtCall(func)) {
             // Allocate conditions for a program.
             for (Function::const_iterator bit = func->getLLVMFun()->begin(),
@@ -343,7 +343,7 @@ void PathCondAllocator::collectBBCallingProgExit(const BasicBlock &bb) {
          it++) {
         const Instruction *inst = &*it;
         if (SVFUtil::isa<CallInst>(inst) || SVFUtil::isa<InvokeInst>(inst)) {
-            if (SVFUtil::isProgExitCall(inst)) {
+            if (SVFUtil::isProgExitCall(inst, svfMod)) {
                 funToExitBBsMap[bb.getParent()].insert(&bb);
             }
         }

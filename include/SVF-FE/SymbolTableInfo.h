@@ -239,8 +239,9 @@ class SymbolTableInfo {
     /// find the unique defined global across multiple modules
     inline const Value *getGlobalRep(const Value *val) const {
         if (const auto *gvar = SVFUtil::dyn_cast<GlobalVariable>(val)) {
-            if (LLVMModuleSet::getLLVMModuleSet()->hasGlobalRep(gvar)) {
-                val = LLVMModuleSet::getLLVMModuleSet()->getGlobalRep(gvar);
+            LLVMModuleSet *modSet = mod->getLLVMModSet();
+            if (modSet->hasGlobalRep(gvar)) {
+                val = modSet->getGlobalRep(gvar);
             }
         }
         return val;

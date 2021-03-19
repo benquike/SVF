@@ -43,22 +43,25 @@ class CallGraphBuilder {
   protected:
     PTACallGraph *callgraph;
     ICFG *icfg;
+    SVFProject *proj;
 
   public:
-    CallGraphBuilder(PTACallGraph *cg, ICFG *i) : callgraph(cg), icfg(i) {}
+    CallGraphBuilder(SVFProject *proj, PTACallGraph *cg)
+      : callgraph(cg), icfg(proj->getICFG()),
+        proj(proj) {}
 
     /// Build normal callgraph
-    PTACallGraph *buildCallGraph(SVFModule *svfModule);
+    PTACallGraph *buildCallGraph();
 };
 
 class ThreadCallGraphBuilder : public CallGraphBuilder {
 
   public:
-    ThreadCallGraphBuilder(ThreadCallGraph *cg, ICFG *i)
-        : CallGraphBuilder(cg, i) {}
+    ThreadCallGraphBuilder(SVFProject *proj, ThreadCallGraph *cg)
+        : CallGraphBuilder(proj, cg) {}
 
     /// Build thread-aware callgraph
-    PTACallGraph *buildThreadCallGraph(SVFModule *svfModule);
+    PTACallGraph *buildThreadCallGraph();
 };
 
 } // End namespace SVF

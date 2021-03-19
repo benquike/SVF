@@ -515,7 +515,7 @@ static bool isAliasTestFunction(std::string name) {
 }
 
 void TypeBasedHeapCloning::validateTBHCTests(SVFModule *) {
-    const LLVMModuleSet *llvmModuleSet = LLVMModuleSet::getLLVMModuleSet();
+    const LLVMModuleSet *llvmModuleSet = pta->getModule()->getLLVMModSet();
     for (u32_t i = 0; i < llvmModuleSet->getModuleNum(); ++i) {
         const PAG::CallSiteSet &callSites = ppag->getCallSiteSet();
         for (const CallBlockNode *cbn : callSites) {

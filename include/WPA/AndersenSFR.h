@@ -49,14 +49,14 @@ class AndersenSCD : public Andersen {
     NodeToNodeMap pwcReps;
 
   public:
-    AndersenSCD(PAG *_pag, PTATY type = AndersenSCD_WPA)
-        : Andersen(_pag, type) {}
+    AndersenSCD(SVFProject *proj, PTATY type = AndersenSCD_WPA)
+        : Andersen(proj, type) {}
 
     /// Create an singleton instance directly instead of invoking llvm pass
     /// manager
-    static AndersenSCD *createAndersenSCD(PAG *_pag) {
+    static AndersenSCD *createAndersenSCD(SVFProject *proj) {
         if (scdAndersen == nullptr) {
-            new AndersenSCD(_pag);
+            new AndersenSCD(proj);
             scdAndersen->analyze();
             return scdAndersen;
         }
@@ -102,14 +102,14 @@ class AndersenSFR : public AndersenSCD {
     FieldReps fieldReps;
 
   public:
-    AndersenSFR(PAG *_pag, PTATY type = AndersenSFR_WPA)
-        : AndersenSCD(_pag, type), csc(nullptr) {}
+    AndersenSFR(SVFProject *proj, PTATY type = AndersenSFR_WPA)
+        : AndersenSCD(proj, type), csc(nullptr) {}
 
     /// Create an singleton instance directly instead of invoking llvm pass
     /// manager
-    static AndersenSFR *createAndersenSFR(PAG *_pag) {
+    static AndersenSFR *createAndersenSFR(SVFProject *proj) {
         if (sfrAndersen == nullptr) {
-            new AndersenSFR(_pag);
+            new AndersenSFR(proj);
             sfrAndersen->analyze();
             return sfrAndersen;
         }

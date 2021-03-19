@@ -85,9 +85,10 @@ void CHGraph::buildCHG() {
 
     double timeStart, timeEnd;
     timeStart = CLOCK_IN_MS();
-    for (u32_t i = 0; i < LLVMModuleSet::getLLVMModuleSet()->getModuleNum();
+    LLVMModuleSet *modSet = svfMod->getLLVMModSet();
+    for (u32_t i = 0; i < modSet->getModuleNum();
          ++i) {
-        Module *M = LLVMModuleSet::getLLVMModuleSet()->getModule(i);
+        Module *M = modSet->getModule(i);
         assert(M && "module not found?");
         DBOUT(DGENERAL,
               outs() << SVFUtil::pasMsg("construct CHGraph From module " +
@@ -99,10 +100,10 @@ void CHGraph::buildCHG() {
             buildCHGNodes(&(*I));
         }
         for (Module::const_iterator F = M->begin(), E = M->end(); F != E; ++F) {
-            buildCHGNodes(getDefFunForMultipleModule(&(*F)));
+            buildCHGNodes(getDefFunForMultipleModule(modSet, &(*F)));
         }
         for (Module::const_iterator F = M->begin(), E = M->end(); F != E; ++F) {
-            buildCHGEdges(getDefFunForMultipleModule(&(*F)));
+            buildCHGEdges(getDefFunForMultipleModule(modSet, &(*F)));
         }
 
         analyzeVTables(*M);
@@ -138,8 +139,9 @@ void CHGraph::buildCHGNodes(const GlobalValue *globalvalue) {
                         isCastConstantExpr(vtbl->getOperand(i))) {
                     const Value *bitcastValue = ce->getOperand(0);
                     if (const Function *func =
-                            SVFUtil::dyn_cast<Function>(bitcastValue)) {
-                        buildCHGNodes(getDefFunForMultipleModule(func));
+                        SVFUtil::dyn_cast<Function>(bitcastValue)) {
+                        LLVMModuleSet *modSet = svfMod->getLLVMModSet();
+                        buildCHGNodes(getDefFunForMultipleModule(modSet, func));
                     }
                 }
             }
@@ -189,11 +191,12 @@ void CHGraph::buildInternalMaps() {
 
 void CHGraph::connectInheritEdgeViaCall(const SVFFunction *callerfun,
                                         CallSite cs) {
-    if (getCallee(cs) == nullptr) {
+    LLVMModuleSet *modSet = svfMod->getLLVMModSet();
+    if (getCallee(modSet, cs) == nullptr) {
         return;
     }
 
-    const Function *callee = getCallee(cs)->getLLVMFun();
+    const Function *callee = getCallee(modSet, cs)->getLLVMFun();
     const Function *caller = callerfun->getLLVMFun();
 
     struct DemangledName dname = demangle(caller->getName().str());
@@ -411,6 +414,7 @@ void CHGraph::addFuncToFuncVector(CHNode::FuncVector &v, const SVFFunction *f) {
  * "class A"
  */
 void CHGraph::analyzeVTables(const Module &M) {
+    LLVMModuleSet *modSet = svfMod->getLLVMModSet();
     for (Module::const_global_iterator I = M.global_begin(), E = M.global_end();
          I != E; ++I) {
         const auto *globalvalue = SVFUtil::dyn_cast<const GlobalValue>(&(*I));
@@ -505,8 +509,7 @@ void CHGraph::analyzeVTables(const Module &M) {
                             if (const auto *f =
                                     SVFUtil::dyn_cast<Function>(bitcastValue)) {
                                 const SVFFunction *func =
-                                    LLVMModuleSet::getLLVMModuleSet()
-                                        ->getSVFFunction(f);
+                                    modSet->getSVFFunction(f);
                                 addFuncToFuncVector(virtualFunctions, func);
                                 if (func->getName().str() ==
                                     pureVirtualFunName) {
@@ -531,8 +534,7 @@ void CHGraph::analyzeVTables(const Module &M) {
                                             SVFUtil::dyn_cast<Function>(
                                                 aliasValue)) {
                                         const SVFFunction *func =
-                                            LLVMModuleSet::getLLVMModuleSet()
-                                                ->getSVFFunction(aliasFunc);
+                                            modSet->getSVFFunction(aliasFunc);
                                         addFuncToFuncVector(virtualFunctions,
                                                             func);
                                     } else if (const auto *aliasconst =
@@ -552,9 +554,8 @@ void CHGraph::analyzeVTables(const Module &M) {
                                                "aliased bitcast in vtable not "
                                                "a function");
                                         const SVFFunction *func =
-                                            LLVMModuleSet::getLLVMModuleSet()
-                                                ->getSVFFunction(
-                                                    aliasbitcastfunc);
+                                            modSet->getSVFFunction(
+                                                aliasbitcastfunc);
                                         addFuncToFuncVector(virtualFunctions,
                                                             func);
                                     } else {
@@ -672,7 +673,8 @@ void CHGraph::buildVirtualFunctionToIDMap() {
 }
 
 const CHGraph::CHNodeSetTy &CHGraph::getCSClasses(CallSite cs) {
-    assert(isVirtualCallSite(cs) && "not virtual callsite!");
+    assert(isVirtualCallSite(cs, svfMod->getLLVMModSet()) &&
+           "not virtual callsite!");
 
     auto it = csToClassesMap.find(cs);
     if (it != csToClassesMap.end()) {
@@ -790,7 +792,7 @@ void CHGraph::getVFnsFromVtbls(CallSite cs, const VTableSet &vtbls,
 void CHGraph::buildCSToCHAVtblsAndVfnsMap() {
 
     for (auto cs : symbolTableInfo->getCallSiteSet()) {
-        if (!cppUtil::isVirtualCallSite(cs)) {
+        if (!cppUtil::isVirtualCallSite(cs, svfMod->getLLVMModSet())) {
             continue;
         }
 

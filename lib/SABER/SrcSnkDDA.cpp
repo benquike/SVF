@@ -25,6 +25,10 @@
  *
  *  Created on: Apr 1, 2014
  *      Author: Yulei Sui
+ *
+ *  Updated by:
+ *     Hui Peng <peng124@purdue.edu>
+ *     2021-03-19
  */
 
 
@@ -38,13 +42,13 @@ using namespace SVFUtil;
 /// Initialize analysis
 void SrcSnkDDA::initialize() {
 
-    AndersenWaveDiff *ander = AndersenWaveDiff::createAndersenWaveDiff(pag);
+    AndersenWaveDiff *ander = AndersenWaveDiff::createAndersenWaveDiff(proj);
     svfg = svfgBuilder.buildPTROnlySVFG(ander);
     setGraph(svfgBuilder.getSVFG());
     ptaCallGraph = ander->getPTACallGraph();
     // AndersenWaveDiff::releaseAndersenWaveDiff();
     /// allocate control-flow graph branch conditions
-    getPathAllocator()->allocate(getPAG()->getModule());
+    getPathAllocator()->allocate();
 
     initSrcs();
     initSnks();

@@ -23,8 +23,8 @@ VersionedVar VersionedFlowSensitive::atKey(NodeID var, Version version) {
     return std::make_pair(var, version);
 }
 
-VersionedFlowSensitive::VersionedFlowSensitive(PAG *_pag, PTATY type)
-    : FlowSensitive(_pag, type) {
+VersionedFlowSensitive::VersionedFlowSensitive(SVFProject *proj, PTATY type)
+    : FlowSensitive(proj, type) {
     numPrelabeledNodes = numPrelabelVersions = 0;
     relianceTime = prelabelingTime = meldLabelingTime = meldMappingTime =
         versionPropTime = 0.0;

@@ -31,25 +31,24 @@ DDAPass::~DDAPass()
     }
 }
 
-void DDAPass::runOnModule(SVFModule *module) {
+void DDAPass::runOnModule(SVFProject *proj) {
     /// initialization for llvm alias analyzer
     // InitializeAliasAnalysis(this, SymbolTableInfo::getDataLayout(&module));
 
+    SVFModule *module = proj->getSVFModule();
     selectClient(module);
 
-    for (u32_t i = PointerAnalysis::FlowS_DDA;
-            i < PointerAnalysis::Default_PTA; i++)
-    {
+    for (u32_t i = PointerAnalysis::FlowS_DDA; i < PointerAnalysis::Default_PTA;
+         i++) {
         if (Options::DDASelected.isSet(i)) {
-            runPointerAnalysis(module, i);
+            runPointerAnalysis(proj, i);
         }
     }
 }
 
 bool DDAPass::runOnModule(Module &module) {
-    SVFModule *svfModule =
-        LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(module);
-    runOnModule(svfModule);
+    SVFProject proj(module);
+    runOnModule(&proj);
     return false;
 }
 
@@ -87,9 +86,8 @@ void DDAPass::selectClient(SVFModule *module) {
 }
 
 /// Create pointer analysis according to specified kind and analyze the module.
-void DDAPass::runPointerAnalysis(SVFModule *module, u32_t kind) {
-    PAG _pag(module);
-    PAG *pag = &_pag;
+void DDAPass::runPointerAnalysis(SVFProject *proj, u32_t kind) {
+    PAG *pag = proj->getPAG();
 
     VFPathCond::setMaxPathLen(Options::MaxPathLen);
     ContextCond::setMaxCxtLen(Options::MaxContextLen);
@@ -97,11 +95,11 @@ void DDAPass::runPointerAnalysis(SVFModule *module, u32_t kind) {
     /// Initialize pointer analysis.
     switch (kind) {
     case PointerAnalysis::Cxt_DDA: {
-        _pta = new ContextDDA(pag, _client);
+        _pta = new ContextDDA(proj, _client);
         break;
     }
     case PointerAnalysis::FlowS_DDA: {
-        _pta = new FlowDDA(pag, _client);
+        _pta = new FlowDDA(proj, _client);
         break;
     }
     default:
@@ -109,9 +107,9 @@ void DDAPass::runPointerAnalysis(SVFModule *module, u32_t kind) {
         break;
     }
 
-    if(Options::WPANum)
-    {
-        _client->collectWPANum(module);
+
+    if(Options::WPANum) {
+        _client->collectWPANum(proj->getSVFModule());
     } else {
         /// initialize
         _pta->initialize();

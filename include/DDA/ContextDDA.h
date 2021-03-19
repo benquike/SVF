@@ -26,7 +26,7 @@ class ContextDDA : public CondPTAImpl<ContextCond>,
 
   public:
     /// Constructor
-    ContextDDA(PAG *_pag, DDAClient *client);
+    ContextDDA(SVFProject *proj, DDAClient *client);
 
     /// Destructor
     virtual ~ContextDDA();

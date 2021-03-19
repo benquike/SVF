@@ -25,10 +25,13 @@
  *
  *  Created on: May 14, 2013
  *      Author: Yulei Sui
+ *
+ *  Updated by:
+ *     Hui Peng <peng124@purdue.edu>
+ *     2021-03-19
  */
 
 #include "Util/Options.h"
-#include "SVF-FE/CallGraphBuilder.h"
 #include "SVF-FE/CHG.h"
 #include "SVF-FE/CPPUtil.h"
 #include "SVF-FE/CallGraphBuilder.h"
@@ -70,12 +73,12 @@ const std::string PointerAnalysis::aliasTestFailNoAliasMangled  = "_Z20EXPECTEDF
 /*!
  * Constructor
  */
-PointerAnalysis::PointerAnalysis(PAG *p, PTATY ty, bool alias_check)
-    : svfMod(nullptr), ptaTy(ty), stat(nullptr), ptaCallGraph(nullptr),
-      callGraphSCC(nullptr), icfg(nullptr), typeSystem(nullptr) {
-    pag = p;
-
-	OnTheFlyIterBudgetForStat = Options::StatBudget;
+PointerAnalysis::PointerAnalysis(SVFProject *proj, PTATY ty, bool alias_check)
+    :  pag(proj->getPAG()), svfMod(proj->getSVFModule()),
+       ptaTy(ty),  stat(nullptr), ptaCallGraph(nullptr),
+       callGraphSCC(nullptr), icfg(proj->getICFG()),
+       typeSystem(nullptr), proj(proj) {
+    OnTheFlyIterBudgetForStat = Options::StatBudget;
     print_stat = Options::PStat;
     ptaImplTy = BaseImpl;
     alias_validation = (alias_check && Options::EnableAliasCheck);
@@ -108,15 +111,17 @@ void PointerAnalysis::destroy() {
  * Initialization of pointer analysis
  */
 void PointerAnalysis::initialize() {
+
     assert(pag && "PAG has not been built!");
+
     if (chgraph == nullptr) {
-        if (LLVMModuleSet::getLLVMModuleSet()->allCTir()) {
-            DCHGraph *dchg = new DCHGraph(pag->getModule());
+        if (svfMod->getLLVMModSet()->allCTir()) {
+            DCHGraph *dchg = new DCHGraph(proj->getSymbolTableInfo());
             // TODO: we might want to have an option for extending.
             dchg->buildCHG(true);
             chgraph = dchg;
         } else {
-            CHGraph *chg = new CHGraph(pag->getSymbolTableInfo());
+            CHGraph *chg = new CHGraph(proj->getSymbolTableInfo());
             chg->buildCHG();
             chgraph = chg;
         }
@@ -142,15 +147,14 @@ void PointerAnalysis::initialize() {
     }
 
     /// initialise pta call graph for every pointer analysis instance
-    if(Options::EnableThreadCallGraph)
-    {
-        auto* cg = new ThreadCallGraph();
-        ThreadCallGraphBuilder bd(cg, pag->getICFG());
-        ptaCallGraph = bd.buildThreadCallGraph(pag->getModule());
+    if (Options::EnableThreadCallGraph) {
+        auto *cg = new ThreadCallGraph(proj);
+        ThreadCallGraphBuilder bd(proj, cg);
+        ptaCallGraph = bd.buildThreadCallGraph();
     } else {
-        auto *cg = new PTACallGraph();
-        CallGraphBuilder bd(cg, pag->getICFG());
-        ptaCallGraph = bd.buildCallGraph(pag->getModule());
+        auto *cg = new PTACallGraph(proj);
+        CallGraphBuilder bd(proj, cg);
+        ptaCallGraph = bd.buildCallGraph();
     }
     callGraphSCCDetection();
 
@@ -164,14 +168,14 @@ void PointerAnalysis::initialize() {
  * Return TRUE if this node is a local variable of recursive function.
  */
 bool PointerAnalysis::isLocalVarInRecursiveFun(NodeID id) const {
-    const MemObj *obj = this->pag->getObject(id);
+
+    const MemObj *obj = pag->getObject(id);
     assert(obj && "object not found!!");
     if (obj->isStack()) {
         if (const auto *local =
                 SVFUtil::dyn_cast<AllocaInst>(obj->getRefVal())) {
             const SVFFunction *fun =
-                LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(
-                    local->getFunction());
+                svfMod->getLLVMModSet()->getSVFFunction(local->getFunction());
             return callGraphSCC->isInCycle(
                 getPTACallGraph()->getCallGraphNode(fun)->getId());
         }
@@ -219,7 +223,6 @@ void PointerAnalysis::finalize() {
     /// Print statistics
     dumpStat();
 
-    PAG *pag = getPAG();
     // dump PAG
     if (dumpGraph()) {
         pag->dump("pag_final");
@@ -424,7 +427,6 @@ void PointerAnalysis::printIndCSTargets() {
 void PointerAnalysis::resolveIndCalls(const CallBlockNode *cs,
                                       const PointsTo &target,
                                       CallEdgeMap &newEdges, LLVMCallGraph *) {
-
     assert(pag->isIndirectCallSites(cs) && "not an indirect callsite?");
     /// discover indirect pointer target
     for (const auto &ii : target) {
@@ -443,7 +445,8 @@ void PointerAnalysis::resolveIndCalls(const CallBlockNode *cs,
                 const auto *calleefun =
                     SVFUtil::cast<Function>(obj->getRefVal());
                 const SVFFunction *callee =
-                    getDefFunForMultipleModule(calleefun);
+                    getDefFunForMultipleModule(svfMod->getLLVMModSet(),
+                                               calleefun);
 
                 /// if the arg size does not match then we do not need to
                 /// connect this parameter even if the callee is a variadic
@@ -476,7 +479,7 @@ void PointerAnalysis::resolveIndCalls(const CallBlockNode *cs,
  */
 bool PointerAnalysis::matchArgs(const CallBlockNode *cs,
                                 const SVFFunction *callee) {
-    if (ThreadAPI::getThreadAPI()->isTDFork(cs->getCallSite())) {
+    if (proj->getThreadAPI()->isTDFork(cs->getCallSite())) {
         return true;
     }
 
@@ -500,6 +503,7 @@ void PointerAnalysis::getVFnsFromCHA(const CallBlockNode *cs, VFunSet &vfns) {
 void PointerAnalysis::getVFnsFromPts(const CallBlockNode *cs,
                                      const PointsTo &target, VFunSet &vfns) {
 
+    PAG *pag = proj->getPAG();
     CallSite llvmCS = SVFUtil::getLLVMCallSite(cs->getCallSite());
     if (chgraph->csHasVtblsBasedonCHA(llvmCS)) {
         Set<const GlobalValue *> vtbls;
@@ -527,8 +531,9 @@ void PointerAnalysis::connectVCallToVFns(const CallBlockNode *cs,
                                          const VFunSet &vfns,
                                          CallEdgeMap &newEdges) {
     //// connect all valid functions
+    LLVMModuleSet *modSet = svfMod->getLLVMModSet();
     for (const auto *callee : vfns) {
-        callee = getDefFunForMultipleModule(callee->getLLVMFun());
+        callee = getDefFunForMultipleModule(modSet, callee->getLLVMFun());
         if (getIndCallMap()[cs].count(callee) > 0) {
             continue;
         }
@@ -555,7 +560,8 @@ void PointerAnalysis::connectVCallToVFns(const CallBlockNode *cs,
 void PointerAnalysis::resolveCPPIndCalls(const CallBlockNode *cs,
                                          const PointsTo &target,
                                          CallEdgeMap &newEdges) {
-    assert(isVirtualCallSite(SVFUtil::getLLVMCallSite(cs->getCallSite())) &&
+    assert(isVirtualCallSite(SVFUtil::getLLVMCallSite(cs->getCallSite()),
+                             getPAG()->getModule()->getLLVMModSet()) &&
            "not cpp virtual call");
 
     VFunSet vfns;
@@ -576,7 +582,8 @@ void PointerAnalysis::validateSuccessTests(std::string fun) {
 
     // check for must alias cases, whether our alias analysis produce the
     // correct results
-    if (const SVFFunction *checkFun = getFunction(fun)) {
+    LLVMModuleSet *modSet = svfMod->getLLVMModSet();
+    if (const SVFFunction *checkFun = getFunction(modSet, fun)) {
         if (!checkFun->getLLVMFun()->use_empty()) {
             outs() << "[" << this->PTAName() << "] Checking " << fun << "\n";
         }
@@ -648,7 +655,8 @@ void PointerAnalysis::validateSuccessTests(std::string fun) {
  */
 void PointerAnalysis::validateExpectedFailureTests(std::string fun) {
 
-    if (const SVFFunction *checkFun = getFunction(fun)) {
+    LLVMModuleSet *modSet = svfMod->getLLVMModSet();
+    if (const SVFFunction *checkFun = getFunction(modSet, fun)) {
         if (!checkFun->getLLVMFun()->use_empty()) {
             outs() << "[" << this->PTAName() << "] Checking " << fun << "\n";
         }
