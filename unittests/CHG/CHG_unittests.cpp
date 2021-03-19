@@ -29,11 +29,13 @@ TEST(CHGTestSuite, BasicTest_0) {
     vector<string> moduleNameVec{test_bc};
     SVFModule *svfModule =
         LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
-    PAGBuilder builder;
-    PAG *pag = builder.build(svfModule);
+    SymbolTableInfo symbolTableInfo(svfModule);
+    PAG _pag(&symbolTableInfo, false);
+    PAGBuilder builder(&_pag);
+    PAG *pag = builder.build();
 
     ASSERT_TRUE(pag != nullptr);
-    CHGraph *chg = new CHGraph(pag->getModule());
+    CHGraph *chg = new CHGraph(pag->getSymbolTableInfo());
     ASSERT_TRUE(chg != nullptr);
 
     chg->buildCHG();

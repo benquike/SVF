@@ -83,7 +83,8 @@ class VTblParseTesting : public ::testing::Test {
     }
 
     void check_chgraph() {
-        CHGraph *chg = new CHGraph(svfMod);
+        SymbolTableInfo symbolTableInfo(svfMod);
+        CHGraph *chg = new CHGraph(&symbolTableInfo);
         chg->buildCHG();
         // DCHGraph *dchg = new DCHGraph(svfMod);
         // dchg->buildCHG(true);
