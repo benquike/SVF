@@ -1,13 +1,22 @@
 /******************************************************************************
- * Copyright (c) 2021 Hui Peng.
- * All rights reserved. This program and the accompanying materials are made
- * available under the private copyright of Hui Peng. It is only for studying
- * purpose, usage for other purposes is not allowed.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  *
  * Author:
  *     Hui Peng <peng124@purdue.edu>
  * Date:
- *     2021-02-28
+ *     2021-03-19
  *****************************************************************************/
 
 #include "SVF-FE/CHG.h"
@@ -19,6 +28,7 @@
 
 #include <llvm/Demangle/Demangle.h>
 
+#include "SVF-FE/SVFProject.h"
 #include "config.h"
 
 using namespace SVF;
@@ -30,24 +40,20 @@ using llvm::demangle;
 
 class VTblParseTesting : public ::testing::Test {
   protected:
-    SVFModule *svfMod;
+    SVFProject *proj;
 
     void SetUp() override {}
 
     void TearDown() override {
-        if (svfMod != nullptr) {
-            delete svfMod;
-        }
+        delete proj;
     }
 
     void init(string &ll_file) {
-        vector<string> moduleNameVec{ll_file};
-        svfMod =
-            LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
+        proj = new SVFProject(ll_file);
     }
 
     void dump_vtbls_from_globalvariable() {
-        Module *mod = LLVMModuleSet::getLLVMModuleSet()->getMainLLVMModule();
+        Module *mod = proj->getLLVMModSet()->getMainLLVMModule();
         for (auto it = mod->global_begin(); it != mod->global_end(); it++) {
             const GlobalVariable *gv = &(*it);
             if (isValVtbl(gv) && gv->getNumOperands() > 0) {
@@ -83,11 +89,13 @@ class VTblParseTesting : public ::testing::Test {
     }
 
     void check_chgraph() {
-        SymbolTableInfo symbolTableInfo(svfMod);
-        CHGraph *chg = new CHGraph(&symbolTableInfo);
+        SymbolTableInfo *symbolTableInfo = proj->getSymbolTableInfo();
+        CHGraph *chg = new CHGraph(symbolTableInfo);
         chg->buildCHG();
         // DCHGraph *dchg = new DCHGraph(svfMod);
         // dchg->buildCHG(true);
+
+        auto *svfMod = proj->getSVFModule();
 
         for (auto fit = svfMod->llvmFunBegin(); fit != svfMod->llvmFunEnd();
              fit++) {
