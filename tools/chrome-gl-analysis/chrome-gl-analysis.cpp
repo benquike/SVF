@@ -273,15 +273,15 @@ int main(int argc, char **argv) {
         arg_num, arg_value,
         "A tool for analyzing webgl interface code in chrome\n");
 
-    SVFModule *svfModule =
-        LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
+    SVFProject proj(moduleNameVec);
 
     /// Build Program Assignment Graph (PAG)
-    PAG _pag(svfModule);
-    PAG *pag = &_pag;
+    PAG *pag = proj.getPAG();
+
+    SVFModule *svfModule = proj.getSVFModule();
 
     // Andersen *ander = AndersenWaveDiff::createAndersenWaveDiff(pag);
-    FlowSensitive *fs_pta = FlowSensitive::createFSWPA(pag, true);
+    FlowSensitive *fs_pta = FlowSensitive::createFSWPA(&proj, true);
 
     /// Call Graph
     PTACallGraph *callgraph = fs_pta->getPTACallGraph();
