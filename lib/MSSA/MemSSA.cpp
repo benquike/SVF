@@ -50,8 +50,9 @@ double MemSSA::timeOfSSARenaming = 0;  ///< Time for SSA rename
 /*!
  * Constructor
  */
-MemSSA::MemSSA(BVDataPTAImpl *p, bool ptrOnlyMSSA) : df(nullptr), dt(nullptr) {
-    pta = p;
+MemSSA::MemSSA(BVDataPTAImpl *p, bool ptrOnlyMSSA)
+    : pta(p), df(nullptr), dt(nullptr) {
+
     assert((pta->getAnalysisTy() != PointerAnalysis::Default_PTA) &&
            "please specify a pointer analysis");
     if (!Options::MemPar.getValue().empty())

@@ -113,7 +113,7 @@ class VFG : public GenericVFGTy {
 
   public:
     /// Constructor
-    VFG(PTACallGraph *callgraph, VFGK k = ORIGSVFGK);
+    VFG(PTACallGraph *callgraph, PAG *pag, VFGK k = ORIGSVFGK);
 
     /// Destructor
     virtual ~VFG() { destroy(); }
@@ -250,13 +250,12 @@ class VFG : public GenericVFGTy {
         if (hasDef(pagNode)) {
             const VFGNode *defNode = getVFGNode(getDef(pagNode));
             if (const auto *addr = SVFUtil::dyn_cast<AddrVFGNode>(defNode)) {
-                if (PAG::getPAG()->isBlkObjOrConstantObj(
-                        addr->getPAGEdge()->getSrcID())) {
+                if (pag->isBlkObjOrConstantObj(addr->getPAGEdge()->getSrcID())) {
                     return true;
                 }
             } else if (const auto *copy =
-                           SVFUtil::dyn_cast<CopyVFGNode>(defNode)) {
-                if (PAG::getPAG()->isNullPtr(copy->getPAGEdge()->getSrcID())) {
+                       SVFUtil::dyn_cast<CopyVFGNode>(defNode)) {
+                if (pag->isNullPtr(copy->getPAGEdge()->getSrcID())) {
                     return true;
                 }
             }

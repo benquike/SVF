@@ -28,8 +28,6 @@
  */
 
 #include "Util/Options.h"
-#include "SVF-FE/CPPUtil.h"
-#include "SVF-FE/ICFGBuilder.h"
 #include "WPA/TypeAnalysis.h"
 #include "Graphs/ICFGStat.h"
 #include "Graphs/VFG.h"
@@ -46,12 +44,10 @@ using namespace std;
 
 
 /// Initialize analysis
-void TypeAnalysis::initialize()
-{
-	AndersenBase::initialize();
-    if (Options::GenICFG)
-    {
-        icfg = PAG::getPAG()->getICFG();
+void TypeAnalysis::initialize() {
+    AndersenBase::initialize();
+    if (Options::GenICFG) {
+        icfg = pag->getICFG();
         icfg->dump("icfg_initial");
         icfg->dump("vfg_initial");
         if (print_stat) {

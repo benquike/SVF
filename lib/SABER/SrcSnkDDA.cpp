@@ -37,13 +37,11 @@ using namespace SVF;
 using namespace SVFUtil;
 
 /// Initialize analysis
-void SrcSnkDDA::initialize(SVFModule *module) {
-    PAGBuilder builder;
-    PAG *pag = builder.build(module);
+void SrcSnkDDA::initialize() {
 
     AndersenWaveDiff *ander = AndersenWaveDiff::createAndersenWaveDiff(pag);
-    svfg = memSSA.buildPTROnlySVFG(ander);
-    setGraph(memSSA.getSVFG());
+    svfg = svfgBuilder.buildPTROnlySVFG(ander);
+    setGraph(svfgBuilder.getSVFG());
     ptaCallGraph = ander->getPTACallGraph();
     // AndersenWaveDiff::releaseAndersenWaveDiff();
     /// allocate control-flow graph branch conditions
@@ -53,9 +51,9 @@ void SrcSnkDDA::initialize(SVFModule *module) {
     initSnks();
 }
 
-void SrcSnkDDA::analyze(SVFModule *module) {
+void SrcSnkDDA::analyze() {
 
-    initialize(module);
+    initialize();
 
     ContextCond::setMaxCxtLen(Options::CxtLimit);
 

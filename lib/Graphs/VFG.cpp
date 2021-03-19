@@ -298,8 +298,8 @@ PHIVFGNode::PHIVFGNode(NodeID id, const PAGNode *r, VFGNodeK k)
  * 2) connect VFG edges
  *    between two statements (PAGEdges)
  */
-VFG::VFG(PTACallGraph *cg, VFGK k)
-    : totalVFGNode(0), callgraph(cg), pag(PAG::getPAG()), kind(k),
+VFG::VFG(PTACallGraph *cg, PAG *pag, VFGK k)
+    : totalVFGNode(0), callgraph(cg), pag(pag), kind(k),
       dumpVFG(false) {
 
     DBOUT(DGENERAL, outs() << pasMsg("\tCreate VFG Top Level Node\n"));
@@ -791,7 +791,6 @@ void VFG::updateCallGraph(PointerAnalysis *pta) {
 void VFG::connectCallerAndCallee(const CallBlockNode *callBlockNode,
                                  const SVFFunction *callee,
                                  VFGEdgeSetTy &edges) {
-    PAG *pag = PAG::getPAG();
     ICFG *icfg = pag->getICFG();
     CallSiteID csId = getCallSiteID(callBlockNode, callee);
     RetBlockNode *retBlockNode =

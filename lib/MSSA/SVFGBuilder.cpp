@@ -81,22 +81,21 @@ SVFG *SVFGBuilder::build(BVDataPTAImpl *pta, VFG::VFGK kind) {
     DBOUT(DGENERAL, outs() << pasMsg("Build Sparse Value-Flow Graph \n"));
     if(Options::SingleVFG)
     {
-        if(globalSvfg==nullptr)
-        {
+        if(globalSvfg==nullptr) {
             /// Note that we use callgraph from andersen analysis here
             if(Options::OPTSVFG)
-                svfg = globalSvfg = new SVFGOPT(mssa, kind);
+                svfg = globalSvfg = new SVFGOPT(mssa, pta->getPAG(), kind);
             else
-                svfg = globalSvfg = new SVFG(mssa, kind);
+                svfg = globalSvfg = new SVFG(mssa, pta->getPAG(), kind);
             buildSVFG();
         }
     }
     else
     {
         if(Options::OPTSVFG)
-            svfg = new SVFGOPT(mssa, kind);
+            svfg = new SVFGOPT(mssa, pta->getPAG(), kind);
         else
-            svfg = new SVFG(mssa, kind);
+            svfg = new SVFG(mssa, pta->getPAG(), kind);
         buildSVFG();
     }
 

@@ -42,7 +42,7 @@ class FileChecker : public LeakChecker {
 
   public:
     /// Constructor
-    FileChecker() : LeakChecker() {}
+    FileChecker(PAG *pag) : LeakChecker(pag) {}
 
     /// Destructor
     virtual ~FileChecker() {}
@@ -50,7 +50,7 @@ class FileChecker : public LeakChecker {
     /// We start from here
     bool runOnModule(SVFModule *module) override {
         /// start analysis
-        analyze(module);
+        analyze();
         return false;
     }
 

@@ -197,7 +197,9 @@ void DDAStat::performStat() {
 
     getNumOfOOBQuery();
 
-    for (auto nodeIt : *PAG::getPAG()) {
+    PAG *pag = getPTA()->getPAG();
+
+    for (auto nodeIt : *pag) {
         PAGNode *pagNode = nodeIt.second;
         if (SVFUtil::isa<ObjPN>(pagNode)) {
             if (getPTA()->isLocalVarInRecursiveFun(nodeIt.first)) {
@@ -233,8 +235,7 @@ void DDAStat::performStat() {
     PTNumStatMap["PointsToBlkPtr"] = _NumOfBlackholePtr;
     PTNumStatMap["NumOfMustAA"] = _TotalNumOfMustAliases;
     PTNumStatMap["NumOfInfePath"] = _TotalNumOfInfeasiblePath;
-    PTNumStatMap["NumOfStore"] =
-        PAG::getPAG()->getPTAEdgeSet(PAGEdge::Store).size();
+    PTNumStatMap["NumOfStore"] = pag->getPTAEdgeSet(PAGEdge::Store).size();
     PTNumStatMap["MemoryUsageVmrss"] = _vmrssUsageAfter - _vmrssUsageBefore;
     PTNumStatMap["MemoryUsageVmsize"] = _vmsizeUsageAfter - _vmsizeUsageBefore;
 

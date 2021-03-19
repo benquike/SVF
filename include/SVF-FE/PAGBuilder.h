@@ -45,6 +45,9 @@ class PAGBuilder : public llvm::InstVisitor<PAGBuilder> {
   private:
     PAG *pag;
     SVFModule *svfMod;
+
+
+    // these 2 fields are for saving the current location
     const BasicBlock *curBB; ///< Current basic block during PAG construction
                              ///< when visiting the module
     const Value *curVal;     ///< Current Value during PAG construction when
@@ -52,14 +55,14 @@ class PAGBuilder : public llvm::InstVisitor<PAGBuilder> {
 
   public:
     /// Constructor
-    PAGBuilder()
-        : pag(PAG::getPAG()), svfMod(nullptr), curBB(nullptr), curVal(nullptr) {
+    PAGBuilder(PAG *pag)
+        : pag(pag), svfMod(nullptr), curBB(nullptr), curVal(nullptr) {
     }
     /// Destructor
     virtual ~PAGBuilder() {}
 
     /// Start building PAG here
-    virtual PAG *build(SVFModule *svfModule);
+    virtual PAG *build();
 
     /// Return PAG
     PAG *getPAG() const { return pag; }

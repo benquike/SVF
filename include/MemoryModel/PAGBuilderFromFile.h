@@ -46,7 +46,7 @@ class PAGBuilderFromFile {
 
   public:
     /// Constructor
-    PAGBuilderFromFile(std::string f) : pag(PAG::getPAG(true)), file(f) {}
+    PAGBuilderFromFile(std::string f, PAG *pag) : pag(pag), file(f) {}
     /// Destructor
     ~PAGBuilderFromFile() {}
 

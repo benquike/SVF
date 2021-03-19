@@ -97,7 +97,7 @@ class AddrCGEdge : public ConstraintEdge {
     //@}
 
     /// constructor
-    AddrCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id);
+    AddrCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id, PAG *pag);
 };
 
 /*!

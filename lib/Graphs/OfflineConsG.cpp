@@ -110,7 +110,7 @@ bool OfflineConsG::createRefNode(NodeID nodeId) {
     }
 
     NodeID refId = pag->addDummyValNode();
-    ConstraintNode *node = new ConstraintNode(refId);
+    ConstraintNode *node = new ConstraintNode(refId, pag);
     addConstraintNode(node, refId);
     refNodes.insert(refId);
     nodeToRefMap[nodeId] = refId;
@@ -187,11 +187,11 @@ struct DOTGraphTraits<OfflineConsG *> : public DOTGraphTraits<PAG *> {
     /// Return label of a VFG node with two display mode
     /// Either you can choose to display the name of the value or the whole
     /// instruction
-    static std::string getNodeLabel(NodeType *n, OfflineConsG *) {
+    static std::string getNodeLabel(NodeType *n, OfflineConsG *g) {
         std::string str;
         raw_string_ostream rawstr(str);
-        if (PAG::getPAG()->findPAGNode(n->getId())) {
-            PAGNode *node = PAG::getPAG()->getPAGNode(n->getId());
+        if (g->getPAG()->findPAGNode(n->getId())) {
+            PAGNode *node = g->getPAG()->getPAGNode(n->getId());
             bool briefDisplay = true;
             bool nameDisplay = true;
 
@@ -222,9 +222,9 @@ struct DOTGraphTraits<OfflineConsG *> : public DOTGraphTraits<PAG *> {
         return rawstr.str();
     }
 
-    static std::string getNodeAttributes(NodeType *n, OfflineConsG *) {
-        if (PAG::getPAG()->findPAGNode(n->getId())) {
-            PAGNode *node = PAG::getPAG()->getPAGNode(n->getId());
+    static std::string getNodeAttributes(NodeType *n, OfflineConsG *g) {
+        if (g->getPAG()->findPAGNode(n->getId())) {
+            PAGNode *node = g->getPAG()->getPAGNode(n->getId());
             if (SVFUtil::isa<ValPN>(node)) {
                 if (SVFUtil::isa<GepValPN>(node)) {
                     return "shape=hexagon";

@@ -165,9 +165,9 @@ void PAGBuilderFromFile::addEdge(NodeID srcID, NodeID dstID,
     } else if (edge == "variant-gep") {
         pag->addVariantGepPE(srcID, dstID);
     } else if (edge == "call") {
-        pag->addEdge(srcNode, dstNode, new CallPE(srcNode, dstNode, nullptr));
+        pag->addEdge(srcNode, dstNode, new CallPE(srcNode, dstNode, pag, nullptr));
     } else if (edge == "ret") {
-        pag->addEdge(srcNode, dstNode, new RetPE(srcNode, dstNode, nullptr));
+        pag->addEdge(srcNode, dstNode, new RetPE(srcNode, dstNode, pag, nullptr));
     } else if (edge == "cmp") {
         pag->addCmpPE(srcID, dstID);
     } else if (edge == "binary-op") {

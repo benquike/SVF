@@ -173,7 +173,7 @@ const std::string RetCFGEdge::toString() const {
  * 2) connect ICFG edges
  *    between two statements (PAGEdges)
  */
-ICFG::ICFG() : totalICFGNode(0) {
+ICFG::ICFG(PAG *pag) : totalICFGNode(0), pag(pag) {
     DBOUT(DGENERAL, outs() << pasMsg("\tCreate ICFG ...\n"));
     globalBlockNode = new GlobalBlockNode(totalICFGNode++);
     addICFGNode(globalBlockNode);
@@ -428,18 +428,19 @@ template <> struct DOTGraphTraits<ICFG *> : public DOTGraphTraits<PAG *> {
     }
 
     /// Return the label of an ICFG node
-    static std::string getSimpleNodeLabel(NodeType *node, ICFG *) {
+    static std::string getSimpleNodeLabel(NodeType *node, ICFG *g) {
         std::string str;
         raw_string_ostream rawstr(str);
         rawstr << "NodeID: " << node->getId() << "\n";
 
+
         if (auto* bNode = SVFUtil::dyn_cast<IntraBlockNode>(node))
         {
             rawstr << "IntraBlockNode ID: " << bNode->getId() << " \t";
-            PAG::PAGEdgeList&  edges = PAG::getPAG()->getInstPTAPAGEdgeList(bNode);
-            for (auto edge : edges)
-            {
-                 rawstr << edge->toString();
+            PAG::PAGEdgeList &edges =
+                g->getPAG()->getInstPTAPAGEdgeList(bNode);
+            for (auto edge : edges) {
+                rawstr << edge->toString();
             }
             rawstr << " {fun: " << bNode->getFun()->getName() << "}";
         }
@@ -454,7 +455,7 @@ template <> struct DOTGraphTraits<ICFG *> : public DOTGraphTraits<PAG *> {
             rawstr << ret->toString();
         } else if (auto *glob = SVFUtil::dyn_cast<GlobalBlockNode>(node)) {
             PAG::PAGEdgeList &edges =
-                PAG::getPAG()->getInstPTAPAGEdgeList(glob);
+                g->getPAG()->getInstPTAPAGEdgeList(glob);
             for (const auto *edge : edges) {
                 rawstr << edge->toString();
             }

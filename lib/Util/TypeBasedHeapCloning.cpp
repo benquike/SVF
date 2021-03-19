@@ -452,21 +452,28 @@ const MDNode *TypeBasedHeapCloning::getRawCTirMetadata(const Value *v) {
 }
 
 NodeID TypeBasedHeapCloning::addCloneDummyObjNode(const MemObj *mem) {
-    NodeID id = NodeIDAllocator::get()->allocateObjectId();
+    auto &nodeIDAllocator = mem->getSymbolTableInfo()->getNodeIDAllocator();
+    NodeID id = nodeIDAllocator.allocateObjectId();
     return ppag->addObjNode(nullptr, new CloneDummyObjPN(id, mem), id);
 }
 
 NodeID TypeBasedHeapCloning::addCloneGepObjNode(const MemObj *mem,
                                                 const LocationSet &l) {
-    NodeID id = NodeIDAllocator::get()->allocateObjectId();
-    return ppag->addObjNode(mem->getRefVal(), new CloneGepObjPN(mem, id, l),
+    SymbolTableInfo *symInfo = mem->getSymbolTableInfo();
+    auto &nodeIDAllocator = symInfo->getNodeIDAllocator();
+    NodeID id =  nodeIDAllocator.allocateObjectId();
+    return ppag->addObjNode(mem->getRefVal(),
+                            new CloneGepObjPN(mem, id, l, symInfo),
                             id);
 }
 
 NodeID TypeBasedHeapCloning::addCloneFIObjNode(const MemObj *mem) {
-    NodeID id = NodeIDAllocator::get()->allocateObjectId();
+    SymbolTableInfo *symInfo = mem->getSymbolTableInfo();
+    auto &nodeIDAllocator = symInfo->getNodeIDAllocator();
+    NodeID id = nodeIDAllocator.allocateObjectId();
     return ppag->addObjNode(mem->getRefVal(),
-                            new CloneFIObjPN(mem->getRefVal(), id, mem), id);
+                            new CloneFIObjPN(mem->getRefVal(), id, mem),
+                            id);
 }
 
 const DIType *TypeBasedHeapCloning::getTypeFromCTirMetadata(const Value *v) {

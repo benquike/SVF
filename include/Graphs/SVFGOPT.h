@@ -59,7 +59,7 @@ class SVFGOPT : public SVFG {
 
   public:
     /// Constructor
-    SVFGOPT(MemSSA *_mssa, VFGK kind) : SVFG(_mssa, kind) {
+    SVFGOPT(MemSSA *_mssa, PAG *pag, VFGK kind) : SVFG(_mssa, pag, kind) {
         keepAllSelfCycle = keepContextSelfCycle = keepActualOutFormalIn = false;
     }
     /// Destructor
@@ -284,10 +284,10 @@ class SVFGOPT : public SVFG {
     /// Check if actual-in/actual-out exist at indirect call site.
     //@{
     inline bool actualInOfIndCS(const ActualINSVFGNode *ai) const {
-        return (PAG::getPAG()->isIndirectCallSites(ai->getCallSite()));
+        return (getPAG()->isIndirectCallSites(ai->getCallSite()));
     }
     inline bool actualOutOfIndCS(const ActualOUTSVFGNode *ao) const {
-        return (PAG::getPAG()->isIndirectCallSites(ao->getCallSite()));
+        return (getPAG()->isIndirectCallSites(ao->getCallSite()));
     }
     //@}
 

@@ -7,7 +7,8 @@ using namespace std;
 using namespace SVF;
 using namespace SVFUtil;
 
-ICFGPrinter::ICFGPrinter() {}
+ICFGPrinter::ICFGPrinter(PAG *pag): ICFG(pag) {}
+
 void ICFGPrinter::printICFGToJson(const std::string &filename) {
     outs() << "write symbols to '" << filename << "'...";
     std::error_code err;
@@ -27,8 +28,7 @@ void ICFGPrinter::printICFGToJson(const std::string &filename) {
         ICFGNode_Obj["Node Type"] = getICFGKind(node->getNodeKind());
         if (IntraBlockNode *bNode = SVFUtil::dyn_cast<IntraBlockNode>(node)) {
             ICFGNode_Obj["Source Location"] = getSourceLoc(bNode->getInst());
-            PAG::PAGEdgeList &edges =
-                PAG::getPAG()->getInstPTAPAGEdgeList(bNode);
+            PAG::PAGEdgeList &edges = getPAG()->getInstPTAPAGEdgeList(bNode);
             llvm::json::Array PAGEdge_array;
 
             // dump pag edges

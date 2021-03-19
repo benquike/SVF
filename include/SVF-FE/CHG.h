@@ -32,6 +32,7 @@
 
 #include "Graphs/GenericGraph.h"
 #include "SVF-FE/CommonCHG.h"
+#include "SVF-FE/SymbolTableInfo.h"
 #include "Util/SVFModule.h"
 #include "Util/WorkList.h"
 
@@ -141,8 +142,9 @@ class CHGraph : public CommonCHGraph, public GenericCHGraphTy {
         DESTRUCTOR = 0x2   // connect node based on destructor
     } RELATIONTYPE;
 
-    CHGraph(SVFModule *svfModule)
-        : svfMod(svfModule), classNum(0), vfID(0), buildingCHGTime(0) {
+    CHGraph(SymbolTableInfo *symInfo)
+        : svfMod(symInfo->getModule()), symbolTableInfo(symInfo),
+          classNum(0), vfID(0), buildingCHGTime(0) {
         this->kind = Standard;
     }
     ~CHGraph();
@@ -235,6 +237,7 @@ class CHGraph : public CommonCHGraph, public GenericCHGraphTy {
 
   private:
     SVFModule *svfMod;
+    SymbolTableInfo *symbolTableInfo;
     u32_t classNum;
     s32_t vfID;
     double buildingCHGTime;

@@ -40,11 +40,11 @@ class NodeIDAllocator {
     static const NodeID nullPointerId;
     ///@}
 
-    /// Return (singleton) allocator.
-    static NodeIDAllocator *get();
-
-    /// Deletes the (singleton) allocator.
-    static void unset();
+    /// Constructor
+    ///
+    /// Builds a node ID allocator with the strategy specified on the command
+    /// line.
+    NodeIDAllocator();
 
     /// Allocate an object ID as determined by the strategy.
     NodeID allocateObjectId();
@@ -62,11 +62,6 @@ class NodeIDAllocator {
 
     /// Notify the allocator that all symbols have had IDs allocated.
     void endSymbolAllocation();
-
-  private:
-    /// Builds a node ID allocator with the strategy specified on the command
-    /// line.
-    NodeIDAllocator();
 
   private:
     /// These are moreso counters than amounts.

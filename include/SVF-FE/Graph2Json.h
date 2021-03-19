@@ -14,7 +14,7 @@ namespace SVF {
 class GraphWriter;
 class ICFGPrinter : public ICFG {
   public:
-    ICFGPrinter();
+    ICFGPrinter(PAG *pag);
 
     void printICFGToJson(const std::string &filename);
 

@@ -104,8 +104,8 @@ void LLVMModuleSet::build() {
         /// building symbol table
         DBOUT(DGENERAL, SVFUtil::outs()
                             << SVFUtil::pasMsg("Building Symbol table ...\n"));
-        SymbolTableInfo *symInfo = SymbolTableInfo::SymbolInfo();
-        symInfo->buildMemModel(svfModule);
+        SymbolTableInfo *symInfo = SymbolTableInfo::SymbolInfo(svfModule);
+        symInfo->buildMemModel();
     }
 }
 

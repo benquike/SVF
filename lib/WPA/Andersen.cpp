@@ -556,8 +556,10 @@ void Andersen::heapAllocatorViaIndCall(CallSite cs, NodePairSet &cpySrcNodes) {
         NodeID objNode = pag->addDummyObjNode(cs.getType());
         addPts(valNode, objNode);
         callsite2DummyValPN.insert(std::make_pair(cs, valNode));
-        consCG->addConstraintNode(new ConstraintNode(valNode), valNode);
-        consCG->addConstraintNode(new ConstraintNode(objNode), objNode);
+        consCG->addConstraintNode(new ConstraintNode(valNode, getPAG()),
+                                  valNode);
+        consCG->addConstraintNode(new ConstraintNode(objNode, getPAG()),
+                                  objNode);
         srcret = valNode;
     }
 

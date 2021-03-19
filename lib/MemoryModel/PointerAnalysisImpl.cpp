@@ -21,22 +21,17 @@ using namespace std;
 /*!
  * Constructor
  */
-BVDataPTAImpl::BVDataPTAImpl(PAG* p, PointerAnalysis::PTATY type, bool alias_check) :
-    PointerAnalysis(p, type, alias_check)
-{
-    if (type == Andersen_BASE || type == Andersen_WPA || type == AndersenWaveDiff_WPA || type == AndersenHCD_WPA || type == AndersenHLCD_WPA
-            || type == AndersenLCD_WPA || type == TypeCPP_WPA || type == FlowS_DDA || type == AndersenWaveDiffWithType_WPA
-            || type == AndersenSCD_WPA || type == AndersenSFR_WPA)
-    {
-        // Only maintain reverse points-to when the analysis is field-sensitive.
-        ptD = new MutDiffPTDataTy(Options::MaxFieldLimit != 0);
-    }
-    else if (type == Steensgaard_WPA)
-    {
-        ptD = new MutDiffPTDataTy(false);
-    }
-    else if (type == FSSPARSE_WPA || type == FSTBHC_WPA)
-    {
+BVDataPTAImpl::BVDataPTAImpl(PAG *pag, PointerAnalysis::PTATY type,
+                             bool alias_check)
+    : PointerAnalysis(pag, type, alias_check) {
+    if (type == Andersen_BASE || type == Andersen_WPA ||
+        type == AndersenWaveDiff_WPA || type == AndersenHCD_WPA ||
+        type == AndersenHLCD_WPA || type == AndersenLCD_WPA ||
+        type == TypeCPP_WPA || type == FlowS_DDA ||
+        type == AndersenWaveDiffWithType_WPA || type == AndersenSCD_WPA ||
+        type == AndersenSFR_WPA || type == Steensgaard_WPA) {
+        ptD = new MutDiffPTDataTy();
+    } else if (type == FSSPARSE_WPA || type == FSTBHC_WPA) {
         if (Options::INCDFPTData) {
             ptD = new IncMutDFPTDataTy(false);
         } else {

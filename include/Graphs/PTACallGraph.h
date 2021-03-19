@@ -200,11 +200,11 @@ class PTACallGraph : public GenericCallGraphTy {
     CallEdgeMap indirectCallMap;
 
     /// Call site information
-    static CallSiteToIdMap csToIdMap;   ///< Map a pair of call instruction and
+    CallSiteToIdMap csToIdMap;   ///< Map a pair of call instruction and
                                         ///< callee to a callsite ID
-    static IdToCallSiteMap idToCSMap;   ///< Map a callsite ID to a pair of call
+    IdToCallSiteMap idToCSMap;   ///< Map a callsite ID to a pair of call
                                         ///< instruction and callee
-    static CallSiteID totalCallSiteNum; ///< CallSiteIDs, start from 1;
+    CallSiteID totalCallSiteNum; ///< CallSiteIDs, start from 1;
 
   protected:
     FunToCallGraphNodeMap funToCallGraphNodeMap; ///< Call Graph node map

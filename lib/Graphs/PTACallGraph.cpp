@@ -34,9 +34,9 @@
 using namespace SVF;
 using namespace SVFUtil;
 
-PTACallGraph::CallSiteToIdMap PTACallGraph::csToIdMap;
-PTACallGraph::IdToCallSiteMap PTACallGraph::idToCSMap;
-CallSiteID PTACallGraph::totalCallSiteNum = 1;
+// PTACallGraph::CallSiteToIdMap PTACallGraph::csToIdMap;
+// PTACallGraph::IdToCallSiteMap PTACallGraph::idToCSMap;
+// CallSiteID PTACallGraph::totalCallSiteNum = 1;
 
 /// Add direct and indirect callsite
 //@{
