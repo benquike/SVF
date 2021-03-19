@@ -142,14 +142,12 @@ int main(int argc, char **argv) {
     cl::ParseCommandLineOptions(arg_num, arg_value,
                                 "Whole Program Points-to Analysis\n");
 
+    // how to manage the momory of SVFModule?
     SVFModule *svfModule =
         LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
 
-    SymbolTableInfo _symbolTableInfo(svfModule);
-    PAG _pag(&_symbolTableInfo);
-    /// Build Program Assignment Graph (PAG)
-    PAGBuilder _builder(&_pag);
-    PAG *pag = _builder.build();
+    PAG _pag(svfModule);
+    PAG *pag = &_pag;
 
     /// Create Andersen's pointer analysis
     Andersen *ander = AndersenWaveDiff::createAndersenWaveDiff(pag);
@@ -181,6 +179,7 @@ int main(int argc, char **argv) {
 
     // clean up memory
     delete vfg;
+    delete ander;
     delete svfg;
     AndersenWaveDiff::releaseAndersenWaveDiff();
 
