@@ -71,11 +71,11 @@ class SVFModule {
     LLVMFun2SVFFunMap
         LLVMFunc2SVFFunc; ///< Map an LLVM Function to an SVF Function
 
-    LLVMModuleSet *llvmModSet;
+    LLVMModuleSet *llvmModSet = nullptr;
 
   public:
     /// Constructors
-    SVFModule(string moduleName = "");
+    SVFModule(string moduleName);
     SVFModule(vector<string> &modVec);
     SVFModule(Module &module);
 
