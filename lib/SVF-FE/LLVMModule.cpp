@@ -99,14 +99,6 @@ void LLVMModuleSet::build() {
     initialize();
     buildFunToFunMap();
     buildGlobalDefToRepMap();
-
-    if (!SVFModule::pagReadFromTXT()) {
-        /// building symbol table
-        DBOUT(DGENERAL, SVFUtil::outs()
-                            << SVFUtil::pasMsg("Building Symbol table ...\n"));
-        SymbolTableInfo *symInfo = SymbolTableInfo::SymbolInfo(svfModule);
-        symInfo->buildMemModel();
-    }
 }
 
 void LLVMModuleSet::loadModules(const std::vector<std::string> &moduleNameVec) {

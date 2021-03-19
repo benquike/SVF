@@ -96,9 +96,8 @@ bool WPAPass::runOnModule(Module &module) {
 void WPAPass::runPointerAnalysis(SVFModule *svfModule, u32_t kind) {
     /// Build PAG
     SymbolTableInfo symbolTableInfo(svfModule);
-    PAG _pag(&symbolTableInfo, false);
-    PAGBuilder builder(&_pag);
-    PAG *pag = builder.build();
+    PAG _pag(svfModule);
+    PAG *pag = &_pag;
 
     /// Initialize pointer analysis.
     switch (kind) {
