@@ -28,6 +28,7 @@
  */
 
 #include "Graphs/PTACallGraph.h"
+#include "SVF-FE/SVFProject.h"
 #include "SVF-FE/LLVMUtil.h"
 #include "Util/SVFModule.h"
 
@@ -41,15 +42,20 @@ using namespace SVFUtil;
 /// Add direct and indirect callsite
 //@{
 void PTACallGraphEdge::addDirectCallSite(const CallBlockNode *call) {
-    assert(SVFUtil::getCallee(call->getCallSite()) &&
-           "not a direct callsite??");
+    const Instruction *callInst = call->getCallSite();
+    llvm::ImmutableCallSite cs(callInst);
+    assert(cs.getCalledFunction() && "not a direct callsite??");
+
     directCalls.insert(call);
 }
 
-void PTACallGraphEdge::addInDirectCallSite(const CallBlockNode *call) {
-    assert((nullptr == SVFUtil::getCallee(call->getCallSite()) ||
+void PTACallGraphEdge::addInDirectCallSite(const CallBlockNode *call,
+                                           SVFProject *proj) {
+    const Instruction *callInst = call->getCallSite();
+    llvm::ImmutableCallSite cs(callInst);
+    assert((nullptr == cs.getCalledFunction() ||
             nullptr == SVFUtil::dyn_cast<Function>(
-                           SVFUtil::getForkedFun(call->getCallSite()))) &&
+                proj->getForkedFun(call->getCallSite()))) &&
            "not an indirect callsite??");
     indirectCalls.insert(call);
 }
@@ -103,7 +109,9 @@ bool PTACallGraphNode::isReachableFromProgEntry() const {
 }
 
 /// Constructor
-PTACallGraph::PTACallGraph(CGEK k) : kind(k) {
+PTACallGraph::PTACallGraph(SVFProject *proj, CGEK k)
+    : kind(k), pag(proj->getPAG()),
+      proj(proj) {
     callGraphNodeNum = 0;
     numOfResolvedIndCallEdge = 0;
 }
@@ -196,7 +204,7 @@ void PTACallGraph::addIndirectCallGraphEdge(const CallBlockNode *cs,
     if (!hasGraphEdge(caller, callee, PTACallGraphEdge::CallRetEdge, csId)) {
         auto *edge = new PTACallGraphEdge(caller, callee,
                                           PTACallGraphEdge::CallRetEdge, csId);
-        edge->addInDirectCallSite(cs);
+        edge->addInDirectCallSite(cs, proj);
         addEdge(edge);
         callinstToCallGraphEdgesMap[cs].insert(edge);
     }

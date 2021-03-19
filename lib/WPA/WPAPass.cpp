@@ -122,10 +122,10 @@ WPAPass::~WPAPass() {
 /*!
  * We start from here
  */
-void WPAPass::runOnModule(SVFModule *svfModule) {
+void WPAPass::runOnModule(SVFProject *proj) {
     for (u32_t i = 0; i <= PointerAnalysis::Default_PTA; i++) {
         if (PASelected.isSet(i))
-            runPointerAnalysis(svfModule, i);
+            runPointerAnalysis(proj, i);
     }
     assert(!ptaVector.empty() && "No pointer analysis is specified.\n");
 }
@@ -134,9 +134,8 @@ void WPAPass::runOnModule(SVFModule *svfModule) {
  * We start from here
  */
 bool WPAPass::runOnModule(Module &module) {
-    SVFModule *svfModule =
-        LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(module);
-    runOnModule(svfModule);
+    SVFProject proj(module);
+    runOnModule(&proj);
     return false;
 }
 
@@ -144,52 +143,49 @@ bool WPAPass::runOnModule(Module &module) {
  * Create pointer analysis according to a specified kind and then analyze the
  * module.
  */
-void WPAPass::runPointerAnalysis(SVFModule *svfModule, u32_t kind) {
+void WPAPass::runPointerAnalysis(SVFProject *proj, u32_t kind) {
     /// Build PAG
-    SymbolTableInfo symbolTableInfo(svfModule);
-    PAG _pag(svfModule);
-    PAG *pag = &_pag;
 
     /// Initialize pointer analysis.
     switch (kind) {
     case PointerAnalysis::Andersen_WPA:
-        _pta = new Andersen(pag);
+        _pta = new Andersen(proj);
         break;
     case PointerAnalysis::AndersenLCD_WPA:
-        _pta = new AndersenLCD(pag);
+        _pta = new AndersenLCD(proj);
         break;
     case PointerAnalysis::AndersenHCD_WPA:
-        _pta = new AndersenHCD(pag);
+        _pta = new AndersenHCD(proj);
         break;
     case PointerAnalysis::AndersenHLCD_WPA:
-        _pta = new AndersenHLCD(pag);
+        _pta = new AndersenHLCD(proj);
         break;
     case PointerAnalysis::AndersenSCD_WPA:
-        _pta = new AndersenSCD(pag);
+        _pta = new AndersenSCD(proj);
         break;
     case PointerAnalysis::AndersenSFR_WPA:
-        _pta = new AndersenSFR(pag);
+        _pta = new AndersenSFR(proj);
         break;
     case PointerAnalysis::AndersenWaveDiff_WPA:
-        _pta = new AndersenWaveDiff(pag);
+        _pta = new AndersenWaveDiff(proj);
         break;
     case PointerAnalysis::AndersenWaveDiffWithType_WPA:
-        _pta = new AndersenWaveDiffWithType(pag);
+        _pta = new AndersenWaveDiffWithType(proj);
         break;
     case PointerAnalysis::Steensgaard_WPA:
-        _pta = new Steensgaard(pag);
+        _pta = new Steensgaard(proj);
         break;
     case PointerAnalysis::FSSPARSE_WPA:
-        _pta = new FlowSensitive(pag);
+        _pta = new FlowSensitive(proj);
         break;
     case PointerAnalysis::FSTBHC_WPA:
-        _pta = new FlowSensitiveTBHC(pag);
+        _pta = new FlowSensitiveTBHC(proj);
         break;
     case PointerAnalysis::VFS_WPA:
-        _pta = new VersionedFlowSensitive(pag);
+        _pta = new VersionedFlowSensitive(proj);
         break;
     case PointerAnalysis::TypeCPP_WPA:
-        _pta = new TypeAnalysis(pag);
+        _pta = new TypeAnalysis(proj);
         break;
     default:
         assert(false &&

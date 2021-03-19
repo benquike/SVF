@@ -23,9 +23,9 @@ static llvm::cl::opt<bool> INCDFPTData(
 /*!
  * Constructor
  */
-BVDataPTAImpl::BVDataPTAImpl(PAG *pag, PointerAnalysis::PTATY type,
+BVDataPTAImpl::BVDataPTAImpl(SVFProject *proj, PointerAnalysis::PTATY type,
                              bool alias_check)
-    : PointerAnalysis(pag, type, alias_check) {
+    : PointerAnalysis(proj, type, alias_check) {
     if (type == Andersen_BASE || type == Andersen_WPA ||
         type == AndersenWaveDiff_WPA || type == AndersenHCD_WPA ||
         type == AndersenHLCD_WPA || type == AndersenLCD_WPA ||
@@ -252,7 +252,7 @@ void BVDataPTAImpl::onTheFlyCallGraphSolve(const CallSiteToFunPtrMap &callsites,
         const CallBlockNode *cs = callsite.first;
         CallSite llvmCS = SVFUtil::getLLVMCallSite(cs->getCallSite());
 
-        if (isVirtualCallSite(llvmCS)) {
+        if (isVirtualCallSite(llvmCS, getPAG()->getModule()->getLLVMModSet())) {
             const Value *vtbl = getVCallVtblPtr(llvmCS);
             assert(pag->hasValueNode(vtbl));
             NodeID vtblId = pag->getValueNode(vtbl);

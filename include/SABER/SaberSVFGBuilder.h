@@ -33,12 +33,14 @@
 #include "MSSA/SVFGBuilder.h"
 #include "Util/BasicTypes.h"
 #include "Util/WorkList.h"
+#include "SABER/SaberCheckerAPI.h"
 
 namespace SVF {
 
 class PAGNode;
 
-class SaberSVFGBuilder : public SVFGBuilder {
+class SaberSVFGBuilder : virtual public SVFGBuilder,
+                         virtual public SaberCheckerAPI {
 
   public:
     using SVFGNodeSet = Set<const SVFGNode *>;
@@ -46,7 +48,9 @@ class SaberSVFGBuilder : public SVFGBuilder {
     using WorkList = FIFOWorkList<NodeID>;
 
     /// Constructor
-    SaberSVFGBuilder() : SVFGBuilder(true) {}
+    SaberSVFGBuilder(PAG *pag) : SVFGBuilder(true),
+                                 SaberCheckerAPI(pag->getModule()) {
+    }
 
     /// Destructor
     virtual ~SaberSVFGBuilder() {}

@@ -63,10 +63,12 @@ inline bool isExtCall(const SVFFunction *fun) {
     return fun && ExtAPI::getExtAPI()->is_ext(fun);
 }
 
-inline bool isExtCall(const CallSite cs) { return isExtCall(getCallee(cs)); }
+inline bool isExtCall(const CallSite cs, SVFModule *svfMod) {
+    return isExtCall(getCallee(svfMod->getLLVMModSet(), cs));
+}
 
-inline bool isExtCall(const Instruction *inst) {
-    return isExtCall(getCallee(inst));
+inline bool isExtCall(const Instruction *inst, SVFModule *svfMod) {
+    return isExtCall(getCallee(svfMod->getLLVMModSet(), inst));
 }
 //@}
 
@@ -82,30 +84,35 @@ inline bool isHeapAllocExtFunViaArg(const SVFFunction *fun) {
 }
 
 /// interfaces to be used externally
-inline bool isHeapAllocExtCallViaRet(const CallSite cs) {
+inline bool isHeapAllocExtCallViaRet(const CallSite cs, SVFModule *svfMod) {
     bool isPtrTy = cs.getInstruction()->getType()->isPointerTy();
-    return isPtrTy && isHeapAllocExtFunViaRet(getCallee(cs));
+    return isPtrTy &&
+        isHeapAllocExtFunViaRet(getCallee(svfMod->getLLVMModSet(), cs));
 }
 
-inline bool isHeapAllocExtCallViaRet(const Instruction *inst) {
+inline bool
+isHeapAllocExtCallViaRet(const Instruction *inst, SVFModule *svfMod) {
     bool isPtrTy = inst->getType()->isPointerTy();
-    return isPtrTy && isHeapAllocExtFunViaRet(getCallee(inst));
+    return isPtrTy &&
+        isHeapAllocExtFunViaRet(getCallee(svfMod->getLLVMModSet(), inst));
 }
 
-inline bool isHeapAllocExtCallViaArg(const CallSite cs) {
-    return isHeapAllocExtFunViaArg(getCallee(cs));
+inline bool isHeapAllocExtCallViaArg(const CallSite cs, SVFModule *svfMod) {
+    return isHeapAllocExtFunViaArg(getCallee(svfMod->getLLVMModSet(), cs));
 }
 
-inline bool isHeapAllocExtCallViaArg(const Instruction *inst) {
-    return isHeapAllocExtFunViaArg(getCallee(inst));
+inline bool isHeapAllocExtCallViaArg(const Instruction *inst, SVFModule *svfMod) {
+    return isHeapAllocExtFunViaArg(getCallee(svfMod->getLLVMModSet(), inst));
 }
 
-inline bool isHeapAllocExtCall(const CallSite cs) {
-    return isHeapAllocExtCallViaRet(cs) || isHeapAllocExtCallViaArg(cs);
+inline bool isHeapAllocExtCall(const CallSite cs, SVFModule *svfMod) {
+    return isHeapAllocExtCallViaRet(cs, svfMod) ||
+        isHeapAllocExtCallViaArg(cs, svfMod);
 }
 
-inline bool isHeapAllocExtCall(const Instruction *inst) {
-    return isHeapAllocExtCallViaRet(inst) || isHeapAllocExtCallViaArg(inst);
+inline bool isHeapAllocExtCall(const Instruction *inst, SVFModule *svfMod) {
+    return isHeapAllocExtCallViaRet(inst, svfMod) ||
+        isHeapAllocExtCallViaArg(inst, svfMod);
 }
 //@}
 
@@ -115,12 +122,16 @@ inline int getHeapAllocHoldingArgPosition(const SVFFunction *fun) {
     return ExtAPI::getExtAPI()->get_alloc_arg_pos(fun);
 }
 
-inline int getHeapAllocHoldingArgPosition(const CallSite cs) {
-    return getHeapAllocHoldingArgPosition(getCallee(cs));
+inline int
+getHeapAllocHoldingArgPosition(const CallSite cs, SVFModule *svfMod) {
+    return getHeapAllocHoldingArgPosition(
+        getCallee(svfMod->getLLVMModSet(), cs));
 }
 
-inline int getHeapAllocHoldingArgPosition(const Instruction *inst) {
-    return getHeapAllocHoldingArgPosition(getCallee(inst));
+inline int
+getHeapAllocHoldingArgPosition(const Instruction *inst, SVFModule *svfMod) {
+    return getHeapAllocHoldingArgPosition(
+        getCallee(svfMod->getLLVMModSet(), inst));
 }
 //@}
 
@@ -131,14 +142,14 @@ inline bool isReallocExtFun(const SVFFunction *fun) {
     return fun && (ExtAPI::getExtAPI()->is_realloc(fun));
 }
 
-inline bool isReallocExtCall(const CallSite cs) {
+inline bool isReallocExtCall(const CallSite cs, SVFModule *svfMod) {
     bool isPtrTy = cs.getInstruction()->getType()->isPointerTy();
-    return isPtrTy && isReallocExtFun(getCallee(cs));
+    return isPtrTy && isReallocExtFun(getCallee(svfMod->getLLVMModSet(), cs));
 }
 
-inline bool isReallocExtCall(const Instruction *inst) {
+inline bool isReallocExtCall(const Instruction *inst, SVFModule *svfMod) {
     bool isPtrTy = inst->getType()->isPointerTy();
-    return isPtrTy && isReallocExtFun(getCallee(inst));
+    return isPtrTy && isReallocExtFun(getCallee(svfMod->getLLVMModSet(), inst));
 }
 //@}
 
@@ -149,12 +160,12 @@ inline bool isDeallocExtFun(const SVFFunction *fun) {
     return fun && (ExtAPI::getExtAPI()->is_dealloc(fun));
 }
 
-inline bool isDeallocExtCall(const CallSite cs) {
-    return isDeallocExtFun(getCallee(cs));
+inline bool isDeallocExtCall(const CallSite cs, SVFModule *svfMod) {
+    return isDeallocExtFun(getCallee(svfMod->getLLVMModSet(), cs));
 }
 
-inline bool isDeallocExtCall(const Instruction *inst) {
-    return isDeallocExtFun(getCallee(inst));
+inline bool isDeallocExtCall(const Instruction *inst, SVFModule *svfMod) {
+    return isDeallocExtFun(getCallee(svfMod->getLLVMModSet(), inst));
 }
 //@}
 
@@ -165,25 +176,26 @@ inline bool isStaticExtFun(const SVFFunction *fun) {
     return fun && ExtAPI::getExtAPI()->has_static(fun);
 }
 
-inline bool isStaticExtCall(const CallSite cs) {
+inline bool isStaticExtCall(const CallSite cs, SVFModule *svfMod) {
     bool isPtrTy = cs.getInstruction()->getType()->isPointerTy();
-    return isPtrTy && isStaticExtFun(getCallee(cs));
+    return isPtrTy && isStaticExtFun(getCallee(svfMod->getLLVMModSet(), cs));
 }
 
-inline bool isStaticExtCall(const Instruction *inst) {
+inline bool isStaticExtCall(const Instruction *inst, SVFModule *svfMod) {
     bool isPtrTy = inst->getType()->isPointerTy();
-    return isPtrTy && isStaticExtFun(getCallee(inst));
+    return isPtrTy && isStaticExtFun(getCallee(svfMod->getLLVMModSet(), inst));
 }
 //@}
 
 /// Return true if the call is a static global call
 //@{
-inline bool isHeapAllocOrStaticExtCall(const CallSite cs) {
-    return isStaticExtCall(cs) || isHeapAllocExtCall(cs);
+inline bool isHeapAllocOrStaticExtCall(const CallSite cs, SVFModule *svfMod) {
+    return isStaticExtCall(cs, svfMod) || isHeapAllocExtCall(cs, svfMod);
 }
 
-inline bool isHeapAllocOrStaticExtCall(const Instruction *inst) {
-    return isStaticExtCall(inst) || isHeapAllocExtCall(inst);
+inline bool
+isHeapAllocOrStaticExtCall(const Instruction *inst, SVFModule *svfMod) {
+    return isStaticExtCall(inst, svfMod) || isHeapAllocExtCall(inst, svfMod);
 }
 //@}
 
@@ -194,11 +206,12 @@ inline ExtAPI::extf_t extCallTy(const SVFFunction *fun) {
 
 /// Get the reference type of heap/static object from an allocation site.
 //@{
-inline const PointerType *getRefTypeOfHeapAllocOrStatic(const CallSite cs) {
+inline const PointerType *
+getRefTypeOfHeapAllocOrStatic(const CallSite cs, SVFModule *svfMod) {
     const PointerType *refType = nullptr;
     // Case 1: heap object held by *argument, we should get its element type.
-    if (isHeapAllocExtCallViaArg(cs)) {
-        int argPos = getHeapAllocHoldingArgPosition(cs);
+    if (isHeapAllocExtCallViaArg(cs, svfMod)) {
+        int argPos = getHeapAllocHoldingArgPosition(cs, svfMod);
         const Value *arg = cs.getArgument(argPos);
         if (const PointerType *argType =
                 SVFUtil::dyn_cast<PointerType>(arg->getType())) {
@@ -207,7 +220,8 @@ inline const PointerType *getRefTypeOfHeapAllocOrStatic(const CallSite cs) {
     }
     // Case 2: heap/static object held by return value.
     else {
-        assert((isStaticExtCall(cs) || isHeapAllocExtCallViaRet(cs)) &&
+        assert((isStaticExtCall(cs, svfMod) ||
+                isHeapAllocExtCallViaRet(cs, svfMod)) &&
                "Must be heap alloc via ret, or static allocation site");
         refType = SVFUtil::dyn_cast<PointerType>(cs.getType());
     }
@@ -217,124 +231,16 @@ inline const PointerType *getRefTypeOfHeapAllocOrStatic(const CallSite cs) {
 }
 
 inline const PointerType *
-getRefTypeOfHeapAllocOrStatic(const Instruction *inst) {
+getRefTypeOfHeapAllocOrStatic(const Instruction *inst, SVFModule *svfMod) {
     CallSite cs(const_cast<Instruction *>(inst));
-    return getRefTypeOfHeapAllocOrStatic(cs);
+    return getRefTypeOfHeapAllocOrStatic(cs, svfMod);
 }
 //@}
 
-/// Return true if this is a thread creation call
-///@{
-inline bool isThreadForkCall(const CallSite cs) {
-    return ThreadAPI::getThreadAPI()->isTDFork(cs);
-}
-inline bool isThreadForkCall(const Instruction *inst) {
-    return ThreadAPI::getThreadAPI()->isTDFork(inst);
-}
-//@}
 
-/// Return true if this is a hare_parallel_for call
-///@{
-inline bool isHareParForCall(const CallSite cs) {
-    return ThreadAPI::getThreadAPI()->isHareParFor(cs);
-}
-inline bool isHareParForCall(const Instruction *inst) {
-    return ThreadAPI::getThreadAPI()->isHareParFor(inst);
-}
-//@}
-
-/// Return true if this is a thread join call
-///@{
-inline bool isThreadJoinCall(const CallSite cs) {
-    return ThreadAPI::getThreadAPI()->isTDJoin(cs);
-}
-inline bool isThreadJoinCall(const Instruction *inst) {
-    return ThreadAPI::getThreadAPI()->isTDJoin(inst);
-}
-//@}
-
-/// Return true if this is a thread exit call
-///@{
-inline bool isThreadExitCall(const CallSite cs) {
-    return ThreadAPI::getThreadAPI()->isTDExit(cs);
-}
-inline bool isThreadExitCall(const Instruction *inst) {
-    return ThreadAPI::getThreadAPI()->isTDExit(inst);
-}
-//@}
-
-/// Return true if this is a lock acquire call
-///@{
-inline bool isLockAquireCall(const CallSite cs) {
-    return ThreadAPI::getThreadAPI()->isTDAcquire(cs);
-}
-inline bool isLockAquireCall(const Instruction *inst) {
-    return ThreadAPI::getThreadAPI()->isTDAcquire(inst);
-}
-//@}
-
-/// Return true if this is a lock acquire call
-///@{
-inline bool isLockReleaseCall(const CallSite cs) {
-    return ThreadAPI::getThreadAPI()->isTDRelease(cs);
-}
-inline bool isLockReleaseCall(const Instruction *inst) {
-    return ThreadAPI::getThreadAPI()->isTDRelease(inst);
-}
-//@}
-
-/// Return true if this is a barrier wait call
-//@{
-inline bool isBarrierWaitCall(const CallSite cs) {
-    return ThreadAPI::getThreadAPI()->isTDBarWait(cs);
-}
-inline bool isBarrierWaitCall(const Instruction *inst) {
-    return ThreadAPI::getThreadAPI()->isTDBarWait(inst);
-}
-//@}
-
-/// Return thread fork function
-//@{
-inline const Value *getForkedFun(const CallSite cs) {
-    return ThreadAPI::getThreadAPI()->getForkedFun(cs);
-}
-inline const Value *getForkedFun(const Instruction *inst) {
-    return ThreadAPI::getThreadAPI()->getForkedFun(inst);
-}
-//@}
-
-/// Return sole argument of the thread routine
-//@{
-inline const Value *getActualParmAtForkSite(const CallSite cs) {
-    return ThreadAPI::getThreadAPI()->getActualParmAtForkSite(cs);
-}
-inline const Value *getActualParmAtForkSite(const Instruction *inst) {
-    return ThreadAPI::getThreadAPI()->getActualParmAtForkSite(inst);
-}
-//@}
-
-/// Return the task function of the parallel_for routine
-//@{
-inline const Value *getTaskFuncAtHareParForSite(const CallSite cs) {
-    return ThreadAPI::getThreadAPI()->getTaskFuncAtHareParForSite(cs);
-}
-inline const Value *getTaskFuncAtHareParForSite(const Instruction *inst) {
-    return ThreadAPI::getThreadAPI()->getTaskFuncAtHareParForSite(inst);
-}
-//@}
-
-/// Return the task data argument of the parallel_for rountine
-//@{
-inline const Value *getTaskDataAtHareParForSite(const CallSite cs) {
-    return ThreadAPI::getThreadAPI()->getTaskDataAtHareParForSite(cs);
-}
-inline const Value *getTaskDataAtHareParForSite(const Instruction *inst) {
-    return ThreadAPI::getThreadAPI()->getTaskDataAtHareParForSite(inst);
-}
-//@}
 
 /// Return true if this value refers to a object
-bool isObject(const Value *ref);
+bool isObject(const Value *ref, SVFModule *svfMod);
 
 /// Return true if the value refers to constant data, e.g., i32 0
 inline bool isConstantData(const Value *val) {
@@ -349,12 +255,12 @@ inline bool isConstantData(const Value *val) {
 /// instruction
 //@{
 /// whether this is a function without any possible caller?
-bool isDeadFunction(const Function *fun);
+bool isDeadFunction(const Function *fun, SVFModule *svfMod);
 
 /// whether this is an argument in dead function
-inline bool ArgInDeadFunction(const Value *val) {
+inline bool ArgInDeadFunction(const Value *val, SVFModule *svfMod) {
     return SVFUtil::isa<Argument>(val) &&
-           isDeadFunction(SVFUtil::cast<Argument>(val)->getParent());
+        isDeadFunction(SVFUtil::cast<Argument>(val)->getParent(), svfMod);
 }
 //@}
 
@@ -387,7 +293,7 @@ inline bool ArgInProgEntryFunction(const Value *val) {
 }
 /// Return true if this is value in a dead function (function without any
 /// caller)
-bool isPtrInDeadFunction(const Value *value);
+bool isPtrInDeadFunction(const Value *value, SVFModule *svfMod);
 //@}
 
 /// Return true if this is a program exit function call
@@ -398,12 +304,12 @@ inline bool isProgExitFunction(const SVFFunction *fun) {
                    fun->getName().str() == "__assert_fail");
 }
 
-inline bool isProgExitCall(const CallSite cs) {
-    return isProgExitFunction(getCallee(cs));
+inline bool isProgExitCall(const CallSite cs, SVFModule *svfMod) {
+    return isProgExitFunction(getCallee(svfMod->getLLVMModSet(), cs));
 }
 
-inline bool isProgExitCall(const Instruction *inst) {
-    return isProgExitFunction(getCallee(inst));
+inline bool isProgExitCall(const Instruction *inst, SVFModule *svfMod) {
+    return isProgExitFunction(getCallee(svfMod->getLLVMModSet(), inst));
 }
 //@}
 
@@ -411,14 +317,14 @@ inline bool isProgExitCall(const Instruction *inst) {
 //@{
 /// Return true if the function does not have a caller (either it is a main
 /// function or a dead function)
-inline bool isNoCallerFunction(const Function *fun) {
-    return isDeadFunction(fun) || isProgEntryFunction(fun);
+inline bool isNoCallerFunction(const Function *fun, SVFModule *svfMod) {
+    return isDeadFunction(fun, svfMod) || isProgEntryFunction(fun);
 }
 
 /// Return true if the argument in a function does not have a caller
-inline bool ArgInNoCallerFunction(const Value *val) {
+inline bool ArgInNoCallerFunction(const Value *val, SVFModule *svfMod) {
     return SVFUtil::isa<Argument>(val) &&
-           isNoCallerFunction(SVFUtil::cast<Argument>(val)->getParent());
+           isNoCallerFunction(SVFUtil::cast<Argument>(val)->getParent(), svfMod);
 }
 //@}
 
@@ -443,7 +349,7 @@ const Value *stripConstantCasts(const Value *val);
 Value *stripAllCasts(Value *val);
 
 /// Get the type of the heap allocation
-const Type *getTypeOfHeapAlloc(const llvm::Instruction *inst);
+const Type *getTypeOfHeapAlloc(const llvm::Instruction *inst, SVFModule *svfMod);
 
 /// Return corresponding constant expression, otherwise return nullptr
 //@{

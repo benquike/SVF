@@ -23,12 +23,12 @@ class Steensgaard : public AndersenBase {
     using NodeToSubsMap = Map<NodeID, Set<NodeID>>;
 
     /// Constructor
-    Steensgaard(PAG *_pag) : AndersenBase(_pag, Steensgaard_WPA, true) {}
+    Steensgaard(SVFProject *proj) : AndersenBase(proj, Steensgaard_WPA, true) {}
 
     /// Create an singleton instance
-    static Steensgaard *createSteensgaard(PAG *_pag) {
+    static Steensgaard *createSteensgaard(SVFProject *proj) {
         if (steens == nullptr) {
-            steens = new Steensgaard(_pag);
+            steens = new Steensgaard(proj);
             steens->analyze();
             return steens;
         }

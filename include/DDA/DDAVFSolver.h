@@ -37,9 +37,10 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
     using StoreToPMSetMap = OrderedMap<const SVFGNode *, DPTItemSet>;
 
     /// Constructor
-    DDAVFSolver()
-        : outOfBudgetQuery(false), _pag(nullptr), _svfg(nullptr),
-          _ander(nullptr), _callGraph(nullptr), _callGraphSCC(nullptr),
+    DDAVFSolver(SVFProject *proj)
+        : outOfBudgetQuery(false), _pag(proj->getPAG()), _svfg(nullptr),
+          _ander(nullptr), proj(proj),  _callGraph(nullptr),
+          _callGraphSCC(nullptr),
           _svfgSCC(nullptr), ddaStat(nullptr) {}
     /// Destructor
     virtual ~DDAVFSolver() {
@@ -262,10 +263,10 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
     }
 
     /// Build SVFG
-    virtual inline void buildSVFG(PAG *pag) {
-        _ander = AndersenWaveDiff::createAndersenWaveDiff(pag);
+    virtual inline void buildSVFG() {
+        _ander = AndersenWaveDiff::createAndersenWaveDiff(proj);
         _svfg = svfgBuilder.buildPTROnlySVFGWithoutOPT(_ander);
-        _pag = _svfg->getPAG();
+        // _pag = _svfg->getPAG();
     }
     /// Reset visited map for next points-to query
     virtual inline void resetQuery() {
@@ -434,10 +435,10 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
         assert(obj && "object not found!!");
         if (obj->isStack()) {
             if (const auto *local =
-                    SVFUtil::dyn_cast<AllocaInst>(obj->getRefVal())) {
+                SVFUtil::dyn_cast<AllocaInst>(obj->getRefVal())) {
+                LLVMModuleSet *modSet = _pag->getModule()->getLLVMModSet();
                 const SVFFunction *fun =
-                    LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(
-                        local->getFunction());
+                    modSet->getSVFFunction(local->getFunction());
                 return _callGraphSCC->isInCycle(
                     _callGraph->getCallGraphNode(fun)->getId());
             }
@@ -719,6 +720,8 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
     PAG *_pag{};            ///< PAG
     SVFG *_svfg{};          ///< SVFG
     AndersenWaveDiff *_ander{};    ///< Andersen's analysis
+    SVFProject *proj;
+
     NodeBS candidateQueries;       ///< candidate pointers;
     PTACallGraph *_callGraph{};    ///< CallGraph
     CallGraphSCC *_callGraphSCC{}; ///< SCC for CallGraph

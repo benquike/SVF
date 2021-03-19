@@ -52,7 +52,7 @@ class VersionedFlowSensitive : public FlowSensitive {
     static VersionedVar atKey(NodeID, Version);
 
     /// Constructor
-    VersionedFlowSensitive(PAG *_pag, PTATY type = VFS_WPA);
+    VersionedFlowSensitive(SVFProject *proj, PTATY type = VFS_WPA);
 
     /// Initialize analysis
     void initialize() override;
@@ -74,9 +74,9 @@ class VersionedFlowSensitive : public FlowSensitive {
     //@}
 
     /// Create single instance of versioned flow-sensitive points-to analysis.
-    static VersionedFlowSensitive *createVFSWPA(PAG *_pag) {
+    static VersionedFlowSensitive *createVFSWPA(SVFProject *proj) {
         if (vfspta == nullptr) {
-            vfspta = new VersionedFlowSensitive(_pag);
+            vfspta = new VersionedFlowSensitive(proj);
             vfspta->analyze();
         }
 

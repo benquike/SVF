@@ -31,7 +31,7 @@ class FlowSensitiveTBHC : public FlowSensitive, public TypeBasedHeapCloning {
     static const MDNode *getRawCTirMetadata(const SVFGNode *);
 
     /// Constructor
-    FlowSensitiveTBHC(PAG *_pag, PTATY type = FSTBHC_WPA);
+    FlowSensitiveTBHC(SVFProject *proj, PTATY type = FSTBHC_WPA);
 
     /// Destructor
     virtual ~FlowSensitiveTBHC(){};

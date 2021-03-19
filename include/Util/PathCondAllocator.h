@@ -69,7 +69,10 @@ class PathCondAllocator {
     using IndexToConditionMap = Map<u32_t, Condition *>;
 
     /// Constructor
-    PathCondAllocator() { getBddCondManager(); }
+    PathCondAllocator(SVFModule *svfMod): svfMod(svfMod) {
+        getBddCondManager();
+    }
+
     /// Destructor
     virtual ~PathCondAllocator() { destroy(); }
     static inline Condition *trueCond() {
@@ -94,7 +97,7 @@ class PathCondAllocator {
     //@}
 
     /// Perform path allocation
-    void allocate(const SVFModule *module);
+    void allocate();
 
     /// Get llvm conditional expression
     inline const Instruction *getCondInst(const Condition *cond) const {
@@ -301,6 +304,7 @@ class PathCondAllocator {
     BBCondMap bbConds; ///< map basic block to its successors/predecessors
                        ///< branch conditions
     IndexToConditionMap indexToDDNodeMap;
+    SVFModule *svfMod;
 };
 
 } // End namespace SVF

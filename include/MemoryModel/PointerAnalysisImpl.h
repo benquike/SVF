@@ -54,7 +54,7 @@ class BVDataPTAImpl : public PointerAnalysis {
         MutableVersionedPTData<NodeID, NodeID, PointsTo, VersionedVar>;
 
     /// Constructor
-    BVDataPTAImpl(PAG *pag, PointerAnalysis::PTATY type,
+    BVDataPTAImpl(SVFProject *proj, PointerAnalysis::PTATY type,
                   bool alias_check = true);
 
     /// Destructor
@@ -245,8 +245,8 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
         PtrToCPtsMap; /// map a pointer to its conditional points-to set
 
     /// Constructor
-    CondPTAImpl(PAG *pag, PointerAnalysis::PTATY type)
-        : PointerAnalysis(pag, type), normalized(false) {
+    CondPTAImpl(SVFProject *proj, PointerAnalysis::PTATY type)
+        : PointerAnalysis(proj, type), normalized(false) {
         if (type == PathS_DDA || type == Cxt_DDA) {
             ptD = new MutPTDataTy();
         } else {

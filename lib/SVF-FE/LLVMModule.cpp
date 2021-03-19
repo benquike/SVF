@@ -25,6 +25,10 @@
  *
  *  Created on: Aug 4, 2017
  *      Author: Xiaokang Fan
+ *
+ *  Updated by:
+ *     Hui Peng <peng124@purdue.edu>
+ *     2021-03-19
  */
 
 #include "SVF-FE/LLVMUtil.h"
@@ -59,21 +63,16 @@ static llvm::cl::opt<std::string>
 static llvm::cl::opt<bool> SVFMain("svfmain", llvm::cl::init(false),
                                    llvm::cl::desc("add svf.main()"));
 
-LLVMModuleSet *LLVMModuleSet::llvmModuleSet = nullptr;
 std::string SVFModule::pagReadFromTxt = "";
 
 SVFModule *LLVMModuleSet::buildSVFModule(Module &mod) {
-    svfModule = new SVFModule(mod.getModuleIdentifier());
     modules.emplace_back(mod);
-
     build();
-
     return svfModule;
 }
 
 SVFModule *
 LLVMModuleSet::buildSVFModule(const std::vector<std::string> &moduleNameVec) {
-    assert(llvmModuleSet && "LLVM Module set needs to be created!");
 
     // We read PAG from LLVM IR
     if (Graphtxt.getValue().empty()) {
@@ -87,15 +86,16 @@ LLVMModuleSet::buildSVFModule(const std::vector<std::string> &moduleNameVec) {
     else
         SVFModule::setPagFromTXT(Graphtxt.getValue());
 
-    if (!moduleNameVec.empty())
-        svfModule = new SVFModule(*moduleNameVec.begin());
-    else
-        svfModule = new SVFModule();
-
     loadModules(moduleNameVec);
     build();
 
     return svfModule;
+}
+
+SVFModule*
+LLVMModuleSet::buildSVFModule(const std::string &moduleName) {
+    std::vector<std::string> nameVec{moduleName};
+    return buildSVFModule(nameVec);
 }
 
 void LLVMModuleSet::build() {
@@ -140,6 +140,8 @@ void LLVMModuleSet::initialize() {
     if (SVFMain)
         addSVFMain();
 
+    // add the functions, global variables and global aliases
+    // in each llvm module to the SVFModule
     for (Module &mod : modules) {
         /// Function
         for (auto &it : mod) {

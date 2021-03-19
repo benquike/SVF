@@ -143,7 +143,7 @@ class CHGraph : public CommonCHGraph, public GenericCHGraphTy {
     } RELATIONTYPE;
 
     CHGraph(SymbolTableInfo *symInfo)
-        : svfMod(symInfo->getModule()), symbolTableInfo(symInfo),
+        : CommonCHGraph(symInfo),
           classNum(0), vfID(0), buildingCHGTime(0) {
         this->kind = Standard;
     }
@@ -236,8 +236,6 @@ class CHGraph : public CommonCHGraph, public GenericCHGraphTy {
     void addFuncToFuncVector(CHNode::FuncVector &v, const SVFFunction *f);
 
   private:
-    SVFModule *svfMod;
-    SymbolTableInfo *symbolTableInfo;
     u32_t classNum;
     s32_t vfID;
     double buildingCHGTime;

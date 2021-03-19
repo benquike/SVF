@@ -11,7 +11,9 @@
 #ifndef COMMONCHG_H_
 #define COMMONCHG_H_
 
+#include "SVF-FE/SymbolTableInfo.h"
 #include "Util/BasicTypes.h"
+#include "Util/SVFModule.h"
 
 namespace SVF {
 
@@ -21,7 +23,12 @@ using VFunSet = Set<const SVFFunction *>;
 /// Common base for class hierarchy graph. Only implements what PointerAnalysis
 /// needs.
 class CommonCHGraph {
-  public:
+public:
+    CommonCHGraph(SymbolTableInfo *symInfo)
+        : svfMod(symInfo->getModule()),
+          symbolTableInfo(symInfo) {
+    };
+
     virtual ~CommonCHGraph(){};
     enum CHGKind { Standard, DI };
 
@@ -36,6 +43,8 @@ class CommonCHGraph {
 
   protected:
     CHGKind kind;
+    SVFModule *svfMod;
+    SymbolTableInfo *symbolTableInfo;
 };
 
 } // End namespace SVF

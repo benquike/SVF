@@ -139,13 +139,15 @@ void ObjTypeInfo::init(const Value *val) {
         analyzeGlobalStackObjType(val);
         objSize = getObjSize(val);
     } else if (SVFUtil::isa<Instruction>(val) &&
-               isHeapAllocExtCall(SVFUtil::cast<Instruction>(val))) {
+               isHeapAllocExtCall(SVFUtil::cast<Instruction>(val),
+                                  symbolTableInfo->getModule())) {
         setFlag(HEAP_OBJ);
         analyzeHeapStaticObjType(val);
         // Heap object, label its field as infinite here
         objSize = -1;
     } else if (SVFUtil::isa<Instruction>(val) &&
-               isStaticExtCall(SVFUtil::cast<Instruction>(val))) {
+               isStaticExtCall(SVFUtil::cast<Instruction>(val),
+                               symbolTableInfo->getModule())) {
         setFlag(STATIC_OBJ);
         analyzeHeapStaticObjType(val);
         // static object allocated before main, label its field as infinite here
@@ -264,7 +266,8 @@ const Type *MemObj::getType() const {
             return typeInfo->getType();
         }
     } else if (refVal && SVFUtil::isa<Instruction>(refVal)) {
-        return SVFUtil::getTypeOfHeapAlloc(SVFUtil::cast<Instruction>(refVal));
+        return SVFUtil::getTypeOfHeapAlloc(SVFUtil::cast<Instruction>(refVal),
+                                           symbolTableInfo->getModule());
     } else {
         return typeInfo->getType();
     }

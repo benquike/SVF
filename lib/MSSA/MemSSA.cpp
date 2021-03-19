@@ -260,6 +260,7 @@ void MemSSA::SSARename(const SVFFunction &fun) {
 void MemSSA::SSARenameBB(const BasicBlock &bb) {
 
     PAG *pag = pta->getPAG();
+    LLVMModuleSet *modSet = pag->getModule()->getLLVMModSet();
     // record which mem region needs to pop stack
     MRVector memRegs;
 
@@ -296,9 +297,7 @@ void MemSSA::SSARenameBB(const BasicBlock &bb) {
             if (mrGen->hasModMRSet(cs))
                 RenameChiSet(getCHISet(cs), memRegs);
         } else if (isReturn(inst)) {
-            const SVFFunction *fun =
-                LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(
-                    bb.getParent());
+            const SVFFunction *fun = modSet->getSVFFunction(bb.getParent());
             RenameMuSet(getReturnMuSet(fun));
         }
     }
@@ -313,8 +312,7 @@ void MemSSA::SSARenameBB(const BasicBlock &bb) {
     }
 
     // for succ basic block in dominator tree
-    const SVFFunction *fun =
-        LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(bb.getParent());
+    const SVFFunction *fun = modSet->getSVFFunction(bb.getParent());
     DominatorTree *dt = getDT(*fun);
     if (DomTreeNode *dtNode = dt->getNode(const_cast<BasicBlock *>(&bb))) {
         for (auto &DI : *dtNode) {
@@ -511,7 +509,7 @@ void MemSSA::dumpMSSA(raw_ostream &Out) {
         return;
 
     PAG *pag = pta->getPAG();
-
+    SVFModule *svfMod = pag->getModule();
     for (const auto *fun : *pta->getModule()) {
         if (MSSAFun != "" && MSSAFun != fun->getName())
             continue;
@@ -536,8 +534,8 @@ void MemSSA::dumpMSSA(raw_ostream &Out) {
             bool last_is_chi = false;
             for (auto &inst : bb) {
                 bool isAppCall =
-                    isNonInstricCallSite(&inst) && !isExtCall(&inst);
-                if (isAppCall || isHeapAllocExtCall(&inst)) {
+                    isNonInstricCallSite(&inst) && !isExtCall(&inst, svfMod);
+                if (isAppCall || isHeapAllocExtCall(&inst, svfMod)) {
                     const CallBlockNode *cs =
                         pag->getICFG()->getCallBlockNode(&inst);
                     if (hasMU(cs)) {

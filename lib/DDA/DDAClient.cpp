@@ -91,7 +91,8 @@ OrderedNodeSet &FunptrDDAClient::collectCandidateQueries(PAG *p) {
     setPAG(p);
     for (auto it : pag->getIndirectCallsites()) {
         if (cppUtil::isVirtualCallSite(
-                SVFUtil::getLLVMCallSite(it.first->getCallSite()))) {
+                SVFUtil::getLLVMCallSite(it.first->getCallSite())),
+            module->getLLVMModSet()) {
             const Value *vtblPtr = cppUtil::getVCallVtblPtr(
                 SVFUtil::getLLVMCallSite(it.first->getCallSite()));
             assert(pag->hasValueNode(vtblPtr) && "not a vtable pointer?");
@@ -108,7 +109,7 @@ OrderedNodeSet &FunptrDDAClient::collectCandidateQueries(PAG *p) {
 void FunptrDDAClient::performStat(PointerAnalysis *pta) {
 
     AndersenWaveDiff *ander =
-        AndersenWaveDiff::createAndersenWaveDiff(pta->getPAG());
+        AndersenWaveDiff::createAndersenWaveDiff(pta->getSVFProject());
     u32_t totalCallsites = 0;
     u32_t morePreciseCallsites = 0;
     u32_t zeroTargetCallsites = 0;

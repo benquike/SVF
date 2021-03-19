@@ -76,7 +76,7 @@ void TypeAnalysis::callGraphSolveBasedOnCHA(
     for (auto callsite : callsites) {
         const CallBlockNode *cbn = callsite.first;
         CallSite cs = SVFUtil::getLLVMCallSite(cbn->getCallSite());
-        if (isVirtualCallSite(cs)) {
+        if (isVirtualCallSite(cs, getPAG()->getModule()->getLLVMModSet())) {
             virtualCallSites.insert(cs);
             const Value *vtbl = getVCallVtblPtr(cs);
             assert(pag->hasValueNode(vtbl));

@@ -42,7 +42,7 @@ class DoubleFreeChecker : public LeakChecker {
 
   public:
     /// Constructor
-    DoubleFreeChecker(PAG *pag) : LeakChecker(pag) {}
+    DoubleFreeChecker(SVFProject *proj) : LeakChecker(proj) {}
 
     /// Destructor
     virtual ~DoubleFreeChecker() {}

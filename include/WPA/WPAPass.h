@@ -112,7 +112,7 @@ class WPAPass : public ModulePass {
                                      const CallInst *callInst2);
 
     /// Run pointer analysis on SVFModule
-    virtual void runOnModule(SVFModule *svfModule);
+    virtual void runOnModule(SVFProject *proj);
 
     /// Run pointer analysis on LLVM module
     bool runOnModule(Module &module) override;
@@ -123,7 +123,7 @@ class WPAPass : public ModulePass {
   private:
     /// Create pointer analysis according to specified kind and analyze the
     /// module.
-    void runPointerAnalysis(SVFModule *svfModule, u32_t kind);
+    void runPointerAnalysis(SVFProject *proj, u32_t kind);
 
     PTAVector ptaVector;   ///< all pointer analysis to be executed.
     PointerAnalysis *_pta; ///<  pointer analysis to be executed.

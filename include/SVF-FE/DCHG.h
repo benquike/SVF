@@ -167,8 +167,8 @@ class DCHGraph : public CommonCHGraph, public GenericGraph<DCHNode, DCHEdge> {
     static bool isAgg(const DIType *t);
 
   public:
-    DCHGraph(const SVFModule *svfMod)
-        : svfModule(svfMod), numTypes(0) // vfID(0), buildingCHGTime(0) {
+    DCHGraph(SymbolTableInfo *symInfo)
+        : CommonCHGraph(symInfo), numTypes(0) // vfID(0), buildingCHGTime(0) {
     {
         this->kind = DI;
     }
@@ -280,8 +280,6 @@ class DCHGraph : public CommonCHGraph, public GenericGraph<DCHNode, DCHEdge> {
     bool isFirstField(const DIType *f, const DIType *b);
 
   protected:
-    /// SVF Module this CHG is built from.
-    const SVFModule *svfModule;
     /// Whether this CHG is an extended CHG (first-field). Set by buildCHG.
     bool extended = false;
     /// Maps DITypes to their nodes.

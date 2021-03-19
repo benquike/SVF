@@ -32,8 +32,6 @@
 using namespace std;
 using namespace SVF;
 
-SaberCheckerAPI *SaberCheckerAPI::ckAPI = nullptr;
-
 namespace {
 
 /// string and type pair

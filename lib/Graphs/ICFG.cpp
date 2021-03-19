@@ -413,6 +413,37 @@ void ICFG::updateCallGraph(PTACallGraph *callgraph) {
     }
 }
 
+IntraBlockNode *ICFG::addIntraBlockICFGNode(const Instruction *inst) {
+    IntraBlockNode *sNode = new IntraBlockNode(totalICFGNode++,
+                                               inst,
+                                               pag->getModule());
+    addICFGNode(sNode);
+    InstToBlockNodeMap[inst] = sNode;
+    return sNode;
+}
+
+CallBlockNode *ICFG::addCallICFGNode(const Instruction *cs) {
+    CallBlockNode *sNode = new CallBlockNode(totalICFGNode++,
+                                             cs,
+                                             pag->getModule());
+    addICFGNode(sNode);
+    CSToCallNodeMap[cs] = sNode;
+    return sNode;
+}
+
+
+RetBlockNode *ICFG::addRetICFGNode(const Instruction *cs) {
+    CallBlockNode *callBlockNode = getCallBlockNode(cs);
+    RetBlockNode *sNode = new RetBlockNode(totalICFGNode++,
+                                           cs, callBlockNode,
+                                           pag->getModule());
+
+    callBlockNode->setRetBlockNode(sNode);
+    addICFGNode(sNode);
+    CSToRetNodeMap[cs] = sNode;
+    return sNode;
+}
+
 /*!
  * GraphTraits specialization
  */

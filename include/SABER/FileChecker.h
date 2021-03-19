@@ -42,7 +42,7 @@ class FileChecker : public LeakChecker {
 
   public:
     /// Constructor
-    FileChecker(PAG *pag) : LeakChecker(pag) {}
+    FileChecker(SVFProject *proj) : LeakChecker(proj) {}
 
     /// Destructor
     virtual ~FileChecker() {}
@@ -55,11 +55,11 @@ class FileChecker : public LeakChecker {
     }
 
     inline bool isSourceLikeFun(const SVFFunction *fun) override {
-        return SaberCheckerAPI::getCheckerAPI()->isFOpen(fun);
+        return svfgBuilder.isFOpen(fun);
     }
     /// Whether the function is a heap deallocator (free/release memory)
     inline bool isSinkLikeFun(const SVFFunction *fun) override {
-        return SaberCheckerAPI::getCheckerAPI()->isFClose(fun);
+        return svfgBuilder.isFClose(fun);
     }
     /// Report file/close bugs
     void reportBug(ProgSlice *slice) override;

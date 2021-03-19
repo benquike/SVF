@@ -32,6 +32,7 @@
 
 #include "Graphs/PAG.h"
 #include "SVF-FE/ICFGBuilder.h"
+#include "SVF-FE/SVFProject.h"
 #include "Util/ExtAPI.h"
 
 namespace SVF {
@@ -45,7 +46,7 @@ class PAGBuilder : public llvm::InstVisitor<PAGBuilder> {
   private:
     PAG *pag;
     SVFModule *svfMod;
-
+    SVFProject *proj;
 
     // these 2 fields are for saving the current location
     const BasicBlock *curBB; ///< Current basic block during PAG construction
@@ -55,8 +56,10 @@ class PAGBuilder : public llvm::InstVisitor<PAGBuilder> {
 
   public:
     /// Constructor
-    PAGBuilder(PAG *pag)
-        : pag(pag), svfMod(nullptr), curBB(nullptr), curVal(nullptr) {
+    PAGBuilder(SVFProject *proj)
+        : pag(proj->getPAG()), svfMod(proj->getSVFModule()),
+          proj(proj),
+          curBB(nullptr), curVal(nullptr) {
     }
     /// Destructor
     virtual ~PAGBuilder() {}
@@ -223,7 +226,7 @@ class PAGBuilder : public llvm::InstVisitor<PAGBuilder> {
     inline NodeID addNullPtrNode() {
         NodeID nullPtr = pag->addDummyValNode(pag->getNullPtr());
         /// let all undef value or non-determined pointers points-to black hole
-        LLVMContext &cxt = LLVMModuleSet::getLLVMModuleSet()->getContext();
+        LLVMContext &cxt = svfMod->getLLVMModSet()->getContext();
         ConstantPointerNull *constNull =
             ConstantPointerNull::get(Type::getInt8PtrTy(cxt));
         setCurrentLocation(constNull, nullptr);

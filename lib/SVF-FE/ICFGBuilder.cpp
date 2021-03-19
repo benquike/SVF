@@ -75,6 +75,7 @@ void ICFGBuilder::processFunEntry(const SVFFunction *fun, WorkList &worklist) {
  */
 void ICFGBuilder::processFunBody(WorkList &worklist) {
     BBSet visited;
+    LLVMModuleSet *modSet = icfg->getPAG()->getModule()->getLLVMModSet();
     /// function body
     while (!worklist.empty()) {
         const Instruction *inst = worklist.pop();
@@ -83,8 +84,7 @@ void ICFGBuilder::processFunBody(WorkList &worklist) {
             ICFGNode *srcNode = getOrAddBlockICFGNode(inst);
             if (isReturn(inst)) {
                 const Function *fun = inst->getFunction();
-                const SVFFunction *svfFun =
-                    LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(fun);
+                const SVFFunction *svfFun = modSet->getSVFFunction(fun);
                 FunExitBlockNode *FunExitBlockNode =
                     icfg->getFunExitBlockNode(svfFun);
                 icfg->addIntraEdge(srcNode, FunExitBlockNode);
@@ -143,8 +143,9 @@ ICFGBuilder::getOrAddInterBlockICFGNode(const Instruction *inst) {
     assert(SVFUtil::isCallSite(inst) && "not a call instruction?");
     assert(SVFUtil::isNonInstricCallSite(inst) &&
            "associating an intrinsic debug instruction with an ICFGNode!");
+    LLVMModuleSet *modSet = icfg->getPAG()->getModule()->getLLVMModSet();
     CallBlockNode *callICFGNode = getOrAddCallICFGNode(inst);
-    if (const SVFFunction *callee = getCallee(inst))
+    if (const SVFFunction *callee = getCallee(modSet, inst))
         addICFGInterEdges(inst, callee); // creating interprocedural edges
     return callICFGNode;
 }

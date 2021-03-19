@@ -28,9 +28,9 @@ class FlowDDA : public BVDataPTAImpl,
     using CallEdgeMap = BVDataPTAImpl::CallEdgeMap;
     using FunctionSet = BVDataPTAImpl::FunctionSet;
     /// Constructor
-    FlowDDA(PAG *_pag, DDAClient *client)
-        : BVDataPTAImpl(_pag, PointerAnalysis::FlowS_DDA),
-          DDAVFSolver<NodeID, PointsTo, LocDPItem>(), _client(client) {}
+    FlowDDA(SVFProject *proj, DDAClient *client)
+        : BVDataPTAImpl(proj, PointerAnalysis::FlowS_DDA),
+          DDAVFSolver<NodeID, PointsTo, LocDPItem>(proj), _client(client) {}
     /// Destructor
     inline virtual ~FlowDDA() {}
     /// dummy analyze method
@@ -52,7 +52,7 @@ class FlowDDA : public BVDataPTAImpl,
     /// Initialization of the analysis
     inline void initialize() override {
         BVDataPTAImpl::initialize();
-        buildSVFG(pag);
+        buildSVFG();
         setCallGraph(getPTACallGraph());
         setCallGraphSCC(getCallGraphSCC());
         stat = setDDAStat(new DDAStat(this));

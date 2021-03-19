@@ -38,7 +38,7 @@ class TypeAnalysis : public AndersenBase {
 
   public:
     /// Constructor
-    TypeAnalysis(PAG *pag) : AndersenBase(pag, TypeCPP_WPA) {}
+    TypeAnalysis(SVFProject *proj) : AndersenBase(proj, TypeCPP_WPA) {}
 
     /// Destructor
     virtual ~TypeAnalysis() {}

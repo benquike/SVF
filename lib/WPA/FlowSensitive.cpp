@@ -50,7 +50,7 @@ FlowSensitive *FlowSensitive::fspta = nullptr;
 void FlowSensitive::initialize() {
     PointerAnalysis::initialize();
 
-    ander = AndersenWaveDiff::createAndersenWaveDiff(getPAG());
+    ander = AndersenWaveDiff::createAndersenWaveDiff(getSVFProject());
     // When evaluating ctir aliases, we want the whole SVFG.
     svfg = CTirAliasEval ? svfgBuilder.buildFullSVFG(ander)
                          : svfgBuilder.buildPTROnlySVFG(ander);

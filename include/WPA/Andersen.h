@@ -50,8 +50,8 @@ using WPAConstraintSolver = WPASolver<ConstraintGraph *>;
 class AndersenBase : public WPAConstraintSolver, public BVDataPTAImpl {
   public:
     /// Constructor
-    AndersenBase(PAG *_pag, PTATY type = Andersen_BASE, bool alias_check = true)
-        : BVDataPTAImpl(_pag, type, alias_check), consCG(nullptr) {
+    AndersenBase(SVFProject *proj, PTATY type = Andersen_BASE, bool alias_check = true)
+        : BVDataPTAImpl(proj, type, alias_check), consCG(nullptr) {
         iterationForPrintStat = OnTheFlyIterBudgetForStat;
     }
 
@@ -136,8 +136,8 @@ class Andersen : public AndersenBase {
     using CallSite2DummyValPN = OrderedMap<CallSite, NodeID>;
 
     /// Constructor
-    Andersen(PAG *_pag, PTATY type = Andersen_WPA, bool alias_check = true)
-        : AndersenBase(_pag, type, alias_check), pwcOpt(false), diffOpt(true) {}
+    Andersen(SVFProject *proj, PTATY type = Andersen_WPA, bool alias_check = true)
+        : AndersenBase(proj, type, alias_check), pwcOpt(false), diffOpt(true) {}
 
     /// Destructor
     virtual ~Andersen() {}
@@ -355,15 +355,17 @@ class AndersenWaveDiff : public Andersen {
     static AndersenWaveDiff *diffWave; // static instance
 
   public:
-    AndersenWaveDiff(PAG *_pag, PTATY type = AndersenWaveDiff_WPA,
+    AndersenWaveDiff(SVFProject *proj,
+                     PTATY type = AndersenWaveDiff_WPA,
                      bool alias_check = true)
-        : Andersen(_pag, type, alias_check) {}
+        : Andersen(proj, type, alias_check) {}
 
     /// Create an singleton instance directly instead of invoking llvm pass
     /// manager
-    static AndersenWaveDiff *createAndersenWaveDiff(PAG *_pag) {
+    /// FIXME: remove it
+    static AndersenWaveDiff *createAndersenWaveDiff(SVFProject *proj) {
         if (diffWave == nullptr) {
-            diffWave = new AndersenWaveDiff(_pag, AndersenWaveDiff_WPA, false);
+            diffWave = new AndersenWaveDiff(proj, AndersenWaveDiff_WPA, false);
             diffWave->analyze();
             return diffWave;
         }
@@ -428,18 +430,19 @@ class AndersenWaveDiffWithType : public AndersenWaveDiff {
     //@}
 
   public:
-    AndersenWaveDiffWithType(PAG *_pag,
+    AndersenWaveDiffWithType(SVFProject *proj,
                              PTATY type = AndersenWaveDiffWithType_WPA)
-        : AndersenWaveDiff(_pag, type) {
+        : AndersenWaveDiff(proj, type) {
         assert(getTypeSystem() != nullptr &&
                "a type system is required for this pointer analysis");
     }
 
     /// Create an singleton instance directly instead of invoking llvm pass
     /// manager
-    static AndersenWaveDiffWithType *createAndersenWaveDiffWithType(PAG *p) {
+    static AndersenWaveDiffWithType *
+    createAndersenWaveDiffWithType(SVFProject *proj) {
         if (diffWaveWithType == nullptr) {
-            diffWaveWithType = new AndersenWaveDiffWithType(p);
+            diffWaveWithType = new AndersenWaveDiffWithType(proj);
             diffWaveWithType->analyze();
             return diffWaveWithType;
         }
@@ -481,14 +484,14 @@ class AndersenLCD : virtual public Andersen {
     NodeSet lcdCandidates;
 
   public:
-    AndersenLCD(PAG *_pag, PTATY type = AndersenLCD_WPA)
-        : Andersen(_pag, type), metEdges({}), lcdCandidates({}) {}
+    AndersenLCD(SVFProject *proj, PTATY type = AndersenLCD_WPA)
+        : Andersen(proj, type), metEdges({}), lcdCandidates({}) {}
 
     /// Create an singleton instance directly instead of invoking llvm pass
     /// manager
-    static AndersenLCD *createAndersenLCD(PAG *_pag) {
+    static AndersenLCD *createAndersenLCD(SVFProject *proj) {
         if (lcdAndersen == nullptr) {
-            lcdAndersen = new AndersenLCD(_pag);
+            lcdAndersen = new AndersenLCD(proj);
             lcdAndersen->analyze();
             return lcdAndersen;
         }
@@ -550,14 +553,14 @@ class AndersenHCD : virtual public Andersen {
     OfflineConsG *oCG;
 
   public:
-    AndersenHCD(PAG *_pag, PTATY type = AndersenHCD_WPA)
-        : Andersen(_pag, type), oCG(nullptr) {}
+    AndersenHCD(SVFProject *proj, PTATY type = AndersenHCD_WPA)
+        : Andersen(proj, type), oCG(nullptr) {}
 
     /// Create an singleton instance directly instead of invoking llvm pass
     /// manager
-    static AndersenHCD *createAndersenHCD(PAG *_pag) {
+    static AndersenHCD *createAndersenHCD(SVFProject *proj) {
         if (hcdAndersen == nullptr) {
-            hcdAndersen = new AndersenHCD(_pag);
+            hcdAndersen = new AndersenHCD(proj);
             hcdAndersen->analyze();
             return hcdAndersen;
         }
@@ -610,15 +613,15 @@ class AndersenHLCD : public AndersenHCD, public AndersenLCD {
     static AndersenHLCD *hlcdAndersen;
 
   public:
-    AndersenHLCD(PAG *_pag, PTATY type = AndersenHLCD_WPA)
-        : Andersen(_pag, type), AndersenHCD(_pag, type),
-          AndersenLCD(_pag, type) {}
+    AndersenHLCD(SVFProject *proj, PTATY type = AndersenHLCD_WPA)
+        : Andersen(proj, type), AndersenHCD(proj, type),
+          AndersenLCD(proj, type) {}
 
     /// Create an singleton instance directly instead of invoking llvm pass
     /// manager
-    static AndersenHLCD *createAndersenHLCD(PAG *_pag) {
+    static AndersenHLCD *createAndersenHLCD(SVFProject *proj) {
         if (hlcdAndersen == nullptr) {
-            hlcdAndersen = new AndersenHLCD(_pag);
+            hlcdAndersen = new AndersenHLCD(proj);
             hlcdAndersen->analyze();
             return hlcdAndersen;
         }

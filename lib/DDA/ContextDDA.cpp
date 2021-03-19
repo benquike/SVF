@@ -18,10 +18,10 @@ static llvm::cl::opt<unsigned long long> cxtBudget(
 /*!
  * Constructor
  */
-ContextDDA::ContextDDA(PAG *_pag, DDAClient *client)
-    : CondPTAImpl<ContextCond>(_pag, PointerAnalysis::Cxt_DDA),
-      DDAVFSolver<CxtVar, CxtPtSet, CxtLocDPItem>(), _client(client) {
-    flowDDA = new FlowDDA(_pag, client);
+ContextDDA::ContextDDA(SVFProject *proj, DDAClient *client)
+    : CondPTAImpl<ContextCond>(proj, PointerAnalysis::Cxt_DDA),
+      DDAVFSolver<CxtVar, CxtPtSet, CxtLocDPItem>(proj), _client(client) {
+    flowDDA = new FlowDDA(proj, client);
 }
 
 /*!
@@ -39,7 +39,7 @@ ContextDDA::~ContextDDA() {
  */
 void ContextDDA::initialize() {
     CondPTAImpl<ContextCond>::initialize();
-    buildSVFG(pag);
+    buildSVFG();
     setCallGraph(getPTACallGraph());
     setCallGraphSCC(getCallGraphSCC());
     stat = setDDAStat(new DDAStat(this));
@@ -319,8 +319,8 @@ bool ContextDDA::isHeapCondMemObj(const CxtVar &var, const StoreSVFGNode *) {
         if (const Instruction *mallocSite =
                 SVFUtil::dyn_cast<Instruction>(mem->getRefVal())) {
             const Function *fun = mallocSite->getFunction();
-            const SVFFunction *svfFun =
-                LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(fun);
+            LLVMModuleSet *modSet = getPAG()->getModule()->getLLVMModSet();
+            const SVFFunction *svfFun = modSet->getSVFFunction(fun);
             if (_ander->isInRecursion(svfFun)) {
                 return true;
             }

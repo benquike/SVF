@@ -230,7 +230,7 @@ bool cppUtil::isLoadVtblInst(const LoadInst *loadInst) {
  * %x = load %vfn
  * call %x (this)
  */
-bool cppUtil::isVirtualCallSite(CallSite cs) {
+bool cppUtil::isVirtualCallSite(CallSite cs, LLVMModuleSet *modSet) {
     // the callsite must be an indirect one with at least one argument (this
     // ptr)
     if (cs.getCalledFunction() != nullptr || cs.arg_empty()) {
@@ -239,7 +239,7 @@ bool cppUtil::isVirtualCallSite(CallSite cs) {
 
     // When compiled with ctir, we'd be using the DCHG which has its own
     // virtual annotations.
-    if (LLVMModuleSet::getLLVMModuleSet()->allCTir()) {
+    if (modSet && modSet->allCTir()) {
         return cs.getInstruction()->getMetadata(cppUtil::ctir::derefMDName) !=
                nullptr;
     }
