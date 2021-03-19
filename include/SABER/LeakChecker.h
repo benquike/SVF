@@ -48,14 +48,14 @@ class LeakChecker : public SrcSnkDDA {
     enum LEAK_TYPE { NEVER_FREE_LEAK, CONTEXT_LEAK, PATH_LEAK, GLOBAL_LEAK };
 
     /// Constructor
-    LeakChecker() {}
+    LeakChecker(PAG *pag): SrcSnkDDA(pag) {}
     /// Destructor
     virtual ~LeakChecker() {}
 
     /// We start from here
     virtual bool runOnModule(SVFModule *module) {
         /// start analysis
-        analyze(module);
+        analyze();
         return false;
     }
 

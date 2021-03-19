@@ -47,7 +47,7 @@ llvm::cl::opt<bool> genICFG("genicfg", llvm::cl::init(true),
 void TypeAnalysis::initialize() {
     AndersenBase::initialize();
     if (genICFG) {
-        icfg = PAG::getPAG()->getICFG();
+        icfg = pag->getICFG();
         icfg->dump("icfg_initial");
         icfg->dump("vfg_initial");
         if (print_stat) {

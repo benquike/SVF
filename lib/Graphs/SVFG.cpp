@@ -184,8 +184,8 @@ FormalOUTSVFGNode::FormalOUTSVFGNode(NodeID id, const MemSSA::RETMU *exit)
 /*!
  * Constructor
  */
-SVFG::SVFG(MemSSA *_mssa, VFGK k)
-    : VFG(_mssa->getPTA()->getPTACallGraph(), k), mssa(_mssa),
+SVFG::SVFG(MemSSA *_mssa, PAG *pag, VFGK k)
+    : VFG(_mssa->getPTA()->getPTACallGraph(), pag, k), mssa(_mssa),
       pta(mssa->getPTA()) {
     stat = new SVFGStat(this);
 }

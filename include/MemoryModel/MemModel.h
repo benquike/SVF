@@ -100,6 +100,7 @@ class StInfo {
     }
 };
 
+class SymbolTableInfo;
 /*!
  * Type Info of an abstract memory object
  */
@@ -121,6 +122,10 @@ class ObjTypeInfo {
                            // field that is a pointer type
     } MEMTYPE;
 
+
+  protected:
+        SymbolTableInfo *symbolTableInfo;
+
   private:
     /// LLVM type
     const Type *type;
@@ -133,11 +138,12 @@ class ObjTypeInfo {
 
   public:
     /// Constructors
-    ObjTypeInfo(const Value *, const Type *t, u32_t max)
-        : type(t), flags(0), maxOffsetLimit(max) {}
+    ObjTypeInfo(SymbolTableInfo *symInfo, const Value *,
+                const Type *t, u32_t max)
+        : symbolTableInfo(symInfo), type(t), flags(0), maxOffsetLimit(max) {}
     /// Constructor
-    ObjTypeInfo(u32_t max, const Type *t)
-        : type(t), flags(0), maxOffsetLimit(max) {}
+    ObjTypeInfo(SymbolTableInfo *symInfo, u32_t max, const Type *t)
+        : symbolTableInfo(symInfo), type(t), flags(0), maxOffsetLimit(max) {}
     /// Destructor
     virtual ~ObjTypeInfo() {}
     /// Initialize the object type
@@ -209,12 +215,15 @@ class MemObj {
     /// Type information of this object
     ObjTypeInfo *typeInfo;
 
+  protected:
+    SymbolTableInfo *symbolTableInfo;
+
   public:
     /// Constructor
-    MemObj(const Value *val, SymID id);
+    MemObj(const Value *val, SymID id, SymbolTableInfo *symInfo);
 
     /// Constructor for black hole and constant obj
-    MemObj(SymID id, const Type *type = nullptr);
+    MemObj(SymID id, SymbolTableInfo *symInfo, const Type *type = nullptr);
 
     /// Destructor
     ~MemObj() { destroy(); }
@@ -225,6 +234,7 @@ class MemObj {
     /// Initialize black hole and constant object
     void init(const Type *type);
 
+    SymbolTableInfo *getSymbolTableInfo() const { return symbolTableInfo; }
     /// Get obj type
     const llvm::Type *getType() const;
 

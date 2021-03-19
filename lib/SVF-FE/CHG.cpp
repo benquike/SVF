@@ -791,7 +791,7 @@ void CHGraph::getVFnsFromVtbls(CallSite cs, const VTableSet &vtbls,
 
 void CHGraph::buildCSToCHAVtblsAndVfnsMap() {
 
-    for (auto cs : SymbolTableInfo::SymbolInfo()->getCallSiteSet()) {
+    for (auto cs : symbolTableInfo->getCallSiteSet()) {
         if (!cppUtil::isVirtualCallSite(cs)) {
             continue;
         }

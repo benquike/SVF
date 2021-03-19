@@ -43,7 +43,7 @@ void ConstraintGraph::buildCG() {
 
     // initialize nodes
     for (auto &it : *pag) {
-        addConstraintNode(new ConstraintNode(it.first), it.first);
+        addConstraintNode(new ConstraintNode(it.first, pag), it.first);
     }
 
     // initialize edges
@@ -109,10 +109,11 @@ void ConstraintGraph::destroy() {}
 /*!
  * Constructor for address constraint graph edge
  */
-AddrCGEdge::AddrCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id)
+AddrCGEdge::AddrCGEdge(ConstraintNode *s, ConstraintNode *d,
+                       EdgeID id, PAG *pag)
     : ConstraintEdge(s, d, Addr, id) {
     // Retarget addr edges may lead s to be a dummy node
-    PAGNode *node = PAG::getPAG()->getPAGNode(s->getId());
+    PAGNode *node = pag->getPAGNode(s->getId());
     if (!SVFModule::pagReadFromTXT()) {
         assert(!SVFUtil::isa<DummyValPN>(node) && "a dummy node??");
     }
@@ -127,7 +128,7 @@ AddrCGEdge *ConstraintGraph::addAddrCGEdge(NodeID src, NodeID dst) {
     if (hasEdge(srcNode, dstNode, ConstraintEdge::Addr)) {
         return nullptr;
     }
-    auto *edge = new AddrCGEdge(srcNode, dstNode, edgeIndex++);
+    auto *edge = new AddrCGEdge(srcNode, dstNode, edgeIndex++, pag);
     bool added = AddrCGEdgeSet.insert(edge).second;
     assert(added && "not added??");
     srcNode->addOutgoingAddrEdge(edge);
@@ -457,8 +458,7 @@ void ConstraintGraph::dump(std::string name) {
  */
 void ConstraintGraph::print() {
 
-    outs() << "-----------------ConstraintGraph--------------------------------"
-              "------\n";
+    outs() << "-----------------ConstraintGraph-----------------------\n";
 
     ConstraintEdge::ConstraintEdgeSetTy &addrs = this->getAddrCGEdges();
     for (auto *addr : addrs) {
@@ -509,18 +509,20 @@ struct DOTGraphTraits<ConstraintGraph *> : public DOTGraphTraits<PAG *> {
     DOTGraphTraits(bool isSimple = false) : DOTGraphTraits<PAG *>(isSimple) {}
 
     /// Return name of the graph
-    static std::string getGraphName(ConstraintGraph *) { return "ConstraintG"; }
+    static std::string getGraphName(ConstraintGraph *g) {
+        return "ConstraintG";
+    }
 
     static bool isNodeHidden(NodeType *n) {
-        PAGNode *node = PAG::getPAG()->getPAGNode(n->getId());
+        PAGNode *node = n->getPAG()->getPAGNode(n->getId());
         return node->isIsolatedNode();
     }
 
     /// Return label of a VFG node with two display mode
     /// Either you can choose to display the name of the value or the whole
     /// instruction
-    static std::string getNodeLabel(NodeType *n, ConstraintGraph *) {
-        PAGNode *node = PAG::getPAG()->getPAGNode(n->getId());
+    static std::string getNodeLabel(NodeType *n, ConstraintGraph *g) {
+        PAGNode *node = g->getPAG()->getPAGNode(n->getId());
         bool briefDisplay = true;
         bool nameDisplay = true;
         std::string str;
@@ -549,8 +551,8 @@ struct DOTGraphTraits<ConstraintGraph *> : public DOTGraphTraits<PAG *> {
         return rawstr.str();
     }
 
-    static std::string getNodeAttributes(NodeType *n, ConstraintGraph *) {
-        PAGNode *node = PAG::getPAG()->getPAGNode(n->getId());
+    static std::string getNodeAttributes(NodeType *n, ConstraintGraph *g) {
+        PAGNode *node = g->getPAG()->getPAGNode(n->getId());
 
         if (SVFUtil::isa<ValPN>(node)) {
             if (SVFUtil::isa<GepValPN>(node)) {

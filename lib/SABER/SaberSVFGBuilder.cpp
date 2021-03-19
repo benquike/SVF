@@ -168,7 +168,7 @@ void SaberSVFGBuilder::rmDerefDirSVFGEdges(BVDataPTAImpl *pta) {
 /// Add actual parameter SVFGNode for 1st argument of a deallocation like
 /// external function
 void SaberSVFGBuilder::AddExtActualParmSVFGNodes(PTACallGraph *callgraph) {
-    PAG *pag = PAG::getPAG();
+    PAG *pag = getSVFG()->getPAG();
     for (auto &it : pag->getCallSiteArgsMap()) {
         PTACallGraph::FunctionSet callees;
         callgraph->getCallees(it.first, callees);

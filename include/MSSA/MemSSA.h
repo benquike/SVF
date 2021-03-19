@@ -288,16 +288,18 @@ class MemSSA {
             assert(0 != load2MuSetMap.count(load) &&
                    "not associated with mem region!");
             return true;
-        } else
-            return false;
+        }
+
+        return false;
     }
     inline bool hasCHI(const PAGEdge *inst) const {
         if (const auto *store = SVFUtil::dyn_cast<StorePE>(inst)) {
             assert(0 != store2ChiSetMap.count(store) &&
                    "not associated with mem region!");
             return true;
-        } else
-            return false;
+        }
+
+        return false;
     }
     inline bool hasMU(const CallBlockNode *cs) const {
         return callsiteToMuSetMap.find(cs) != callsiteToMuSetMap.end();

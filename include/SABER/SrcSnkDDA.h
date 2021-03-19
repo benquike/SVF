@@ -68,13 +68,15 @@ class SrcSnkDDA : public CFLSrcSnkSolver {
     SVFGNodeSet visitedSet;                ///<  record backward visited nodes
 
   protected:
-    SaberSVFGBuilder memSSA;
+    PAG *pag;
+    SaberSVFGBuilder svfgBuilder;
     SVFG *svfg;
     PTACallGraph *ptaCallGraph;
 
   public:
     /// Constructor
-    SrcSnkDDA() : _curSlice(nullptr), svfg(nullptr), ptaCallGraph(nullptr) {
+    SrcSnkDDA(PAG *pag) : _curSlice(nullptr), pag(pag),
+                          svfg(nullptr), ptaCallGraph(nullptr) {
         pathCondAllocator = new PathCondAllocator();
     }
     /// Destructor
@@ -98,16 +100,16 @@ class SrcSnkDDA : public CFLSrcSnkSolver {
     }
 
     /// Start analysis here
-    virtual void analyze(SVFModule *module);
+    virtual void analyze();
 
     /// Initialize analysis
-    virtual void initialize(SVFModule *module);
+    virtual void initialize();
 
     /// Finalize analysis
     virtual void finalize() { dumpSlices(); }
 
     /// Get PAG
-    PAG *getPAG() const { return PAG::getPAG(); }
+    PAG *getPAG() const { return getSVFG()->getPAG(); }
 
     /// Get SVFG
     inline const SVFG *getSVFG() const { return graph(); }
@@ -117,7 +119,7 @@ class SrcSnkDDA : public CFLSrcSnkSolver {
 
     /// Whether this svfg node may access global variable
     inline bool isGlobalSVFGNode(const SVFGNode *node) const {
-        return memSSA.isGlobalSVFGNode(node);
+        return svfgBuilder.isGlobalSVFGNode(node);
     }
     /// Slice operations
     //@{

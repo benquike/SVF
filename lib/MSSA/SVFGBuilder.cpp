@@ -95,16 +95,16 @@ SVFG *SVFGBuilder::build(BVDataPTAImpl *pta, VFG::VFGK kind) {
         if (globalSvfg == nullptr) {
             /// Note that we use callgraph from andersen analysis here
             if (OPTSVFG)
-                svfg = globalSvfg = new SVFGOPT(mssa, kind);
+                svfg = globalSvfg = new SVFGOPT(mssa, pta->getPAG(), kind);
             else
-                svfg = globalSvfg = new SVFG(mssa, kind);
+                svfg = globalSvfg = new SVFG(mssa, pta->getPAG(), kind);
             buildSVFG();
         }
     } else {
         if (OPTSVFG)
-            svfg = new SVFGOPT(mssa, kind);
+            svfg = new SVFGOPT(mssa, pta->getPAG(), kind);
         else
-            svfg = new SVFG(mssa, kind);
+            svfg = new SVFG(mssa, pta->getPAG(), kind);
         buildSVFG();
     }
 

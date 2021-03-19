@@ -90,6 +90,8 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
     /// Destructor
     virtual ~ConstraintGraph() { destroy(); }
 
+    PAG *getPAG() { return pag; }
+
     /// Get/add/remove constraint node
     //@{
     inline ConstraintNode *getConstraintNode(NodeID id) const {
@@ -258,7 +260,7 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
     inline const PAG::CallSiteToFunPtrMap &getIndirectCallsites() const {
         return pag->getIndirectCallsites();
     }
-    inline NodeID getBlackHoleNode() { return pag->getBlackHoleNode(); }
+    inline NodeID getBlackHoleNode() { return pag->getBlackHoleNodeID(); }
     inline bool isBlkObjOrConstantObj(NodeID id) {
         return pag->isBlkObjOrConstantObj(id);
     }
@@ -275,7 +277,7 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
         NodeID gep = pag->getGepObjNode(id, ls);
         /// Create a node when it is (1) not exist on graph and (2) not merged
         if (sccRepNode(gep) == gep && hasConstraintNode(gep) == false) {
-            addConstraintNode(new ConstraintNode(gep), gep);
+            addConstraintNode(new ConstraintNode(gep, pag), gep);
         }
         return gep;
     }
@@ -284,7 +286,7 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
         NodeID fi = pag->getFIObjNode(id);
         /// Create a node when it is (1) not exist on graph and (2) not merged
         if (sccRepNode(fi) == fi && hasConstraintNode(fi) == false) {
-            addConstraintNode(new ConstraintNode(fi), fi);
+            addConstraintNode(new ConstraintNode(fi, pag), fi);
         }
         return fi;
     }

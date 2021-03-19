@@ -145,13 +145,13 @@ const char *PTAStat::MaxNumOfNodesInSCC =
 const char *PTAStat::NumOfNullPointer =
     "NullPointer"; ///< Number of pointers points-to null
 
-PTAStat::PTAStat(PointerAnalysis *p) : startTime(0), endTime(0), pta(p) {}
+PTAStat::PTAStat(PointerAnalysis *p)
+    : startTime(0), endTime(0), pta(p) {}
 
 void PTAStat::performStat() {
 
     callgraphStat();
 
-    PAG *pag = PAG::getPAG();
     u32_t numOfFunction = 0;
     u32_t numOfGlobal = 0;
     u32_t numOfStack = 0;
@@ -165,6 +165,9 @@ void PTAStat::performStat() {
     u32_t fiObjNumber = 0;
     u32_t fsObjNumber = 0;
     Set<SymID> memObjSet;
+    PAG *pag = pta->getPAG();
+    SymbolTableInfo *symInfo = pag->getSymbolTableInfo();
+
     for (PAG::iterator it = pag->begin(), eit = pag->end(); it != eit; ++it) {
         PAGNode *node = it->second;
         if (ObjPN *obj = SVFUtil::dyn_cast<ObjPN>(node)) {
@@ -209,8 +212,7 @@ void PTAStat::performStat() {
         pag->getValueNodeNum() + pag->getFieldValNodeNum();
     generalNumMap[TotalNumOfObjects] = pag->getObjectNodeNum();
     generalNumMap[TotalNumOfFieldObjects] = pag->getFieldObjNodeNum();
-    generalNumMap[MaxStructSize] =
-        SymbolTableInfo::SymbolInfo()->getMaxStructSize();
+    generalNumMap[MaxStructSize] = symInfo->getMaxStructSize();
     generalNumMap[TotalNumOfEdges] = pag->getPAGEdgeNum();
     generalNumMap["TotalPTAPAGEdges"] = pag->totalPTAPAGEdge;
     generalNumMap[NumberOfFieldInsensitiveObj] = fiObjNumber;
@@ -301,8 +303,10 @@ void PTAStat::callgraphStat() {
 
 void PTAStat::printStat(string statname) {
 
-    StringRef fullName(
-        SymbolTableInfo::SymbolInfo()->getModule()->getModuleIdentifier());
+    PAG *pag = pta->getPAG();
+    SymbolTableInfo *symInfo = pag->getSymbolTableInfo();
+
+    StringRef fullName(symInfo->getModule()->getModuleIdentifier());
     StringRef name = fullName.split('/').second;
     moduleName = name.split('.').first.str();
 

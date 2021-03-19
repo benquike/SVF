@@ -79,7 +79,7 @@ class MemSSAStat : public PTAStat {
     static const char
         *NumOfBBHasMSSAPhi; ///< Number of basic blocks which have mssa phi
 
-    MemSSAStat(MemSSA *);
+    MemSSAStat(MemSSA *memSSA);
 
     virtual ~MemSSAStat() {}
 

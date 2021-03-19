@@ -10,22 +10,6 @@ const NodeID NodeIDAllocator::constantObjectId = 1;
 const NodeID NodeIDAllocator::blackHolePointerId = 2;
 const NodeID NodeIDAllocator::nullPointerId = 3;
 
-NodeIDAllocator *NodeIDAllocator::allocator = nullptr;
-
-NodeIDAllocator *NodeIDAllocator::get() {
-    if (allocator == nullptr) {
-        allocator = new NodeIDAllocator();
-    }
-
-    return allocator;
-}
-
-void NodeIDAllocator::unset() {
-    if (allocator != nullptr) {
-        delete allocator;
-    }
-}
-
 // Initialise counts to 4 because that's how many special nodes we have.
 
 NodeIDAllocator::NodeIDAllocator(void)

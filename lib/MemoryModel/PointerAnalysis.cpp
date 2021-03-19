@@ -109,8 +109,8 @@ static llvm::cl::opt<bool>
     connectVCallOnCHA("vcall-cha", llvm::cl::init(false),
                       llvm::cl::desc("connect virtual calls using cha"));
 
-CommonCHGraph *PointerAnalysis::chgraph = nullptr;
-PAG *PointerAnalysis::pag = nullptr;
+// CommonCHGraph *PointerAnalysis::chgraph = nullptr;
+// PAG *PointerAnalysis::pag = nullptr;
 
 const std::string PointerAnalysis::aliasTestMayAlias = "MAYALIAS";
 const std::string PointerAnalysis::aliasTestMayAliasMangled = "_Z8MAYALIASPvS_";
@@ -179,7 +179,7 @@ void PointerAnalysis::initialize() {
             dchg->buildCHG(true);
             chgraph = dchg;
         } else {
-            CHGraph *chg = new CHGraph(pag->getModule());
+            CHGraph *chg = new CHGraph(pag->getSymbolTableInfo());
             chg->buildCHG();
             chgraph = chg;
         }
@@ -276,7 +276,7 @@ void PointerAnalysis::finalize() {
     /// Print statistics
     dumpStat();
 
-    PAG *pag = PAG::getPAG();
+    PAG *pag = getPAG();
     // dump PAG
     if (dumpGraph()) {
         pag->dump("pag_final");
@@ -289,7 +289,7 @@ void PointerAnalysis::finalize() {
     }
 
     if (!DumpPAGFunctions.empty()) {
-        ExternalPAG::dumpFunctions(DumpPAGFunctions);
+        pag->dumpFunctions(DumpPAGFunctions);
     }
 
     /// Dump results
@@ -359,10 +359,10 @@ void PointerAnalysis::dumpAllTypes() {
         outs() << "\nNodeID " << node->getId() << "\n";
 
         Type *type = node->getValue()->getType();
-        SymbolTableInfo::SymbolInfo()->printFlattenFields(type);
+        SymbolTableInfo *symbolTableInfo = getPAG()->getSymbolTableInfo();
+        symbolTableInfo->printFlattenFields(type);
         if (auto *ptType = SVFUtil::dyn_cast<PointerType>(type)) {
-            SymbolTableInfo::SymbolInfo()->printFlattenFields(
-                ptType->getElementType());
+            symbolTableInfo->printFlattenFields(ptType->getElementType());
         }
     }
 }

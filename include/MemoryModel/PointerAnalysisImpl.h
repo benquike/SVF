@@ -521,7 +521,7 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
         for (typename CPtSet::const_iterator cit = cpts.begin(),
                                              ecit = cpts.end();
              cit != ecit; ++cit) {
-            if (cit->get_id() == pag->getBlackHoleNode()) {
+            if (cit->get_id() == pag->getBlackHoleNodeID()) {
                 return true;
             }
         }
@@ -532,7 +532,7 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
         for (typename CPtSet::const_iterator cit = cpts.begin(),
                                              ecit = cpts.end();
              cit != ecit; ++cit) {
-            if (cit->get_id() == pag->getConstantNode()) {
+            if (cit->get_id() == pag->getConstantNodeID()) {
                 return true;
             }
         }

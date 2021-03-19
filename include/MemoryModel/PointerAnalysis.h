@@ -138,7 +138,7 @@ class PointerAnalysis {
     bool vcall_cha;
 
     /// PAG
-    static PAG *pag;
+    PAG *pag;
     /// Module
     SVFModule *svfMod;
     /// Pointer analysis Type
@@ -152,11 +152,14 @@ class PointerAnalysis {
     /// SCC for CallGraph
     CallGraphSCC *callGraphSCC;
     /// Interprocedural control-flow graph
+
     ICFG *icfg;
     /// CHGraph
-    static CommonCHGraph *chgraph;
+    CommonCHGraph *chgraph;
     /// TypeSystem
     TypeSystem *typeSystem;
+
+
 
   public:
     /// Return number of resolved indirect call edges
@@ -272,10 +275,10 @@ class PointerAnalysis {
     /// Determine whether a points-to contains a black hole or constant node
     //@{
     inline bool containBlackHoleNode(const PointsTo &pts) {
-        return pts.test(pag->getBlackHoleNode());
+        return pts.test(pag->getBlackHoleNodeID());
     }
     inline bool containConstantNode(const PointsTo &pts) {
-        return pts.test(pag->getConstantNode());
+        return pts.test(pag->getConstantNodeID());
     }
     virtual inline bool isBlkObjOrConstantObj(NodeID ptd) const {
         return pag->isBlkObjOrConstantObj(ptd);

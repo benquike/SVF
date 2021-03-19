@@ -42,7 +42,7 @@ class DoubleFreeChecker : public LeakChecker {
 
   public:
     /// Constructor
-    DoubleFreeChecker() : LeakChecker() {}
+    DoubleFreeChecker(PAG *pag) : LeakChecker(pag) {}
 
     /// Destructor
     virtual ~DoubleFreeChecker() {}
@@ -50,7 +50,7 @@ class DoubleFreeChecker : public LeakChecker {
     /// We start from here
     bool runOnModule(SVFModule *module) override {
         /// start analysis
-        analyze(module);
+        analyze();
         return false;
     }
 

@@ -32,6 +32,7 @@
 
 #include "MemoryModel/MemModel.h"
 #include "SVF-FE/LLVMModule.h"
+#include "Util/NodeIDAllocator.h"
 
 namespace SVF {
 
@@ -48,6 +49,7 @@ class SymbolTableInfo {
     /// value node id.
     using ValueToIDMapTy = OrderedMap<const Value *, SymID>;
     /// sym id to memory object map
+    using IDToValueMapTy = OrderedMap<SymID, const Value *>;
     using IDToMemMapTy = OrderedMap<SymID, MemObj *>;
     /// function to sym id map
     using FunToIDMapTy = OrderedMap<const Function *, SymID>;
@@ -62,21 +64,19 @@ class SymbolTableInfo {
     //@}
 
   private:
-    /// Data layout on a target machine
-    static DataLayout *dl;
+
+    // node id allocator
+    NodeIDAllocator nodeIDAllocator;
 
     ValueToIDMapTy valSymMap;  ///< map a value to its sym id
     ValueToIDMapTy objSymMap;  ///< map a obj reference to its sym id
-    IDToMemMapTy objMap;       ///< map a memory sym id to its obj
+    IDToValueMapTy idValueMap; ///< map from its id to the pointer
+    IDToMemMapTy   objMap;     ///< map a memory sym id to its obj
     IDToSymTyMapTy symTyMap;   /// < map a sym id to its type
     FunToIDMapTy returnSymMap; ///< return  map
     FunToIDMapTy varargSymMap; ///< vararg map
 
     CallSiteSet callSiteSet;
-
-    // Singleton pattern here to enable instance of SymbolTableInfo can only be
-    // created once.
-    static SymbolTableInfo *symInfo;
 
     /// Module
     SVFModule *mod;
@@ -96,22 +96,17 @@ class SymbolTableInfo {
     /// total number of symbols
     SymID totalSymNum;
 
-  protected:
-    /// Constructor
-    SymbolTableInfo(void)
-        : mod(nullptr), modelConstants(false), totalSymNum(0),
-          maxStruct(nullptr), maxStSize(0) {}
-
   public:
+
+    /// Constructor
+    SymbolTableInfo(SVFModule *mod)
+        : mod(mod), modelConstants(false), totalSymNum(0),
+          maxStruct(nullptr), maxStSize(0) {}
     /// Singleton design here to make sure we only have one instance during any
     /// analysis
     //@{
-    static SymbolTableInfo *SymbolInfo();
+    static SymbolTableInfo *SymbolInfo(SVFModule *mod);
 
-    static void releaseSymbolInfo() {
-        delete symInfo;
-        symInfo = nullptr;
-    }
     virtual ~SymbolTableInfo() { destroy(); }
     //@}
 
@@ -131,14 +126,6 @@ class SymbolTableInfo {
     /// Module
     inline SVFModule *getModule() { return mod; }
 
-    /// Get target machine data layout
-    inline static DataLayout *getDataLayout(Module *mod) {
-        if (dl == nullptr) {
-            return dl = new DataLayout(mod);
-        }
-        return dl;
-    }
-
     /// Helper method to get the size of the type from target data layout
     //@{
     u32_t getTypeSizeInBytes(const Type *type);
@@ -146,7 +133,7 @@ class SymbolTableInfo {
     //@}
 
     /// Start building memory model
-    void buildMemModel(SVFModule *svfModule);
+    void buildMemModel();
 
     /// collect the syms
     //@{
@@ -184,8 +171,7 @@ class SymbolTableInfo {
     inline void createBlkOrConstantObj(SymID symId) {
         assert(isBlkObjOrConstantObj(symId));
         assert(objMap.find(symId) == objMap.end());
-        objMap[symId] = new MemObj(symId);
-        ;
+        objMap[symId] = new MemObj(symId, this);
     }
 
     inline MemObj *getBlkObj() const { return getObj(blackholeSymID()); }
@@ -203,7 +189,7 @@ class SymbolTableInfo {
     inline const MemObj *createDummyObj(SymID symId, const Type *type) {
         assert(objMap.find(symId) == objMap.end() &&
                "this dummy obj has been created before");
-        auto *memObj = new MemObj(symId, type);
+        auto *memObj = new MemObj(symId, this, type);
         objMap[symId] = memObj;
         return memObj;
     }
@@ -356,6 +342,10 @@ class SymbolTableInfo {
     /// Debug method
     void printFlattenFields(const Type *type);
 
+    NodeIDAllocator &getNodeIDAllocator() {
+        return nodeIDAllocator;
+    }
+
   protected:
     /// Collect the struct info
     virtual void collectStructInfo(const StructType *T);
@@ -386,7 +376,7 @@ class LocSymTableInfo : public SymbolTableInfo {
 
   public:
     /// Constructor
-    LocSymTableInfo() {}
+    LocSymTableInfo(SVFModule *mod): SymbolTableInfo(mod) {}
     /// Destructor
     virtual ~LocSymTableInfo() {}
     /// Compute gep offset
@@ -410,8 +400,9 @@ class LocObjTypeInfo : public ObjTypeInfo {
 
   public:
     /// Constructor
-    LocObjTypeInfo(const Value *val, Type *t, Size_t max)
-        : ObjTypeInfo(val, t, max) {}
+    LocObjTypeInfo(SymbolTableInfo *symInfo, const Value *val,
+                   Type *t, Size_t max)
+        : ObjTypeInfo(symInfo, val, t, max) {}
     /// Destructor
     virtual ~LocObjTypeInfo() {}
     /// Get the size of this object

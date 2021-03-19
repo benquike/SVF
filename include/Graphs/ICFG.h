@@ -37,6 +37,7 @@
 namespace SVF {
 
 class PTACallGraph;
+class PAG;
 
 /*!
  * Interprocedural Control-Flow Graph (ICFG)
@@ -70,12 +71,16 @@ class ICFG : public GenericICFGTy {
         InstToBlockNodeMap;           ///< map a basic block to its ICFGNode
     GlobalBlockNode *globalBlockNode; ///< unique basic block for all globals
 
+    PAG *pag;
   public:
     /// Constructor
-    ICFG();
+    ICFG(PAG *pag);
 
     /// Destructor
     virtual ~ICFG() {}
+
+
+    PAG *getPAG() { return pag; }
 
     /// Get a ICFG node
     inline ICFGNode *getICFGNode(NodeID id) const { return getGNode(id); }

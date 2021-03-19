@@ -74,8 +74,16 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     using GepValPNMap = Map<const Value *, NodeLocationSetMap>;
     using NodePairSetMap = Map<NodePair, NodeID>;
 
+
+
   private:
-    SymbolTableInfo *symInfo;
+    /// Maps function names to the entry nodes of the extpag which implements
+    /// it. This is to connect arguments and callsites.
+    Map<const SVFFunction *, Map<int, PAGNode *>>
+        functionToExternalPAGEntries;
+    Map<const SVFFunction *, PAGNode *> functionToExternalPAGReturns;
+
+    SymbolTableInfo *symbolTableInfo;
     /// ValueNodes - This map indicates the Node that a particular Value* is
     /// represented by.  This contains entries for all pointers.
     PAGEdge::PAGKindToEdgeSetMapTy
@@ -105,8 +113,7 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
         callSiteRetMap; ///< Map a callsite to its callsite returns PAGNodes
     FunToRetMap
         funRetMap;   ///< Map a function to its unique function return PAGNodes
-    static PAG *pag; ///< Singleton pattern here to enable instance of PAG can
-                     ///< only be created once.
+
     CallSiteToFunPtrMap indCallSiteToFunPtrMap; ///< Map an indirect callsite to
                                                 ///< its function pointer
     FunPtrToCallSitesMap
@@ -124,13 +131,15 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     ICFG *icfg;               // ICFG
     CallSiteSet callSiteSet;  /// all the callsites of a program
 
-    /// Constructor
-    PAG(bool buildFromFile);
-
     /// Clean up memory
     void destroy();
 
   public:
+    friend class ExternalPAG;
+
+    /// Constructor
+    PAG(SymbolTableInfo *symInfo, bool buildFromFile=false);
+
     u32_t totalPTAPAGEdge;
 
     /// Return ICFG
@@ -152,23 +161,6 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
         }
     }
 
-    /// Singleton design here to make sure we only have one instance during any
-    /// analysis
-    //@{
-    static inline PAG *getPAG(bool buildFromFile = false) {
-        if (pag == nullptr) {
-            pag = new PAG(buildFromFile);
-        }
-        return pag;
-    }
-    static void releasePAG() {
-        if (pag) {
-            delete pag;
-        }
-        pag = nullptr;
-    }
-    //@}
-
     /// Destructor
     virtual ~PAG() { destroy(); }
 
@@ -179,9 +171,15 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     /// Whether to handle blackhole edge
     static void handleBlackHole(bool b);
     //@}
+    ///
+
+    inline SymbolTableInfo *getSymbolTableInfo() const {
+        return symbolTableInfo;
+    }
+
     /// Get LLVM Module
     inline SVFModule *getModule() {
-        return SymbolTableInfo::SymbolInfo()->getModule();
+        return symbolTableInfo->getModule();
     }
     inline void addCallSite(const CallBlockNode *call) {
         callSiteSet.insert(call);
@@ -376,9 +374,9 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     //@{
     inline Size_t getPAGNodeNum() const { return nodeNum; }
     inline Size_t getPAGEdgeNum() const { return edgeNum; }
-    inline Size_t getValueNodeNum() const { return symInfo->valSyms().size(); }
+    inline Size_t getValueNodeNum() const { return symbolTableInfo->valSyms().size(); }
     inline Size_t getObjectNodeNum() const {
-        return symInfo->idToObjMap().size();
+        return symbolTableInfo->idToObjMap().size();
     }
     inline Size_t getFieldValNodeNum() const { return GepValNodeMap.size(); }
     inline Size_t getFieldObjNodeNum() const { return GepObjNodeMap.size(); }
@@ -445,7 +443,7 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     }
     inline PAGEdge *getIntraPAGEdge(PAGNode *src, PAGNode *dst,
                                     PAGEdge::PEDGEK kind) {
-        PAGEdge edge(src, dst, kind);
+        PAGEdge edge(src, dst, this, kind);
         const PAGEdge::PAGEdgeSetTy &edgeSet = getEdgeSet(kind);
         auto it = edgeSet.find(&edge);
         assert(it != edgeSet.end() && "can not find pag edge");
@@ -461,14 +459,14 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     /// getNode - Return the node ID corresponding
     /// to the specified pointer.
     /// FIXME: rename the API
-    inline NodeID getValueNode(const Value *V) { return symInfo->getValSym(V); }
+    inline NodeID getValueNode(const Value *V) { return symbolTableInfo->getValSym(V); }
 
-    inline bool hasValueNode(const Value *V) { return symInfo->hasValSym(V); }
+    inline bool hasValueNode(const Value *V) { return symbolTableInfo->hasValSym(V); }
 
     /// getObject - Return the obj node id refer to the memory object for the
     /// specified global, heap or alloca instruction according to llvm value.
     inline NodeID getObjectNode(const Value *V) {
-        return symInfo->getObjSym(V);
+        return symbolTableInfo->getObjSym(V);
     }
 
     /// getObject - return mem object id
@@ -495,13 +493,13 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     /// GetReturnNode - Return the unique node representing the return value of
     /// a function
     inline NodeID getReturnNode(const SVFFunction *func) const {
-        return symInfo->getRetSym(func->getLLVMFun());
+        return symbolTableInfo->getRetSym(func->getLLVMFun());
     }
 
     /// getVarargNode - Return the unique node representing the variadic
     /// argument of a variadic function.
     inline NodeID getVarargNode(const SVFFunction *func) const {
-        return symInfo->getVarargSym(func->getLLVMFun());
+        return symbolTableInfo->getVarargSym(func->getLLVMFun());
     }
 
     /// Get a field PAG Object node according to base mem obj and offset
@@ -517,7 +515,7 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     }
 
     inline NodeID getFIObjNode(NodeID id) const {
-        PAGNode *node = pag->getPAGNode(id);
+        PAGNode *node = getPAGNode(id);
         assert(SVFUtil::isa<ObjPN>(node) && "need an object node");
         auto *obj = SVFUtil::cast<ObjPN>(node);
         return getFIObjNode(obj->getMemObj());
@@ -526,13 +524,21 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
 
     /// Get black hole and constant id
     //@{
-    inline NodeID getBlackHoleNode() const { return symInfo->blackholeSymID(); }
+    inline NodeID getBlackHoleNodeID() const {
+        return symbolTableInfo->blackholeSymID();
+    }
 
-    inline NodeID getConstantNode() const { return symInfo->constantSymID(); }
+    inline NodeID getConstantNodeID() const {
+        return symbolTableInfo->constantSymID();
+    }
 
-    inline NodeID getBlkPtr() const { return symInfo->blkPtrSymID(); }
+    inline NodeID getBlkPtr() const {
+        return symbolTableInfo->blkPtrSymID();
+    }
 
-    inline NodeID getNullPtr() const { return symInfo->nullPtrSymID(); }
+    inline NodeID getNullPtr() const {
+        return symbolTableInfo->nullPtrSymID();
+    }
 
     inline bool isBlkPtr(NodeID id) const {
         return (SymbolTableInfo::isBlkPtr(id));
@@ -572,11 +578,11 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     }
 
     inline const MemObj *getBlackHoleObj() const {
-        return symInfo->getBlkObj();
+        return symbolTableInfo->getBlkObj();
     }
 
     inline const MemObj *getConstantObj() const {
-        return symInfo->getConstantObj();
+        return symbolTableInfo->getConstantObj();
     }
     //@}
 
@@ -599,7 +605,7 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     }
 
     inline const MemObj *getBaseObj(NodeID id) const {
-        const PAGNode *node = pag->getPAGNode(id);
+        const PAGNode *node = getPAGNode(id);
         assert(SVFUtil::isa<ObjPN>(node) && "need an object node");
         const auto *obj = SVFUtil::cast<ObjPN>(node);
         return obj->getMemObj();
@@ -629,9 +635,9 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
 
     /// Add a memory obj node
     inline NodeID addObjNode(const Value *val, NodeID i) {
-        MemObj *mem = symInfo->getObj(symInfo->getObjSym(val));
+        MemObj *mem = symbolTableInfo->getObj(symbolTableInfo->getObjSym(val));
         assert(
-            ((mem->getSymId() == i) || (symInfo->getGlobalRep(val) != val)) &&
+            ((mem->getSymId() == i) || (symbolTableInfo->getGlobalRep(val) != val)) &&
             "not same object id?");
         return addFIObjNode(mem);
     }
@@ -665,7 +671,8 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     ///  Add a dummy value/object node according to node ID (llvm value is null)
     //@{
     inline NodeID addDummyValNode() {
-        return addDummyValNode(NodeIDAllocator::get()->allocateValueId());
+        auto &nodeIDAllocator = symbolTableInfo->getNodeIDAllocator();
+        return addDummyValNode(nodeIDAllocator.allocateValueId());
     }
 
     inline NodeID addDummyValNode(NodeID i) {
@@ -673,8 +680,8 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     }
 
     inline NodeID addDummyObjNode(const Type *type = nullptr) {
-        return addDummyObjNode(NodeIDAllocator::get()->allocateObjectId(),
-                               type);
+        auto &nodeIDAllocator = symbolTableInfo->getNodeIDAllocator();
+        return addDummyObjNode(nodeIDAllocator.allocateObjectId(), type);
     }
 
     inline NodeID addDummyObjNode(NodeID i, const Type *type) {
@@ -683,19 +690,17 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     }
 
     inline const MemObj *addDummyMemObj(NodeID i, const Type *type) {
-        return SymbolTableInfo::SymbolInfo()->createDummyObj(i, type);
+        return symbolTableInfo->createDummyObj(i, type);
     }
 
     inline NodeID addBlackholeObjNode() {
-        return addObjNode(nullptr,
-                          new DummyObjPN(getBlackHoleNode(), getBlackHoleObj()),
-                          getBlackHoleNode());
+        auto id = getConstantNodeID();
+        return addObjNode(nullptr, new DummyObjPN(id, getBlackHoleObj()), id);
     }
 
     inline NodeID addConstantObjNode() {
-        return addObjNode(nullptr,
-                          new DummyObjPN(getConstantNode(), getConstantObj()),
-                          getConstantNode());
+        auto id = getConstantNodeID();
+        return addObjNode(nullptr, new DummyObjPN(id, getConstantObj()), id);
     }
 
     inline NodeID addBlackholePtrNode() { return addDummyValNode(getBlkPtr()); }
@@ -785,6 +790,28 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
 
     bool isValidTopLevelPtr(const PAGNode *node);
     //@}
+
+    void initializeExternalPAGs();
+
+    /// Whether an external PAG implementing function exists.
+    bool hasExternalPAG(const SVFFunction *function) {
+        bool ret = functionToExternalPAGEntries.find(function) !=
+               functionToExternalPAGEntries.end();
+        return ret;
+    }
+
+    std::vector<std::pair<std::string, std::string>>
+    parseExternalPAGs(llvm::cl::list<std::string> &extpagsArgs);
+
+    /// Connects callsite if a external PAG implementing the relevant function
+    /// has been added.
+    /// Returns true on success, false otherwise.
+    bool connectCallsiteToExternalPAG(CallSite *cs);
+
+
+    /// Dump individual PAGs of specified functions. Currently to outs().
+    void dumpFunctions(std::vector<std::string> &functions);
+
 
     /// Return graph name
     inline std::string getGraphName() const { return "PAG"; }

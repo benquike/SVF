@@ -397,6 +397,7 @@ class GepObjPN : public ObjPN {
   private:
     LocationSet ls;
     NodeID base = 0;
+    SymbolTableInfo *symbolTableInfo;
 
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
@@ -418,8 +419,9 @@ class GepObjPN : public ObjPN {
 
     /// Constructor
     GepObjPN(const MemObj *mem, NodeID i, const LocationSet &l,
-             PNODEK ty = GepObjNode)
-        : ObjPN(mem->getRefVal(), i, mem, ty), ls(l) {
+             SymbolTableInfo *symInfo, PNODEK ty = GepObjNode)
+        : ObjPN(mem->getRefVal(), i, mem, ty), ls(l),
+          symbolTableInfo(symInfo) {
         base = mem->getSymId();
     }
 
@@ -434,7 +436,7 @@ class GepObjPN : public ObjPN {
 
     /// Return the type of this gep object
     inline const llvm::Type *getType() const override {
-        return SymbolTableInfo::SymbolInfo()->getOrigSubTypeWithByteOffset(
+        return symbolTableInfo->getOrigSubTypeWithByteOffset(
             mem->getType(), ls.getByteOffset());
     }
 
@@ -646,8 +648,8 @@ class CloneGepObjPN : public GepObjPN {
 
     /// Constructor
     CloneGepObjPN(const MemObj *mem, NodeID i, const LocationSet &l,
-                  PNODEK ty = CloneGepObjNode)
-        : GepObjPN(mem, i, l, ty) {}
+                  SymbolTableInfo *symInfo, PNODEK ty = CloneGepObjNode)
+        : GepObjPN(mem, i, l, symInfo, ty) {}
 
     /// Return name of this node
     inline const std::string getValueName() const override {

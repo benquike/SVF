@@ -111,12 +111,15 @@ class SVFG : public VFG {
     void destroy();
 
     /// Constructor
-    SVFG(MemSSA *mssa, VFGK k);
+    SVFG(MemSSA *mssa, PAG *pag, VFGK k);
 
     /// Start building SVFG
     virtual void buildSVFG();
 
   public:
+
+    friend class SVFGStat;
+
     /// Destructor
     virtual ~SVFG() { destroy(); }
 
