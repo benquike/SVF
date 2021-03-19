@@ -99,7 +99,7 @@ void traverseOnICFG(ICFG *icfg, const Instruction *inst) {
  * value-flow graph (VFG)
  */
 void traverseOnVFG(const SVFG *vfg, Value *val) {
-    PAG *pag = PAG::getPAG();
+    PAG *pag = vfg->getPAG();
 
     PAGNode *pNode = pag->getPAGNode(pag->getValueNode(val));
     const VFGNode *vNode = vfg->getDefSVFGNode(pNode);
@@ -145,9 +145,11 @@ int main(int argc, char **argv) {
     SVFModule *svfModule =
         LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
 
+    SymbolTableInfo _symbolTableInfo(svfModule);
+    PAG _pag(&_symbolTableInfo);
     /// Build Program Assignment Graph (PAG)
-    PAGBuilder builder;
-    PAG *pag = builder.build(svfModule);
+    PAGBuilder _builder(&_pag);
+    PAG *pag = _builder.build();
 
     /// Create Andersen's pointer analysis
     Andersen *ander = AndersenWaveDiff::createAndersenWaveDiff(pag);
@@ -165,7 +167,7 @@ int main(int argc, char **argv) {
     ICFG *icfg = pag->getICFG();
 
     /// Value-Flow Graph (VFG)
-    VFG *vfg = new VFG(callgraph);
+    VFG *vfg = new VFG(callgraph, pag);
 
     /// Sparse value-flow graph (SVFG)
     SVFGBuilder svfBuilder;
@@ -181,7 +183,6 @@ int main(int argc, char **argv) {
     delete vfg;
     delete svfg;
     AndersenWaveDiff::releaseAndersenWaveDiff();
-    PAG::releasePAG();
 
     return 0;
 }

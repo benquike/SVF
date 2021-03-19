@@ -31,6 +31,8 @@
 #include "SABER/FileChecker.h"
 #include "SABER/LeakChecker.h"
 #include "SVF-FE/LLVMUtil.h"
+#include "SVF-FE/PAGBuilder.h"
+#include "SVF-FE/PAGBuilder.h"
 
 using namespace llvm;
 using namespace SVF;
@@ -65,17 +67,21 @@ int main(int argc, char **argv) {
 
     SVFModule *svfModule =
         LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
+    SymbolTableInfo symbolTableInfo(svfModule);
+    PAG _pag(&symbolTableInfo);
+    PAGBuilder _builder(&_pag);
+    PAG *pag = _builder.build();
 
     LeakChecker *saber;
 
     if (LEAKCHECKER)
-        saber = new LeakChecker();
+        saber = new LeakChecker(pag);
     else if (FILECHECKER)
-        saber = new FileChecker();
+        saber = new FileChecker(pag);
     else if (DFREECHECKER)
-        saber = new DoubleFreeChecker();
+        saber = new DoubleFreeChecker(pag);
     else
-        saber = new LeakChecker(); // if no checker is specified, we use leak
+        saber = new LeakChecker(pag); // if no checker is specified, we use leak
                                    // checker as the default one.
 
     saber->runOnModule(svfModule);
