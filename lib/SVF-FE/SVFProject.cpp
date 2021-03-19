@@ -42,3 +42,11 @@ ICFG * SVFProject::getICFG() {
 
     return icfg;
 }
+
+SVFProject::~SVFProject() {
+      delete threadAPI;
+      delete icfg;
+      delete pag;
+      delete symTableInfo;
+      delete svfModule;
+}
