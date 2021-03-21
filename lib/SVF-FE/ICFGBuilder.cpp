@@ -26,7 +26,12 @@
  *
  *  Created on:
  *      Author: yulei
+ *
+ *  Updated by:
+ *     Hui Peng <peng124@purdue.edu>
+ *     2021-03-21
  */
+
 
 #include "SVF-FE/ICFGBuilder.h"
 #include "Graphs/PAG.h"
@@ -38,8 +43,8 @@ using namespace SVFUtil;
 /*!
  * Create ICFG nodes and edges
  */
-void ICFGBuilder::build(SVFModule *svfModule) {
-    for (const auto *fun : *svfModule) {
+void ICFGBuilder::build() {
+    for (const auto *fun : *icfg->getPAG()->getModule()) {
         if (SVFUtil::isExtCall(fun))
             continue;
         WorkList worklist;
@@ -47,7 +52,7 @@ void ICFGBuilder::build(SVFModule *svfModule) {
         processFunBody(worklist);
         processFunExit(fun);
     }
-    connectGlobalToProgEntry(svfModule);
+    connectGlobalToProgEntry();
 }
 
 /*!
@@ -166,7 +171,8 @@ void ICFGBuilder::addICFGInterEdges(const Instruction *cs,
     }
 }
 
-void ICFGBuilder::connectGlobalToProgEntry(SVFModule *svfModule) {
+void ICFGBuilder::connectGlobalToProgEntry() {
+    SVFModule * svfModule = icfg->getPAG()->getModule();
     const SVFFunction *mainFunc = SVFUtil::getProgEntryFunction(svfModule);
 
     /// Return back if the main function is not found, the bc file might be a

@@ -25,7 +25,12 @@
  *
  *  Created on: 11 Sep. 2018
  *      Author: Yulei
+ *
+ *  Updated by:
+ *     Hui Peng <peng124@purdue.edu>
+ *     2021-03-21
  */
+
 
 #ifndef INCLUDE_UTIL_ICFG_H_
 #define INCLUDE_UTIL_ICFG_H_
@@ -70,8 +75,10 @@ class ICFG : public GenericICFGTy {
     InstToBlockNodeMapTy
         InstToBlockNodeMap;           ///< map a basic block to its ICFGNode
     GlobalBlockNode *globalBlockNode; ///< unique basic block for all globals
-
     PAG *pag;
+
+    void buildICFG();
+
   public:
     /// Constructor
     ICFG(PAG *pag);

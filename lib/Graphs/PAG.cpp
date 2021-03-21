@@ -25,7 +25,12 @@
  *
  *  Created on: Nov 1, 2013
  *      Author: Yulei Sui
+ *
+ *  Updated by:
+ *     Hui Peng <peng124@purdue.edu>
+ *     2021-03-21
  */
+
 
 #include <sstream>      // std::stringstream
 #include <string>
@@ -272,8 +277,6 @@ PAG::PAG(SVFProject *proj, bool buildFromFile)
       proj(proj), totalPTAPAGEdge(0) {
     if (icfg == nullptr) {
         icfg = new ICFG(this);
-        ICFGBuilder builder(icfg);
-        builder.build(symbolTableInfo->getModule());
     }
 
     // build the PAG
