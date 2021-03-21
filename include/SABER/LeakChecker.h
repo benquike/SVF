@@ -48,10 +48,9 @@ class LeakChecker : public SrcSnkDDA {
     enum LEAK_TYPE { NEVER_FREE_LEAK, CONTEXT_LEAK, PATH_LEAK, GLOBAL_LEAK };
 
     /// Constructor
-    LeakChecker(SVFProject *proj): SrcSnkDDA(proj) { }
+    LeakChecker(SVFProject *proj) : SrcSnkDDA(proj) {}
     /// Destructor
-    virtual ~LeakChecker() {
-    }
+    virtual ~LeakChecker() {}
 
     /// We start from here
     virtual bool runOnModule(SVFModule *module) {

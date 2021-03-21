@@ -44,13 +44,9 @@ class VTblParseTesting : public ::testing::Test {
 
     void SetUp() override {}
 
-    void TearDown() override {
-        delete proj;
-    }
+    void TearDown() override { delete proj; }
 
-    void init(string &ll_file) {
-        proj = new SVFProject(ll_file);
-    }
+    void init(string &ll_file) { proj = new SVFProject(ll_file); }
 
     void dump_vtbls_from_globalvariable() {
         Module *mod = proj->getLLVMModSet()->getMainLLVMModule();

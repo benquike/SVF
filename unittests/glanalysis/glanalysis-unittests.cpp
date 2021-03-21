@@ -24,11 +24,11 @@
 
 #include <llvm/Demangle/Demangle.h>
 
-#include "SVF-FE/PAGBuilder.h"
 #include "SVF-FE/CHG.h"
+#include "SVF-FE/PAGBuilder.h"
 
-#include "gtest/gtest.h"
 #include "config.h"
+#include "gtest/gtest.h"
 
 using namespace SVF;
 using namespace std;
@@ -47,12 +47,11 @@ TEST(GLAnalysis, DumpVTargets) {
 
     chg->buildCHG();
 
-
     // Get the indirect callsites from the PAG
     // CallBlockNode * -> FnPtrId
     auto callSitesToFunPtrIDMap = pag->getIndirectCallsites();
 
-    for (auto [cbn, fnPtrId]: callSitesToFunPtrIDMap) {
+    for (auto [cbn, fnPtrId] : callSitesToFunPtrIDMap) {
         // auto *callInst = llvm::dyn_cast<CallInst>(cbn->getCallSite());
         CallSite cs = SVFUtil::getLLVMCallSite(cbn->getCallSite());
 
@@ -61,7 +60,6 @@ TEST(GLAnalysis, DumpVTargets) {
         }
 
         const auto *fun = cbn->getFun();
-
 
         if (!chg->csHasVFnsBasedonCHA(cs)) {
             continue;
@@ -72,14 +70,13 @@ TEST(GLAnalysis, DumpVTargets) {
         llvm::outs() << *cbn->getCallSite() << "\n";
 
         auto vTargets = chg->getCSVFsBasedonCHA(cs);
-        for (const auto *tgt: vTargets) {
-            llvm::outs() << "\t -" <<
-                llvm::demangle(tgt->getLLVMFun()->getName().str()) << "\n";
+        for (const auto *tgt : vTargets) {
+            llvm::outs() << "\t -"
+                         << llvm::demangle(tgt->getLLVMFun()->getName().str())
+                         << "\n";
         }
     }
-
 }
-
 
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);

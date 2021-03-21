@@ -50,7 +50,8 @@ using WPAConstraintSolver = WPASolver<ConstraintGraph *>;
 class AndersenBase : public WPAConstraintSolver, public BVDataPTAImpl {
   public:
     /// Constructor
-    AndersenBase(SVFProject *proj, PTATY type = Andersen_BASE, bool alias_check = true)
+    AndersenBase(SVFProject *proj, PTATY type = Andersen_BASE,
+                 bool alias_check = true)
         : BVDataPTAImpl(proj, type, alias_check), consCG(nullptr) {
         iterationForPrintStat = OnTheFlyIterBudgetForStat;
     }
@@ -136,7 +137,8 @@ class Andersen : public AndersenBase {
     using CallSite2DummyValPN = OrderedMap<CallSite, NodeID>;
 
     /// Constructor
-    Andersen(SVFProject *proj, PTATY type = Andersen_WPA, bool alias_check = true)
+    Andersen(SVFProject *proj, PTATY type = Andersen_WPA,
+             bool alias_check = true)
         : AndersenBase(proj, type, alias_check), pwcOpt(false), diffOpt(true) {}
 
     /// Destructor
@@ -355,8 +357,7 @@ class AndersenWaveDiff : public Andersen {
     static AndersenWaveDiff *diffWave; // static instance
 
   public:
-    AndersenWaveDiff(SVFProject *proj,
-                     PTATY type = AndersenWaveDiff_WPA,
+    AndersenWaveDiff(SVFProject *proj, PTATY type = AndersenWaveDiff_WPA,
                      bool alias_check = true)
         : Andersen(proj, type, alias_check) {}
 

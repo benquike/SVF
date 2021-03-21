@@ -19,13 +19,12 @@
  *     2021-03-19
  *****************************************************************************/
 
-#include "Graphs/PAG.h"
 #include "SVF-FE/SVFProject.h"
+#include "Graphs/PAG.h"
 
 using namespace SVF;
 
-
-PAG * SVFProject::getPAG() {
+PAG *SVFProject::getPAG() {
     if (!pag) {
         // TODO: add support for options
         pag = new PAG(this);
@@ -34,8 +33,7 @@ PAG * SVFProject::getPAG() {
     return pag;
 }
 
-
-ICFG * SVFProject::getICFG() {
+ICFG *SVFProject::getICFG() {
     if (!icfg) {
         icfg = getPAG()->getICFG();
     }
@@ -44,9 +42,9 @@ ICFG * SVFProject::getICFG() {
 }
 
 SVFProject::~SVFProject() {
-      delete threadAPI;
-      delete icfg;
-      delete pag;
-      delete symTableInfo;
-      delete svfModule;
+    delete threadAPI;
+    delete icfg;
+    delete pag;
+    delete symTableInfo;
+    delete svfModule;
 }

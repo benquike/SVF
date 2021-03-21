@@ -57,10 +57,8 @@ class PAGBuilder : public llvm::InstVisitor<PAGBuilder> {
   public:
     /// Constructor
     PAGBuilder(SVFProject *proj)
-        : pag(proj->getPAG()), svfMod(proj->getSVFModule()),
-          proj(proj),
-          curBB(nullptr), curVal(nullptr) {
-    }
+        : pag(proj->getPAG()), svfMod(proj->getSVFModule()), proj(proj),
+          curBB(nullptr), curVal(nullptr) {}
     /// Destructor
     virtual ~PAGBuilder() {}
 

@@ -48,11 +48,10 @@ inline const Function *getLLVMFunction(const Value *val) {
 }
 
 ///
-/// Return true if the call is an external function (external library in function
-/// summary table) or it is just a declaration without a definition.
-/// If the libary function is redefined in the application code
-/// (e.g., memcpy), it will return false and will not be treated as an external
-/// call.
+/// Return true if the call is an external function (external library in
+/// function summary table) or it is just a declaration without a definition. If
+/// the libary function is redefined in the application code (e.g., memcpy), it
+/// will return false and will not be treated as an external call.
 ///
 ///  ExtAPI::getExtAPI()->is_ext(fun) will return true if fun is
 ///  a declaration.
@@ -87,32 +86,33 @@ inline bool isHeapAllocExtFunViaArg(const SVFFunction *fun) {
 inline bool isHeapAllocExtCallViaRet(const CallSite cs, SVFModule *svfMod) {
     bool isPtrTy = cs.getInstruction()->getType()->isPointerTy();
     return isPtrTy &&
-        isHeapAllocExtFunViaRet(getCallee(svfMod->getLLVMModSet(), cs));
+           isHeapAllocExtFunViaRet(getCallee(svfMod->getLLVMModSet(), cs));
 }
 
-inline bool
-isHeapAllocExtCallViaRet(const Instruction *inst, SVFModule *svfMod) {
+inline bool isHeapAllocExtCallViaRet(const Instruction *inst,
+                                     SVFModule *svfMod) {
     bool isPtrTy = inst->getType()->isPointerTy();
     return isPtrTy &&
-        isHeapAllocExtFunViaRet(getCallee(svfMod->getLLVMModSet(), inst));
+           isHeapAllocExtFunViaRet(getCallee(svfMod->getLLVMModSet(), inst));
 }
 
 inline bool isHeapAllocExtCallViaArg(const CallSite cs, SVFModule *svfMod) {
     return isHeapAllocExtFunViaArg(getCallee(svfMod->getLLVMModSet(), cs));
 }
 
-inline bool isHeapAllocExtCallViaArg(const Instruction *inst, SVFModule *svfMod) {
+inline bool isHeapAllocExtCallViaArg(const Instruction *inst,
+                                     SVFModule *svfMod) {
     return isHeapAllocExtFunViaArg(getCallee(svfMod->getLLVMModSet(), inst));
 }
 
 inline bool isHeapAllocExtCall(const CallSite cs, SVFModule *svfMod) {
     return isHeapAllocExtCallViaRet(cs, svfMod) ||
-        isHeapAllocExtCallViaArg(cs, svfMod);
+           isHeapAllocExtCallViaArg(cs, svfMod);
 }
 
 inline bool isHeapAllocExtCall(const Instruction *inst, SVFModule *svfMod) {
     return isHeapAllocExtCallViaRet(inst, svfMod) ||
-        isHeapAllocExtCallViaArg(inst, svfMod);
+           isHeapAllocExtCallViaArg(inst, svfMod);
 }
 //@}
 
@@ -122,14 +122,14 @@ inline int getHeapAllocHoldingArgPosition(const SVFFunction *fun) {
     return ExtAPI::getExtAPI()->get_alloc_arg_pos(fun);
 }
 
-inline int
-getHeapAllocHoldingArgPosition(const CallSite cs, SVFModule *svfMod) {
+inline int getHeapAllocHoldingArgPosition(const CallSite cs,
+                                          SVFModule *svfMod) {
     return getHeapAllocHoldingArgPosition(
         getCallee(svfMod->getLLVMModSet(), cs));
 }
 
-inline int
-getHeapAllocHoldingArgPosition(const Instruction *inst, SVFModule *svfMod) {
+inline int getHeapAllocHoldingArgPosition(const Instruction *inst,
+                                          SVFModule *svfMod) {
     return getHeapAllocHoldingArgPosition(
         getCallee(svfMod->getLLVMModSet(), inst));
 }
@@ -193,8 +193,8 @@ inline bool isHeapAllocOrStaticExtCall(const CallSite cs, SVFModule *svfMod) {
     return isStaticExtCall(cs, svfMod) || isHeapAllocExtCall(cs, svfMod);
 }
 
-inline bool
-isHeapAllocOrStaticExtCall(const Instruction *inst, SVFModule *svfMod) {
+inline bool isHeapAllocOrStaticExtCall(const Instruction *inst,
+                                       SVFModule *svfMod) {
     return isStaticExtCall(inst, svfMod) || isHeapAllocExtCall(inst, svfMod);
 }
 //@}
@@ -206,8 +206,8 @@ inline ExtAPI::extf_t extCallTy(const SVFFunction *fun) {
 
 /// Get the reference type of heap/static object from an allocation site.
 //@{
-inline const PointerType *
-getRefTypeOfHeapAllocOrStatic(const CallSite cs, SVFModule *svfMod) {
+inline const PointerType *getRefTypeOfHeapAllocOrStatic(const CallSite cs,
+                                                        SVFModule *svfMod) {
     const PointerType *refType = nullptr;
     // Case 1: heap object held by *argument, we should get its element type.
     if (isHeapAllocExtCallViaArg(cs, svfMod)) {
@@ -230,14 +230,12 @@ getRefTypeOfHeapAllocOrStatic(const CallSite cs, SVFModule *svfMod) {
     return refType;
 }
 
-inline const PointerType *
-getRefTypeOfHeapAllocOrStatic(const Instruction *inst, SVFModule *svfMod) {
+inline const PointerType *getRefTypeOfHeapAllocOrStatic(const Instruction *inst,
+                                                        SVFModule *svfMod) {
     CallSite cs(const_cast<Instruction *>(inst));
     return getRefTypeOfHeapAllocOrStatic(cs, svfMod);
 }
 //@}
-
-
 
 /// Return true if this value refers to a object
 bool isObject(const Value *ref, SVFModule *svfMod);
@@ -260,7 +258,7 @@ bool isDeadFunction(const Function *fun, SVFModule *svfMod);
 /// whether this is an argument in dead function
 inline bool ArgInDeadFunction(const Value *val, SVFModule *svfMod) {
     return SVFUtil::isa<Argument>(val) &&
-        isDeadFunction(SVFUtil::cast<Argument>(val)->getParent(), svfMod);
+           isDeadFunction(SVFUtil::cast<Argument>(val)->getParent(), svfMod);
 }
 //@}
 
@@ -324,7 +322,8 @@ inline bool isNoCallerFunction(const Function *fun, SVFModule *svfMod) {
 /// Return true if the argument in a function does not have a caller
 inline bool ArgInNoCallerFunction(const Value *val, SVFModule *svfMod) {
     return SVFUtil::isa<Argument>(val) &&
-           isNoCallerFunction(SVFUtil::cast<Argument>(val)->getParent(), svfMod);
+           isNoCallerFunction(SVFUtil::cast<Argument>(val)->getParent(),
+                              svfMod);
 }
 //@}
 
@@ -349,7 +348,8 @@ const Value *stripConstantCasts(const Value *val);
 Value *stripAllCasts(Value *val);
 
 /// Get the type of the heap allocation
-const Type *getTypeOfHeapAlloc(const llvm::Instruction *inst, SVFModule *svfMod);
+const Type *getTypeOfHeapAlloc(const llvm::Instruction *inst,
+                               SVFModule *svfMod);
 
 /// Return corresponding constant expression, otherwise return nullptr
 //@{

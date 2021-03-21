@@ -7,21 +7,21 @@
   Synopsis    [Functions to support group specification for reordering.]
 
   Description [External procedures included in this module:
-	    <ul>
-	    <li> Mtr_InitGroupTree()
-	    <li> Mtr_MakeGroup()
-	    <li> Mtr_DissolveGroup()
-	    <li> Mtr_FindGroup()
-	    <li> Mtr_SwapGroups()
+        <ul>
+        <li> Mtr_InitGroupTree()
+        <li> Mtr_MakeGroup()
+        <li> Mtr_DissolveGroup()
+        <li> Mtr_FindGroup()
+        <li> Mtr_SwapGroups()
             <li> Mtr_ReorderGroups()
-	    <li> Mtr_PrintGroups()
-	    <li> Mtr_ReadGroups()
-	    </ul>
-	Static procedures included in this module:
-	    <ul>
-	    <li> mtrShiftHL
-	    </ul>
-	    ]
+        <li> Mtr_PrintGroups()
+        <li> Mtr_ReadGroups()
+        </ul>
+    Static procedures included in this module:
+        <ul>
+        <li> mtrShiftHL
+        </ul>
+        ]
 
   SeeAlso     [cudd package]
 
@@ -61,8 +61,8 @@
 
 ******************************************************************************/
 
-#include "CUDD/util.h"
 #include "CUDD/mtrInt.h"
+#include "CUDD/util.h"
 
 /*---------------------------------------------------------------------------*/
 /* Constant declarations                                                     */
@@ -81,7 +81,8 @@
 /*---------------------------------------------------------------------------*/
 
 #ifndef lint
-static char rcsid[] MTR_UNUSED = "$Id: mtrGroup.c,v 1.21 2012/02/05 01:06:19 fabio Exp $";
+static char rcsid[] MTR_UNUSED =
+    "$Id: mtrGroup.c,v 1.21 2012/02/05 01:06:19 fabio Exp $";
 #endif
 
 /*---------------------------------------------------------------------------*/
@@ -94,14 +95,13 @@ static char rcsid[] MTR_UNUSED = "$Id: mtrGroup.c,v 1.21 2012/02/05 01:06:19 fab
 /* Static function prototypes                                                */
 /*---------------------------------------------------------------------------*/
 
-static int mtrShiftHL (MtrNode *node, int shift);
+static int mtrShiftHL(MtrNode *node, int shift);
 
 /**AutomaticEnd***************************************************************/
 
 /*---------------------------------------------------------------------------*/
 /* Definition of exported functions                                          */
 /*---------------------------------------------------------------------------*/
-
 
 /**Function********************************************************************
 
@@ -116,22 +116,18 @@ static int mtrShiftHL (MtrNode *node, int shift);
   SeeAlso     [Mtr_InitTree Mtr_FreeTree]
 
 ******************************************************************************/
-MtrNode *
-Mtr_InitGroupTree(
-  int  lower,
-  int  size)
-{
+MtrNode *Mtr_InitGroupTree(int lower, int size) {
     MtrNode *root;
 
     root = Mtr_InitTree();
-    if (root == NULL) return(NULL);
+    if (root == NULL)
+        return (NULL);
     root->flags = MTR_DEFAULT;
     root->low = lower;
     root->size = size;
-    return(root);
+    return (root);
 
 } /* end of Mtr_InitGroupTree */
-
 
 /**Function********************************************************************
 
@@ -152,29 +148,22 @@ Mtr_InitGroupTree(
   SeeAlso     [Mtr_DissolveGroup Mtr_ReadGroups Mtr_FindGroup]
 
 ******************************************************************************/
-MtrNode *
-Mtr_MakeGroup(
-  MtrNode * root /* root of the group tree */,
-  unsigned int  low /* lower bound of the group */,
-  unsigned int  size /* size of the group */,
-  unsigned int  flags /* flags for the new group */)
-{
-    MtrNode *node,
-	    *first,
-	    *last,
-	    *previous,
-	    *newn;
+MtrNode *Mtr_MakeGroup(MtrNode *root /* root of the group tree */,
+                       unsigned int low /* lower bound of the group */,
+                       unsigned int size /* size of the group */,
+                       unsigned int flags /* flags for the new group */) {
+    MtrNode *node, *first, *last, *previous, *newn;
 
     /* Sanity check. */
     if (size == 0)
-	return(NULL);
+        return (NULL);
 
     /* Check whether current group includes new group.  This check is
     ** necessary at the top-level call.  In the subsequent calls it is
     ** redundant. */
-    if (low < (unsigned int) root->low ||
-	low + size > (unsigned int) (root->low + root->size))
-	return(NULL);
+    if (low < (unsigned int)root->low ||
+        low + size > (unsigned int)(root->low + root->size))
+        return (NULL);
 
     /* At this point we know that the new group is contained
     ** in the group of root. We have two possible cases here:
@@ -183,15 +172,16 @@ Mtr_MakeGroup(
 
     /* Root has no children: create a new group. */
     if (root->child == NULL) {
-	newn = Mtr_AllocNode();
-	if (newn == NULL) return(NULL);	/* out of memory */
-	newn->low = low;
-	newn->size = size;
-	newn->flags = flags;
-	newn->parent = root;
-	newn->elder = newn->younger = newn->child = NULL;
-	root->child = newn;
-	return(newn);
+        newn = Mtr_AllocNode();
+        if (newn == NULL)
+            return (NULL); /* out of memory */
+        newn->low = low;
+        newn->size = size;
+        newn->flags = flags;
+        newn->parent = root;
+        newn->elder = newn->younger = newn->child = NULL;
+        root->child = newn;
+        return (newn);
     }
 
     /* Root has children: Find all children of root that are included
@@ -199,59 +189,61 @@ Mtr_MakeGroup(
     ** the new group, call Mtr_MakeGroup recursively. */
     previous = NULL;
     first = root->child; /* guaranteed to be non-NULL */
-    while (first != NULL && low >= (unsigned int) (first->low + first->size)) {
-	previous = first;
-	first = first->younger;
+    while (first != NULL && low >= (unsigned int)(first->low + first->size)) {
+        previous = first;
+        first = first->younger;
     }
     if (first == NULL) {
-	/* We have scanned the entire list and we need to append a new
-	** child at the end of it.  Previous points to the last child
-	** of root. */
-	newn = Mtr_AllocNode();
-	if (newn == NULL) return(NULL);	/* out of memory */
-	newn->low = low;
-	newn->size = size;
-	newn->flags = flags;
-	newn->parent = root;
-	newn->elder = previous;
-	previous->younger = newn;
-	newn->younger = newn->child = NULL;
-	return(newn);
+        /* We have scanned the entire list and we need to append a new
+        ** child at the end of it.  Previous points to the last child
+        ** of root. */
+        newn = Mtr_AllocNode();
+        if (newn == NULL)
+            return (NULL); /* out of memory */
+        newn->low = low;
+        newn->size = size;
+        newn->flags = flags;
+        newn->parent = root;
+        newn->elder = previous;
+        previous->younger = newn;
+        newn->younger = newn->child = NULL;
+        return (newn);
     }
     /* Here first is non-NULL and low < first->low + first->size. */
-    if (low >= (unsigned int) first->low &&
-	low + size <= (unsigned int) (first->low + first->size)) {
-	/* The new group is contained in the group of first. */
-	newn = Mtr_MakeGroup(first, low, size, flags);
-	return(newn);
+    if (low >= (unsigned int)first->low &&
+        low + size <= (unsigned int)(first->low + first->size)) {
+        /* The new group is contained in the group of first. */
+        newn = Mtr_MakeGroup(first, low, size, flags);
+        return (newn);
     } else if (low + size <= first->low) {
-	/* The new group is entirely contained in the gap between
-	** previous and first. */
-	newn = Mtr_AllocNode();
-	if (newn == NULL) return(NULL);	/* out of memory */
-	newn->low = low;
-	newn->size = size;
-	newn->flags = flags;
-	newn->child = NULL;
-	newn->parent = root;
-	newn->elder = previous;
-	newn->younger = first;
-	first->elder = newn;
-	if (previous != NULL) {
-	    previous->younger = newn;
-	} else {
-	    root->child = newn;
-	}
-	return(newn);
-    } else if (low < (unsigned int) first->low &&
-	       low + size < (unsigned int) (first->low + first->size)) {
-	/* Trying to cut an existing group: not allowed. */
-	return(NULL);
+        /* The new group is entirely contained in the gap between
+        ** previous and first. */
+        newn = Mtr_AllocNode();
+        if (newn == NULL)
+            return (NULL); /* out of memory */
+        newn->low = low;
+        newn->size = size;
+        newn->flags = flags;
+        newn->child = NULL;
+        newn->parent = root;
+        newn->elder = previous;
+        newn->younger = first;
+        first->elder = newn;
+        if (previous != NULL) {
+            previous->younger = newn;
+        } else {
+            root->child = newn;
+        }
+        return (newn);
+    } else if (low < (unsigned int)first->low &&
+               low + size < (unsigned int)(first->low + first->size)) {
+        /* Trying to cut an existing group: not allowed. */
+        return (NULL);
     } else if (low > first->low) {
-	/* The new group neither is contained in the group of first
-	** (this was tested above) nor contains it. It is therefore
-	** trying to cut an existing group: not allowed. */
-	return(NULL);
+        /* The new group neither is contained in the group of first
+        ** (this was tested above) nor contains it. It is therefore
+        ** trying to cut an existing group: not allowed. */
+        return (NULL);
     }
 
     /* First holds the pointer to the first child contained in the new
@@ -259,40 +251,41 @@ Mtr_MakeGroup(
     ** first->size.  One of the two inequalities is strict. */
     last = first->younger;
     while (last != NULL &&
-	   (unsigned int) (last->low + last->size) < low + size) {
-	last = last->younger;
+           (unsigned int)(last->low + last->size) < low + size) {
+        last = last->younger;
     }
     if (last == NULL) {
-	/* All the chilren of root from first onward become children
-	** of the new group. */
-	newn = Mtr_AllocNode();
-	if (newn == NULL) return(NULL);	/* out of memory */
-	newn->low = low;
-	newn->size = size;
-	newn->flags = flags;
-	newn->child = first;
-	newn->parent = root;
-	newn->elder = previous;
-	newn->younger = NULL;
-	first->elder = NULL;
-	if (previous != NULL) {
-	    previous->younger = newn;
-	} else {
-	    root->child = newn;
-	}
-	last = first;
-	while (last != NULL) {
-	    last->parent = newn;
-	    last = last->younger;
-	}
-	return(newn);
+        /* All the chilren of root from first onward become children
+        ** of the new group. */
+        newn = Mtr_AllocNode();
+        if (newn == NULL)
+            return (NULL); /* out of memory */
+        newn->low = low;
+        newn->size = size;
+        newn->flags = flags;
+        newn->child = first;
+        newn->parent = root;
+        newn->elder = previous;
+        newn->younger = NULL;
+        first->elder = NULL;
+        if (previous != NULL) {
+            previous->younger = newn;
+        } else {
+            root->child = newn;
+        }
+        last = first;
+        while (last != NULL) {
+            last->parent = newn;
+            last = last->younger;
+        }
+        return (newn);
     }
 
     /* Here last != NULL and low + size <= last->low + last->size. */
-    if (low + size - 1 >= (unsigned int) last->low &&
-	low + size < (unsigned int) (last->low + last->size)) {
-	/* Trying to cut an existing group: not allowed. */
-	return(NULL);
+    if (low + size - 1 >= (unsigned int)last->low &&
+        low + size < (unsigned int)(last->low + last->size)) {
+        /* Trying to cut an existing group: not allowed. */
+        return (NULL);
     }
 
     /* First and last point to the first and last of the children of
@@ -302,32 +295,32 @@ Mtr_MakeGroup(
     ** preceeding first. If it is NULL, then first is the first child
     ** of root. */
     newn = Mtr_AllocNode();
-    if (newn == NULL) return(NULL);	/* out of memory */
+    if (newn == NULL)
+        return (NULL); /* out of memory */
     newn->low = low;
     newn->size = size;
     newn->flags = flags;
     newn->child = first;
     newn->parent = root;
     if (previous == NULL) {
-	root->child = newn;
+        root->child = newn;
     } else {
-	previous->younger = newn;
+        previous->younger = newn;
     }
     newn->elder = previous;
     newn->younger = last->younger;
     if (last->younger != NULL) {
-	last->younger->elder = newn;
+        last->younger->elder = newn;
     }
     last->younger = NULL;
     first->elder = NULL;
     for (node = first; node != NULL; node = node->younger) {
-	node->parent = newn;
+        node->parent = newn;
     }
 
-    return(newn);
+    return (newn);
 
 } /* end of Mtr_MakeGroup */
-
 
 /**Function********************************************************************
 
@@ -345,42 +338,40 @@ Mtr_MakeGroup(
   SeeAlso     [Mtr_MakeGroup]
 
 ******************************************************************************/
-MtrNode *
-Mtr_DissolveGroup(
-  MtrNode * group /* group to be dissolved */)
-{
+MtrNode *Mtr_DissolveGroup(MtrNode *group /* group to be dissolved */) {
     MtrNode *parent;
     MtrNode *last;
 
     parent = group->parent;
 
-    if (parent == NULL) return(NULL);
-    if (MTR_TEST(group,MTR_TERMINAL) || group->child == NULL) return(NULL);
+    if (parent == NULL)
+        return (NULL);
+    if (MTR_TEST(group, MTR_TERMINAL) || group->child == NULL)
+        return (NULL);
 
     /* Make all children of group children of its parent, and make
     ** last point to the last child of group. */
     for (last = group->child; last->younger != NULL; last = last->younger) {
-	last->parent = parent;
+        last->parent = parent;
     }
     last->parent = parent;
 
     last->younger = group->younger;
     if (group->younger != NULL) {
-	group->younger->elder = last;
+        group->younger->elder = last;
     }
 
     group->child->elder = group->elder;
     if (group == parent->child) {
-	parent->child = group->child;
+        parent->child = group->child;
     } else {
-	group->elder->younger = group->child;
+        group->elder->younger = group->child;
     }
 
     Mtr_DeallocNode(group);
-    return(parent);
+    return (parent);
 
 } /* end of Mtr_DissolveGroup */
-
 
 /**Function********************************************************************
 
@@ -397,52 +388,49 @@ Mtr_DissolveGroup(
   SeeAlso     []
 
 ******************************************************************************/
-MtrNode *
-Mtr_FindGroup(
-  MtrNode * root /* root of the group tree */,
-  unsigned int  low /* lower bound of the group */,
-  unsigned int  size /* upper bound of the group */)
-{
+MtrNode *Mtr_FindGroup(MtrNode *root /* root of the group tree */,
+                       unsigned int low /* lower bound of the group */,
+                       unsigned int size /* upper bound of the group */) {
     MtrNode *node;
 
 #ifdef MTR_DEBUG
     /* We cannot have a non-empty proper subgroup of a singleton set. */
-    assert(!MTR_TEST(root,MTR_TERMINAL));
+    assert(!MTR_TEST(root, MTR_TERMINAL));
 #endif
 
     /* Sanity check. */
-    if (size < 1) return(NULL);
+    if (size < 1)
+        return (NULL);
 
     /* Check whether current group includes the group sought.  This
     ** check is necessary at the top-level call.  In the subsequent
     ** calls it is redundant. */
-    if (low < (unsigned int) root->low ||
-	low + size > (unsigned int) (root->low + root->size))
-	return(NULL);
+    if (low < (unsigned int)root->low ||
+        low + size > (unsigned int)(root->low + root->size))
+        return (NULL);
 
     if (root->size == size && root->low == low)
-	return(root);
+        return (root);
 
     if (root->child == NULL)
-	return(NULL);
+        return (NULL);
 
     /* Find all chidren of root that are included in the new group. If
     ** the group of any child entirely contains the new group, call
     ** Mtr_MakeGroup recursively.  */
     node = root->child;
-    while (low >= (unsigned int) (node->low + node->size)) {
-	node = node->younger;
+    while (low >= (unsigned int)(node->low + node->size)) {
+        node = node->younger;
     }
-    if (low + size <= (unsigned int) (node->low + node->size)) {
-	/* The group is contained in the group of node. */
-	node = Mtr_FindGroup(node, low, size);
-	return(node);
+    if (low + size <= (unsigned int)(node->low + node->size)) {
+        /* The group is contained in the group of node. */
+        node = Mtr_FindGroup(node, low, size);
+        return (node);
     } else {
-	return(NULL);
+        return (NULL);
     }
 
 } /* end of Mtr_FindGroup */
-
 
 /**Function********************************************************************
 
@@ -458,22 +446,19 @@ Mtr_FindGroup(
   SeeAlso     []
 
 ******************************************************************************/
-int
-Mtr_SwapGroups(
-  MtrNode * first /* first node to be swapped */,
-  MtrNode * second /* second node to be swapped */)
-{
+int Mtr_SwapGroups(MtrNode *first /* first node to be swapped */,
+                   MtrNode *second /* second node to be swapped */) {
     MtrNode *node;
     MtrNode *parent;
     int sizeFirst;
     int sizeSecond;
 
     if (second->younger == first) { /* make first first */
-	node = first;
-	first = second;
-	second = node;
+        node = first;
+        first = second;
+        second = node;
     } else if (first->younger != second) { /* non-adjacent */
-	return(0);
+        return (0);
     }
 
     sizeFirst = first->size;
@@ -481,14 +466,15 @@ Mtr_SwapGroups(
 
     /* Swap the two nodes. */
     parent = first->parent;
-    if (parent == NULL || second->parent != parent) return(0);
+    if (parent == NULL || second->parent != parent)
+        return (0);
     if (parent->child == first) {
-	parent->child = second;
+        parent->child = second;
     } else { /* first->elder != NULL */
-	first->elder->younger = second;
+        first->elder->younger = second;
     }
     if (second->younger != NULL) {
-	second->younger->elder = first;
+        second->younger->elder = first;
     }
     first->younger = second->younger;
     second->elder = first->elder;
@@ -496,13 +482,14 @@ Mtr_SwapGroups(
     second->younger = first;
 
     /* Adjust the high and low fields. */
-    if (!mtrShiftHL(first,sizeSecond)) return(0);
-    if (!mtrShiftHL(second,-sizeFirst)) return(0);
+    if (!mtrShiftHL(first, sizeSecond))
+        return (0);
+    if (!mtrShiftHL(second, -sizeFirst))
+        return (0);
 
-    return(1);
+    return (1);
 
 } /* end of Mtr_SwapGroups */
-
 
 /**Function********************************************************************
 
@@ -520,25 +507,21 @@ Mtr_SwapGroups(
   SeeAlso     []
 
 ******************************************************************************/
-void
-Mtr_ReorderGroups(
-  MtrNode *treenode,
-  int *permutation)
-{
+void Mtr_ReorderGroups(MtrNode *treenode, int *permutation) {
     MtrNode *auxnode;
     /* Initialize sorted list to first element. */
     MtrNode *sorted = treenode;
     sorted->low = permutation[sorted->index];
     if (sorted->child != NULL)
-      Mtr_ReorderGroups(sorted->child, permutation);
+        Mtr_ReorderGroups(sorted->child, permutation);
 
     auxnode = treenode->younger;
     while (auxnode != NULL) {
         MtrNode *rightplace;
         MtrNode *moving = auxnode;
-	auxnode->low = permutation[auxnode->index];
-	if (auxnode->child != NULL)
-          Mtr_ReorderGroups(auxnode->child, permutation);
+        auxnode->low = permutation[auxnode->index];
+        if (auxnode->child != NULL)
+            Mtr_ReorderGroups(auxnode->child, permutation);
         rightplace = auxnode->elder;
         /* Find insertion point. */
         while (rightplace != NULL && auxnode->low < rightplace->low)
@@ -569,7 +552,6 @@ Mtr_ReorderGroups(
 
 } /* end of Mtr_ReorderGroups */
 
-
 /**Function********************************************************************
 
   Synopsis    [Prints the groups as a parenthesized list.]
@@ -591,52 +573,57 @@ Mtr_ReorderGroups(
   SeeAlso     [Mtr_PrintTree]
 
 ******************************************************************************/
-void
-Mtr_PrintGroups(
-  MtrNode * root /* root of the group tree */,
-  int  silent /* flag to check tree syntax only */)
-{
+void Mtr_PrintGroups(MtrNode *root /* root of the group tree */,
+                     int silent /* flag to check tree syntax only */) {
     MtrNode *node;
 
     assert(root != NULL);
     assert(root->younger == NULL || root->younger->elder == root);
     assert(root->elder == NULL || root->elder->younger == root);
 #if SIZEOF_VOID_P == 8
-    if (!silent) (void) printf("(%u",root->low);
+    if (!silent)
+        (void)printf("(%u", root->low);
 #else
-    if (!silent) (void) printf("(%hu",root->low);
+    if (!silent)
+        (void)printf("(%hu", root->low);
 #endif
-    if (MTR_TEST(root,MTR_TERMINAL) || root->child == NULL) {
-	if (!silent) (void) printf(",");
+    if (MTR_TEST(root, MTR_TERMINAL) || root->child == NULL) {
+        if (!silent)
+            (void)printf(",");
     } else {
-	node = root->child;
-	while (node != NULL) {
-	    assert(node->low >= root->low && (int) (node->low + node->size) <= (int) (root->low + root->size));
-	    assert(node->parent == root);
-	    Mtr_PrintGroups(node,silent);
-	    node = node->younger;
-	}
+        node = root->child;
+        while (node != NULL) {
+            assert(node->low >= root->low && (int)(node->low + node->size) <=
+                                                 (int)(root->low + root->size));
+            assert(node->parent == root);
+            Mtr_PrintGroups(node, silent);
+            node = node->younger;
+        }
     }
     if (!silent) {
 #if SIZEOF_VOID_P == 8
-	(void) printf("%u", root->low + root->size - 1);
+        (void)printf("%u", root->low + root->size - 1);
 #else
-	(void) printf("%hu", root->low + root->size - 1);
+        (void)printf("%hu", root->low + root->size - 1);
 #endif
-	if (root->flags != MTR_DEFAULT) {
-	    (void) printf("|");
-	    if (MTR_TEST(root,MTR_FIXED)) (void) printf("F");
-	    if (MTR_TEST(root,MTR_NEWNODE)) (void) printf("N");
-	    if (MTR_TEST(root,MTR_SOFT)) (void) printf("S");
-	}
-	(void) printf(")");
-	if (root->parent == NULL) (void) printf("\n");
+        if (root->flags != MTR_DEFAULT) {
+            (void)printf("|");
+            if (MTR_TEST(root, MTR_FIXED))
+                (void)printf("F");
+            if (MTR_TEST(root, MTR_NEWNODE))
+                (void)printf("N");
+            if (MTR_TEST(root, MTR_SOFT))
+                (void)printf("S");
+        }
+        (void)printf(")");
+        if (root->parent == NULL)
+            (void)printf("\n");
     }
-    assert((root->flags &~(MTR_TERMINAL | MTR_SOFT | MTR_FIXED | MTR_NEWNODE)) == 0);
+    assert((root->flags &
+            ~(MTR_TERMINAL | MTR_SOFT | MTR_FIXED | MTR_NEWNODE)) == 0);
     return;
 
 } /* end of Mtr_PrintGroups */
-
 
 /**Function********************************************************************
 
@@ -658,12 +645,9 @@ Mtr_PrintGroups(
   SeeAlso     [Mtr_PrintGroups]
 
 ******************************************************************************/
-int
-Mtr_PrintGroupedOrder(
-  MtrNode * root /* root of the group tree */,
-  int *invperm /* map from levels to indices */,
-  FILE *fp /* output file */)
-{
+int Mtr_PrintGroupedOrder(MtrNode *root /* root of the group tree */,
+                          int *invperm /* map from levels to indices */,
+                          FILE *fp /* output file */) {
     MtrNode *child;
     MtrHalfWord level;
     int retval;
@@ -671,59 +655,72 @@ Mtr_PrintGroupedOrder(
     assert(root != NULL);
     assert(root->younger == NULL || root->younger->elder == root);
     assert(root->elder == NULL || root->elder->younger == root);
-    retval = fprintf(fp,"(");
-    if (retval == EOF) return(0);
+    retval = fprintf(fp, "(");
+    if (retval == EOF)
+        return (0);
     level = root->low;
     child = root->child;
     while (child != NULL) {
-        assert(child->low >= root->low && (child->low + child->size) <= (root->low + root->size));
+        assert(child->low >= root->low &&
+               (child->low + child->size) <= (root->low + root->size));
         assert(child->parent == root);
         while (level < child->low) {
-            retval = fprintf(fp,"%d%s", invperm[level], (level < root->low + root->size - 1) ? "," : "");
-            if (retval == EOF) return(0);
+            retval = fprintf(fp, "%d%s", invperm[level],
+                             (level < root->low + root->size - 1) ? "," : "");
+            if (retval == EOF)
+                return (0);
             level++;
         }
-        retval = Mtr_PrintGroupedOrder(child,invperm,fp);
-        if (retval == 0) return(0);
+        retval = Mtr_PrintGroupedOrder(child, invperm, fp);
+        if (retval == 0)
+            return (0);
         level += child->size;
         if (level < root->low + root->size - 1) {
-            retval = fprintf(fp,",");
-            if (retval == EOF) return(0);
+            retval = fprintf(fp, ",");
+            if (retval == EOF)
+                return (0);
         }
         child = child->younger;
     }
     while (level < root->low + root->size) {
-        retval = fprintf(fp,"%d%s", invperm[level], (level < root->low + root->size - 1) ? "," : "");
-        if (retval == EOF) return(0);
+        retval = fprintf(fp, "%d%s", invperm[level],
+                         (level < root->low + root->size - 1) ? "," : "");
+        if (retval == EOF)
+            return (0);
         level++;
     }
     if (root->flags != MTR_DEFAULT) {
-      retval = fprintf(fp,"|");
-      if (retval == EOF) return(0);
-      if (MTR_TEST(root,MTR_FIXED)) {
-          retval = fprintf(fp,"F");
-          if (retval == EOF) return(0);
-      }
-      if (MTR_TEST(root,MTR_NEWNODE)) {
-          retval = fprintf(fp,"N");
-          if (retval == EOF) return(0);
-      }
-      if (MTR_TEST(root,MTR_SOFT)) {
-          retval = fprintf(fp,"S");
-          if (retval == EOF) return(0);
-      }
+        retval = fprintf(fp, "|");
+        if (retval == EOF)
+            return (0);
+        if (MTR_TEST(root, MTR_FIXED)) {
+            retval = fprintf(fp, "F");
+            if (retval == EOF)
+                return (0);
+        }
+        if (MTR_TEST(root, MTR_NEWNODE)) {
+            retval = fprintf(fp, "N");
+            if (retval == EOF)
+                return (0);
+        }
+        if (MTR_TEST(root, MTR_SOFT)) {
+            retval = fprintf(fp, "S");
+            if (retval == EOF)
+                return (0);
+        }
     }
-    retval = fprintf(fp,")");
-    if (retval == EOF) return(0);
+    retval = fprintf(fp, ")");
+    if (retval == EOF)
+        return (0);
     if (root->parent == NULL) {
-        retval = fprintf(fp,"\n");
-        if (retval == EOF) return(0);
+        retval = fprintf(fp, "\n");
+        if (retval == EOF)
+            return (0);
     }
-    assert((root->flags &~(MTR_SOFT | MTR_FIXED | MTR_NEWNODE)) == 0);
-    return(1);
+    assert((root->flags & ~(MTR_SOFT | MTR_FIXED | MTR_NEWNODE)) == 0);
+    return (1);
 
 } /* end of Mtr_PrintGroupedOrder */
-
 
 /**Function********************************************************************
 
@@ -752,77 +749,73 @@ Mtr_PrintGroupedOrder(
   SeeAlso     [Mtr_InitGroupTree Mtr_MakeGroup]
 
 ******************************************************************************/
-MtrNode *
-Mtr_ReadGroups(
-  FILE * fp /* file pointer */,
-  int  nleaves /* number of leaves of the new tree */)
-{
+MtrNode *Mtr_ReadGroups(FILE *fp /* file pointer */,
+                        int nleaves /* number of leaves of the new tree */) {
     int low;
     int size;
     int err;
     unsigned int flags;
     MtrNode *root;
     MtrNode *node;
-    char attrib[8*sizeof(unsigned int)+1];
+    char attrib[8 * sizeof(unsigned int) + 1];
     char *c;
 
-    root = Mtr_InitGroupTree(0,nleaves);
-    if (root == NULL) return NULL;
+    root = Mtr_InitGroupTree(0, nleaves);
+    if (root == NULL)
+        return NULL;
 
-    while (! feof(fp)) {
-	/* Read a triple and check for consistency. */
-	err = fscanf(fp, "%d %d %s", &low, &size, attrib);
-	if (err == EOF) {
-	    break;
-	} else if (err != 3) {
-	    Mtr_FreeTree(root);
-	    return(NULL);
-	} else if (low < 0 || low+size > nleaves || size < 1) {
-	    Mtr_FreeTree(root);
-	    return(NULL);
-	} else if (strlen(attrib) > 8 * sizeof(MtrHalfWord)) {
-	    /* Not enough bits in the flags word to store these many
-	    ** attributes. */
-	    Mtr_FreeTree(root);
-	    return(NULL);
-	}
+    while (!feof(fp)) {
+        /* Read a triple and check for consistency. */
+        err = fscanf(fp, "%d %d %s", &low, &size, attrib);
+        if (err == EOF) {
+            break;
+        } else if (err != 3) {
+            Mtr_FreeTree(root);
+            return (NULL);
+        } else if (low < 0 || low + size > nleaves || size < 1) {
+            Mtr_FreeTree(root);
+            return (NULL);
+        } else if (strlen(attrib) > 8 * sizeof(MtrHalfWord)) {
+            /* Not enough bits in the flags word to store these many
+            ** attributes. */
+            Mtr_FreeTree(root);
+            return (NULL);
+        }
 
-	/* Parse the flag string. Currently all flags are permitted,
-	** to make debugging easier. Normally, specifying NEWNODE
-	** wouldn't be allowed. */
-	flags = MTR_DEFAULT;
-	for (c=attrib; *c != 0; c++) {
-	    switch (*c) {
-	    case 'D':
-		break;
-	    case 'F':
-		flags |= MTR_FIXED;
-		break;
-	    case 'N':
-		flags |= MTR_NEWNODE;
-		break;
-	    case 'S':
-		flags |= MTR_SOFT;
-		break;
-	    case 'T':
-		flags |= MTR_TERMINAL;
-		break;
-	    default:
-		return NULL;
-	    }
-	}
-	node = Mtr_MakeGroup(root, (MtrHalfWord) low, (MtrHalfWord) size,
-			     flags);
-	if (node == NULL) {
-	    Mtr_FreeTree(root);
-	    return(NULL);
-	}
+        /* Parse the flag string. Currently all flags are permitted,
+        ** to make debugging easier. Normally, specifying NEWNODE
+        ** wouldn't be allowed. */
+        flags = MTR_DEFAULT;
+        for (c = attrib; *c != 0; c++) {
+            switch (*c) {
+            case 'D':
+                break;
+            case 'F':
+                flags |= MTR_FIXED;
+                break;
+            case 'N':
+                flags |= MTR_NEWNODE;
+                break;
+            case 'S':
+                flags |= MTR_SOFT;
+                break;
+            case 'T':
+                flags |= MTR_TERMINAL;
+                break;
+            default:
+                return NULL;
+            }
+        }
+        node = Mtr_MakeGroup(root, (MtrHalfWord)low, (MtrHalfWord)size, flags);
+        if (node == NULL) {
+            Mtr_FreeTree(root);
+            return (NULL);
+        }
     }
 
-    return(root);
+    return (root);
 
 } /* end of Mtr_ReadGroups */
-
 
 /*---------------------------------------------------------------------------*/
 /* Definition of internal functions                                          */
@@ -831,7 +824,6 @@ Mtr_ReadGroups(
 /*---------------------------------------------------------------------------*/
 /* Definition of static functions                                            */
 /*---------------------------------------------------------------------------*/
-
 
 /**Function********************************************************************
 
@@ -847,31 +839,29 @@ Mtr_ReadGroups(
   SeeAlso     []
 
 ******************************************************************************/
-static int
-mtrShiftHL(
-  MtrNode * node /* group tree node */,
-  int  shift /* amount by which low should be changed */)
-{
+static int mtrShiftHL(MtrNode *node /* group tree node */,
+                      int shift /* amount by which low should be changed */) {
     MtrNode *auxnode;
     int low;
 
-    low = (int) node->low;
-
+    low = (int)node->low;
 
     low += shift;
 
-    if (low < 0 || low + (int) (node->size - 1) > (int) MTR_MAXHIGH) return(0);
+    if (low < 0 || low + (int)(node->size - 1) > (int)MTR_MAXHIGH)
+        return (0);
 
-    node->low = (MtrHalfWord) low;
+    node->low = (MtrHalfWord)low;
 
-    if (!MTR_TEST(node,MTR_TERMINAL) && node->child != NULL) {
-	auxnode = node->child;
-	do {
-	    if (!mtrShiftHL(auxnode,shift)) return(0);
-	    auxnode = auxnode->younger;
-	} while (auxnode != NULL);
+    if (!MTR_TEST(node, MTR_TERMINAL) && node->child != NULL) {
+        auxnode = node->child;
+        do {
+            if (!mtrShiftHL(auxnode, shift))
+                return (0);
+            auxnode = auxnode->younger;
+        } while (auxnode != NULL);
     }
 
-    return(1);
+    return (1);
 
 } /* end of mtrShiftHL */

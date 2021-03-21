@@ -98,8 +98,8 @@ void ThreadCallGraph::updateCallGraph(PointerAnalysis *pta) {
                             SVFUtil::cast<Function>(obj->getRefVal());
                         LLVMModuleSet *modSet =
                             getPAG()->getModule()->getLLVMModSet();
-                        const SVFFunction *svfCallee = modSet->getSVFFunction(
-                            callee);
+                        const SVFFunction *svfCallee =
+                            modSet->getSVFFunction(callee);
                         this->addIndirectForkEdge(*it, svfCallee);
                     }
                 }

@@ -250,11 +250,12 @@ class VFG : public GenericVFGTy {
         if (hasDef(pagNode)) {
             const VFGNode *defNode = getVFGNode(getDef(pagNode));
             if (const auto *addr = SVFUtil::dyn_cast<AddrVFGNode>(defNode)) {
-                if (pag->isBlkObjOrConstantObj(addr->getPAGEdge()->getSrcID())) {
+                if (pag->isBlkObjOrConstantObj(
+                        addr->getPAGEdge()->getSrcID())) {
                     return true;
                 }
             } else if (const auto *copy =
-                       SVFUtil::dyn_cast<CopyVFGNode>(defNode)) {
+                           SVFUtil::dyn_cast<CopyVFGNode>(defNode)) {
                 if (pag->isNullPtr(copy->getPAGEdge()->getSrcID())) {
                     return true;
                 }

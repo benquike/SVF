@@ -69,7 +69,7 @@ class PathCondAllocator {
     using IndexToConditionMap = Map<u32_t, Condition *>;
 
     /// Constructor
-    PathCondAllocator(SVFModule *svfMod): svfMod(svfMod) {
+    PathCondAllocator(SVFModule *svfMod) : svfMod(svfMod) {
         getBddCondManager();
     }
 

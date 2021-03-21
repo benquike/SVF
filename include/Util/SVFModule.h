@@ -31,9 +31,9 @@
 #ifndef SVFMODULE_H_
 #define SVFMODULE_H_
 
+#include <string>
 #include <utility>
 #include <vector>
-#include <string>
 
 #include "Util/BasicTypes.h"
 
@@ -68,8 +68,8 @@ class SVFModule {
     LLVMFunctionSetType LLVMFunctionSet; ///< The Functions in the module
     GlobalSetType GlobalSet;             ///< The Global Variables in the module
     AliasSetType AliasSet;               ///< The Aliases in the module
-    LLVMFun2SVFFunMap
-        LLVMFunc2SVFFunc; ///< Map an LLVM Function to an SVF Function
+    LLVMFun2SVFFunMap LLVMFunc2SVFFunc;  ///< Map an LLVM Function to
+                                         /// an SVF Function
 
     LLVMModuleSet *llvmModSet = nullptr;
 
@@ -133,9 +133,7 @@ class SVFModule {
     const_alias_iterator alias_end() const { return AliasSet.end(); }
     ///@}
 
-    LLVMModuleSet *getLLVMModSet() const {
-        return llvmModSet;
-    }
+    LLVMModuleSet *getLLVMModSet() const { return llvmModSet; }
 
     const std::string &getModuleIdentifier() const {
         if (pagReadFromTxt.empty()) {

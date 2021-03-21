@@ -28,8 +28,8 @@
  */
 
 #include "Graphs/PTACallGraph.h"
-#include "SVF-FE/SVFProject.h"
 #include "SVF-FE/LLVMUtil.h"
+#include "SVF-FE/SVFProject.h"
 #include "Util/SVFModule.h"
 
 using namespace SVF;
@@ -55,7 +55,7 @@ void PTACallGraphEdge::addInDirectCallSite(const CallBlockNode *call,
     llvm::ImmutableCallSite cs(callInst);
     assert((nullptr == cs.getCalledFunction() ||
             nullptr == SVFUtil::dyn_cast<Function>(
-                proj->getForkedFun(call->getCallSite()))) &&
+                           proj->getForkedFun(call->getCallSite()))) &&
            "not an indirect callsite??");
     indirectCalls.insert(call);
 }
@@ -110,8 +110,7 @@ bool PTACallGraphNode::isReachableFromProgEntry() const {
 
 /// Constructor
 PTACallGraph::PTACallGraph(SVFProject *proj, CGEK k)
-    : kind(k), pag(proj->getPAG()),
-      proj(proj) {
+    : kind(k), pag(proj->getPAG()), proj(proj) {
     callGraphNodeNum = 0;
     numOfResolvedIndCallEdge = 0;
 }

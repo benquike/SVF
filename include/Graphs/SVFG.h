@@ -117,7 +117,6 @@ class SVFG : public VFG {
     virtual void buildSVFG();
 
   public:
-
     friend class SVFGStat;
 
     /// Destructor
@@ -316,7 +315,7 @@ class SVFG : public VFG {
                                         const SVFFunction *callee,
                                         SVFGEdgeSetTy &edges) {
         for (auto inIt = actualOut->InEdgeBegin(),
-                 inEit = actualOut->InEdgeEnd();
+                  inEit = actualOut->InEdgeEnd();
              inIt != inEit; ++inIt) {
 
             SVFGEdge *edge = *inIt;

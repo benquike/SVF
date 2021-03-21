@@ -79,7 +79,8 @@ class FlowSensitive : public WPASVFGFSSolver, public BVDataPTAImpl {
 
     /// Create signle instance of flow-sensitive pointer analysis
     /// TODO: remove this
-    static FlowSensitive *createFSWPA(SVFProject *proj, bool vcall_cha = false) {
+    static FlowSensitive *createFSWPA(SVFProject *proj,
+                                      bool vcall_cha = false) {
         if (fspta == nullptr) {
             fspta = new FlowSensitive(proj);
             if (vcall_cha) {

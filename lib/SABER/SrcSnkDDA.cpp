@@ -31,7 +31,6 @@
  *     2021-03-19
  */
 
-
 #include "Util/Options.h"
 #include "SABER/SrcSnkDDA.h"
 #include "Graphs/SVFGStat.h"

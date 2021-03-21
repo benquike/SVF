@@ -21,7 +21,6 @@ namespace SVF {
 /// It's purpose is to be attached to the main PAG (almost) seamlessly.
 class ExternalPAG {
   private:
-
     /// Name of the function this external PAG represents.
     std::string functionName;
 
@@ -48,12 +47,10 @@ class ExternalPAG {
     /// Whether this function has a return or not.
     bool hasReturn;
 
-
-
   public:
     ExternalPAG(std::string &functionName, PAG *pag)
-        : functionName(functionName), pag(pag),
-          returnNode(-1), hasReturn(false) {}
+        : functionName(functionName), pag(pag), returnNode(-1),
+          hasReturn(false) {}
 
     ~ExternalPAG() {}
 

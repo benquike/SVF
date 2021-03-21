@@ -22,16 +22,15 @@
 #include <string>
 #include <vector>
 
-#include "Util/SVFModule.h"
 #include "SVF-FE/LLVMModule.h"
+#include "Util/SVFModule.h"
 
 using namespace std;
 
 namespace SVF {
 
 /// Constructors
-SVFModule::SVFModule(string moduleName)
-    : moduleIdentifier(moduleName) {
+SVFModule::SVFModule(string moduleName) : moduleIdentifier(moduleName) {
 
     llvmModSet = new LLVMModuleSet(this);
     llvmModSet->buildSVFModule(moduleName);

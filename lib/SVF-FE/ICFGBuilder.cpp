@@ -32,7 +32,6 @@
  *     2021-03-21
  */
 
-
 #include "SVF-FE/ICFGBuilder.h"
 #include "Graphs/PAG.h"
 #include "SVF-FE/LLVMUtil.h"
@@ -172,7 +171,7 @@ void ICFGBuilder::addICFGInterEdges(const Instruction *cs,
 }
 
 void ICFGBuilder::connectGlobalToProgEntry() {
-    SVFModule * svfModule = icfg->getPAG()->getModule();
+    SVFModule *svfModule = icfg->getPAG()->getModule();
     const SVFFunction *mainFunc = SVFUtil::getProgEntryFunction(svfModule);
 
     /// Return back if the main function is not found, the bc file might be a

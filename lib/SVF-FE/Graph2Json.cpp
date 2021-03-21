@@ -7,7 +7,7 @@ using namespace std;
 using namespace SVF;
 using namespace SVFUtil;
 
-ICFGPrinter::ICFGPrinter(PAG *pag): ICFG(pag) {}
+ICFGPrinter::ICFGPrinter(PAG *pag) : ICFG(pag) {}
 
 void ICFGPrinter::printICFGToJson(const std::string &filename) {
     outs() << "write symbols to '" << filename << "'...";

@@ -31,7 +31,6 @@
  *     2021-03-19
  */
 
-
 #ifndef AnalysisUtil_H_
 #define AnalysisUtil_H_
 

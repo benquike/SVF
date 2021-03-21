@@ -19,12 +19,49 @@
  *     2021-03-19
  *****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <string>
+
+#include "SVF-FE/SVFProject.h"
 
 #include "config.h"
+#include "gtest/gtest.h"
 
-TEST(SymbolTableInfoTests, Construction_0) {
+using namespace std;
+using namespace SVF;
 
+class SymbolTableInfoTest : public ::testing::Test {
+  protected:
+};
+
+TEST_F(SymbolTableInfoTest, Construction_0) {
+    string ll_file = SVF_BUILD_DIR "tests/simple/simple_cpp.ll";
+    SVFProject proj(ll_file);
+
+    ASSERT_NE(proj.getSVFModule(), nullptr);
+
+    ASSERT_NE(proj.getLLVMModSet(), nullptr);
+    SymbolTableInfo *symInfo = proj.getSymbolTableInfo();
+
+    ASSERT_NE(symInfo, nullptr);
+
+    ASSERT_TRUE(symInfo->getModule());
+
+    llvm::outs() << symInfo->getTotalSymNum() << "\n";
+}
+
+TEST_F(SymbolTableInfoTest, Construction_1) {
+    string ll_file = SVF_BUILD_DIR "tests/CHG/callsite_cpp.ll";
+    SVFProject proj(ll_file);
+    ASSERT_NE(proj.getSVFModule(), nullptr);
+    ASSERT_NE(proj.getLLVMModSet(), nullptr);
+
+    SymbolTableInfo *symInfo = proj.getSymbolTableInfo();
+
+    ASSERT_NE(symInfo, nullptr);
+
+    ASSERT_TRUE(symInfo->getModule());
+
+    llvm::outs() << symInfo->getTotalSymNum() << "\n";
 }
 
 int main(int argc, char *argv[]) {

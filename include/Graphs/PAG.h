@@ -75,13 +75,10 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     using GepValPNMap = Map<const Value *, NodeLocationSetMap>;
     using NodePairSetMap = Map<NodePair, NodeID>;
 
-
-
   private:
     /// Maps function names to the entry nodes of the extpag which implements
     /// it. This is to connect arguments and callsites.
-    Map<const SVFFunction *, Map<int, PAGNode *>>
-        functionToExternalPAGEntries;
+    Map<const SVFFunction *, Map<int, PAGNode *>> functionToExternalPAGEntries;
     Map<const SVFFunction *, PAGNode *> functionToExternalPAGReturns;
 
     /// ValueNodes - This map indicates the Node that a particular Value* is
@@ -112,7 +109,7 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     CSToRetMap
         callSiteRetMap; ///< Map a callsite to its callsite returns PAGNodes
     FunToRetMap
-        funRetMap;   ///< Map a function to its unique function return PAGNodes
+        funRetMap; ///< Map a function to its unique function return PAGNodes
 
     CallSiteToFunPtrMap indCallSiteToFunPtrMap; ///< Map an indirect callsite to
                                                 ///< its function pointer
@@ -132,7 +129,7 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     SymbolTableInfo *symbolTableInfo;
     SVFProject *proj;
 
-    CallSiteSet callSiteSet;  /// all the callsites of a program
+    CallSiteSet callSiteSet; /// all the callsites of a program
 
     /// Clean up memory
     void destroy();
@@ -141,7 +138,7 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     friend class ExternalPAG;
 
     /// Constructor
-    PAG(SVFProject *proj, bool buildFromFile=false);
+    PAG(SVFProject *proj, bool buildFromFile = false);
 
     u32_t totalPTAPAGEdge;
 
@@ -181,9 +178,7 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     }
 
     /// Get LLVM Module
-    inline SVFModule *getModule() {
-        return symbolTableInfo->getModule();
-    }
+    inline SVFModule *getModule() { return symbolTableInfo->getModule(); }
     inline void addCallSite(const CallBlockNode *call) {
         callSiteSet.insert(call);
     }
@@ -383,7 +378,9 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     //@{
     inline Size_t getPAGNodeNum() const { return nodeNum; }
     inline Size_t getPAGEdgeNum() const { return edgeNum; }
-    inline Size_t getValueNodeNum() const { return symbolTableInfo->valSyms().size(); }
+    inline Size_t getValueNodeNum() const {
+        return symbolTableInfo->valSyms().size();
+    }
     inline Size_t getObjectNodeNum() const {
         return symbolTableInfo->idToObjMap().size();
     }
@@ -474,9 +471,13 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     /// getNode - Return the node ID corresponding
     /// to the specified pointer.
     /// FIXME: rename the API
-    inline NodeID getValueNode(const Value *V) { return symbolTableInfo->getValSym(V); }
+    inline NodeID getValueNode(const Value *V) {
+        return symbolTableInfo->getValSym(V);
+    }
 
-    inline bool hasValueNode(const Value *V) { return symbolTableInfo->hasValSym(V); }
+    inline bool hasValueNode(const Value *V) {
+        return symbolTableInfo->hasValSym(V);
+    }
 
     /// getObject - Return the obj node id refer to the memory object for the
     /// specified global, heap or alloca instruction according to llvm value.
@@ -547,13 +548,9 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
         return symbolTableInfo->constantSymID();
     }
 
-    inline NodeID getBlkPtr() const {
-        return symbolTableInfo->blkPtrSymID();
-    }
+    inline NodeID getBlkPtr() const { return symbolTableInfo->blkPtrSymID(); }
 
-    inline NodeID getNullPtr() const {
-        return symbolTableInfo->nullPtrSymID();
-    }
+    inline NodeID getNullPtr() const { return symbolTableInfo->nullPtrSymID(); }
 
     inline bool isBlkPtr(NodeID id) const {
         return (SymbolTableInfo::isBlkPtr(id));
@@ -651,9 +648,9 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     /// Add a memory obj node
     inline NodeID addObjNode(const Value *val, NodeID i) {
         MemObj *mem = symbolTableInfo->getObj(symbolTableInfo->getObjSym(val));
-        assert(
-            ((mem->getSymId() == i) || (symbolTableInfo->getGlobalRep(val) != val)) &&
-            "not same object id?");
+        assert(((mem->getSymId() == i) ||
+                (symbolTableInfo->getGlobalRep(val) != val)) &&
+               "not same object id?");
         return addFIObjNode(mem);
     }
 
@@ -811,7 +808,7 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     /// Whether an external PAG implementing function exists.
     bool hasExternalPAG(const SVFFunction *function) {
         bool ret = functionToExternalPAGEntries.find(function) !=
-               functionToExternalPAGEntries.end();
+                   functionToExternalPAGEntries.end();
         return ret;
     }
 
@@ -823,10 +820,8 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     /// Returns true on success, false otherwise.
     bool connectCallsiteToExternalPAG(CallSite *cs);
 
-
     /// Dump individual PAGs of specified functions. Currently to outs().
     void dumpFunctions(std::vector<std::string> &functions);
-
 
     /// Return graph name
     inline std::string getGraphName() const { return "PAG"; }

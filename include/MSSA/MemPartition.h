@@ -44,8 +44,7 @@ namespace SVF {
  */
 class DistinctMRG : public MRGenerator {
   public:
-    DistinctMRG(BVDataPTAImpl *p, bool ptrOnly)
-        : MRGenerator(p, ptrOnly) {}
+    DistinctMRG(BVDataPTAImpl *p, bool ptrOnly) : MRGenerator(p, ptrOnly) {}
 
     ~DistinctMRG() {}
 

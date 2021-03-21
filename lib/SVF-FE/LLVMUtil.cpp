@@ -58,7 +58,6 @@ bool SVFUtil::isObject(const Value *ref, SVFModule *svfMod) {
         createobj = true;
     }
 
-
     return createobj;
 }
 
@@ -246,7 +245,8 @@ void SVFUtil::getPrevInsts(const Instruction *curInst,
 /*!
  * Return the type of the object from a heap allocation
  */
-const Type *SVFUtil::getTypeOfHeapAlloc(const Instruction *inst, SVFModule *svfMod) {
+const Type *SVFUtil::getTypeOfHeapAlloc(const Instruction *inst,
+                                        SVFModule *svfMod) {
     const PointerType *type = SVFUtil::dyn_cast<PointerType>(inst->getType());
 
     if (isHeapAllocExtCallViaRet(inst, svfMod)) {

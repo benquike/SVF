@@ -77,6 +77,7 @@ class ConstraintNode : public GenericConsNodeTy {
         addressOutEdges; ///< all outgoing address edge of this node
 
     PAG *pag;
+
   public:
     static SCCEdgeFlag sccEdgeFlag;
 
@@ -87,8 +88,8 @@ class ConstraintNode : public GenericConsNodeTy {
     static void setSCCEdgeFlag(SCCEdgeFlag f) { sccEdgeFlag = f; }
 
     ConstraintNode(NodeID i, PAG *pag)
-        : GenericConsNodeTy(i, 0), _isPWCNode(false),
-          pag(pag), newExpand(false) {}
+        : GenericConsNodeTy(i, 0), _isPWCNode(false), pag(pag),
+          newExpand(false) {}
 
     /// Whether a node involves in PWC, if so, all its points-to elements should
     /// become field-insensitive.
@@ -109,68 +110,57 @@ class ConstraintNode : public GenericConsNodeTy {
 
     /// Return constraint edges
     //@{
-    inline const ConstraintEdge::ConstraintEdgeSetTy
-    &getDirectInEdges() const {
+    inline const ConstraintEdge::ConstraintEdgeSetTy &getDirectInEdges() const {
         return directInEdges;
     }
 
-    inline const ConstraintEdge::ConstraintEdgeSetTy
-    &getDirectOutEdges() const {
+    inline const ConstraintEdge::ConstraintEdgeSetTy &
+    getDirectOutEdges() const {
         return directOutEdges;
     }
 
-    inline const ConstraintEdge::ConstraintEdgeSetTy
-    &getCopyInEdges() const {
+    inline const ConstraintEdge::ConstraintEdgeSetTy &getCopyInEdges() const {
         return copyInEdges;
     }
 
-    inline const ConstraintEdge::ConstraintEdgeSetTy
-    &getCopyOutEdges() const {
+    inline const ConstraintEdge::ConstraintEdgeSetTy &getCopyOutEdges() const {
         return copyOutEdges;
     }
 
-    inline const ConstraintEdge::ConstraintEdgeSetTy
-    &getGepInEdges() const {
+    inline const ConstraintEdge::ConstraintEdgeSetTy &getGepInEdges() const {
         return gepInEdges;
     }
 
-    inline const ConstraintEdge::ConstraintEdgeSetTy
-    &getGepOutEdges() const {
+    inline const ConstraintEdge::ConstraintEdgeSetTy &getGepOutEdges() const {
         return gepOutEdges;
     }
 
-    inline const ConstraintEdge::ConstraintEdgeSetTy
-    &getLoadInEdges() const {
+    inline const ConstraintEdge::ConstraintEdgeSetTy &getLoadInEdges() const {
         return loadInEdges;
     }
 
-    inline const ConstraintEdge::ConstraintEdgeSetTy
-    &getLoadOutEdges() const {
+    inline const ConstraintEdge::ConstraintEdgeSetTy &getLoadOutEdges() const {
         return loadOutEdges;
     }
 
-    inline const ConstraintEdge::ConstraintEdgeSetTy
-    &getStoreInEdges() const {
+    inline const ConstraintEdge::ConstraintEdgeSetTy &getStoreInEdges() const {
         return storeInEdges;
     }
 
-    inline const ConstraintEdge::ConstraintEdgeSetTy
-    &getStoreOutEdges() const {
+    inline const ConstraintEdge::ConstraintEdgeSetTy &getStoreOutEdges() const {
         return storeOutEdges;
     }
 
-    inline const ConstraintEdge::ConstraintEdgeSetTy
-    &getAddrInEdges() const {
+    inline const ConstraintEdge::ConstraintEdgeSetTy &getAddrInEdges() const {
         return addressInEdges;
     }
 
-    inline const ConstraintEdge::ConstraintEdgeSetTy
-    &getAddrOutEdges() const {
+    inline const ConstraintEdge::ConstraintEdgeSetTy &getAddrOutEdges() const {
         return addressOutEdges;
     }
     //@}
 
-    PAG *getPAG() const {return pag;}
+    PAG *getPAG() const { return pag; }
 
     ///  Iterators
     //@{

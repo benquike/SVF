@@ -174,8 +174,8 @@ class PointerAnalysis {
     inline CallGraphSCC *getCallGraphSCC() const { return callGraphSCC; }
 
     /// Constructor
-    PointerAnalysis(SVFProject *proj,
-                    PTATY ty = Default_PTA, bool alias_check = true);
+    PointerAnalysis(SVFProject *proj, PTATY ty = Default_PTA,
+                    bool alias_check = true);
 
     /// Type of pointer analysis
     inline PTATY getAnalysisTy() const { return ptaTy; }
@@ -188,7 +188,7 @@ class PointerAnalysis {
     inline PAG *getPAG() const { return proj->getPAG(); }
     //@}
 
-    SVFProject *getSVFProject() {  return proj; }
+    SVFProject *getSVFProject() { return proj; }
 
     /// Get PTA stat
     inline PTAStat *getStat() const { return stat; }
@@ -320,9 +320,7 @@ class PointerAnalysis {
         return getPAG()->getBaseObjNode(id);
     }
 
-    inline NodeID getFIObjNode(NodeID id) {
-        return getPAG()->getFIObjNode(id);
-    }
+    inline NodeID getFIObjNode(NodeID id) { return getPAG()->getFIObjNode(id); }
 
     inline NodeID getGepObjNode(NodeID id, const LocationSet &ls) {
         return getPAG()->getGepObjNode(id, ls);

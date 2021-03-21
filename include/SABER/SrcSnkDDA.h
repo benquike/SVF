@@ -78,9 +78,8 @@ class SrcSnkDDA : virtual public CFLSrcSnkSolver {
   public:
     /// Constructor
     SrcSnkDDA(SVFProject *proj)
-        : _curSlice(nullptr), pag(proj->getPAG()),
-          svfgBuilder(pag), svfg(nullptr),
-          ptaCallGraph(nullptr), proj(proj) {
+        : _curSlice(nullptr), pag(proj->getPAG()), svfgBuilder(pag),
+          svfg(nullptr), ptaCallGraph(nullptr), proj(proj) {
         pathCondAllocator = new PathCondAllocator(pag->getModule());
     }
 

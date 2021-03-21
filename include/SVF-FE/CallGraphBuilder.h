@@ -47,8 +47,7 @@ class CallGraphBuilder {
 
   public:
     CallGraphBuilder(SVFProject *proj, PTACallGraph *cg)
-      : callgraph(cg), icfg(proj->getICFG()),
-        proj(proj) {}
+        : callgraph(cg), icfg(proj->getICFG()), proj(proj) {}
 
     /// Build normal callgraph
     PTACallGraph *buildCallGraph();

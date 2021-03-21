@@ -23,11 +23,9 @@ using VFunSet = Set<const SVFFunction *>;
 /// Common base for class hierarchy graph. Only implements what PointerAnalysis
 /// needs.
 class CommonCHGraph {
-public:
+  public:
     CommonCHGraph(SymbolTableInfo *symInfo)
-        : svfMod(symInfo->getModule()),
-          symbolTableInfo(symInfo) {
-    };
+        : svfMod(symInfo->getModule()), symbolTableInfo(symInfo){};
 
     virtual ~CommonCHGraph(){};
     enum CHGKind { Standard, DI };

@@ -64,13 +64,12 @@ void MemObj::init(const Value *val) {
 
     if (refTy) {
         Type *objTy = refTy->getElementType();
-
         if(Options::LocMemModel) {
             typeInfo = new LocObjTypeInfo(symbolTableInfo, val,
                                           objTy, Options::MaxFieldLimit);
         } else {
-            typeInfo = new ObjTypeInfo(symbolTableInfo, val,
-                                       objTy, Options::MaxFieldLimit);
+            typeInfo = new ObjTypeInfo(symbolTableInfo, val, objTy,
+                                       Options::MaxFieldLimit);
         }
         typeInfo->init(val);
     } else {
@@ -241,8 +240,7 @@ bool SymbolTableInfo::computeGepOffset(const User *V, LocationSet &ls) {
     auto dl = std::make_unique<DataLayout>(
         getModule()->getLLVMModSet()->getMainLLVMModule());
     llvm::APInt byteOffset(
-        dl->getIndexSizeInBits(gepOp->getPointerAddressSpace()), 0,
-        true);
+        dl->getIndexSizeInBits(gepOp->getPointerAddressSpace()), 0, true);
     if (gepOp && dl.get() && gepOp->accumulateConstantOffset(*dl, byteOffset)) {
         Size_t bo = byteOffset.getSExtValue();
         ls.setByteOffset(bo + ls.getByteOffset());
@@ -451,8 +449,7 @@ void SymbolTableInfo::buildMemModel() {
     symTyMap.insert(std::make_pair(totalSymNum, NullPtr));
 
     // Add symbols for all the globals .
-    for (auto I = mod->global_begin(), E = mod->global_end();
-         I != E; ++I) {
+    for (auto I = mod->global_begin(), E = mod->global_end(); I != E; ++I) {
         collectSym(*I);
     }
 
@@ -482,8 +479,8 @@ void SymbolTableInfo::buildMemModel() {
         }
 
         // collect and create symbols inside the function body
-        for (inst_iterator II = inst_begin(*fun), E = inst_end(*fun);
-             II != E; ++II) {
+        for (inst_iterator II = inst_begin(*fun), E = inst_end(*fun); II != E;
+             ++II) {
             const Instruction *inst = &*II;
 
             // no matter what it is

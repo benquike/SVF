@@ -39,9 +39,8 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
     /// Constructor
     DDAVFSolver(SVFProject *proj)
         : outOfBudgetQuery(false), _pag(proj->getPAG()), _svfg(nullptr),
-          _ander(nullptr), proj(proj),  _callGraph(nullptr),
-          _callGraphSCC(nullptr),
-          _svfgSCC(nullptr), ddaStat(nullptr) {}
+          _ander(nullptr), proj(proj), _callGraph(nullptr),
+          _callGraphSCC(nullptr), _svfgSCC(nullptr), ddaStat(nullptr) {}
     /// Destructor
     virtual ~DDAVFSolver() {
         if (_ander != nullptr) {
@@ -435,7 +434,7 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
         assert(obj && "object not found!!");
         if (obj->isStack()) {
             if (const auto *local =
-                SVFUtil::dyn_cast<AllocaInst>(obj->getRefVal())) {
+                    SVFUtil::dyn_cast<AllocaInst>(obj->getRefVal())) {
                 LLVMModuleSet *modSet = _pag->getModule()->getLLVMModSet();
                 const SVFFunction *fun =
                     modSet->getSVFFunction(local->getFunction());
@@ -719,7 +718,7 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
         outOfBudgetQuery{}; ///< Whether the current query is out of step limits
     PAG *_pag{};            ///< PAG
     SVFG *_svfg{};          ///< SVFG
-    AndersenWaveDiff *_ander{};    ///< Andersen's analysis
+    AndersenWaveDiff *_ander{}; ///< Andersen's analysis
     SVFProject *proj;
 
     NodeBS candidateQueries;       ///< candidate pointers;

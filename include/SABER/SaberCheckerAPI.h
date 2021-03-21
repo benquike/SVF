@@ -62,7 +62,6 @@ class SaberCheckerAPI {
     /// Initialize the map
     void init();
 
-
     /// Get the function type of a function
     inline CHECKER_TYPE getType(const SVFFunction *F) const {
         if (F) {
@@ -74,12 +73,8 @@ class SaberCheckerAPI {
     }
 
   public:
-
     /// Constructor
-    SaberCheckerAPI(SVFModule *svfMod)
-        :svfMod(svfMod) {
-        init();
-    }
+    SaberCheckerAPI(SVFModule *svfMod) : svfMod(svfMod) { init(); }
 
     /// Return true if this call is a memory allocation
     //@{
@@ -121,7 +116,7 @@ class SaberCheckerAPI {
 
     inline bool isFOpen(const Instruction *inst) const {
         auto *modSet = svfMod->getLLVMModSet();
-        return getType(SVFUtil::getCallee(modSet,inst)) == CK_FOPEN;
+        return getType(SVFUtil::getCallee(modSet, inst)) == CK_FOPEN;
     }
 
     inline bool isFOpen(const CallBlockNode *cs) const {

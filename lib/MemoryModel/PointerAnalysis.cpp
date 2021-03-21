@@ -444,9 +444,8 @@ void PointerAnalysis::resolveIndCalls(const CallBlockNode *cs,
             if (obj->isFunction()) {
                 const auto *calleefun =
                     SVFUtil::cast<Function>(obj->getRefVal());
-                const SVFFunction *callee =
-                    getDefFunForMultipleModule(svfMod->getLLVMModSet(),
-                                               calleefun);
+                const SVFFunction *callee = getDefFunForMultipleModule(
+                    svfMod->getLLVMModSet(), calleefun);
 
                 /// if the arg size does not match then we do not need to
                 /// connect this parameter even if the callee is a variadic

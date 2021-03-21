@@ -51,9 +51,9 @@ class OfflineConsG : public ConstraintGraph {
   protected:
     NodeSet refNodes;
     NodeToRepMap nodeToRefMap; // a --> *a
-    NodeToRepMap norToRepMap; // for each *a construct a --> rep,
-                              // i.e., mapping a node of
-                              // to a rep node for online constraint solving
+    NodeToRepMap norToRepMap;  // for each *a construct a --> rep,
+                               // i.e., mapping a node of
+                               // to a rep node for online constraint solving
 
   public:
     OfflineConsG(PAG *p)

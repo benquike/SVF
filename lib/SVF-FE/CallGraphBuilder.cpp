@@ -67,8 +67,7 @@ PTACallGraph *CallGraphBuilder::buildCallGraph() {
     return callgraph;
 }
 
-PTACallGraph *
-ThreadCallGraphBuilder::buildThreadCallGraph() {
+PTACallGraph *ThreadCallGraphBuilder::buildThreadCallGraph() {
 
     SVFModule *svfModule = proj->getSVFModule();
 

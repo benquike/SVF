@@ -110,8 +110,7 @@ u32_t ObjTypeInfo::getObjSize(const Value *val) {
     Type *ety = SVFUtil::cast<PointerType>(val->getType())->getElementType();
     u32_t numOfFields = 1;
     if (SVFUtil::isa<StructType>(ety) || SVFUtil::isa<ArrayType>(ety)) {
-        numOfFields =
-            symbolTableInfo->getFlattenFieldInfoVec(ety).size();
+        numOfFields = symbolTableInfo->getFlattenFieldInfoVec(ety).size();
     }
     return numOfFields;
 }
@@ -227,8 +226,8 @@ void MemObj::setFieldSensitive() {
  * Initial the memory object here
  */
 void MemObj::init(const Type *type) {
-    typeInfo = new ObjTypeInfo(symbolTableInfo,
-                               StInfo::getMaxFieldLimit(), type);
+    typeInfo =
+        new ObjTypeInfo(symbolTableInfo, StInfo::getMaxFieldLimit(), type);
     typeInfo->setFlag(ObjTypeInfo::HEAP_OBJ);
     typeInfo->setFlag(ObjTypeInfo::HASPTR_OBJ);
 }

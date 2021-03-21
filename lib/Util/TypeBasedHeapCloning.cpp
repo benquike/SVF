@@ -461,10 +461,9 @@ NodeID TypeBasedHeapCloning::addCloneGepObjNode(const MemObj *mem,
                                                 const LocationSet &l) {
     SymbolTableInfo *symInfo = mem->getSymbolTableInfo();
     auto &nodeIDAllocator = symInfo->getNodeIDAllocator();
-    NodeID id =  nodeIDAllocator.allocateObjectId();
+    NodeID id = nodeIDAllocator.allocateObjectId();
     return ppag->addObjNode(mem->getRefVal(),
-                            new CloneGepObjPN(mem, id, l, symInfo),
-                            id);
+                            new CloneGepObjPN(mem, id, l, symInfo), id);
 }
 
 NodeID TypeBasedHeapCloning::addCloneFIObjNode(const MemObj *mem) {
@@ -472,8 +471,7 @@ NodeID TypeBasedHeapCloning::addCloneFIObjNode(const MemObj *mem) {
     auto &nodeIDAllocator = symInfo->getNodeIDAllocator();
     NodeID id = nodeIDAllocator.allocateObjectId();
     return ppag->addObjNode(mem->getRefVal(),
-                            new CloneFIObjPN(mem->getRefVal(), id, mem),
-                            id);
+                            new CloneFIObjPN(mem->getRefVal(), id, mem), id);
 }
 
 const DIType *TypeBasedHeapCloning::getTypeFromCTirMetadata(const Value *v) {

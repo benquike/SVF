@@ -31,12 +31,11 @@
  *     2021-03-21
  */
 
-
-#include <sstream>      // std::stringstream
+#include <sstream> // std::stringstream
 #include <string>
 #include "Util/Options.h"
-#include "Graphs/PAG.h"
 #include "Graphs/ExternalPAG.h"
+#include "Graphs/PAG.h"
 #include "SVF-FE/ICFGBuilder.h"
 #include "SVF-FE/LLVMUtil.h"
 #include "SVF-FE/PAGBuilder.h"
@@ -272,9 +271,9 @@ const std::string TDJoinPE::toString() const {
 }
 
 PAG::PAG(SVFProject *proj, bool buildFromFile)
-    : fromFile(buildFromFile), nodeNumAfterPAGBuild(0),
-      icfg(proj->getICFG()), symbolTableInfo(proj->getSymbolTableInfo()),
-      proj(proj), totalPTAPAGEdge(0) {
+    : fromFile(buildFromFile), nodeNumAfterPAGBuild(0), icfg(proj->getICFG()),
+      symbolTableInfo(proj->getSymbolTableInfo()), proj(proj),
+      totalPTAPAGEdge(0) {
     if (icfg == nullptr) {
         icfg = new ICFG(this);
     }
@@ -336,7 +335,7 @@ BinaryOPPE *PAG::addBinaryOPPE(NodeID src, NodeID dst) {
     PAGNode *srcNode = getPAGNode(src);
     PAGNode *dstNode = getPAGNode(dst);
     if (PAGEdge *edge =
-        hasNonlabeledEdge(srcNode, dstNode, PAGEdge::BinaryOp)) {
+            hasNonlabeledEdge(srcNode, dstNode, PAGEdge::BinaryOp)) {
         return SVFUtil::cast<BinaryOPPE>(edge);
     } else {
         BinaryOPPE *binaryOP = new BinaryOPPE(srcNode, dstNode, this);
@@ -383,7 +382,7 @@ StorePE *PAG::addStorePE(NodeID src, NodeID dst, const IntraBlockNode *curVal) {
     PAGNode *srcNode = getPAGNode(src);
     PAGNode *dstNode = getPAGNode(dst);
     if (PAGEdge *edge =
-        hasLabeledEdge(srcNode, dstNode, PAGEdge::Store, curVal)) {
+            hasLabeledEdge(srcNode, dstNode, PAGEdge::Store, curVal)) {
         return SVFUtil::cast<StorePE>(edge);
     }
 
@@ -442,7 +441,7 @@ TDForkPE *PAG::addThreadForkPE(NodeID src, NodeID dst,
     PAGNode *srcNode = getPAGNode(src);
     PAGNode *dstNode = getPAGNode(dst);
     if (PAGEdge *edge =
-        hasLabeledEdge(srcNode, dstNode, PAGEdge::ThreadFork, cs)) {
+            hasLabeledEdge(srcNode, dstNode, PAGEdge::ThreadFork, cs)) {
         return SVFUtil::cast<TDForkPE>(edge);
     }
 
@@ -460,7 +459,7 @@ TDJoinPE *PAG::addThreadJoinPE(NodeID src, NodeID dst,
     PAGNode *srcNode = getPAGNode(src);
     PAGNode *dstNode = getPAGNode(dst);
     if (PAGEdge *edge =
-        hasLabeledEdge(srcNode, dstNode, PAGEdge::ThreadJoin, cs)) {
+            hasLabeledEdge(srcNode, dstNode, PAGEdge::ThreadJoin, cs)) {
         return SVFUtil::cast<TDJoinPE>(edge);
     }
 
@@ -496,7 +495,7 @@ NormalGepPE *PAG::addNormalGepPE(NodeID src, NodeID dst,
     PAGNode *baseNode = getPAGNode(getBaseValNode(src));
     PAGNode *dstNode = getPAGNode(dst);
     if (PAGEdge *edge =
-        hasNonlabeledEdge(baseNode, dstNode, PAGEdge::NormalGep)) {
+            hasNonlabeledEdge(baseNode, dstNode, PAGEdge::NormalGep)) {
         return SVFUtil::cast<NormalGepPE>(edge);
     }
 
@@ -514,7 +513,7 @@ VariantGepPE *PAG::addVariantGepPE(NodeID src, NodeID dst) {
     PAGNode *baseNode = getPAGNode(getBaseValNode(src));
     PAGNode *dstNode = getPAGNode(dst);
     if (PAGEdge *edge =
-        hasNonlabeledEdge(baseNode, dstNode, PAGEdge::VariantGep)) {
+            hasNonlabeledEdge(baseNode, dstNode, PAGEdge::VariantGep)) {
         return SVFUtil::cast<VariantGepPE>(edge);
     }
 
@@ -603,8 +602,7 @@ NodeID PAG::addGepObjNode(const MemObj *obj, const LocationSet &ls) {
            "this node should not be created before");
 
     auto &idAllocator = symbolTableInfo->getNodeIDAllocator();
-    NodeID gepId = idAllocator.allocateGepObjectId(base,
-                                                   ls.getOffset(),
+    NodeID gepId = idAllocator.allocateGepObjectId(base, ls.getOffset(),
                                                    StInfo::getMaxFieldLimit());
     GepObjNodeMap[std::make_pair(base, ls)] = gepId;
     auto *node = new GepObjPN(obj, gepId, ls, symbolTableInfo);
@@ -659,8 +657,8 @@ PAGEdge *PAG::hasLabeledEdge(PAGNode *src, PAGNode *dst, PAGEdge::PEDGEK kind,
 bool PAG::addEdge(PAGNode *src, PAGNode *dst, PAGEdge *edge) {
 
     DBOUT(DPAGBuild, outs() << "add edge from " << src->getId() << " kind :"
-          << src->getNodeKind() << " to " << dst->getId()
-          << " kind :" << dst->getNodeKind() << "\n");
+                            << src->getNodeKind() << " to " << dst->getId()
+                            << " kind :" << dst->getNodeKind() << "\n");
     src->addOutEdge(edge);
     dst->addInEdge(edge);
     bool added = PAGEdgeKindToSetMap[edge->getEdgeKind()].insert(edge).second;
@@ -963,7 +961,6 @@ void PAG::handleBlackHole(bool b)
     Options::HandBlackHole = b;
 }
 
-
 void PAG::initializeExternalPAGs() {
     std::vector<std::pair<std::string, std::string>> parsedExternalPAGs =
         parseExternalPAGs(ExternalPAGArgs);
@@ -979,7 +976,6 @@ void PAG::initializeExternalPAGs() {
         extpag.addExternalPAG(getFunction(getModule()->getLLVMModSet(), fname));
     }
 }
-
 
 std::vector<std::pair<std::string, std::string>>
 PAG::parseExternalPAGs(llvm::cl::list<std::string> &extpagsArgs) {
@@ -1068,7 +1064,6 @@ bool PAG::connectCallsiteToExternalPAG(CallSite *cs) {
 
     return true;
 }
-
 
 static int getArgNo(const SVFFunction *function, const Value *arg) {
     int argNo = 0;
@@ -1164,7 +1159,6 @@ static void outputPAGEdge(raw_ostream &o, PAGEdge *pagEdge) {
     o << srcId << " " << edgeKind << " " << dstId << " " << offset << "\n";
 }
 
-
 void PAG::dumpFunctions(std::vector<std::string> &functions) {
 
     // Naive: first map functions to entries in PAG, then dump them.
@@ -1198,8 +1192,7 @@ void PAG::dumpFunctions(std::vector<std::string> &functions) {
                         callDsts.insert(callEdge->getDstNode());
                         SVFModule *mod = getModule();
                         const SVFFunction *svfFun =
-                            mod->getLLVMModSet()->getSVFFunction(
-                                currFunction);
+                            mod->getLLVMModSet()->getSVFFunction(currFunction);
                         functionToPAGNodes[svfFun].push_back(
                             callEdge->getDstNode());
                     }
@@ -1271,7 +1264,6 @@ void PAG::dumpFunctions(std::vector<std::string> &functions) {
         outs() << "PAG for functionName " << functionName << " done\n";
     }
 }
-
 
 namespace llvm {
 /*!

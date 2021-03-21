@@ -32,7 +32,6 @@
  *     2021-03-19
  */
 
-
 #ifndef INCLUDE_SVF_FE_LLVMMODULE_H_
 #define INCLUDE_SVF_FE_LLVMMODULE_H_
 
@@ -65,7 +64,6 @@ class LLVMModuleSet {
     void build();
 
   public:
-
     /// Constructor
     LLVMModuleSet(SVFModule *svfMod) : svfModule(svfMod), cxts(nullptr) {}
 

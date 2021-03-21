@@ -122,9 +122,8 @@ class ObjTypeInfo {
                            // field that is a pointer type
     } MEMTYPE;
 
-
   protected:
-        SymbolTableInfo *symbolTableInfo;
+    SymbolTableInfo *symbolTableInfo;
 
   private:
     /// LLVM type
@@ -138,8 +137,8 @@ class ObjTypeInfo {
 
   public:
     /// Constructors
-    ObjTypeInfo(SymbolTableInfo *symInfo, const Value *,
-                const Type *t, u32_t max)
+    ObjTypeInfo(SymbolTableInfo *symInfo, const Value *, const Type *t,
+                u32_t max)
         : symbolTableInfo(symInfo), type(t), flags(0), maxOffsetLimit(max) {}
     /// Constructor
     ObjTypeInfo(SymbolTableInfo *symInfo, u32_t max, const Type *t)

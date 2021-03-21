@@ -145,8 +145,7 @@ const char *PTAStat::MaxNumOfNodesInSCC =
 const char *PTAStat::NumOfNullPointer =
     "NullPointer"; ///< Number of pointers points-to null
 
-PTAStat::PTAStat(PointerAnalysis *p)
-    : startTime(0), endTime(0), pta(p) {}
+PTAStat::PTAStat(PointerAnalysis *p) : startTime(0), endTime(0), pta(p) {}
 
 void PTAStat::performStat() {
 

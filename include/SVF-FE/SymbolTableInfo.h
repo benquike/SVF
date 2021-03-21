@@ -64,14 +64,13 @@ class SymbolTableInfo {
     //@}
 
   private:
-
     // node id allocator
     NodeIDAllocator nodeIDAllocator;
 
     ValueToIDMapTy valSymMap;  ///< map a value to its sym id
     ValueToIDMapTy objSymMap;  ///< map a obj reference to its sym id
     IDToValueMapTy idValueMap; ///< map from its id to the pointer
-    IDToMemMapTy   objMap;     ///< map a memory sym id to its obj
+    IDToMemMapTy objMap;       ///< map a memory sym id to its obj
     IDToSymTyMapTy symTyMap;   /// < map a sym id to its type
     FunToIDMapTy returnSymMap; ///< return  map
     FunToIDMapTy varargSymMap; ///< vararg map
@@ -97,11 +96,10 @@ class SymbolTableInfo {
     SymID totalSymNum;
 
   public:
-
     /// Constructor
     SymbolTableInfo(SVFModule *mod)
-        : mod(mod), modelConstants(false), totalSymNum(0),
-          maxStruct(nullptr), maxStSize(0) {
+        : mod(mod), modelConstants(false), totalSymNum(0), maxStruct(nullptr),
+          maxStSize(0) {
         // start building the memory model
         // in the co construtor
         buildMemModel();
@@ -113,7 +111,6 @@ class SymbolTableInfo {
     //  or SymbolTableInfo will be returned
     //@{
     static SymbolTableInfo *SymbolInfo(SVFModule *mod);
-
 
     virtual ~SymbolTableInfo() { destroy(); }
     //@}
@@ -390,7 +387,7 @@ class LocSymTableInfo : public SymbolTableInfo {
 
   public:
     /// Constructor
-    LocSymTableInfo(SVFModule *mod): SymbolTableInfo(mod) {}
+    LocSymTableInfo(SVFModule *mod) : SymbolTableInfo(mod) {}
     /// Destructor
     virtual ~LocSymTableInfo() {}
     /// Compute gep offset
@@ -414,8 +411,8 @@ class LocObjTypeInfo : public ObjTypeInfo {
 
   public:
     /// Constructor
-    LocObjTypeInfo(SymbolTableInfo *symInfo, const Value *val,
-                   Type *t, Size_t max)
+    LocObjTypeInfo(SymbolTableInfo *symInfo, const Value *val, Type *t,
+                   Size_t max)
         : ObjTypeInfo(symInfo, val, t, max) {}
     /// Destructor
     virtual ~LocObjTypeInfo() {}

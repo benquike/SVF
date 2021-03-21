@@ -300,8 +300,8 @@ class CallBlockNode : public InterBlockNode {
 
   public:
     CallBlockNode(NodeID id, const Instruction *c, SVFModule *svfMod)
-        : InterBlockNode(id, FunCallBlock), cs(c),
-          ret(nullptr), svfMod(svfMod) {
+        : InterBlockNode(id, FunCallBlock), cs(c), ret(nullptr),
+          svfMod(svfMod) {
         fun = svfMod->getLLVMModSet()->getSVFFunction(cs->getFunction());
         bb = cs->getParent();
     }
@@ -370,8 +370,8 @@ class RetBlockNode : public InterBlockNode {
     const CallBlockNode *callBlockNode;
 
   public:
-    RetBlockNode(NodeID id, const Instruction *c,
-                 CallBlockNode *cb, SVFModule *svfMod)
+    RetBlockNode(NodeID id, const Instruction *c, CallBlockNode *cb,
+                 SVFModule *svfMod)
         : InterBlockNode(id, FunRetBlock), cs(c), actualRet(nullptr),
           callBlockNode(cb) {
         fun = svfMod->getLLVMModSet()->getSVFFunction(cs->getFunction());

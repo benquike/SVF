@@ -31,7 +31,6 @@
  *     2021-03-21
  */
 
-
 #ifndef INCLUDE_UTIL_ICFG_H_
 #define INCLUDE_UTIL_ICFG_H_
 
@@ -85,7 +84,6 @@ class ICFG : public GenericICFGTy {
 
     /// Destructor
     virtual ~ICFG() {}
-
 
     PAG *getPAG() { return pag; }
 

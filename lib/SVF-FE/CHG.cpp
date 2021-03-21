@@ -86,8 +86,7 @@ void CHGraph::buildCHG() {
     double timeStart, timeEnd;
     timeStart = CLOCK_IN_MS();
     LLVMModuleSet *modSet = svfMod->getLLVMModSet();
-    for (u32_t i = 0; i < modSet->getModuleNum();
-         ++i) {
+    for (u32_t i = 0; i < modSet->getModuleNum(); ++i) {
         Module *M = modSet->getModule(i);
         assert(M && "module not found?");
         DBOUT(DGENERAL,
@@ -139,7 +138,7 @@ void CHGraph::buildCHGNodes(const GlobalValue *globalvalue) {
                         isCastConstantExpr(vtbl->getOperand(i))) {
                     const Value *bitcastValue = ce->getOperand(0);
                     if (const Function *func =
-                        SVFUtil::dyn_cast<Function>(bitcastValue)) {
+                            SVFUtil::dyn_cast<Function>(bitcastValue)) {
                         LLVMModuleSet *modSet = svfMod->getLLVMModSet();
                         buildCHGNodes(getDefFunForMultipleModule(modSet, func));
                     }

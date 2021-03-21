@@ -109,8 +109,8 @@ void ConstraintGraph::destroy() {}
 /*!
  * Constructor for address constraint graph edge
  */
-AddrCGEdge::AddrCGEdge(ConstraintNode *s, ConstraintNode *d,
-                       EdgeID id, PAG *pag)
+AddrCGEdge::AddrCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id,
+                       PAG *pag)
     : ConstraintEdge(s, d, Addr, id) {
     // Retarget addr edges may lead s to be a dummy node
     PAGNode *node = pag->getPAGNode(s->getId());

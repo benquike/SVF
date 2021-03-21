@@ -420,8 +420,7 @@ class GepObjPN : public ObjPN {
     /// Constructor
     GepObjPN(const MemObj *mem, NodeID i, const LocationSet &l,
              SymbolTableInfo *symInfo, PNODEK ty = GepObjNode)
-        : ObjPN(mem->getRefVal(), i, mem, ty), ls(l),
-          symbolTableInfo(symInfo) {
+        : ObjPN(mem->getRefVal(), i, mem, ty), ls(l), symbolTableInfo(symInfo) {
         base = mem->getSymId();
     }
 

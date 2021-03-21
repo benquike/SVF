@@ -89,8 +89,7 @@ LLVMModuleSet::buildSVFModule(const std::vector<std::string> &moduleNameVec) {
     return svfModule;
 }
 
-SVFModule*
-LLVMModuleSet::buildSVFModule(const std::string &moduleName) {
+SVFModule *LLVMModuleSet::buildSVFModule(const std::string &moduleName) {
     std::vector<std::string> nameVec{moduleName};
     return buildSVFModule(nameVec);
 }

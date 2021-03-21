@@ -1,16 +1,12 @@
 class Base {
-    public:
-        virtual void foo() = 0;
+  public:
+    virtual void foo() = 0;
 };
 
-
-
-
-class Child: public Base {
-    public:
-        void foo() {}
+class Child : public Base {
+  public:
+    void foo() {}
 };
-
 
 int main(int argc, char *argv[]) {
     Child c;

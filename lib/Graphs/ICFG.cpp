@@ -31,7 +31,6 @@
  *     2021-03-21
  */
 
-
 #include "Graphs/ICFG.h"
 #include "Graphs/PAG.h"
 #include "Graphs/PTACallGraph.h"
@@ -79,7 +78,6 @@ const std::string IntraBlockNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "IntraBlockNode ID: " << getId();
-
     rawstr << value2String(getInst()) << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
     return rawstr.str();
 }
@@ -94,8 +92,7 @@ const std::string FunEntryBlockNode::toString() const {
     } else {
         rawstr << " Entry(" << getSourceLoc(getFun()->getLLVMFun()) << ")\n";
     }
-    rawstr << " {fun: "
-           << llvm::demangle(getFun()->getName().str()) << "}";
+    rawstr << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
     return rawstr.str();
 }
 
@@ -112,8 +109,7 @@ const std::string FunExitBlockNode::toString() const {
                       getFunExitBB(getFun()->getLLVMFun())->getFirstNonPHI())
                << ")\n";
     }
-    rawstr << " {fun: "
-           << llvm::demangle(getFun()->getName().str()) << "}";
+    rawstr << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
     return rawstr.str();
 }
 
@@ -424,29 +420,25 @@ void ICFG::updateCallGraph(PTACallGraph *callgraph) {
 }
 
 IntraBlockNode *ICFG::addIntraBlockICFGNode(const Instruction *inst) {
-    IntraBlockNode *sNode = new IntraBlockNode(totalICFGNode++,
-                                               inst,
-                                               pag->getModule());
+    IntraBlockNode *sNode =
+        new IntraBlockNode(totalICFGNode++, inst, pag->getModule());
     addICFGNode(sNode);
     InstToBlockNodeMap[inst] = sNode;
     return sNode;
 }
 
 CallBlockNode *ICFG::addCallICFGNode(const Instruction *cs) {
-    CallBlockNode *sNode = new CallBlockNode(totalICFGNode++,
-                                             cs,
-                                             pag->getModule());
+    CallBlockNode *sNode =
+        new CallBlockNode(totalICFGNode++, cs, pag->getModule());
     addICFGNode(sNode);
     CSToCallNodeMap[cs] = sNode;
     return sNode;
 }
 
-
 RetBlockNode *ICFG::addRetICFGNode(const Instruction *cs) {
     CallBlockNode *callBlockNode = getCallBlockNode(cs);
-    RetBlockNode *sNode = new RetBlockNode(totalICFGNode++,
-                                           cs, callBlockNode,
-                                           pag->getModule());
+    RetBlockNode *sNode =
+        new RetBlockNode(totalICFGNode++, cs, callBlockNode, pag->getModule());
 
     callBlockNode->setRetBlockNode(sNode);
     addICFGNode(sNode);
@@ -477,6 +469,7 @@ template <> struct DOTGraphTraits<ICFG *> : public DOTGraphTraits<PAG *> {
         rawstr << "NodeID: " << node->getId() << "\n";
 
 
+
         if (auto* bNode = SVFUtil::dyn_cast<IntraBlockNode>(node))
         {
             rawstr << "IntraBlockNode ID: " << bNode->getId() << " \t";
@@ -497,8 +490,7 @@ template <> struct DOTGraphTraits<ICFG *> : public DOTGraphTraits<PAG *> {
         } else if (auto *ret = SVFUtil::dyn_cast<RetBlockNode>(node)) {
             rawstr << ret->toString();
         } else if (auto *glob = SVFUtil::dyn_cast<GlobalBlockNode>(node)) {
-            PAG::PAGEdgeList &edges =
-                g->getPAG()->getInstPTAPAGEdgeList(glob);
+            PAG::PAGEdgeList &edges = g->getPAG()->getInstPTAPAGEdgeList(glob);
             for (const auto *edge : edges) {
                 rawstr << edge->toString();
             }

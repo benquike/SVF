@@ -143,8 +143,7 @@ class CHGraph : public CommonCHGraph, public GenericCHGraphTy {
     } RELATIONTYPE;
 
     CHGraph(SymbolTableInfo *symInfo)
-        : CommonCHGraph(symInfo),
-          classNum(0), vfID(0), buildingCHGTime(0) {
+        : CommonCHGraph(symInfo), classNum(0), vfID(0), buildingCHGTime(0) {
         this->kind = Standard;
     }
     ~CHGraph();

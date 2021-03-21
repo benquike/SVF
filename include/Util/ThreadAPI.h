@@ -71,7 +71,6 @@ class ThreadAPI {
     /// API map, from a string to threadAPI type
     TDAPIMap tdAPIMap;
 
-
     /// Initialize the map
     void init();
 
@@ -88,7 +87,6 @@ class ThreadAPI {
     SVFModule *svfMod;
 
   public:
-
     /// Constructor
     ThreadAPI(SVFModule *svfMod) : svfMod(svfMod) { init(); }
 
@@ -185,7 +183,7 @@ class ThreadAPI {
     //@{
     inline bool isTDJoin(const Instruction *inst) const {
         auto type = getType(SVFUtil::getCallee(svfMod->getLLVMModSet(), inst));
-        return  type == TD_JOIN;
+        return type == TD_JOIN;
     }
 
     inline bool isTDJoin(CallSite cs) const {

@@ -764,9 +764,8 @@ void PAGBuilder::visitCallSite(CallSite cs) {
         /// FIXME: where is the PAG node added for the callsite ret?
         /// here, when constructing the symboltable,
         /// a value symbol will be created for the call instruction
-        pag->addCallSiteRets(icfgRetBlockNode,
-                             pag->getPAGNode(
-                                 getValueNode(cs.getInstruction())));
+        pag->addCallSiteRets(icfgRetBlockNode, pag->getPAGNode(getValueNode(
+                                                   cs.getInstruction())));
     }
 
     // extract direct callees?
@@ -1318,10 +1317,10 @@ void PAGBuilder::handleExtCall(CallSite cs, const SVFFunction *callee) {
         /// create inter-procedural PAG edges for thread forks
         if (proj->isThreadForkCall(inst)) {
             if (const Function *forkedFun =
-                getLLVMFunction(proj->getForkedFun(inst))) {
+                    getLLVMFunction(proj->getForkedFun(inst))) {
                 LLVMModuleSet *modSet = svfMod->getLLVMModSet();
-                forkedFun = getDefFunForMultipleModule(modSet,
-                                                       forkedFun)->getLLVMFun();
+                forkedFun =
+                    getDefFunForMultipleModule(modSet, forkedFun)->getLLVMFun();
                 const Value *actualParm = proj->getActualParmAtForkSite(inst);
                 /// pthread_create has 1 arg.
                 /// apr_thread_create has 2 arg.
@@ -1364,7 +1363,8 @@ void PAGBuilder::handleExtCall(CallSite cs, const SVFFunction *callee) {
                 assert((taskFunc->arg_size() == 3) &&
                        "Size of formal parameter of hare_parallel_for's task "
                        "routine should be 3");
-                const Value *actualParm = proj->getTaskDataAtHareParForSite(inst);
+                const Value *actualParm =
+                    proj->getTaskDataAtHareParForSite(inst);
                 const Argument *formalParm = &(*taskFunc->arg_begin());
                 /// Connect actual parameter to formal parameter of the start
                 /// routine
@@ -1457,8 +1457,7 @@ NodeID PAGBuilder::getGepValNode(const Value *val, const LocationSet &ls,
         NodeID gepNode = pag->addGepValNode(
             curVal, val, ls,
             pag->getSymbolTableInfo()->getNodeIDAllocator().allocateValueId(),
-            type,
-            fieldidx);
+            type, fieldidx);
         addGepEdge(base, gepNode, ls, true);
         setCurrentLocation(cval, cbb);
         return gepNode;

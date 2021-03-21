@@ -246,8 +246,7 @@ class MRGenerator {
     void getCallGraphSCCRevTopoOrder(WorkList &worklist);
 
   protected:
-    MRGenerator(BVDataPTAImpl *p, bool ptrOnly)
-        : pta(p), ptrOnlyMSSA(ptrOnly) {
+    MRGenerator(BVDataPTAImpl *p, bool ptrOnly) : pta(p), ptrOnlyMSSA(ptrOnly) {
         callGraph = pta->getPTACallGraph();
         callGraphSCC = new SCC(callGraph);
     }

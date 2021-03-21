@@ -159,8 +159,7 @@ class VersionedFlowSensitiveStat : public PTAStat {
   public:
     VersionedFlowSensitive *vfspta;
 
-        VersionedFlowSensitiveStat(VersionedFlowSensitive *pta)
-            : PTAStat(pta) {
+    VersionedFlowSensitiveStat(VersionedFlowSensitive *pta) : PTAStat(pta) {
         vfspta = pta;
         clearStat();
         startClk();

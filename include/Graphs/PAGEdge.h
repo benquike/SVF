@@ -180,7 +180,8 @@ class AddrPE : public PAGEdge {
     //@}
 
     /// constructor
-    AddrPE(PAGNode *s, PAGNode *d, PAG *pag) : PAGEdge(s, d, pag, PAGEdge::Addr) {}
+    AddrPE(PAGNode *s, PAGNode *d, PAG *pag)
+        : PAGEdge(s, d, pag, PAGEdge::Addr) {}
 
     virtual const std::string toString() const;
 };
@@ -206,8 +207,8 @@ class CopyPE : public PAGEdge {
     //@}
 
     /// constructor
-    CopyPE(PAGNode *s, PAGNode *d, PAG *pag) :
-        PAGEdge(s, d, pag, PAGEdge::Copy) {}
+    CopyPE(PAGNode *s, PAGNode *d, PAG *pag)
+        : PAGEdge(s, d, pag, PAGEdge::Copy) {}
 
     virtual const std::string toString() const;
 };
@@ -233,8 +234,8 @@ class CmpPE : public PAGEdge {
     //@}
 
     /// constructor
-    CmpPE(PAGNode *s, PAGNode *d, PAG *pag) :
-        PAGEdge(s, d, pag, PAGEdge::Cmp) {}
+    CmpPE(PAGNode *s, PAGNode *d, PAG *pag)
+        : PAGEdge(s, d, pag, PAGEdge::Cmp) {}
 
     virtual const std::string toString() const;
 };
@@ -260,8 +261,8 @@ class BinaryOPPE : public PAGEdge {
     //@}
 
     /// constructor
-    BinaryOPPE(PAGNode *s, PAGNode *d, PAG *pag) :
-        PAGEdge(s, d, pag, PAGEdge::BinaryOp) {}
+    BinaryOPPE(PAGNode *s, PAGNode *d, PAG *pag)
+        : PAGEdge(s, d, pag, PAGEdge::BinaryOp) {}
 
     virtual const std::string toString() const;
 };
@@ -374,8 +375,7 @@ class GepPE : public PAGEdge {
 
   protected:
     /// constructor
-    GepPE(PAGNode *s, PAGNode *d, PAG *pag, PEDGEK k)
-        : PAGEdge(s, d, pag, k) {}
+    GepPE(PAGNode *s, PAGNode *d, PAG *pag, PEDGEK k) : PAGEdge(s, d, pag, k) {}
 
     virtual const std::string toString() const;
 };

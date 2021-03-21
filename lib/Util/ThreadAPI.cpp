@@ -117,7 +117,6 @@ void ThreadAPI::init() {
     }
 }
 
-
 /*!
  *
  */

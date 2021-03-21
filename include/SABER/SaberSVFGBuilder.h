@@ -31,9 +31,9 @@
 #define SABERSVFGBUILDER_H_
 
 #include "MSSA/SVFGBuilder.h"
+#include "SABER/SaberCheckerAPI.h"
 #include "Util/BasicTypes.h"
 #include "Util/WorkList.h"
-#include "SABER/SaberCheckerAPI.h"
 
 namespace SVF {
 
@@ -48,9 +48,8 @@ class SaberSVFGBuilder : virtual public SVFGBuilder,
     using WorkList = FIFOWorkList<NodeID>;
 
     /// Constructor
-    SaberSVFGBuilder(PAG *pag) : SVFGBuilder(true),
-                                 SaberCheckerAPI(pag->getModule()) {
-    }
+    SaberSVFGBuilder(PAG *pag)
+        : SVFGBuilder(true), SaberCheckerAPI(pag->getModule()) {}
 
     /// Destructor
     virtual ~SaberSVFGBuilder() {}
