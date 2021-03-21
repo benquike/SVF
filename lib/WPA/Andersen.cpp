@@ -540,6 +540,7 @@ bool Andersen::updateCallGraph(const CallSiteToFunPtrMap &callsites) {
 
     CallEdgeMap newEdges;
     onTheFlyCallGraphSolve(callsites, newEdges);
+
     NodePairSet cpySrcNodes; /// nodes as a src of a generated new copy edge
     for (auto &newEdge : newEdges) {
         CallSite cs = SVFUtil::getLLVMCallSite(newEdge.first->getCallSite());
@@ -547,6 +548,7 @@ bool Andersen::updateCallGraph(const CallSiteToFunPtrMap &callsites) {
             connectCaller2CalleeParams(cs, cit, cpySrcNodes);
         }
     }
+
     for (const auto &cpySrcNode : cpySrcNodes) {
         pushIntoWorklist(cpySrcNode.first);
     }
@@ -587,6 +589,8 @@ void Andersen::heapAllocatorViaIndCall(CallSite cs, NodePairSet &cpySrcNodes) {
 
 /*!
  * Connect formal and actual parameters for indirect callsites
+ *
+ * FIXME: this method is badly named, rename it appopriately
  */
 void Andersen::connectCaller2CalleeParams(CallSite cs, const SVFFunction *F,
                                           NodePairSet &cpySrcNodes) {
@@ -596,10 +600,10 @@ void Andersen::connectCaller2CalleeParams(CallSite cs, const SVFFunction *F,
                             << *cs.getInstruction() << " to callee " << *F
                             << "\n");
 
-    CallBlockNode *callBlockNode =
-        pag->getICFG()->getCallBlockNode(cs.getInstruction());
-    RetBlockNode *retBlockNode =
-        pag->getICFG()->getRetBlockNode(cs.getInstruction());
+    auto *icfg = pag->getICFG();
+    auto *inst = cs.getInstruction();
+    CallBlockNode *callBlockNode = icfg->getCallBlockNode(inst);
+    RetBlockNode *retBlockNode = icfg->getRetBlockNode(inst);
 
     if (SVFUtil::isHeapAllocExtFunViaRet(F) &&
         pag->callsiteHasRet(retBlockNode)) {
@@ -607,9 +611,16 @@ void Andersen::connectCaller2CalleeParams(CallSite cs, const SVFFunction *F,
     }
 
     if (pag->funHasRet(F) && pag->callsiteHasRet(retBlockNode)) {
+
         const PAGNode *cs_return = pag->getCallSiteRet(retBlockNode);
         const PAGNode *fun_return = pag->getFunRet(F);
+
+        // TODO: why only pointer return types?
         if (cs_return->isPointer() && fun_return->isPointer()) {
+
+            // add a copy edge from the formal return node
+            // to the actual return node
+
             NodeID dstrec = sccRepNode(cs_return->getId());
             NodeID srcret = sccRepNode(fun_return->getId());
             if (addCopyEdge(srcret, dstrec)) {

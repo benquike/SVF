@@ -348,8 +348,10 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
                "this call site doesn't have arguments");
         return it->second;
     }
+
     /// Get callsite return
     inline CSToRetMap &getCallSiteRets() { return callSiteRetMap; }
+
     /// Get callsite return
     inline const PAGNode *getCallSiteRet(const RetBlockNode *cs) const {
         auto it = callSiteRetMap.find(cs);
@@ -357,11 +359,14 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
                "this call site doesn't have return");
         return it->second;
     }
+
     inline bool callsiteHasRet(const RetBlockNode *cs) const {
         return callSiteRetMap.find(cs) != callSiteRetMap.end();
     }
+
     /// Get function return list
     inline FunToRetMap &getFunRets() { return funRetMap; }
+
     /// Get function return list
     inline const PAGNode *getFunRet(const SVFFunction *func) const {
         auto it = funRetMap.find(func);
@@ -408,28 +413,33 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     inline const CallSiteToFunPtrMap &getIndirectCallsites() const {
         return indCallSiteToFunPtrMap;
     }
+
     inline void addIndirectCallsites(const CallBlockNode *cs, NodeID funPtr) {
         bool added =
             indCallSiteToFunPtrMap.insert(std::make_pair(cs, funPtr)).second;
         funPtrToCallSitesMap[funPtr].insert(cs);
         assert(added && "adding the same indirect callsite twice?");
     }
+
     inline NodeID getFunPtr(const CallBlockNode *cs) const {
         auto it = indCallSiteToFunPtrMap.find(cs);
         assert(it != indCallSiteToFunPtrMap.end() &&
                "indirect callsite not have a function pointer?");
         return it->second;
     }
+
     inline const CallSiteSet &getIndCallSites(NodeID funPtr) const {
         auto it = funPtrToCallSitesMap.find(funPtr);
         assert(it != funPtrToCallSitesMap.end() &&
                "function pointer not used at any indirect callsite?");
         return it->second;
     }
+
     inline bool isIndirectCallSites(const CallBlockNode *cs) const {
         return (indCallSiteToFunPtrMap.find(cs) !=
                 indCallSiteToFunPtrMap.end());
     }
+
     inline bool isFunPtr(NodeID id) const {
         return (funPtrToCallSitesMap.find(id) != funPtrToCallSitesMap.end());
     }
@@ -444,6 +454,7 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
                                     PAGEdge::PEDGEK kind) {
         return getIntraPAGEdge(getPAGNode(src), getPAGNode(dst), kind);
     }
+
     inline PAGEdge *getIntraPAGEdge(PAGNode *src, PAGNode *dst,
                                     PAGEdge::PEDGEK kind) {
         PAGEdge edge(src, dst, this, kind);
