@@ -16,11 +16,4 @@ file (GLOB SOURCES
         DDA/*.cpp)
 
 # add_llvm_library(Svf STATIC ${SOURCES} LINK_LIBS Cudd)
-add_llvm_library(Svf SHARED ${SOURCES} LINK_LIBS Cudd)
-
-link_directories( ${CMAKE_BINARY_DIR}/lib/Cudd )
-
-
-if(DEFINED IN_SOURCE_BUILD)
-    add_dependencies(Svf intrinsics_gen)
-endif()
+add_library(Svf SHARED ${SOURCES})
