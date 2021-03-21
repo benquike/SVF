@@ -32,7 +32,6 @@
 #include "SABER/LeakChecker.h"
 #include "SVF-FE/LLVMUtil.h"
 #include "SVF-FE/PAGBuilder.h"
-#include "SVF-FE/PAGBuilder.h"
 
 using namespace llvm;
 using namespace SVF;
@@ -76,8 +75,8 @@ int main(int argc, char **argv) {
     else if (DFREECHECKER)
         saber = new DoubleFreeChecker(&proj);
     else
-        saber = new LeakChecker(&proj); // if no checker is specified, we use leak
-                                        // checker as the default one.
+        saber = new LeakChecker(&proj); // if no checker is specified, we use
+                                        // leak checker as the default one.
     saber->runOnModule(proj.getSVFModule());
 
     return 0;

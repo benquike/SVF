@@ -97,7 +97,7 @@ void traverseFunctionICFG(ICFG *icfg, SVFModule *mod,
             const Instruction *llvmInst = ibnode->getInst();
             visitor.visit(const_cast<Instruction *>(llvmInst));
         } else if (const auto *cbnode =
-                   SVFUtil::dyn_cast<CallBlockNode>(vNode)) {
+                       SVFUtil::dyn_cast<CallBlockNode>(vNode)) {
             const Instruction *inst = cbnode->getCallSite();
             visitor.visit(const_cast<Instruction *>(inst));
         } else {
@@ -105,8 +105,7 @@ void traverseFunctionICFG(ICFG *icfg, SVFModule *mod,
                  << endl;
         }
 
-        for (auto it = vNode->OutEdgeBegin(),
-                 eit = vNode->OutEdgeEnd();
+        for (auto it = vNode->OutEdgeBegin(), eit = vNode->OutEdgeEnd();
              it != eit; ++it) {
 
             ICFGEdge *edge = *it;
@@ -140,8 +139,7 @@ void traverseOnVFG(const SVFG *vfg, const Value *val) {
         const VFGNode *vNode = worklist.pop();
         visited.insert(vNode);
 
-        for (auto it = vNode->InEdgeBegin(),
-                 eit = vNode->InEdgeEnd();
+        for (auto it = vNode->InEdgeBegin(), eit = vNode->InEdgeEnd();
              it != eit; ++it) {
 
             VFGEdge *edge = *it;
@@ -155,7 +153,7 @@ void traverseOnVFG(const SVFG *vfg, const Value *val) {
 
     /// Collect all LLVM Values
     for (const auto *node : visited) {
-         /// can only query VFGNode involving top-level pointers (starting with %
+        /// can only query VFGNode involving top-level pointers (starting with %
         /// or
         /// @ in LLVM IR) PAGNode* pNode = vfg->getLHSTopLevPtr(node); Value*
         /// val = pNode->getValue();
@@ -250,10 +248,9 @@ void analyzeArgFlowToCondition(const SVFG *vfg, const Value *val,
 
             // we need to check whether is
             if (const auto *arg = SVFUtil::dyn_cast<Argument>(llvmValue)) {
-                llvm::outs() << "\tArg #:" << arg->getArgNo()
-                             << " of "
-                             << llvm::demangle(function->getName().str())
-                             << "\n";
+                llvm::outs()
+                    << "\tArg #:" << arg->getArgNo() << " of "
+                    << llvm::demangle(function->getName().str()) << "\n";
             }
         }
     }

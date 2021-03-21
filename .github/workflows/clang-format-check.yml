@@ -9,7 +9,7 @@ jobs:
         path:
           - 'include'
           - 'lib'
-          - 'examples'
+          - 'tools'
           - 'tests'
           - 'unittests'
     steps:
