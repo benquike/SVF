@@ -64,6 +64,11 @@ int main(int argc, char **argv) {
     cl::ParseCommandLineOptions(arg_num, arg_value,
                                 "Source-Sink Bug Detector\n");
 
+    if (moduleNameVec.empty()) {
+        outs() << "Please provide llvm IR files\n";
+        exit(-1);
+    }
+
     SVFProject proj(moduleNameVec);
 
     LeakChecker *saber;

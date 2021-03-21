@@ -142,6 +142,11 @@ int main(int argc, char **argv) {
     cl::ParseCommandLineOptions(arg_num, arg_value,
                                 "Whole Program Points-to Analysis\n");
 
+    if (moduleNameVec.empty()) {
+        outs() << "Please provide llvm IR files\n";
+        exit(-1);
+    }
+
     // how to manage the momory of SVFModule?
     SVFProject proj(moduleNameVec);
     PAG *pag = proj.getPAG();

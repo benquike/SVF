@@ -53,6 +53,7 @@ class SVFProject {
     }
 
     SVFProject(vector<string> &modVec) {
+        assert(!modVec.empty() && "no module files are provided");
         modNameVec.insert(modNameVec.end(), modVec.begin(), modVec.end());
         svfModule = new SVFModule(modVec);
     }

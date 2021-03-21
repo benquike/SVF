@@ -270,6 +270,11 @@ int main(int argc, char **argv) {
         arg_num, arg_value,
         "A tool for analyzing webgl interface code in chrome\n");
 
+    if (moduleNameVec.empty()) {
+        llvm::outs() << "Please provide LLVM IR files\n";
+        exit(-1);
+    }
+
     SVFProject proj(moduleNameVec);
 
     /// Build Program Assignment Graph (PAG)

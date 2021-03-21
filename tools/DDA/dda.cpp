@@ -54,6 +54,11 @@ int main(int argc, char **argv) {
     cl::ParseCommandLineOptions(arg_num, arg_value,
                                 "Demand-Driven Points-to Analysis\n");
 
+    if (moduleNameVec.empty()) {
+        outs() << "Please provide llvm IR files\n";
+        exit(-1);
+    }
+
     SVFProject proj(moduleNameVec);
 
     DDAPass *dda = new DDAPass();
