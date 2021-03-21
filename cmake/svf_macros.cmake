@@ -71,11 +71,23 @@ function(generate_ll_file)
     set(GEN_CMD_COMMENT "${GEN_CMD_COMMENT} ${GEN_LL_FILE}")
 
     # define .ll file generation command
+
+    # choose the version of clang(++) according to
+    # in ${LLVM_TOOLS_BINARY_DIR} to compile the
+    # tests sources
+    set(CLANG_PATH "${LLVM_TOOLS_BINARY_DIR}/clang")
+    set(CLANGXX_PATH "${LLVM_TOOLS_BINARY_DIR}/clang++")
+
+    if (NOT EXISTS ${CLANG_PATH}  OR NOT EXISTS ${CLANGXX_PATH})
+        message(FATAL_ERROR "clang or clang++ do not exist \
+in ${LLVM_TOOLS_BINARY_DIR}, please check your install of llvm")
+    endif()
+
     if(${test_code_file_ext} STREQUAL ".cpp")
-        set(GEN_CMD ${CMAKE_CXX_COMPILER_LAUNCHER} ${CMAKE_CXX_COMPILER})
+        set(GEN_CMD ${CMAKE_CXX_COMPILER_LAUNCHER} ${CLANGXX_PATH})
         list(APPEND GEN_CMD ${GEN_CXX_FLAGS})
     else()
-        set(GEN_CMD ${CMAKE_C_COMPILER_LAUNCHER} ${CMAKE_C_COMPILER})
+        set(GEN_CMD ${CMAKE_C_COMPILER_LAUNCHER} ${CLANG_PATH})
         list(APPEND GEN_CMD ${GEN_C_FLAGS})
     endif()
     if(GEN_LL_MEM2REG)
