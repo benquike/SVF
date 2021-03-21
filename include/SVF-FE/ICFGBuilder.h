@@ -49,7 +49,7 @@ class ICFGBuilder {
     using WorkList = FIFOWorkList<const Instruction *>;
 
     ICFGBuilder(ICFG *i) : icfg(i) {}
-    void build(SVFModule *svfModule);
+    void build();
 
   private:
     /// Create edges between ICFG nodes within a function
@@ -61,7 +61,7 @@ class ICFGBuilder {
     void processFunExit(const SVFFunction *fun);
     //@}
 
-    void connectGlobalToProgEntry(SVFModule *svfModule);
+    void connectGlobalToProgEntry();
 
     /// Add/Get an inter block ICFGNode
     InterBlockNode *getOrAddInterBlockICFGNode(const Instruction *inst);

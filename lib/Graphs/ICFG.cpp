@@ -25,11 +25,17 @@
  *
  *  Created on: Sep 11, 2018
  *      Author: Yulei Sui
+ *
+ *  Updated by:
+ *     Hui Peng <peng124@purdue.edu>
+ *     2021-03-21
  */
+
 
 #include "Graphs/ICFG.h"
 #include "Graphs/PAG.h"
 #include "Graphs/PTACallGraph.h"
+#include "SVF-FE/ICFGBuilder.h"
 #include "SVF-FE/LLVMUtil.h"
 #include "Util/SVFModule.h"
 #include <llvm/Demangle/Demangle.h>
@@ -179,6 +185,12 @@ ICFG::ICFG(PAG *pag) : totalICFGNode(0), pag(pag) {
     DBOUT(DGENERAL, outs() << pasMsg("\tCreate ICFG ...\n"));
     globalBlockNode = new GlobalBlockNode(totalICFGNode++);
     addICFGNode(globalBlockNode);
+    buildICFG();
+}
+
+void ICFG::buildICFG() {
+    ICFGBuilder builder(this);
+    builder.build();
 }
 
 /// Get a basic block ICFGNode
