@@ -7,3 +7,6 @@
 [submodule "external/clang-format-hooks"]
 	path = external/clang-format-hooks
 	url = https://github.com/barisione/clang-format-hooks.git
+[submodule "Test-Suite"]
+	path = Test-Suite
+	url = https://github.com/SVF-tools/Test-Suite.git
