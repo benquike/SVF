@@ -14,6 +14,7 @@ find_package(LLVM ${LLVM_VERSION} REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 message(STATUS "LLVM_TOOLS_BINARY_DIR: ${LLVM_TOOLS_BINARY_DIR}")
+message(STATUS "LLVM_ENABLE_RTTI: ${LLVM_ENABLE_RTTI}")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -35,8 +36,12 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 -Wno-implicit-fallthrough")
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS} -fno-rtti \
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS} \
 -Wno-overloaded-virtual -Wno-c++17-extensions")
+
+if (NOT ${LLVM_ENABLE_RTTI})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+endif()
 
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
