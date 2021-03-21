@@ -30,6 +30,4 @@
 #ifndef LOCMEMMODEL_H_
 #define LOCMEMMODEL_H_
 
-
-
 #endif /* LOCMEMMODEL_H_ */

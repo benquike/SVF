@@ -6,62 +6,58 @@
  */
 
 #include "MTA/MTA.h"
-#include "MTA/MHP.h"
-#include "MTA/TCT.h"
-#include "MTA/LockAnalysis.h"
-#include "MTA/MTAStat.h"
-#include "WPA/Andersen.h"
 #include "MTA/FSMPTA.h"
+#include "MTA/LockAnalysis.h"
+#include "MTA/MHP.h"
+#include "MTA/MTAStat.h"
+#include "MTA/TCT.h"
 #include "Util/SVFUtil.h"
+#include "WPA/Andersen.h"
 
 using namespace SVF;
 using namespace SVFUtil;
 
-static llvm::RegisterPass<MTA> RACEDETECOR("pmhp", "May-Happen-in-Parallel Analysis");
+static llvm::RegisterPass<MTA> RACEDETECOR("pmhp",
+                                           "May-Happen-in-Parallel Analysis");
 
-static llvm::cl::opt<bool> AndersenAnno("tsan-ander", llvm::cl::init(false), llvm::cl::desc("Add TSan annotation according to Andersen"));
+static llvm::cl::opt<bool>
+    AndersenAnno("tsan-ander", llvm::cl::init(false),
+                 llvm::cl::desc("Add TSan annotation according to Andersen"));
 
-static llvm::cl::opt<bool> FSAnno("tsan-fs", llvm::cl::init(false), llvm::cl::desc("Add TSan annotation according to flow-sensitive analysis"));
-
+static llvm::cl::opt<bool> FSAnno(
+    "tsan-fs", llvm::cl::init(false),
+    llvm::cl::desc("Add TSan annotation according to flow-sensitive analysis"));
 
 char MTA::ID = 0;
-ModulePass* MTA::modulePass = nullptr;
+ModulePass *MTA::modulePass = nullptr;
 MTA::FunToSEMap MTA::func2ScevMap;
 MTA::FunToLoopInfoMap MTA::func2LoopInfoMap;
 
-MTA::MTA() :
-    ModulePass(ID), tcg(nullptr), tct(nullptr)
-{
+MTA::MTA() : ModulePass(ID), tcg(nullptr), tct(nullptr) {
     stat = new MTAStat();
 }
 
-MTA::~MTA()
-{
+MTA::~MTA() {
     if (tcg)
         delete tcg;
-    //if (tct)
+    // if (tct)
     //    delete tct;
 }
 
-bool MTA::runOnModule(Module& module)
-{
-    SVFModule* m(module);
+bool MTA::runOnModule(Module &module) {
+    SVFModule *m(module);
     return runOnModule(m);
 }
 
 /*!
  * Perform data race detection
  */
-bool MTA::runOnModule(SVFModule* module)
-{
-
+bool MTA::runOnModule(SVFModule *module) {
 
     modulePass = this;
 
-    MHP* mhp = computeMHP(module);
-    LockAnalysis* lsa = computeLocksets(mhp->getTCT());
-
-
+    MHP *mhp = computeMHP(module);
+    LockAnalysis *lsa = computeLocksets(mhp->getTCT());
 
     /*
     if (AndersenAnno) {
@@ -93,8 +89,8 @@ bool MTA::runOnModule(SVFModule* module)
         DBOUT(DMTA, outs() << pasMsg("ThreadSanitizer Instrumentation\n"));
         TSan tsan;
         tsan.doInitialization(*pta->getModule());
-        for (Module::iterator it = pta->getModule()->begin(), eit = pta->getModule()->end(); it != eit; ++it) {
-            tsan.runOnFunction(*it);
+        for (Module::iterator it = pta->getModule()->begin(), eit =
+    pta->getModule()->end(); it != eit; ++it) { tsan.runOnFunction(*it);
         }
         if (pta->printStat())
             PrintStatistics();
@@ -110,19 +106,17 @@ bool MTA::runOnModule(SVFModule* module)
 /*!
  * Compute lock sets
  */
-LockAnalysis* MTA::computeLocksets(TCT* tct)
-{
-    LockAnalysis* lsa = new LockAnalysis(tct);
+LockAnalysis *MTA::computeLocksets(TCT *tct) {
+    auto *lsa = new LockAnalysis(tct);
     lsa->analyze();
     return lsa;
 }
 
-MHP* MTA::computeMHP(SVFModule* module)
-{
+MHP *MTA::computeMHP(SVFModule *module) {
 
     DBOUT(DGENERAL, outs() << pasMsg("MTA analysis\n"));
     DBOUT(DMTA, outs() << pasMsg("MTA analysis\n"));
-    PointerAnalysis* pta = AndersenWaveDiff::createAndersenWaveDiff(module);
+    PointerAnalysis *pta = AndersenWaveDiff::createAndersenWaveDiff(module);
     pta->getPTACallGraph()->dump("ptacg");
 
     DBOUT(DGENERAL, outs() << pasMsg("Build TCT\n"));
@@ -133,8 +127,7 @@ MHP* MTA::computeMHP(SVFModule* module)
     DOTIMESTAT(double tctEnd = stat->getClk());
     DOTIMESTAT(stat->TCTTime += (tctEnd - tctStart) / TIMEINTERVAL);
 
-    if (pta->printStat())
-    {
+    if (pta->printStat()) {
         stat->performThreadCallGraphStat(tcg);
         stat->performTCTStat(tct);
     }
@@ -145,7 +138,7 @@ MHP* MTA::computeMHP(SVFModule* module)
     DBOUT(DMTA, outs() << pasMsg("MHP analysis\n"));
 
     DOTIMESTAT(double mhpStart = stat->getClk());
-    MHP* mhp = new MHP(tct);
+    MHP *mhp = new MHP(tct);
     mhp->analyze();
     DOTIMESTAT(double mhpEnd = stat->getClk());
     DOTIMESTAT(stat->MHPTime += (mhpEnd - mhpStart) / TIMEINTERVAL);
@@ -159,51 +152,42 @@ MHP* MTA::computeMHP(SVFModule* module)
 // * Check   (1) write-write race
 // * 		 (2) write-read race
 // * 		 (3) read-read race
-// * when two memory access may-happen in parallel and are not protected by the same lock
-// * (excluding global constraints because they are initialized before running the main function)
+// * when two memory access may-happen in parallel and are not protected by the
+// same lock
+// * (excluding global constraints because they are initialized before running
+// the main function)
 // */
-void MTA::detect(SVFModule* module)
-{
+void MTA::detect(SVFModule *module) {
 
     DBOUT(DGENERAL, outs() << pasMsg("Starting Race Detection\n"));
 
     LoadSet loads;
     StoreSet stores;
 
-    Set<const Instruction*> needcheckinst;
+    Set<const Instruction *> needcheckinst;
     // Add symbols for all of the functions and the instructions in them.
-    for (SVFModule::iterator F = module->begin(), E = module->end(); F != E; ++F)
-    {
+    for (auto &F : *module) {
         // collect and create symbols inside the function body
-        for (inst_iterator II = inst_begin(*F), E = inst_end(*F); II != E; ++II)
-        {
+        for (inst_iterator II = inst_begin(F), E = inst_end(F); II != E; ++II) {
             const Instruction *inst = &*II;
-            if (const LoadInst* load = SVFUtil::dyn_cast<LoadInst>(inst))
-            {
+            if (const auto *load = SVFUtil::dyn_cast<LoadInst>(inst)) {
                 loads.insert(load);
-            }
-            else if (const StoreInst* store = SVFUtil::dyn_cast<StoreInst>(inst))
-            {
+            } else if (const auto *store = SVFUtil::dyn_cast<StoreInst>(inst)) {
                 stores.insert(store);
             }
         }
     }
 
-    for (LoadSet::const_iterator lit = loads.begin(), elit = loads.end(); lit != elit; ++lit)
-    {
-        const LoadInst* load = *lit;
+    for (const auto *load : loads) {
         bool loadneedcheck = false;
-        for (StoreSet::const_iterator sit = stores.begin(), esit = stores.end(); sit != esit; ++sit)
-        {
-            const StoreInst* store = *sit;
-
+        for (const auto *store : stores) {
             loadneedcheck = true;
             needcheckinst.insert(store);
         }
+
         if (loadneedcheck)
             needcheckinst.insert(load);
     }
 
     outs() << "HP needcheck: " << needcheckinst.size() << "\n";
 }
-

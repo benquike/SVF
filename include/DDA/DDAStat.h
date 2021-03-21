@@ -10,8 +10,7 @@
 
 #include "MemoryModel/PTAStat.h"
 
-namespace SVF
-{
+namespace SVF {
 
 class FlowDDA;
 class ContextDDA;
@@ -21,12 +20,11 @@ class PointerAnalysis;
 /*!
  * Statistics of demand-driven analysis
  */
-class DDAStat : public PTAStat
-{
+class DDAStat : public PTAStat {
 
-public:
-    DDAStat(FlowDDA* pta);
-    DDAStat(ContextDDA* pta);
+  public:
+    DDAStat(FlowDDA *pta);
+    DDAStat(ContextDDA *pta);
 
     u32_t _NumOfDPM;
     u32_t _NumOfStrongUpdates;
@@ -42,31 +40,29 @@ public:
 
     NodeBS _StrongUpdateStores;
 
-    void performStatPerQuery(NodeID ptr);
+    void performStatPerQuery(NodeID ptr) override;
 
-    void performStat();
+    void performStat() override;
 
     void printStat();
 
-    void printStatPerQuery(NodeID ptr, const PointsTo& pts);
+    void printStatPerQuery(NodeID ptr, const PointsTo &pts) override;
 
     void getNumOfOOBQuery();
 
-    inline void setMemUsageBefore(u32_t vmrss, u32_t vmsize)
-    {
+    inline void setMemUsageBefore(u32_t vmrss, u32_t vmsize) {
         _vmrssUsageBefore = vmrss;
         _vmsizeUsageBefore = vmsize;
     }
 
-    inline void setMemUsageAfter(u32_t vmrss, u32_t vmsize)
-    {
+    inline void setMemUsageAfter(u32_t vmrss, u32_t vmsize) {
         _vmrssUsageAfter = vmrss;
         _vmsizeUsageAfter = vmsize;
     }
 
-private:
-    FlowDDA* flowDDA;
-    ContextDDA* contextDDA;
+  private:
+    FlowDDA *flowDDA;
+    ContextDDA *contextDDA;
 
     u32_t _TotalNumOfQuery;
     u32_t _TotalNumOfOutOfBudgetQuery;
@@ -99,15 +95,12 @@ private:
 
     void initDefault();
 
-public:
-    SVFG* getSVFG() const;
+  public:
+    SVFG *getSVFG() const;
 
-    PointerAnalysis* getPTA() const;
+    PointerAnalysis *getPTA() const;
 
-    inline NodeBS& getStrongUpdateStores()
-    {
-        return _StrongUpdateStores;
-    }
+    inline NodeBS &getStrongUpdateStores() { return _StrongUpdateStores; }
 };
 
 } // End namespace SVF

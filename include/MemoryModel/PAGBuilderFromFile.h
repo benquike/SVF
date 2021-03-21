@@ -1,4 +1,5 @@
-//===- PAGBuilderFromFile.h -- Building PAG from File--------------------------------//
+//===- PAGBuilderFromFile.h -- Building PAG from
+// File--------------------------------//
 //
 //                     SVF: Static Value-Flow Analysis
 //
@@ -32,43 +33,31 @@
 
 #include "Graphs/PAG.h"
 
-namespace SVF
-{
+namespace SVF {
 
 /*!
  * Build PAG from a user specified file (for debugging purpose)
  */
-class PAGBuilderFromFile
-{
+class PAGBuilderFromFile {
 
-private:
-    PAG* pag;
+  private:
+    PAG *pag;
     std::string file;
-public:
+
+  public:
     /// Constructor
-    PAGBuilderFromFile(std::string f) :
-        pag(PAG::getPAG(true)), file(f)
-    {
-    }
+    PAGBuilderFromFile(std::string f, PAG *pag) : pag(pag), file(f) {}
     /// Destructor
-    ~PAGBuilderFromFile()
-    {
-    }
+    ~PAGBuilderFromFile() {}
 
     /// Return PAG
-    PAG* getPAG() const
-    {
-        return pag;
-    }
+    PAG *getPAG() const { return pag; }
 
     /// Return file name
-    std::string getFileName() const
-    {
-        return file;
-    }
+    std::string getFileName() const { return file; }
 
     /// Start building
-    PAG* build();
+    PAG *build();
 
     // Add edges
     void addEdge(NodeID nodeSrc, NodeID nodeDst, Size_t offset,

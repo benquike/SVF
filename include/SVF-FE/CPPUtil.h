@@ -32,31 +32,33 @@
 
 #include "Util/BasicTypes.h"
 
-namespace SVF
-{
+namespace SVF {
 
 class CHGraph;
+class LLVMModuleSet;
+
 /*
  * Util class to assist pointer analysis for cpp programs
  */
 
-namespace cppUtil
-{
+namespace cppUtil {
 
-struct DemangledName
-{
+struct DemangledName {
     std::string className;
     std::string funcName;
+    bool isThunkFunc;
 };
 
-struct DemangledName demangle(const std::string name);
+struct DemangledName demangle(const std::string &name);
 
-std::string getBeforeBrackets(const std::string name);
+std::string getBeforeBrackets(const std::string &name);
 bool isValVtbl(const Value *val);
 bool isLoadVtblInst(const LoadInst *loadInst);
-bool isVirtualCallSite(CallSite cs);
+bool isVirtualCallSite(CallSite cs, LLVMModuleSet *modSet = nullptr);
 bool isConstructor(const Function *F);
 bool isDestructor(const Function *F);
+bool isCPPThunkFunction(const Function *F);
+const Function *getThunkTarget(const Function *F);
 
 /*
  * VtableA = {&A::foo}
@@ -79,7 +81,7 @@ bool isDestructor(const Function *F);
  * getClassNameFromVtblObj(VtableA) return
  * getClassNameFromType(type of p) return type A
  */
-const Argument* getConstructorThisPtr(const Function* fun);
+const Argument *getConstructorThisPtr(const Function *fun);
 const Value *getVCallThisPtr(CallSite cs);
 const Value *getVCallVtblPtr(CallSite cs);
 u64_t getVCallIdx(CallSite cs);
@@ -98,26 +100,26 @@ bool VCallInCtorOrDtor(CallSite cs);
  *  }
  *  this and this1 are the same thisPtr in the constructor
  */
-bool isSameThisPtrInConstructor(const Argument* thisPtr1, const Value* thisPtr2);
+bool isSameThisPtrInConstructor(const Argument *thisPtr1,
+                                const Value *thisPtr2);
 
 /// Constants pertaining to CTir, for C and C++.
 /// TODO: move helper functions here too?
-namespace ctir
-{
+namespace ctir {
 /// On loads, stores, GEPs representing dereferences, and calls
 /// representing virtual calls.
 /// (The static type.)
-const std::string derefMDName  = "ctir";
+const std::string derefMDName = "ctir";
 /// On the (global) virtual table itself.
 /// (The class it corresponds to.)
-const std::string vtMDName     = "ctir.vt";
+const std::string vtMDName = "ctir.vt";
 /// On the bitcast of `this` to i8*.
 /// (The class the constructor it corresponds to.)
 const std::string vtInitMDName = "ctir.vt.init";
 
 /// Value we expect a ctir-annotated module to have.
 const uint32_t moduleFlagValue = 1;
-}
+} // namespace ctir
 
 } // End namespace cppUtil
 

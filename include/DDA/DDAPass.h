@@ -6,91 +6,90 @@
  *
  */
 
-
 #ifndef WPA_H_
 #define WPA_H_
 
-#include "MemoryModel/PointerAnalysisImpl.h"
 #include "DDA/DDAClient.h"
+#include "MemoryModel/PointerAnalysisImpl.h"
 #include "Util/SCC.h"
 
-namespace SVF
-{
+namespace SVF {
 
 /*!
  * Demand-Driven Pointer Analysis.
  * This class performs various pointer analysis on the given module.
  */
-class DDAPass: public ModulePass
-{
+class DDAPass : public ModulePass {
 
-public:
+  public:
     /// Pass ID
     static char ID;
-    typedef SCCDetection<SVFG*> SVFGSCC;
-    typedef OrderedSet<const SVFGEdge*> SVFGEdgeSet;
-    typedef std::vector<PointerAnalysis*> PTAVector;
+    using SVFGSCC = SCCDetection<SVFG *>;
+    using SVFGEdgeSet = OrderedSet<const SVFGEdge *>;
+    using PTAVector = std::vector<PointerAnalysis *>;
 
     DDAPass() : ModulePass(ID), _pta(nullptr), _client(nullptr) {}
     ~DDAPass();
 
-    virtual inline void getAnalysisUsage(AnalysisUsage &au) const
-    {
+    inline void getAnalysisUsage(AnalysisUsage &au) const override {
         // declare your dependencies here.
         /// do not intend to change the IR in this pass,
         au.setPreservesAll();
     }
 
-    virtual inline void* getAdjustedAnalysisPointer(AnalysisID)
-    {
+    inline void *getAdjustedAnalysisPointer(AnalysisID) override {
         return this;
     }
 
     /// Interface expose to users of our pointer analysis, given Location infos
-    virtual inline AliasResult alias(const MemoryLocation &LocA, const MemoryLocation &LocB)
-    {
+    virtual inline AliasResult alias(const MemoryLocation &LocA,
+                                     const MemoryLocation &LocB) {
         return alias(LocA.Ptr, LocB.Ptr);
     }
 
     /// Interface expose to users of our pointer analysis, given Value infos
-    virtual AliasResult alias(const Value* V1,	const Value* V2);
+    virtual AliasResult alias(const Value *V1, const Value *V2);
 
     /// Interface expose to users of our pointer analysis, given PAGNodes
     virtual AliasResult alias(NodeID V1, NodeID V2);
 
     /// We start from here
-    virtual void runOnModule(SVFModule* module);
+    virtual void runOnModule(SVFProject *proj);
 
     /// We start from here
-    virtual bool runOnModule(Module& module);
+    bool runOnModule(Module &module) override;
 
     /// Select a client
-    virtual void selectClient(SVFModule* module);
+    virtual void selectClient(SVFModule *module);
 
     /// Pass name
-    virtual inline StringRef getPassName() const
-    {
-        return "DDAPass";
-    }
+    inline StringRef getPassName() const override { return "DDAPass"; }
 
-private:
+  private:
     /// Print queries' pts
     void printQueryPTS();
-    /// Create pointer analysis according to specified kind and analyze the module.
-    void runPointerAnalysis(SVFModule* module, u32_t kind);
+    /// Create pointer analysis according to specified kind and analyze the
+    /// module.
+    void runPointerAnalysis(SVFProject *proj, u32_t kind);
     /// Context insensitive Edge for DDA
-    void initCxtInsensitiveEdges(PointerAnalysis* pta, const SVFG* svfg,const SVFGSCC* svfgSCC, SVFGEdgeSet& insensitveEdges);
-    /// Return TRUE if this edge is inside a SVFG SCC, i.e., src node and dst node are in the same SCC on the SVFG.
-    bool edgeInSVFGSCC(const SVFGSCC* svfgSCC,const SVFGEdge* edge);
-    /// Return TRUE if this edge is inside a SVFG SCC, i.e., src node and dst node are in the same SCC on the SVFG.
-    bool edgeInCallGraphSCC(PointerAnalysis* pta,const SVFGEdge* edge);
+    void initCxtInsensitiveEdges(PointerAnalysis *pta, const SVFG *svfg,
+                                 const SVFGSCC *svfgSCC,
+                                 SVFGEdgeSet &insensitveEdges);
+    /// Return TRUE if this edge is inside a SVFG SCC, i.e., src node and dst
+    /// node are in the same SCC on the SVFG.
+    bool edgeInSVFGSCC(const SVFGSCC *svfgSCC, const SVFGEdge *edge);
+    /// Return TRUE if this edge is inside a SVFG SCC, i.e., src node and dst
+    /// node are in the same SCC on the SVFG.
+    bool edgeInCallGraphSCC(PointerAnalysis *pta, const SVFGEdge *edge);
 
-    void collectCxtInsenEdgeForRecur(PointerAnalysis* pta, const SVFG* svfg,SVFGEdgeSet& insensitveEdges);
-    void collectCxtInsenEdgeForVFCycle(PointerAnalysis* pta, const SVFG* svfg,const SVFGSCC* svfgSCC, SVFGEdgeSet& insensitveEdges);
+    void collectCxtInsenEdgeForRecur(PointerAnalysis *pta, const SVFG *svfg,
+                                     SVFGEdgeSet &insensitveEdges);
+    void collectCxtInsenEdgeForVFCycle(PointerAnalysis *pta, const SVFG *svfg,
+                                       const SVFGSCC *svfgSCC,
+                                       SVFGEdgeSet &insensitveEdges);
 
-    PointerAnalysis* _pta;	///<  pointer analysis to be executed.
-    DDAClient* _client;		///<  DDA client used
-
+    PointerAnalysis *_pta{}; ///<  pointer analysis to be executed.
+    DDAClient *_client{};    ///<  DDA client used
 };
 
 } // End namespace SVF

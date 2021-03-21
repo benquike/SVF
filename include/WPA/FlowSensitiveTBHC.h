@@ -10,98 +10,99 @@
 #ifndef FLOWSENSITIVETYPEFILTER_H_
 #define FLOWSENSITIVETYPEFILTER_H_
 
-#include "SVF-FE/DCHG.h"
 #include "Graphs/SVFGOPT.h"
 #include "MSSA/SVFGBuilder.h"
+#include "SVF-FE/DCHG.h"
 #include "Util/TypeBasedHeapCloning.h"
 #include "WPA/FlowSensitive.h"
 
-namespace SVF
-{
+namespace SVF {
 
 class SVFModule;
 
 /*!
  * Flow sensitive whole program pointer analysis with type-based heap cloning.
  */
-class FlowSensitiveTBHC : public FlowSensitive, public TypeBasedHeapCloning
-{
-public:
+class FlowSensitiveTBHC : public FlowSensitive, public TypeBasedHeapCloning {
+  public:
     /// Returns raw ctir metadata of the instruction behind a SVFG node.
-    /// Wraps getRawCTirMetadata(const Value *). Returns null if it doesn't exist.
+    /// Wraps getRawCTirMetadata(const Value *). Returns null if it doesn't
+    /// exist.
     static const MDNode *getRawCTirMetadata(const SVFGNode *);
 
     /// Constructor
-    FlowSensitiveTBHC(PAG* _pag, PTATY type = FSTBHC_WPA);
+    FlowSensitiveTBHC(SVFProject *proj, PTATY type = FSTBHC_WPA);
 
     /// Destructor
-    virtual ~FlowSensitiveTBHC() { };
+    virtual ~FlowSensitiveTBHC(){};
 
     /// Flow sensitive analysis with FSTBHC.
-    virtual void analyze() override;
+    void analyze() override;
     /// Initialize analysis.
-    virtual void initialize() override;
+    void initialize() override;
     /// Finalize analysis.
-    virtual void finalize() override;
+    void finalize() override;
 
     /// Get PTA name
-    virtual const std::string PTAName() const override
-    {
-        return "FSTBHC";
-    }
+    const std::string PTAName() const override { return "FSTBHC"; }
 
     /// For LLVM RTTI.
-    static inline bool classof(const FlowSensitiveTBHC *)
-    {
-        return true;
-    }
+    static inline bool classof(const FlowSensitiveTBHC *) { return true; }
 
     /// For LLVM RTTI.
-    static inline bool classof(const PointerAnalysis *pta)
-    {
+    static inline bool classof(const PointerAnalysis *pta) {
         return pta->getAnalysisTy() == FSTBHC_WPA;
     }
 
-    virtual bool propAlongIndirectEdge(const IndirectSVFGEdge* edge) override;
-    virtual bool propAlongDirectEdge(const DirectSVFGEdge* edge) override;
+    bool propAlongIndirectEdge(const IndirectSVFGEdge *edge) override;
+    bool propAlongDirectEdge(const DirectSVFGEdge *edge) override;
 
-    virtual bool processAddr(const AddrSVFGNode* addr) override;
-    virtual bool processGep(const GepSVFGNode* gep) override;
-    virtual bool processLoad(const LoadSVFGNode* load) override;
-    virtual bool processStore(const StoreSVFGNode* store) override;
-    virtual bool processPhi(const PHISVFGNode* phi) override;
-    virtual bool processCopy(const CopySVFGNode* copy) override;
+    bool processAddr(const AddrSVFGNode *addr) override;
+    bool processGep(const GepSVFGNode *gep) override;
+    bool processLoad(const LoadSVFGNode *load) override;
+    bool processStore(const StoreSVFGNode *store) override;
+    bool processPhi(const PHISVFGNode *phi) override;
+    bool processCopy(const CopySVFGNode *copy) override;
 
-    virtual inline const NodeBS& getAllFieldsObjNode(NodeID id) override;
+    inline const NodeBS &getAllFieldsObjNode(NodeID id) override;
 
-    virtual inline bool updateInFromIn(const SVFGNode* srcStmt, NodeID srcVar, const SVFGNode* dstStmt, NodeID dstVar) override;
-    virtual inline bool updateInFromOut(const SVFGNode* srcStmt, NodeID srcVar, const SVFGNode* dstStmt, NodeID dstVar) override;
+    inline bool updateInFromIn(const SVFGNode *srcStmt, NodeID srcVar,
+                               const SVFGNode *dstStmt, NodeID dstVar) override;
+    inline bool updateInFromOut(const SVFGNode *srcStmt, NodeID srcVar,
+                                const SVFGNode *dstStmt,
+                                NodeID dstVar) override;
 
-    virtual inline bool unionPtsFromIn(const SVFGNode* stmt, NodeID srcVar, NodeID dstVar) override;
-    virtual inline bool unionPtsFromTop(const SVFGNode* stmt, NodeID srcVar, NodeID dstVar) override;
+    inline bool unionPtsFromIn(const SVFGNode *stmt, NodeID srcVar,
+                               NodeID dstVar) override;
+    inline bool unionPtsFromTop(const SVFGNode *stmt, NodeID srcVar,
+                                NodeID dstVar) override;
 
-    virtual inline bool propDFOutToIn(const SVFGNode* srcStmt, NodeID srcVar, const SVFGNode* dstStmt, NodeID dstVar) override;
-    virtual inline bool propDFInToIn(const SVFGNode* srcStmt, NodeID srcVar, const SVFGNode* dstStmt, NodeID dstVar) override;
+    inline bool propDFOutToIn(const SVFGNode *srcStmt, NodeID srcVar,
+                              const SVFGNode *dstStmt, NodeID dstVar) override;
+    inline bool propDFInToIn(const SVFGNode *srcStmt, NodeID srcVar,
+                             const SVFGNode *dstStmt, NodeID dstVar) override;
 
-    virtual void expandFIObjs(const PointsTo& pts, PointsTo& expandedPts) override;
+    void expandFIObjs(const PointsTo &pts, PointsTo &expandedPts) override;
 
     /// Extracts the value from SVFGNode (if it exists), and calls
     /// getTypeFromCTirMetadata(const Value *).
     /// If no ctir type exists, returns null (void).
     const DIType *getTypeFromCTirMetadata(const SVFGNode *);
 
-protected:
-    virtual void backPropagate(NodeID clone) override;
+  protected:
+    void backPropagate(NodeID clone) override;
 
-    virtual void countAliases(Set<std::pair<NodeID, NodeID>> cmp, unsigned *mayAliases, unsigned *noAliases) override;
+    void countAliases(Set<std::pair<NodeID, NodeID>> cmp, unsigned *mayAliases,
+                      unsigned *noAliases) override;
 
-private:
+  private:
     /// Determines whether each GEP is for a load or not. Builds gepIsLoad map.
-    /// This is a quick heuristic; if all destination nodes are loads, it's a load.
+    /// This is a quick heuristic; if all destination nodes are loads, it's a
+    /// load.
     void determineWhichGepsAreLoads(void);
 
-    /// Returns true if the given GEP is for loads, false otherwise. If the node ID
-    /// is not for a GEP SVFG node, returns false.
+    /// Returns true if the given GEP is for loads, false otherwise. If the node
+    /// ID is not for a GEP SVFG node, returns false.
     bool gepIsLoad(NodeID gep);
 
     /// Whether to allow for reuse at stores.
@@ -110,7 +111,8 @@ private:
     /// allReuse => storeReuse.
     bool allReuse;
 
-    /// Maps GEP objects to the SVFG nodes that retrieved them with getGepObjClones.
+    /// Maps GEP objects to the SVFG nodes that retrieved them with
+    /// getGepObjClones.
     Map<NodeID, NodeBS> gepToSVFGRetrievers;
     /// Maps whether a (SVFG) GEP node is a load or not.
     NodeBS loadGeps;

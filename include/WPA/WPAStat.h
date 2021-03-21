@@ -20,7 +20,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 /*
  * FlowSensitiveStat.h
  *
@@ -35,8 +34,7 @@
 #include "WPA/FlowSensitive.h"
 #include "WPA/VersionedFlowSensitive.h"
 
-namespace SVF
-{
+namespace SVF {
 
 class AndersenBase;
 class PAG;
@@ -46,14 +44,13 @@ class PAGNode;
 /*!
  * Statistics of Andersen's analysis
  */
-class AndersenStat : public PTAStat
-{
+class AndersenStat : public PTAStat {
 
-private:
-    AndersenBase* pta;
+  private:
+    AndersenBase *pta;
 
-public:
-    static const char* CollapseTime;
+  public:
+    static const char *CollapseTime;
 
     static u32_t _MaxPtsSize;
     static u32_t _NumOfCycles;
@@ -64,16 +61,13 @@ public:
     u32_t _NumOfConstantPtr;
     u32_t _NumOfBlackholePtr;
 
-    AndersenStat(AndersenBase* p);
+    AndersenStat(AndersenBase *p);
 
-    virtual ~AndersenStat()
-    {
-
-    }
+    virtual ~AndersenStat() {}
 
     virtual void performStat();
 
-    void collectCycleInfo(ConstraintGraph* consCG);
+    void collectCycleInfo(ConstraintGraph *consCG);
 
     void statNullPtr();
 
@@ -83,16 +77,14 @@ public:
 /*!
  * Statistics of flow-sensitive analysis
  */
-class FlowSensitiveStat : public PTAStat
-{
-public:
-    typedef FlowSensitive::DFInOutMap DFInOutMap;
-    typedef FlowSensitive::PtsMap PtsMap;
+class FlowSensitiveStat : public PTAStat {
+  public:
+    using DFInOutMap = FlowSensitive::DFInOutMap;
+    using PtsMap = FlowSensitive::PtsMap;
 
-    FlowSensitive * fspta;
+    FlowSensitive *fspta;
 
-    FlowSensitiveStat(FlowSensitive* pta): PTAStat(pta)
-    {
+    FlowSensitiveStat(FlowSensitive *pta) : PTAStat(pta) {
         fspta = pta;
         clearStat();
         startClk();
@@ -100,14 +92,10 @@ public:
 
     virtual ~FlowSensitiveStat() {}
 
-    virtual void performStat();
+    void performStat() override;
 
-private:
-    enum ENUM_INOUT
-    {
-        IN,
-        OUT
-    };
+  private:
+    enum ENUM_INOUT { IN, OUT };
 
     void clearStat();
 
@@ -117,9 +105,9 @@ private:
 
     void statAddrVarPtsSize();
 
-    void calculateAddrVarPts(NodeID pointer, const SVFGNode* node);
+    void calculateAddrVarPts(NodeID pointer, const SVFGNode *node);
 
-    void statInOutPtsSize(const DFInOutMap& data, ENUM_INOUT inOrOut);
+    void statInOutPtsSize(const DFInOutMap &data, ENUM_INOUT inOrOut);
 
     u32_t _NumOfNullPtr;
     u32_t _NumOfConstantPtr;
@@ -148,45 +136,48 @@ private:
     u32_t _PotentialNumOfVarHaveINOUTPts[2];
 
     /// sizes of points-to set
-    u32_t _MaxPtsSize;	///< max points-to set size.
-    u32_t _MaxTopLvlPtsSize;	///< max points-to set size in top-level pointers.
-    u32_t _MaxInOutPtsSize[2];	///< max points-to set size in IN/OUT set.
+    u32_t _MaxPtsSize;       ///< max points-to set size.
+    u32_t _MaxTopLvlPtsSize; ///< max points-to set size in top-level pointers.
+    u32_t _MaxInOutPtsSize[2]; ///< max points-to set size in IN/OUT set.
 
-    u32_t _TotalPtsSize;	///< total points-to set size.
+    u32_t _TotalPtsSize; ///< total points-to set size.
 
-    double _AvgPtsSize;	///< average points-to set size.
-    double _AvgTopLvlPtsSize;	///< average points-to set size in top-level pointers.
-    double _AvgInOutPtsSize[2];	///< average points-to set size in IN set.
-    double _AvgAddrTakenVarPtsSize;	///< average points-to set size of addr-taken variables.
+    double _AvgPtsSize;             ///< average points-to set size.
+    double _AvgTopLvlPtsSize;       ///< average points-to set size in top-level
+                                    ///< pointers.
+    double _AvgInOutPtsSize[2];     ///< average points-to set size in IN set.
+    double _AvgAddrTakenVarPtsSize; ///< average points-to set size of
+                                    ///< addr-taken variables.
 
-    u32_t _MaxAddrTakenVarPts;	///< max points-to set size of addr-taken variables.
-    u32_t _NumOfAddrTakeVar;	///< number of occurrences of addr-taken variables in load/store.
+    u32_t _MaxAddrTakenVarPts; ///< max points-to set size of addr-taken
+                               ///< variables.
+    u32_t _NumOfAddrTakeVar; ///< number of occurrences of addr-taken variables
+                             ///< in load/store.
 };
 
-class VersionedFlowSensitiveStat : public PTAStat
-{
-public:
+class VersionedFlowSensitiveStat : public PTAStat {
+  public:
     VersionedFlowSensitive *vfspta;
 
-    VersionedFlowSensitiveStat(VersionedFlowSensitive* pta): PTAStat(pta)
-    {
+        VersionedFlowSensitiveStat(VersionedFlowSensitive *pta)
+            : PTAStat(pta) {
         vfspta = pta;
         clearStat();
         startClk();
     }
 
-    virtual ~VersionedFlowSensitiveStat() { }
+    virtual ~VersionedFlowSensitiveStat() {}
 
-    virtual void performStat();
+    void performStat() override;
 
-private:
+  private:
     void clearStat();
 
     /// For all version-related statistics.
-    void versionStat(void);
+    void versionStat();
 
     /// For all PTS size related statistics not handled by versionStat.
-    void ptsSizeStat(void);
+    void ptsSizeStat();
 
     /// Total number of versions across all objects.
     u32_t _NumVersions;
@@ -194,9 +185,11 @@ private:
     u32_t _MaxVersions;
     /// Number of version PTSs actually used (sum of next two fields).
     u32_t _NumUsedVersions;
-    /// Number of versions with non-empty points-to sets (since versioning is over-approximate).
+    /// Number of versions with non-empty points-to sets (since versioning is
+    /// over-approximate).
     u32_t _NumNonEmptyVersions;
-    /// Number of versions with empty points-to sets (actually empty, not never-accessed).
+    /// Number of versions with empty points-to sets (actually empty, not
+    /// never-accessed).
     u32_t _NumEmptyVersions;
     /// Number of objects which have a single version.
     u32_t _NumSingleVersion;

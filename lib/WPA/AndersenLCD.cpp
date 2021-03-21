@@ -32,13 +32,10 @@
 using namespace SVF;
 using namespace SVFUtil;
 
-AndersenLCD* AndersenLCD::lcdAndersen = nullptr;
+AndersenLCD *AndersenLCD::lcdAndersen = nullptr;
 
-
-void AndersenLCD::solveWorklist()
-{
-    while (!isWorklistEmpty())
-    {
+void AndersenLCD::solveWorklist() {
+    while (!isWorklistEmpty()) {
         // Merge detected SCC cycles
         mergeSCC();
 
@@ -53,31 +50,29 @@ void AndersenLCD::solveWorklist()
 /*!
  * Process copy and gep edges
  */
-void AndersenLCD::handleCopyGep(ConstraintNode* node)
-{
+void AndersenLCD::handleCopyGep(ConstraintNode *node) {
     double propStart = stat->getClk();
 
     NodeID nodeId = node->getId();
     computeDiffPts(nodeId);
 
-    for (ConstraintEdge* edge : node->getCopyOutEdges())
-    {
+    for (ConstraintEdge *edge : node->getCopyOutEdges()) {
         NodeID dstNodeId = edge->getDstID();
-        const PointsTo& srcPts = getPts(nodeId);
-        const PointsTo& dstPts = getPts(dstNodeId);
-        // In one edge, if the pts of src node equals to that of dst node, and the edge
-        // is never met, push it into 'metEdges' and push the dst node into 'lcdCandidates'
-        if (!srcPts.empty() && srcPts == dstPts && !isMetEdge(edge))
-        {
+        const PointsTo &srcPts = getPts(nodeId);
+        const PointsTo &dstPts = getPts(dstNodeId);
+        // In one edge, if the pts of src node equals to that of dst node, and
+        // the edge is never met, push it into 'metEdges' and push the dst node
+        // into 'lcdCandidates'
+        if (!srcPts.empty() && srcPts == dstPts && !isMetEdge(edge)) {
             addMetEdge(edge);
             addLCDCandidate((edge)->getDstID());
         }
         processCopy(nodeId, edge);
     }
-    for (ConstraintEdge* edge : node->getGepOutEdges())
-    {
-        if (GepCGEdge* gepEdge = SVFUtil::dyn_cast<GepCGEdge>(edge))
+    for (ConstraintEdge *edge : node->getGepOutEdges()) {
+        if (GepCGEdge *gepEdge = SVFUtil::dyn_cast<GepCGEdge>(edge)) {
             processGep(nodeId, gepEdge);
+        }
     }
 
     double propEnd = stat->getClk();
@@ -87,10 +82,8 @@ void AndersenLCD::handleCopyGep(ConstraintNode* node)
 /*!
  * Collapse nodes and fields based on 'lcdCandidates'
  */
-void AndersenLCD::mergeSCC()
-{
-    if (hasLCDCandidate())
-    {
+void AndersenLCD::mergeSCC() {
+    if (hasLCDCandidate()) {
         SCCDetect();
         cleanLCDCandidate();
     }
@@ -99,15 +92,16 @@ void AndersenLCD::mergeSCC()
 /*!
  * AndersenLCD specified SCC detector, need to input a nodeStack 'lcdCandidate'
  */
-NodeStack& AndersenLCD::SCCDetect()
-{
+NodeStack &AndersenLCD::SCCDetect() {
     numOfSCCDetection++;
 
     NodeSet sccCandidates;
     sccCandidates.clear();
-    for (NodeSet::iterator it = lcdCandidates.begin(); it != lcdCandidates.end(); ++it)
-        if (sccRepNode(*it) == *it)
-            sccCandidates.insert(*it);
+    for (const auto &lcdCandidate : lcdCandidates) {
+        if (sccRepNode(lcdCandidate) == lcdCandidate) {
+            sccCandidates.insert(lcdCandidate);
+        }
+    }
 
     double sccStart = stat->getClk();
     /// Detect SCC cycles
@@ -127,23 +121,24 @@ NodeStack& AndersenLCD::SCCDetect()
 /*!
  * merge nodeId to newRepId. Return true if the newRepId is a PWC node
  */
-bool AndersenLCD::mergeSrcToTgt(NodeID nodeId, NodeID newRepId)
-{
+bool AndersenLCD::mergeSrcToTgt(NodeID nodeId, NodeID newRepId) {
 
-    if(nodeId==newRepId)
+    if (nodeId == newRepId) {
         return false;
+    }
 
     /// union pts of node to rep
     updatePropaPts(newRepId, nodeId);
-    unionPts(newRepId,nodeId);
+    unionPts(newRepId, nodeId);
     pushIntoWorklist(newRepId);
 
     /// move the edges from node to rep, and remove the node
-    ConstraintNode* node = consCG->getConstraintNode(nodeId);
-    bool gepInsideScc = consCG->moveEdgesToRepNode(node, consCG->getConstraintNode(newRepId));
+    ConstraintNode *node = consCG->getConstraintNode(nodeId);
+    bool gepInsideScc =
+        consCG->moveEdgesToRepNode(node, consCG->getConstraintNode(newRepId));
 
     /// set rep and sub relations
-    updateNodeRepAndSubs(node->getId(),newRepId);
+    updateNodeRepAndSubs(node->getId(), newRepId);
 
     consCG->removeConstraintNode(node);
 
