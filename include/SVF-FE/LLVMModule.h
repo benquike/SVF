@@ -67,6 +67,7 @@ class LLVMModuleSet {
     /// Constructor
     LLVMModuleSet(SVFModule *svfMod) : svfModule(svfMod), cxts(nullptr) {}
 
+    //// FIXME: update this interface
     SVFModule *buildSVFModule(Module &mod);
     SVFModule *buildSVFModule(const std::vector<std::string> &moduleNameVec);
     SVFModule *buildSVFModule(const std::string &moduleName);

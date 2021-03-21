@@ -271,7 +271,7 @@ const std::string TDJoinPE::toString() const {
 }
 
 PAG::PAG(SVFProject *proj, bool buildFromFile)
-    : fromFile(buildFromFile), nodeNumAfterPAGBuild(0), icfg(proj->getICFG()),
+    : fromFile(buildFromFile), nodeNumAfterPAGBuild(0), icfg(nullptr),
       symbolTableInfo(proj->getSymbolTableInfo()), proj(proj),
       totalPTAPAGEdge(0) {
     if (icfg == nullptr) {
@@ -279,7 +279,10 @@ PAG::PAG(SVFProject *proj, bool buildFromFile)
     }
 
     // build the PAG
-    PAGBuilder _builder(proj);
+    // here we should pass this pointer to the builder,
+    // otherwise indirect infinite recursive call will
+    // be triggered
+    PAGBuilder _builder(this, proj);
     _builder.build();
 }
 
@@ -772,7 +775,8 @@ void PAG::destroy() {
         }
     }
 
-    delete icfg;
+    // delete icfg;
+    // icfg = nullptr;
 }
 
 /*!

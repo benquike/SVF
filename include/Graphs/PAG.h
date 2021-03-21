@@ -143,7 +143,13 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     u32_t totalPTAPAGEdge;
 
     /// Return ICFG
-    inline ICFG *getICFG() { return icfg; }
+    inline ICFG *getICFG() {
+        if (icfg == nullptr) {
+            icfg = proj->getICFG();
+        }
+
+        return icfg;
+    }
 
     /// Return valid pointers
     inline OrderedNodeSet &getAllValidPtrs() { return candidatePointers; }
