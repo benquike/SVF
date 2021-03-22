@@ -23,6 +23,11 @@ jobs:
       with:
         submodules: 'true'
 
+    - name: Install and Setup clang/llvm
+      working-directory: ${{github.workspace}}
+      shell: bash
+      run: ./scripts/setup_github_ci_container.sh
+
     - name: Update Test-Suite CMakeLists.txt and Build Test-Suite
       working-directory: ${{github.workspace}}/Test-Suite
       shell: bash
