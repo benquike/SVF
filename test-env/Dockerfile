@@ -16,11 +16,10 @@ RUN apt-get update && apt-get install -y software-properties-common apt-utils \
     make wget vim clang-10 \
     clang-tidy-10 llvm-10-dev clang-format-10 clang-tools-10 \
     cmake libz3-dev git curl unzip \
-    apt-transport-https ca-certificates gnupg
+    apt-transport-https ca-certificates gnupg \
+    python3-pip
 
-# add CMake
-# RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-# RUN apt-add-repository 'deb https://apt.kitware.com/ubuntu/ focal main' &&  apt-get update
+RUN pip3 install cmakelang
 
 RUN rm -rf /var/lib/apt/lists/*
 
