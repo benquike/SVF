@@ -23,6 +23,20 @@ cmake_minimum_required(VERSION 3.4.3)
 
 project("SVF")
 
+## add CPM
+## https://github.com/cpm-cmake/CPM.cmake
+include(cmake/CPM.cmake)
+
+CPMAddPackage(
+    NAME Format.cmake
+    VERSION 1.7.0
+    GITHUB_REPOSITORY TheLartians/Format.cmake
+    OPTIONS # set to yes skip cmake formatting
+    "FORMAT_SKIP_CMAKE NO"
+    # path to exclude (optional, supports regular expressions)
+    "CMAKE_FORMAT_EXCLUDE cmake/CPM.cmake"
+)
+
 # LLVM_VER
 if(DEFINED ENV{LLVM_VERSION})
     set(LLVM_VERSION $ENV{LLVM_VERSION})
