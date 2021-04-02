@@ -32,37 +32,30 @@
 
 #include "SABER/LeakChecker.h"
 
-namespace SVF
-{
+namespace SVF {
 
 /*!
  * Double free checker to check deallocations of memory
  */
 
-class DoubleFreeChecker : public LeakChecker
-{
+class DoubleFreeChecker : public LeakChecker {
 
-public:
+  public:
     /// Constructor
-    DoubleFreeChecker(): LeakChecker()
-    {
-    }
+    DoubleFreeChecker(SVFProject *proj) : LeakChecker(proj) {}
 
     /// Destructor
-    virtual ~DoubleFreeChecker()
-    {
-    }
+    virtual ~DoubleFreeChecker() {}
 
     /// We start from here
-    virtual bool runOnModule(SVFModule* module)
-    {
+    bool runOnModule(SVFModule *module) override {
         /// start analysis
-        analyze(module);
+        analyze();
         return false;
     }
 
     /// Report file/close bugs
-    void reportBug(ProgSlice* slice);
+    void reportBug(ProgSlice *slice) override;
 };
 
 } // End namespace SVF

@@ -30,102 +30,84 @@
 #ifndef LEAKCHECKER_H_
 #define LEAKCHECKER_H_
 
-#include "SABER/SrcSnkDDA.h"
 #include "SABER/SaberCheckerAPI.h"
+#include "SABER/SrcSnkDDA.h"
 
-namespace SVF
-{
+namespace SVF {
 
 /*!
  * Static Memory Leak Detector
  */
-class LeakChecker : public SrcSnkDDA
-{
+class LeakChecker : public SrcSnkDDA {
 
-public:
-    typedef Map<const SVFGNode*,const CallBlockNode*> SVFGNodeToCSIDMap;
-    typedef FIFOWorkList<const CallBlockNode*> CSWorkList;
-    typedef ProgSlice::VFWorkList WorkList;
-    typedef NodeBS SVFGNodeBS;
-    enum LEAK_TYPE
-    {
-        NEVER_FREE_LEAK,
-        CONTEXT_LEAK,
-        PATH_LEAK,
-        GLOBAL_LEAK
-    };
+  public:
+    using SVFGNodeToCSIDMap = Map<const SVFGNode *, const CallBlockNode *>;
+    using CSWorkList = FIFOWorkList<const CallBlockNode *>;
+    using WorkList = ProgSlice::VFWorkList;
+    using SVFGNodeBS = NodeBS;
+    enum LEAK_TYPE { NEVER_FREE_LEAK, CONTEXT_LEAK, PATH_LEAK, GLOBAL_LEAK };
 
     /// Constructor
-    LeakChecker()
-    {
-    }
+    LeakChecker(SVFProject *proj) : SrcSnkDDA(proj) {}
     /// Destructor
-    virtual ~LeakChecker()
-    {
-    }
+    virtual ~LeakChecker() {}
 
     /// We start from here
-    virtual bool runOnModule(SVFModule* module)
-    {
+    virtual bool runOnModule(SVFModule *module) {
         /// start analysis
-        analyze(module);
+        analyze();
         return false;
     }
 
     /// Initialize sources and sinks
     //@{
     /// Initialize sources and sinks
-    virtual void initSrcs();
-    virtual void initSnks();
+    void initSrcs() override;
+    void initSnks() override;
     /// Whether the function is a heap allocator/reallocator (allocate memory)
-    virtual inline bool isSourceLikeFun(const SVFFunction* fun)
-    {
-        return SaberCheckerAPI::getCheckerAPI()->isMemAlloc(fun);
+    inline bool isSourceLikeFun(const SVFFunction *fun) override {
+        return svfgBuilder.isMemAlloc(fun);
     }
     /// Whether the function is a heap deallocator (free/release memory)
-    virtual inline bool isSinkLikeFun(const SVFFunction* fun)
-    {
-        return SaberCheckerAPI::getCheckerAPI()->isMemDealloc(fun);
+    inline bool isSinkLikeFun(const SVFFunction *fun) override {
+        return svfgBuilder.isMemDealloc(fun);
     }
     /// A SVFG node is source if it is an actualRet at malloc site
-    inline bool isSource(const SVFGNode* node)
-    {
-        return getSources().find(node)!=getSources().end();
+    inline bool isSource(const SVFGNode *node) override {
+        return getSources().find(node) != getSources().end();
     }
     /// A SVFG node is source if it is an actual parameter at dealloca site
-    inline bool isSink(const SVFGNode* node)
-    {
-        return getSinks().find(node)!=getSinks().end();
+    inline bool isSink(const SVFGNode *node) override {
+        return getSinks().find(node) != getSinks().end();
     }
     //@}
 
-protected:
+  protected:
     /// Report leaks
     //@{
-    virtual void reportBug(ProgSlice* slice);
-    void reportNeverFree(const SVFGNode* src);
-    void reportPartialLeak(const SVFGNode* src);
+    void reportBug(ProgSlice *slice) override;
+    void reportNeverFree(const SVFGNode *src);
+    void reportPartialLeak(const SVFGNode *src);
     //@}
 
     /// Validate test cases for regression test purpose
-    void testsValidation(const ProgSlice* slice);
-    void validateSuccessTests(const SVFGNode* source, const SVFFunction* fun);
-    void validateExpectedFailureTests(const SVFGNode* source, const SVFFunction* fun);
+    void testsValidation(const ProgSlice *slice);
+    void validateSuccessTests(const SVFGNode *source, const SVFFunction *fun);
+    void validateExpectedFailureTests(const SVFGNode *source,
+                                      const SVFFunction *fun);
 
     /// Record a source to its callsite
     //@{
-    inline void addSrcToCSID(const SVFGNode* src, const CallBlockNode* cs)
-    {
+    inline void addSrcToCSID(const SVFGNode *src, const CallBlockNode *cs) {
         srcToCSIDMap[src] = cs;
     }
-    inline const CallBlockNode* getSrcCSID(const SVFGNode* src)
-    {
-        SVFGNodeToCSIDMap::iterator it =srcToCSIDMap.find(src);
-        assert(it!=srcToCSIDMap.end() && "source node not at a callsite??");
+    inline const CallBlockNode *getSrcCSID(const SVFGNode *src) {
+        auto it = srcToCSIDMap.find(src);
+        assert(it != srcToCSIDMap.end() && "source node not at a callsite??");
         return it->second;
     }
     //@}
-private:
+  private:
     SVFGNodeToCSIDMap srcToCSIDMap;
 };
 

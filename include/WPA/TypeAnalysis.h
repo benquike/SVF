@@ -32,52 +32,42 @@
 
 #include "WPA/Andersen.h"
 
-namespace SVF
-{
+namespace SVF {
 
-class TypeAnalysis:  public AndersenBase
-{
+class TypeAnalysis : public AndersenBase {
 
-public:
+  public:
     /// Constructor
-    TypeAnalysis(PAG* pag)
-        :  AndersenBase(pag, TypeCPP_WPA)
-    {
-    }
+    TypeAnalysis(SVFProject *proj) : AndersenBase(proj, TypeCPP_WPA) {}
 
     /// Destructor
-    virtual ~TypeAnalysis()
-    {
-    }
+    virtual ~TypeAnalysis() {}
 
     /// Type analysis
-    void analyze();
+    void analyze() override;
 
     /// Initialize analysis
-    void initialize();
+    void initialize() override;
 
     /// Finalize analysis
-    virtual inline void finalize();
+    inline void finalize() override;
 
     /// Resolve callgraph based on CHA
-    void callGraphSolveBasedOnCHA(const CallSiteToFunPtrMap& callsites, CallEdgeMap& newEdges);
+    void callGraphSolveBasedOnCHA(const CallSiteToFunPtrMap &callsites,
+                                  CallEdgeMap &newEdges);
 
     /// Statistics of CHA and callgraph
     void dumpCHAStats();
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const TypeAnalysis *)
-    {
-        return true;
-    }
-    static inline bool classof(const PointerAnalysis *pta)
-    {
+    static inline bool classof(const TypeAnalysis *) { return true; }
+    static inline bool classof(const PointerAnalysis *pta) {
         return (pta->getAnalysisTy() == TypeCPP_WPA);
     }
     //@}
 
-private:
+  private:
     Set<CallSite> virtualCallSites;
 };
 

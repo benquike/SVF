@@ -35,39 +35,33 @@ using namespace SVF;
 /*!
  *
  */
-void SaberAnnotator::annotateSource()
-{
+void SaberAnnotator::annotateSource() {
     std::string str;
     raw_string_ostream rawstr(str);
-    rawstr << SB_SLICESOURCE ; //<< _curSlice->getSource()->getId();
-    if(const Instruction* sourceinst = SVFUtil::dyn_cast<Instruction>(_curSlice->getLLVMValue(_curSlice->getSource())))
-    {
-        addMDTag(const_cast<Instruction*>(sourceinst),rawstr.str());
-    }
-    else
+    rawstr << SB_SLICESOURCE; //<< _curSlice->getSource()->getId();
+    if (const auto *sourceinst = SVFUtil::dyn_cast<Instruction>(
+            _curSlice->getLLVMValue(_curSlice->getSource()))) {
+        addMDTag(const_cast<Instruction *>(sourceinst), rawstr.str());
+    } else
         assert(false && "instruction of source node not found");
-
 }
 
 /*!
  *
  */
-void SaberAnnotator::annotateSinks()
-{
-    for(ProgSlice::SVFGNodeSet::const_iterator it = _curSlice->getSinks().begin(),
-            eit = _curSlice->getSinks().end(); it!=eit; ++it)
-    {
-        if(const ActualParmSVFGNode* ap = SVFUtil::dyn_cast<ActualParmSVFGNode>(*it))
-        {
-            const Instruction* sinkinst = ap->getCallSite()->getCallSite();
-            assert(SVFUtil::isa<CallInst>(sinkinst) && "not a call instruction?");
-            const CallInst* sink = SVFUtil::cast<CallInst>(sinkinst);
+void SaberAnnotator::annotateSinks() {
+    for (const auto *it : _curSlice->getSinks()) {
+        if (const auto *ap = SVFUtil::dyn_cast<ActualParmSVFGNode>(it)) {
+            const Instruction *sinkinst = ap->getCallSite()->getCallSite();
+            assert(SVFUtil::isa<CallInst>(sinkinst) &&
+                   "not a call instruction?");
+            const auto *sink = SVFUtil::cast<CallInst>(sinkinst);
             std::string str;
             raw_string_ostream rawstr(str);
             rawstr << SB_SLICESINK << _curSlice->getSource()->getId();
-            addMDTag(const_cast<CallInst*>(sink),sink->getArgOperand(0),rawstr.str());
-        }
-        else
+            addMDTag(const_cast<CallInst *>(sink), sink->getArgOperand(0),
+                     rawstr.str());
+        } else
             assert(false && "sink node is not a actual parameter?");
     }
 }
@@ -75,42 +69,39 @@ void SaberAnnotator::annotateSinks()
 /*!
  * Annotate branch instruction and its corresponding feasible path
  */
-void SaberAnnotator::annotateFeasibleBranch(const BranchInst *brInst, u32_t succPos)
-{
+void SaberAnnotator::annotateFeasibleBranch(const BranchInst *brInst,
+                                            u32_t succPos) {
 
-    assert((succPos == 0 || succPos == 1) && "branch instruction should only have two successors");
+    assert((succPos == 0 || succPos == 1) &&
+           "branch instruction should only have two successors");
 
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << SB_FESIBLE << _curSlice->getSource()->getId();
-    BranchInst* br = const_cast<BranchInst*>(brInst);
-    addMDTag(br,br->getCondition(),rawstr.str());
+    auto *br = const_cast<BranchInst *>(brInst);
+    addMDTag(br, br->getCondition(), rawstr.str());
 }
 
 /*!
  * Annotate branch instruction and its corresponding infeasible path
  */
-void SaberAnnotator::annotateInfeasibleBranch(const BranchInst *brInst, u32_t succPos)
-{
+void SaberAnnotator::annotateInfeasibleBranch(const BranchInst *brInst,
+                                              u32_t succPos) {
 
-    assert((succPos == 0 || succPos == 1) && "branch instruction should only have two successors");
+    assert((succPos == 0 || succPos == 1) &&
+           "branch instruction should only have two successors");
 
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << SB_INFESIBLE << _curSlice->getSource()->getId();
-    BranchInst* br = const_cast<BranchInst*>(brInst);
-    addMDTag(br,br->getCondition(),rawstr.str());
+    auto *br = const_cast<BranchInst *>(brInst);
+    addMDTag(br, br->getCondition(), rawstr.str());
 }
-
 
 /*!
  * Annotate switch instruction and its corresponding feasible path
  */
-void SaberAnnotator::annotateSwitch(SwitchInst *switchInst, u32_t succPos)
-{
-    assert(succPos < switchInst->getNumSuccessors() && "successor position not correct!");
+void SaberAnnotator::annotateSwitch(SwitchInst *switchInst, u32_t succPos) {
+    assert(succPos < switchInst->getNumSuccessors() &&
+           "successor position not correct!");
 }
-
-
-
-

@@ -32,7 +32,6 @@
  *
  */
 
-
 #ifndef WORKLIST_H_
 #define WORKLIST_H_
 
@@ -40,26 +39,21 @@
 
 #include <assert.h>
 #include <cstdlib>
-#include <vector>
 #include <deque>
 #include <set>
+#include <vector>
 
-namespace SVF
-{
+namespace SVF {
 
 /**
  * Worklist with "first come first go" order.
  * New nodes pushed at back and popped from front.
  * Elements in the list are unique as they're recorded by Set.
  */
-template<class Data>
-class List
-{
-    class ListNode
-    {
-    public:
-        ListNode(Data d)
-        {
+template <class Data> class List {
+    class ListNode {
+      public:
+        ListNode(Data d) {
             data = d;
             next = nullptr;
         }
@@ -67,54 +61,49 @@ class List
         ~ListNode() {}
 
         Data data;
-        ListNode* next;
+        ListNode *next;
     };
 
-    typedef Set<Data> DataSet;
-    typedef ListNode Node;
+    using DataSet = Set<Data>;
+    using Node = ListNode;
 
-public:
-    List()
-    {
+  public:
+    List() {
         head = nullptr;
         tail = nullptr;
     }
 
     ~List() {}
 
-    inline bool empty() const
-    {
-        return (head == nullptr);
-    }
+    inline bool empty() const { return (head == nullptr); }
 
-    inline bool find(Data data) const
-    {
+    inline bool find(Data data) const {
         return (nodeSet.find(data) == nodeSet.end() ? false : true);
     }
 
-    void push(Data data)
-    {
-        if (nodeSet.find(data) == nodeSet.end())
-        {
-            Node* new_node = new Node(data);
-            if (head == nullptr)
-                head = new_node;// the list is empty
-            else
+    void push(Data data) {
+        if (nodeSet.find(data) == nodeSet.end()) {
+            Node *new_node = new Node(data);
+            if (head == nullptr) {
+                head = new_node; // the list is empty
+            } else {
                 tail->next = new_node;
+            }
+
             tail = new_node;
         }
     }
 
-    Data pop()
-    {
+    Data pop() {
         assert(head != nullptr && "list is empty");
         /// get node from list head
-        Node* head_node = head;
+        Node *head_node = head;
 
         /// change list head to the next node
         head = head->next;
-        if (head == nullptr)
-            tail = nullptr;	/// the last node is popped.
+        if (head == nullptr) {
+            tail = nullptr; /// the last node is popped.
+        }
 
         Data data = head_node->data;
         nodeSet.erase(data);
@@ -122,10 +111,10 @@ public:
         return data;
     }
 
-private:
+  private:
     DataSet nodeSet;
-    Node* head;
-    Node* tail;
+    Node *head;
+    Node *tail;
 };
 
 /**
@@ -133,46 +122,38 @@ private:
  * New nodes will be pushed at back and popped from front.
  * Elements in the list are unique as they're recorded by Set.
  */
-template<class Data>
-class FIFOWorkList
-{
-    typedef Set<Data> DataSet;
-    typedef std::deque<Data> DataDeque;
-public:
+template <class Data> class FIFOWorkList {
+    using DataSet = Set<Data>;
+    using DataDeque = std::deque<Data>;
+
+  public:
     FIFOWorkList() {}
 
     ~FIFOWorkList() {}
 
-    inline bool empty() const
-    {
-        return data_list.empty();
-    }
+    inline bool empty() const { return data_list.empty(); }
 
-    inline bool find(Data data) const
-    {
+    inline bool find(Data data) const {
         return (data_set.find(data) == data_set.end() ? false : true);
     }
 
     /**
      * Push a data into the work list.
      */
-    inline bool push(Data data)
-    {
-        if (data_set.find(data) == data_set.end())
-        {
+    inline bool push(Data data) {
+        if (data_set.find(data) == data_set.end()) {
             data_list.push_back(data);
             data_set.insert(data);
             return true;
         }
-        else
-            return false;
+
+        return false;
     }
 
     /**
      * Pop a data from the END of work list.
      */
-    inline Data pop()
-    {
+    inline Data pop() {
         assert(!empty() && "work list is empty");
         Data data = data_list.front();
         data_list.pop_front();
@@ -183,15 +164,14 @@ public:
     /*!
      * Clear all the data
      */
-    inline void clear()
-    {
+    inline void clear() {
         data_list.clear();
         data_set.clear();
     }
 
-private:
-    DataSet data_set;	///< store all data in the work list.
-    DataDeque data_list;	///< work list using std::vector.
+  private:
+    DataSet data_set;    ///< store all data in the work list.
+    DataDeque data_list; ///< work list using std::vector.
 };
 
 /**
@@ -199,46 +179,38 @@ private:
  * New nodes will be pushed at back and popped from back.
  * Elements in the list are unique as they're recorded by Set.
  */
-template<class Data>
-class FILOWorkList
-{
-    typedef Set<Data> DataSet;
-    typedef std::vector<Data> DataVector;
-public:
+template <class Data> class FILOWorkList {
+    using DataSet = Set<Data>;
+    using DataVector = std::vector<Data>;
+
+  public:
     FILOWorkList() {}
 
     ~FILOWorkList() {}
 
-    inline bool empty() const
-    {
-        return data_list.empty();
-    }
+    inline bool empty() const { return data_list.empty(); }
 
-    inline bool find(Data data) const
-    {
+    inline bool find(Data data) const {
         return (data_set.find(data) == data_set.end() ? false : true);
     }
 
     /**
      * Push a data into the work list.
      */
-    inline bool push(Data data)
-    {
-        if (data_set.find(data) == data_set.end())
-        {
+    inline bool push(Data data) {
+        if (data_set.find(data) == data_set.end()) {
             data_list.push_back(data);
             data_set.insert(data);
             return true;
         }
-        else
-            return false;
+
+        return false;
     }
 
     /**
      * Pop a data from the END of work list.
      */
-    inline Data pop()
-    {
+    inline Data pop() {
         assert(!empty() && "work list is empty");
         Data data = data_list.back();
         data_list.pop_back();
@@ -249,15 +221,14 @@ public:
     /*!
      * Clear all the data
      */
-    inline void clear()
-    {
+    inline void clear() {
         data_list.clear();
         data_set.clear();
     }
 
-private:
-    DataSet data_set;	///< store all data in the work list.
-    DataVector data_list;	///< work list using std::vector.
+  private:
+    DataSet data_set;     ///< store all data in the work list.
+    DataVector data_list; ///< work list using std::vector.
 };
 
 } // End namespace SVF

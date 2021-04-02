@@ -30,32 +30,25 @@
 #ifndef SABERANNOTATOR_H_
 #define SABERANNOTATOR_H_
 
-#include "Util/BasicTypes.h"
 #include "Util/Annotator.h"
+#include "Util/BasicTypes.h"
 
-namespace SVF
-{
+namespace SVF {
 
 class ProgSlice;
 /*!
  * Saber annotation
  */
-class SaberAnnotator : public Annotator
-{
+class SaberAnnotator : public Annotator {
 
-private:
-    const ProgSlice* _curSlice;
-public:
+  private:
+    const ProgSlice *_curSlice;
+
+  public:
     /// Constructor
-    SaberAnnotator(ProgSlice* slice): _curSlice(slice)
-    {
-
-    }
+    SaberAnnotator(ProgSlice *slice) : _curSlice(slice) {}
     /// Destructor
-    virtual ~SaberAnnotator()
-    {
-
-    }
+    virtual ~SaberAnnotator() {}
     /// Annotation
     //@{
     void annotateSource();

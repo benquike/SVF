@@ -1,4 +1,5 @@
-//===- AndersenHCD.cpp -- HCD based Field-sensitive Andersen's analysis-------------------//
+//===- AndersenHCD.cpp -- HCD based Field-sensitive Andersen's
+// analysis-------------------//
 //
 //                     SVF: Static Value-Flow Analysis
 //
@@ -34,19 +35,17 @@ using namespace SVFUtil;
 
 AndersenHCD *AndersenHCD::hcdAndersen = nullptr;
 
-
 // --- Methods of AndersenHCD ---
 
 /*!
  * AndersenHCD initilizer,
  * including initilization of PAG, constraint graph and offline constraint graph
  */
-void AndersenHCD::initialize()
-{
+void AndersenHCD::initialize() {
     Andersen::initialize();
     // Build offline constraint graph and solve its constraints
     oCG = new OfflineConsG(pag);
-    OSCC* oscc = new OSCC(oCG);
+    OSCC *oscc = new OSCC(oCG);
     oscc->find();
     oCG->solveOfflineSCC(oscc);
     delete oscc;
@@ -55,14 +54,12 @@ void AndersenHCD::initialize()
 /*!
  * AndersenHCD worklist solver
  */
-void AndersenHCD::solveWorklist()
-{
-    while (!isWorklistEmpty())
-    {
+void AndersenHCD::solveWorklist() {
+    while (!isWorklistEmpty()) {
         NodeID nodeId = popFromWorklist();
         collapsePWCNode(nodeId);
 
-        //Merge detected offline SCC cycles
+        // Merge detected offline SCC cycles
         mergeSCC(nodeId);
 
         // Keep solving until workList is empty.
@@ -74,24 +71,21 @@ void AndersenHCD::solveWorklist()
 /*!
  * Collapse a node to its ref, if the ref exists
  */
-void AndersenHCD::mergeSCC(NodeID nodeId)
-{
-    if (hasOfflineRep(nodeId))
-    {
+void AndersenHCD::mergeSCC(NodeID nodeId) {
+    if (hasOfflineRep(nodeId)) {
         // get offline rep node
         NodeID oRep = getOfflineRep(nodeId);
         // get online rep node
         NodeID rep = consCG->sccRepNode(oRep);
         const PointsTo &pts = getPts(nodeId);
-        for (PointsTo::iterator ptIt = pts.begin(), ptEit = pts.end(); ptIt != ptEit; ++ptIt)
-        {
-            NodeID tgt = *ptIt;
-            ConstraintNode* tgtNode = consCG->getConstraintNode(tgt);
+        for (const auto &tgt : pts) {
+            ConstraintNode *tgtNode = consCG->getConstraintNode(tgt);
             if (!tgtNode->getDirectInEdges().empty())
                 continue;
             if (tgtNode->getAddrOutEdges().size() > 1)
                 continue;
-            assert(!oCG->isaRef(tgt) && "Point-to target should not be a ref node!");
+            assert(!oCG->isaRef(tgt) &&
+                   "Point-to target should not be a ref node!");
             mergeNodeAndPts(tgt, rep);
         }
     }
@@ -100,12 +94,10 @@ void AndersenHCD::mergeSCC(NodeID nodeId)
 /*!
  * Merge node and its pts to the rep node
  */
-void AndersenHCD::mergeNodeAndPts(NodeID node, NodeID rep)
-{
+void AndersenHCD::mergeNodeAndPts(NodeID node, NodeID rep) {
     node = sccRepNode(node);
     rep = sccRepNode(rep);
-    if (!isaMergedNode(node))
-    {
+    if (!isaMergedNode(node)) {
         if (unionPts(rep, node))
             pushIntoWorklist(rep);
         // Once a 'Node' is merged to its rep, it is collapsed,

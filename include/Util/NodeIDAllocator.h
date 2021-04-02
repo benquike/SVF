@@ -1,23 +1,21 @@
-//===- NodeIDAllocator.h -- Allocates node IDs on request ------------------------//
+//===- NodeIDAllocator.h -- Allocates node IDs on request
+//------------------------//
 
 #ifndef NODEIDALLOCATOR_H_
 #define NODEIDALLOCATOR_H_
 
 #include "Util/SVFBasicTypes.h"
 
-namespace SVF
-{
+namespace SVF {
 
 /// Allocates node IDs for objects and values, upon request, according to
 /// some strategy which can be user-defined.
 /// It is the job of SymbolTableInfo to tell the NodeIDAllocator when
 /// all symbols have been allocated through endSymbolAllocation.
-class NodeIDAllocator
-{
-public:
+class NodeIDAllocator {
+  public:
     /// Allocation strategy to use.
-    enum Strategy
-    {
+    enum Strategy {
         /// Allocate objects contiguously, separate from values, and vice versa.
         /// If [****...*****] is the space of unsigned integers, we allocate as,
         /// [ssssooooooo...vvvvvvv] (o = object, v = value, s = special).
@@ -25,9 +23,9 @@ public:
         /// Allocate objects objects and values sequentially, intermixed.
         SEQ,
         /// Allocate values and objects as they come in with a single counter.
-        /// GEP objects are allocated as an offset from their base (see implementation
-        /// of allocateGepObjectId). The purpose of this allocation strategy
-        /// is human readability.
+        /// GEP objects are allocated as an offset from their base (see
+        /// implementation of allocateGepObjectId). The purpose of this
+        /// allocation strategy is human readability.
         DEBUG,
     };
 
@@ -42,14 +40,14 @@ public:
     static const NodeID nullPointerId;
     ///@}
 
-    /// Return (singleton) allocator.
-    static NodeIDAllocator *get(void);
-
-    /// Deletes the (singleton) allocator.
-    static void unset(void);
+    /// Constructor
+    ///
+    /// Builds a node ID allocator with the strategy specified on the command
+    /// line.
+    NodeIDAllocator();
 
     /// Allocate an object ID as determined by the strategy.
-    NodeID allocateObjectId(void);
+    NodeID allocateObjectId();
 
     /// Allocate a GEP object ID as determined by the strategy.
     /// allocateObjectId is still fine for GEP objects, but
@@ -60,23 +58,20 @@ public:
     NodeID allocateGepObjectId(NodeID base, u32_t offset, u32_t maxFieldLimit);
 
     /// Allocate a value ID as determined by the strategy.
-    NodeID allocateValueId(void);
+    NodeID allocateValueId();
 
     /// Notify the allocator that all symbols have had IDs allocated.
-    void endSymbolAllocation(void);
+    void endSymbolAllocation();
 
-private:
-    /// Builds a node ID allocator with the strategy specified on the command line.
-    NodeIDAllocator(void);
-
-private:
+  private:
     /// These are moreso counters than amounts.
     ///@{
     /// Number of memory objects allocated, including specials.
     NodeID numObjects;
     /// Number of values allocated, including specials.
     NodeID numValues;
-    /// Number of explicit symbols allocated (e.g., llvm::Values), including specials.
+    /// Number of explicit symbols allocated (e.g., llvm::Values), including
+    /// specials.
     NodeID numSymbols;
     /// Total number of objects and values allocated.
     NodeID numNodes;
@@ -89,6 +84,6 @@ private:
     static NodeIDAllocator *allocator;
 };
 
-};  // namespace SVF
+}; // namespace SVF
 
-#endif  // ifdef NODEIDALLOCATOR_H_
+#endif // ifdef NODEIDALLOCATOR_H_

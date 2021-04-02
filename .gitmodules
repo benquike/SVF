@@ -1,0 +1,16 @@
+[submodule "external/googletest"]
+	path = external/googletest
+	url = https://github.com/google/googletest.git
+	branch = maste
+[submodule "external/run-clang-format"]
+	path = external/run-clang-format
+	url = https://github.com/Sarcasm/run-clang-format.git
+	branch = maste
+[submodule "external/clang-format-hooks"]
+	path = external/clang-format-hooks
+	url = https://github.com/barisione/clang-format-hooks.git
+	branch = maste
+[submodule "Test-Suite"]
+	path = Test-Suite
+	url = https://github.com/SVF-tools/Test-Suite.git
+	branch = master

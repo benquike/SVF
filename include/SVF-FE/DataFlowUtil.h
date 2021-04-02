@@ -34,69 +34,66 @@
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
 
-namespace SVF
-{
+namespace SVF {
 
 /*!
  * Wrapper for SCEV collected from function pass ScalarEvolution
  */
-class PTASCEV
-{
+class PTASCEV {
 
-public:
-    PTASCEV():scev(nullptr), start(nullptr), step(nullptr),ptr(nullptr),inloop(false),tripcount(0) {}
+  public:
+    PTASCEV()
+        : scev(nullptr), start(nullptr), step(nullptr), ptr(nullptr),
+          inloop(false), tripcount(0) {}
 
     /// Constructor
-    PTASCEV(const Value* p, const SCEV* s, ScalarEvolution* SE): scev(s),start(nullptr), step(nullptr), ptr(p), inloop(false), tripcount(0)
-    {
-        if(const SCEVAddRecExpr* ar = SVFUtil::dyn_cast<SCEVAddRecExpr>(s))
-        {
-            if (const SCEVConstant *startExpr = SVFUtil::dyn_cast<SCEVConstant>(ar->getStart()))
+    PTASCEV(const Value *p, const SCEV *s, ScalarEvolution *SE)
+        : scev(s), start(nullptr), step(nullptr), ptr(p), inloop(false),
+          tripcount(0) {
+        if (const SCEVAddRecExpr *ar = SVFUtil::dyn_cast<SCEVAddRecExpr>(s)) {
+            if (const SCEVConstant *startExpr =
+                    SVFUtil::dyn_cast<SCEVConstant>(ar->getStart()))
                 start = startExpr->getValue();
-            if (const SCEVConstant *stepExpr = SVFUtil::dyn_cast<SCEVConstant>(ar->getStepRecurrence(*SE)))
+            if (const SCEVConstant *stepExpr =
+                    SVFUtil::dyn_cast<SCEVConstant>(ar->getStepRecurrence(*SE)))
                 step = stepExpr->getValue();
-            tripcount = SE->getSmallConstantTripCount(const_cast<Loop*>(ar->getLoop()));
+            tripcount = SE->getSmallConstantTripCount(
+                const_cast<Loop *>(ar->getLoop()));
             inloop = true;
         }
     }
     /// Copy Constructor
-    PTASCEV(const PTASCEV& ptase): scev(ptase.scev), start(ptase.start), step(ptase.step), ptr(ptase.ptr), inloop(ptase.inloop),tripcount(ptase.tripcount)
-    {
-
-    }
+    PTASCEV(const PTASCEV &ptase)
+        : scev(ptase.scev), start(ptase.start), step(ptase.step),
+          ptr(ptase.ptr), inloop(ptase.inloop), tripcount(ptase.tripcount) {}
 
     /// Destructor
-    virtual ~PTASCEV()
-    {
-    }
+    virtual ~PTASCEV() {}
 
     const SCEV *scev;
-    const Value* start;
-    const Value* step;
+    const Value *start;
+    const Value *step;
     const Value *ptr;
     bool inloop;
     unsigned tripcount;
 
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
-    inline bool operator< (const PTASCEV& rhs) const
-    {
-        if(start!=rhs.start)
+    inline bool operator<(const PTASCEV &rhs) const {
+        if (start != rhs.start)
             return start < rhs.start;
-        else if(step!=rhs.step)
+        else if (step != rhs.step)
             return step < rhs.step;
-        else if(ptr!=rhs.ptr)
+        else if (ptr != rhs.ptr)
             return ptr < rhs.ptr;
-        else if(tripcount!=rhs.tripcount)
+        else if (tripcount != rhs.tripcount)
             return tripcount < rhs.tripcount;
         else
             return inloop < rhs.inloop;
     }
     /// Overloading operator=
-    inline PTASCEV& operator= (const PTASCEV& rhs)
-    {
-        if(*this!=rhs)
-        {
+    inline PTASCEV &operator=(const PTASCEV &rhs) {
+        if (*this != rhs) {
             start = rhs.start;
             step = rhs.step;
             ptr = rhs.ptr;
@@ -106,82 +103,75 @@ public:
         return *this;
     }
     /// Overloading operator==
-    inline bool operator== (const PTASCEV& rhs) const
-    {
-        return (start == rhs.start && step == rhs.step && ptr == rhs.ptr && tripcount == rhs.tripcount && inloop == rhs.inloop);
+    inline bool operator==(const PTASCEV &rhs) const {
+        return (start == rhs.start && step == rhs.step && ptr == rhs.ptr &&
+                tripcount == rhs.tripcount && inloop == rhs.inloop);
     }
     /// Overloading operator==
-    inline bool operator!= (const PTASCEV& rhs) const
-    {
-        return !(*this==rhs);
-    }
+    inline bool operator!=(const PTASCEV &rhs) const { return !(*this == rhs); }
 };
 
-
-class PTACFInfoBuilder{
-public:
-    typedef Map<const Function*, DominatorTree*> FunToDTMap;  ///< map a function to its dominator tree
-    typedef Map<const Function*, PostDominatorTree*> FunToPostDTMap;  ///< map a function to its post dominator tree
-    typedef Map<const Function*, LoopInfo*> FunToLoopInfoMap;  ///< map a function to its loop info
+class PTACFInfoBuilder {
+  public:
+    using FunToDTMap =
+        Map<const Function *,
+            DominatorTree *>; ///< map a function to its dominator tree
+    using FunToPostDTMap =
+        Map<const Function *,
+            PostDominatorTree *>; ///< map a function to its post dominator tree
+    using FunToLoopInfoMap =
+        Map<const Function *, LoopInfo *>; ///< map a function to its loop info
 
     /// Constructor
-     PTACFInfoBuilder();
+    PTACFInfoBuilder();
 
-     ~PTACFInfoBuilder();
+    ~PTACFInfoBuilder();
 
-     /// Get loop info of a function
-     LoopInfo* getLoopInfo(const Function* f);
+    /// Get loop info of a function
+    LoopInfo *getLoopInfo(const Function *f);
 
-     /// Get post dominator tree of a function
-     PostDominatorTree* getPostDT(const Function* f);
+    /// Get post dominator tree of a function
+    PostDominatorTree *getPostDT(const Function *f);
 
-     /// Get dominator tree of a function
-     DominatorTree* getDT(const Function* f);
+    /// Get dominator tree of a function
+    DominatorTree *getDT(const Function *f);
 
-private:
-    FunToLoopInfoMap funToLoopInfoMap;      ///< map a function to its loop info
-    FunToDTMap funToDTMap;                  ///< map a function to its dominator tree
-    FunToPostDTMap funToPDTMap;             ///< map a function to its post dominator tree
+  private:
+    FunToLoopInfoMap funToLoopInfoMap; ///< map a function to its loop info
+    FunToDTMap funToDTMap;             ///< map a function to its dominator tree
+    FunToPostDTMap funToPDTMap; ///< map a function to its post dominator tree
 };
-
 
 /*!
  * Iterated dominance frontier
  */
-class IteratedDominanceFrontier: public llvm::DominanceFrontierBase<BasicBlock, false>
-{
+class IteratedDominanceFrontier
+    : public llvm::DominanceFrontierBase<BasicBlock, false> {
 
-private:
+  private:
     const DominanceFrontier *DF;
 
     void calculate(BasicBlock *, const DominanceFrontier &DF);
 
-public:
+  public:
     static char ID;
 
-    IteratedDominanceFrontier() :
-        DominanceFrontierBase(), DF(nullptr)
-    {
-    }
+    IteratedDominanceFrontier() : DominanceFrontierBase(), DF(nullptr) {}
 
-    virtual ~IteratedDominanceFrontier()
-    {
-    }
+    virtual ~IteratedDominanceFrontier() {}
 
-    virtual void getAnalysisUsage(AnalysisUsage &AU) const
-    {
+    virtual void getAnalysisUsage(AnalysisUsage &AU) const {
         AU.setPreservesAll();
         // AU.addRequired<DominanceFrontier>();
     }
 
-//	virtual bool runOnFunction(Function &m) {
-//		Frontiers.clear();
-//		DF = &getAnalysis<DominanceFrontier>();
-//		return false;
-//	}
+    //	virtual bool runOnFunction(Function &m) {
+    //		Frontiers.clear();
+    //		DF = &getAnalysis<DominanceFrontier>();
+    //		return false;
+    //	}
 
-    iterator getIDFSet(BasicBlock *B)
-    {
+    iterator getIDFSet(BasicBlock *B) {
         if (Frontiers.find(B) == Frontiers.end())
             calculate(B, *DF);
         return Frontiers.find(B);

@@ -37,131 +37,125 @@ AndersenSFR *AndersenSFR::sfrAndersen = nullptr;
 /*!
  *
  */
-void AndersenSFR::initialize()
-{
+void AndersenSFR::initialize() {
     AndersenSCD::initialize();
     setPWCOpt(false);
 
-    if (!csc)
+    if (!csc) {
         csc = new CSC(_graph, scc);
+    }
 
     // detect and collapse cycles that only comprise copy edges
     getSCCDetector()->find();
     mergeSccCycle();
 }
 
-
 /*!
  * Call the PWC stride calculation method of class CSC.
  */
-void AndersenSFR::PWCDetect()
-{
+void AndersenSFR::PWCDetect() {
     AndersenSCD::PWCDetect();
     csc->find(getSCCDetector()->topoNodeStack());
 }
 
-
 /*!
  *
  */
-bool AndersenSFR::mergeSrcToTgt(NodeID nodeId, NodeID newRepId)
-{
-    ConstraintNode* node = consCG->getConstraintNode(nodeId);
-    if (!node->strides.empty())
-    {
-        ConstraintNode* newRepNode = consCG->getConstraintNode(newRepId);
+bool AndersenSFR::mergeSrcToTgt(NodeID nodeId, NodeID newRepId) {
+    ConstraintNode *node = consCG->getConstraintNode(nodeId);
+    if (!node->strides.empty()) {
+        ConstraintNode *newRepNode = consCG->getConstraintNode(newRepId);
         newRepNode->strides |= node->strides;
     }
     return AndersenSCD::mergeSrcToTgt(nodeId, newRepId);
 }
 
-
 /*!
  * Propagate point-to set via a gep edge, using SFR
  */
-bool AndersenSFR::processGepPts(PointsTo& pts, const GepCGEdge* edge)
-{
-    ConstraintNode* dst = edge->getDstNode();
+bool AndersenSFR::processGepPts(PointsTo &pts, const GepCGEdge *edge) {
+    ConstraintNode *dst = edge->getDstNode();
     NodeID dstId = dst->getId();
 
-    if (!dst->strides.empty() && SVFUtil::isa<NormalGepCGEdge>(edge))        // dst is in pwc
+    if (!dst->strides.empty() &&
+        SVFUtil::isa<NormalGepCGEdge>(edge)) // dst is in pwc
     {
         PointsTo tmpDstPts;
         PointsTo srcInits = pts - getPts(dstId);
 
-        if (!srcInits.empty())
-        {
+        if (!srcInits.empty()) {
             NodeSet sortSrcInits;
-            for (NodeID ptd : srcInits)
+            for (NodeID ptd : srcInits) {
                 sortSrcInits.insert(ptd);
+            }
 
-            Size_t offset = SVFUtil::dyn_cast<NormalGepCGEdge>(edge)->getOffset();
+            Size_t offset =
+                SVFUtil::dyn_cast<NormalGepCGEdge>(edge)->getOffset();
             fieldExpand(sortSrcInits, offset, dst->strides, tmpDstPts);
         }
 
-        if (unionPts(dstId, tmpDstPts))
-        {
+        if (unionPts(dstId, tmpDstPts)) {
             pushIntoWorklist(dstId);
             return true;
         }
-        else
-            return false;
-    }
-    else
-        return Andersen::processGepPts(pts, edge);
-}
 
+        return false;
+    }
+
+    return Andersen::processGepPts(pts, edge);
+}
 
 /*!
  *
  */
-void AndersenSFR::fieldExpand(NodeSet& initials, Size_t offset, NodeBS& strides, PointsTo& expandPts)
-{
+void AndersenSFR::fieldExpand(NodeSet &initials, Size_t offset, NodeBS &strides,
+                              PointsTo &expandPts) {
     numOfFieldExpand++;
 
-    while (!initials.empty())
-    {
+    while (!initials.empty()) {
         NodeID init = *initials.begin();
         initials.erase(init);
 
-        if (consCG->isBlkObjOrConstantObj(init))
+        if (consCG->isBlkObjOrConstantObj(init)) {
             expandPts.set(init);
-        else
-        {
-            PAGNode* initPN = pag->getPAGNode(init);
-            const MemObj* obj = pag->getBaseObj(init);
+        } else {
+            PAGNode *initPN = pag->getPAGNode(init);
+            const MemObj *obj = pag->getBaseObj(init);
             const Size_t maxLimit = obj->getMaxFieldOffsetLimit();
             Size_t initOffset;
-            if (GepObjPN *gepNode = SVFUtil::dyn_cast<GepObjPN>(initPN))
+            if (auto *gepNode = SVFUtil::dyn_cast<GepObjPN>(initPN)) {
                 initOffset = gepNode->getLocationSet().getOffset();
-            else if (SVFUtil::isa<FIObjPN>(initPN) || SVFUtil::isa<DummyObjPN>(initPN))
+            } else if (SVFUtil::isa<FIObjPN>(initPN) ||
+                       SVFUtil::isa<DummyObjPN>(initPN)) {
                 initOffset = 0;
-            else
+            } else {
                 assert(false && "Not an object node!!");
+            }
 
             Set<Size_t> offsets;
             offsets.insert(offset);
 
             // calculate offsets
             bool loopFlag = true;
-            while (loopFlag)
-            {
+            while (loopFlag) {
                 loopFlag = false;
-                for (auto _f : offsets)
-                    for (auto _s : strides)
-                    {
+                for (auto _f : offsets) {
+                    for (auto _s : strides) {
                         Size_t _f1 = _f + _s;
-                        loopFlag = (offsets.find(_f1) == offsets.end()) && (initOffset + _f1 < maxLimit);
-                        if (loopFlag)
+                        loopFlag = (offsets.find(_f1) == offsets.end()) &&
+                                   (initOffset + _f1 < maxLimit);
+                        if (loopFlag) {
                             offsets.insert(_f1);
+                        }
                     }
+                }
             }
 
             // get gep objs
-            for (Size_t _f : offsets)
-            {
+            for (Size_t _f : offsets) {
                 NodeID gepId = consCG->getGepObjNode(init, LocationSet(_f));
-                initials.erase(gepId);  // gep id in initials should be removed to avoid redundant derivation
+                initials.erase(gepId); // gep id in initials should be removed
+                                       // to avoid redundant derivation
                 expandPts.set(gepId);
             }
         }

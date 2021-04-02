@@ -30,57 +30,61 @@
 #ifndef SRCSNKANALYSIS_H_
 #define SRCSNKANALYSIS_H_
 
-#include "Util/CFLSolver.h"
 #include "Graphs/SVFGOPT.h"
 #include "SABER/ProgSlice.h"
+#include "SABER/SaberCheckerAPI.h"
 #include "SABER/SaberSVFGBuilder.h"
+#include "Util/CFLSolver.h"
 #include "WPA/Andersen.h"
 
-namespace SVF
-{
+namespace SVF {
 
-typedef CFLSolver<SVFG*,CxtDPItem> CFLSrcSnkSolver;
+using CFLSrcSnkSolver = CFLSolver<SVFG *, CxtDPItem>;
 
 /*!
- * General source-sink analysis, which serves as a base analysis to be extended for various clients
+ * General source-sink analysis, which serves as a base analysis to be extended
+ * for various clients
  */
-class SrcSnkDDA : public CFLSrcSnkSolver
-{
+class SrcSnkDDA : virtual public CFLSrcSnkSolver {
 
-public:
-    typedef ProgSlice::SVFGNodeSet SVFGNodeSet;
-    typedef Map<const SVFGNode*,ProgSlice*> SVFGNodeToSliceMap;
-    typedef SVFGNodeSet::const_iterator SVFGNodeSetIter;
-    typedef CxtDPItem DPIm;
-    typedef Set<DPIm> DPImSet;							///< dpitem set
-    typedef Map<const SVFGNode*, DPImSet> SVFGNodeToDPItemsMap; 	///< map a SVFGNode to its visited dpitems
-    typedef Set<const CallBlockNode*> CallSiteSet;
-    typedef NodeBS SVFGNodeBS;
-    typedef ProgSlice::VFWorkList WorkList;
+  public:
+    using SVFGNodeSet = ProgSlice::SVFGNodeSet;
+    using SVFGNodeToSliceMap = Map<const SVFGNode *, ProgSlice *>;
+    using SVFGNodeSetIter = SVFGNodeSet::const_iterator;
+    using DPIm = CxtDPItem;
+    using DPImSet = Set<DPIm>; ///< dpitem set
+    using SVFGNodeToDPItemsMap =
+        Map<const SVFGNode *,
+            DPImSet>; ///< map a SVFGNode to its visited dpitems
+    using CallSiteSet = Set<const CallBlockNode *>;
+    using SVFGNodeBS = NodeBS;
+    using WorkList = ProgSlice::VFWorkList;
 
-private:
-    ProgSlice* _curSlice;		/// current program slice
-    SVFGNodeSet sources;		/// source nodes
-    SVFGNodeSet sinks;		/// source nodes
-    PathCondAllocator* pathCondAllocator;
-    SVFGNodeToDPItemsMap nodeToDPItemsMap;	///<  record forward visited dpitems
-    SVFGNodeSet visitedSet;	///<  record backward visited nodes
+  private:
+    ProgSlice *_curSlice; /// current program slice
+    SVFGNodeSet sources;  /// source nodes
+    SVFGNodeSet sinks;    /// source nodes
+    PathCondAllocator *pathCondAllocator;
+    SVFGNodeToDPItemsMap nodeToDPItemsMap; ///<  record forward visited dpitems
+    SVFGNodeSet visitedSet;                ///<  record backward visited nodes
 
-protected:
-    SaberSVFGBuilder memSSA;
-    SVFG* svfg;
-    PTACallGraph* ptaCallGraph;
+  protected:
+    PAG *pag;
+    SaberSVFGBuilder svfgBuilder;
+    SVFG *svfg;
+    PTACallGraph *ptaCallGraph;
+    SVFProject *proj;
 
-public:
-
+  public:
     /// Constructor
-    SrcSnkDDA() : _curSlice(nullptr), svfg(nullptr), ptaCallGraph(nullptr)
-    {
-        pathCondAllocator = new PathCondAllocator();
+    SrcSnkDDA(SVFProject *proj)
+        : _curSlice(nullptr), pag(proj->getPAG()), svfgBuilder(pag),
+          svfg(nullptr), ptaCallGraph(nullptr), proj(proj) {
+        pathCondAllocator = new PathCondAllocator(pag->getModule());
     }
+
     /// Destructor
-    virtual ~SrcSnkDDA()
-    {
+    virtual ~SrcSnkDDA() {
         if (svfg != nullptr)
             delete svfg;
         svfg = nullptr;
@@ -90,77 +94,57 @@ public:
         _curSlice = nullptr;
 
         /// the following shared by multiple checkers, thus can not be released.
-        //if (ptaCallGraph != nullptr)
+        // if (ptaCallGraph != nullptr)
         //    delete ptaCallGraph;
-        //ptaCallGraph = nullptr;
+        // ptaCallGraph = nullptr;
 
-        //if(pathCondAllocator)
+        // if(pathCondAllocator)
         //    delete pathCondAllocator;
-        //pathCondAllocator = nullptr;
+        // pathCondAllocator = nullptr;
+        delete pathCondAllocator;
     }
 
     /// Start analysis here
-    virtual void analyze(SVFModule* module);
+    virtual void analyze();
 
     /// Initialize analysis
-    virtual void initialize(SVFModule* module);
+    virtual void initialize();
 
     /// Finalize analysis
-    virtual void finalize()
-    {
-        dumpSlices();
-    }
+    virtual void finalize() { dumpSlices(); }
 
     /// Get PAG
-    PAG* getPAG() const
-    {
-        return PAG::getPAG();
-    }
+    PAG *getPAG() const { return getSVFG()->getPAG(); }
 
     /// Get SVFG
-    inline const SVFG* getSVFG() const
-    {
-        return graph();
-    }
+    inline const SVFG *getSVFG() const { return graph(); }
 
     /// Get Callgraph
-    inline PTACallGraph* getCallgraph() const
-    {
-        return ptaCallGraph;
-    }
+    inline PTACallGraph *getCallgraph() const { return ptaCallGraph; }
 
     /// Whether this svfg node may access global variable
-    inline bool isGlobalSVFGNode(const SVFGNode* node) const
-    {
-        return memSSA.isGlobalSVFGNode(node);
+    inline bool isGlobalSVFGNode(const SVFGNode *node) const {
+        return svfgBuilder.isGlobalSVFGNode(node);
     }
     /// Slice operations
     //@{
-    virtual void setCurSlice(const SVFGNode* src);
+    virtual void setCurSlice(const SVFGNode *src);
 
-    inline ProgSlice* getCurSlice() const
-    {
-        return _curSlice;
-    }
-    inline void addSinkToCurSlice(const SVFGNode* node)
-    {
+    inline ProgSlice *getCurSlice() const { return _curSlice; }
+    inline void addSinkToCurSlice(const SVFGNode *node) {
         _curSlice->addToSinks(node);
         addToCurForwardSlice(node);
     }
-    inline bool isInCurForwardSlice(const SVFGNode* node)
-    {
+    inline bool isInCurForwardSlice(const SVFGNode *node) {
         return _curSlice->inForwardSlice(node);
     }
-    inline bool isInCurBackwardSlice(const SVFGNode* node)
-    {
+    inline bool isInCurBackwardSlice(const SVFGNode *node) {
         return _curSlice->inBackwardSlice(node);
     }
-    inline void addToCurForwardSlice(const SVFGNode* node)
-    {
+    inline void addToCurForwardSlice(const SVFGNode *node) {
         _curSlice->addToForwardSlice(node);
     }
-    inline void addToCurBackwardSlice(const SVFGNode* node)
-    {
+    inline void addToCurBackwardSlice(const SVFGNode *node) {
         _curSlice->addToBackwardSlice(node);
     }
     //@}
@@ -169,132 +153,91 @@ public:
     ///@{
     virtual void initSrcs() = 0;
     virtual void initSnks() = 0;
-    virtual bool isSourceLikeFun(const SVFFunction* fun) = 0;
-    virtual bool isSinkLikeFun(const SVFFunction* fun) = 0;
-    virtual bool isSource(const SVFGNode* node) = 0;
-    virtual bool isSink(const SVFGNode* node) = 0;
+    virtual bool isSourceLikeFun(const SVFFunction *fun) = 0;
+    virtual bool isSinkLikeFun(const SVFFunction *fun) = 0;
+    virtual bool isSource(const SVFGNode *node) = 0;
+    virtual bool isSink(const SVFGNode *node) = 0;
     ///@}
 
     /// Identify allocation wrappers
-    bool isInAWrapper(const SVFGNode* src, CallSiteSet& csIdSet);
+    bool isInAWrapper(const SVFGNode *src, CallSiteSet &csIdSet);
 
     /// report bug on the current analyzed slice
-    virtual void reportBug(ProgSlice* slice) = 0;
+    virtual void reportBug(ProgSlice *slice) = 0;
 
     /// Get sources/sinks
     //@{
-    inline const SVFGNodeSet& getSources() const
-    {
-        return sources;
-    }
-    inline SVFGNodeSetIter sourcesBegin() const
-    {
-        return sources.begin();
-    }
-    inline SVFGNodeSetIter sourcesEnd() const
-    {
-        return sources.end();
-    }
-    inline void addToSources(const SVFGNode* node)
-    {
-        sources.insert(node);
-    }
-    inline const SVFGNodeSet& getSinks() const
-    {
-        return sinks;
-    }
-    inline SVFGNodeSetIter sinksBegin() const
-    {
-        return sinks.begin();
-    }
-    inline SVFGNodeSetIter sinksEnd() const
-    {
-        return sinks.end();
-    }
-    inline void addToSinks(const SVFGNode* node)
-    {
-        sinks.insert(node);
-    }
+    inline const SVFGNodeSet &getSources() const { return sources; }
+    inline SVFGNodeSetIter sourcesBegin() const { return sources.begin(); }
+    inline SVFGNodeSetIter sourcesEnd() const { return sources.end(); }
+    inline void addToSources(const SVFGNode *node) { sources.insert(node); }
+    inline const SVFGNodeSet &getSinks() const { return sinks; }
+    inline SVFGNodeSetIter sinksBegin() const { return sinks.begin(); }
+    inline SVFGNodeSetIter sinksEnd() const { return sinks.end(); }
+    inline void addToSinks(const SVFGNode *node) { sinks.insert(node); }
     //@}
 
     /// Get path condition allocator
-    PathCondAllocator* getPathAllocator() const
-    {
-        return pathCondAllocator;
-    }
+    PathCondAllocator *getPathAllocator() const { return pathCondAllocator; }
 
-protected:
+  protected:
     /// Forward traverse
-    virtual inline void FWProcessCurNode(const DPIm& item)
-    {
-        const SVFGNode* node = getNode(item.getCurNodeID());
-        if(isSink(node))
-        {
+    inline void FWProcessCurNode(const DPIm &item) override {
+        const SVFGNode *node = getNode(item.getCurNodeID());
+        if (isSink(node)) {
             addSinkToCurSlice(node);
             _curSlice->setPartialReachable();
-        }
-        else
+        } else
             addToCurForwardSlice(node);
     }
     /// Backward traverse
-    virtual inline void BWProcessCurNode(const DPIm& item)
-    {
-        const SVFGNode* node = getNode(item.getCurNodeID());
-        if(isInCurForwardSlice(node))
-        {
+    inline void BWProcessCurNode(const DPIm &item) override {
+        const SVFGNode *node = getNode(item.getCurNodeID());
+        if (isInCurForwardSlice(node)) {
             addToCurBackwardSlice(node);
         }
     }
     /// Propagate information forward by matching context
-    virtual void FWProcessOutgoingEdge(const DPIm& item, SVFGEdge* edge);
-    /// Propagate information backward without matching context, as forward analysis already did it
-    virtual void BWProcessIncomingEdge(const DPIm& item, SVFGEdge* edge);
+    void FWProcessOutgoingEdge(const DPIm &item, SVFGEdge *edge) override;
+    /// Propagate information backward without matching context, as forward
+    /// analysis already did it
+    void BWProcessIncomingEdge(const DPIm &item, SVFGEdge *edge) override;
     /// Whether has been visited or not, in order to avoid recursion on SVFG
     //@{
-    inline bool forwardVisited(const SVFGNode* node, const DPIm& item)
-    {
-        SVFGNodeToDPItemsMap::const_iterator it = nodeToDPItemsMap.find(node);
-        if(it!=nodeToDPItemsMap.end())
-            return it->second.find(item)!=it->second.end();
+    inline bool forwardVisited(const SVFGNode *node, const DPIm &item) {
+        auto it = nodeToDPItemsMap.find(node);
+        if (it != nodeToDPItemsMap.end())
+            return it->second.find(item) != it->second.end();
         else
             return false;
     }
-    inline void addForwardVisited(const SVFGNode* node, const DPIm& item)
-    {
+    inline void addForwardVisited(const SVFGNode *node, const DPIm &item) {
         nodeToDPItemsMap[node].insert(item);
     }
-    inline bool backwardVisited(const SVFGNode* node)
-    {
-        return visitedSet.find(node)!=visitedSet.end();
+    inline bool backwardVisited(const SVFGNode *node) {
+        return visitedSet.find(node) != visitedSet.end();
     }
-    inline void addBackwardVisited(const SVFGNode* node)
-    {
+    inline void addBackwardVisited(const SVFGNode *node) {
         visitedSet.insert(node);
     }
-    inline void clearVisitedMap()
-    {
+    inline void clearVisitedMap() {
         nodeToDPItemsMap.clear();
         visitedSet.clear();
     }
     //@}
 
     /// Whether it is all path reachable from a source
-    virtual bool isAllPathReachable()
-    {
-        return _curSlice->isAllReachable();
-    }
+    virtual bool isAllPathReachable() { return _curSlice->isAllReachable(); }
     /// Whether it is some path reachable from a source
-    virtual bool isSomePathReachable()
-    {
+    virtual bool isSomePathReachable() {
         return _curSlice->isPartialReachable();
     }
     /// Dump SVFG with annotated slice informaiton
     //@{
     void dumpSlices();
-    void annotateSlice(ProgSlice* slice);
+    void annotateSlice(ProgSlice *slice);
     void printBDDStat();
     //@}
-
 };
 
 } // End namespace SVF

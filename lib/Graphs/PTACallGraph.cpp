@@ -20,7 +20,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 /*
  * PTACallGraph.cpp
  *
@@ -28,29 +27,36 @@
  *      Author: Yulei Sui
  */
 
-#include "Util/SVFModule.h"
-#include "SVF-FE/LLVMUtil.h"
 #include "Graphs/PTACallGraph.h"
+#include "SVF-FE/LLVMUtil.h"
+#include "SVF-FE/SVFProject.h"
+#include "Util/SVFModule.h"
 
 using namespace SVF;
 using namespace SVFUtil;
 
-PTACallGraph::CallSiteToIdMap PTACallGraph::csToIdMap;
-PTACallGraph::IdToCallSiteMap PTACallGraph::idToCSMap;
-CallSiteID PTACallGraph::totalCallSiteNum = 1;
-
+// PTACallGraph::CallSiteToIdMap PTACallGraph::csToIdMap;
+// PTACallGraph::IdToCallSiteMap PTACallGraph::idToCSMap;
+// CallSiteID PTACallGraph::totalCallSiteNum = 1;
 
 /// Add direct and indirect callsite
 //@{
-void PTACallGraphEdge::addDirectCallSite(const CallBlockNode* call)
-{
-    assert(SVFUtil::getCallee(call->getCallSite()) && "not a direct callsite??");
+void PTACallGraphEdge::addDirectCallSite(const CallBlockNode *call) {
+    const Instruction *callInst = call->getCallSite();
+    llvm::ImmutableCallSite cs(callInst);
+    assert(cs.getCalledFunction() && "not a direct callsite??");
+
     directCalls.insert(call);
 }
 
-void PTACallGraphEdge::addInDirectCallSite(const CallBlockNode* call)
-{
-    assert((nullptr == SVFUtil::getCallee(call->getCallSite()) || nullptr == SVFUtil::dyn_cast<Function> (SVFUtil::getForkedFun(call->getCallSite()))) && "not an indirect callsite??");
+void PTACallGraphEdge::addInDirectCallSite(const CallBlockNode *call,
+                                           SVFProject *proj) {
+    const Instruction *callInst = call->getCallSite();
+    llvm::ImmutableCallSite cs(callInst);
+    assert((nullptr == cs.getCalledFunction() ||
+            nullptr == SVFUtil::dyn_cast<Function>(
+                           proj->getForkedFun(call->getCallSite()))) &&
+           "not an indirect callsite??");
     indirectCalls.insert(call);
 }
 //@}
@@ -59,10 +65,11 @@ const std::string PTACallGraphEdge::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "CallSite ID: " << getCallSiteID();
-    if(isDirectCallEdge())
+    if (isDirectCallEdge()) {
         rawstr << "direct call";
-    else
+    } else {
         rawstr << "indirect call";
+    }
     rawstr << "[" << getDstID() << "<--" << getSrcID() << "]\t";
     return rawstr.str();
 }
@@ -70,40 +77,40 @@ const std::string PTACallGraphEdge::toString() const {
 const std::string PTACallGraphNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
-    rawstr << "CallGraphNode ID: " << getId() << " {fun: " << fun->getName() << "}";
+    rawstr << "CallGraphNode ID: " << getId() << " {fun: " << fun->getName()
+           << "}";
     return rawstr.str();
 }
 
-bool PTACallGraphNode::isReachableFromProgEntry() const
-{
-    std::stack<const PTACallGraphNode*> nodeStack;
+bool PTACallGraphNode::isReachableFromProgEntry() const {
+    std::stack<const PTACallGraphNode *> nodeStack;
     NodeBS visitedNodes;
     nodeStack.push(this);
     visitedNodes.set(getId());
 
-    while (nodeStack.empty() == false)
-    {
-        PTACallGraphNode* node = const_cast<PTACallGraphNode*>(nodeStack.top());
+    while (nodeStack.empty() == false) {
+        auto *node = const_cast<PTACallGraphNode *>(nodeStack.top());
         nodeStack.pop();
 
-        if (SVFUtil::isProgEntryFunction(node->getFunction()))
+        if (SVFUtil::isProgEntryFunction(node->getFunction())) {
             return true;
+        }
 
-        for (const_iterator it = node->InEdgeBegin(), eit = node->InEdgeEnd(); it != eit; ++it)
-        {
-            PTACallGraphEdge* edge = *it;
-            if (visitedNodes.test_and_set(edge->getSrcID()))
+        for (auto it = node->InEdgeBegin(), eit = node->InEdgeEnd(); it != eit;
+             ++it) {
+            PTACallGraphEdge *edge = *it;
+            if (visitedNodes.test_and_set(edge->getSrcID())) {
                 nodeStack.push(edge->getSrcNode());
+            }
         }
     }
 
     return false;
 }
 
-
 /// Constructor
-PTACallGraph::PTACallGraph(CGEK k): kind(k)
-{
+PTACallGraph::PTACallGraph(SVFProject *proj, CGEK k)
+    : kind(k), pag(proj->getPAG()), proj(proj) {
     callGraphNodeNum = 0;
     numOfResolvedIndCallEdge = 0;
 }
@@ -111,18 +118,15 @@ PTACallGraph::PTACallGraph(CGEK k): kind(k)
 /*!
  *  Memory has been cleaned up at GenericGraph
  */
-void PTACallGraph::destroy()
-{
-}
+void PTACallGraph::destroy() {}
 
 /*!
  * Add call graph node
  */
-void PTACallGraph::addCallGraphNode(const SVFFunction* fun)
-{
+void PTACallGraph::addCallGraphNode(const SVFFunction *fun) {
     NodeID id = callGraphNodeNum;
-    PTACallGraphNode* callGraphNode = new PTACallGraphNode(id, fun);
-    addGNode(id,callGraphNode);
+    auto *callGraphNode = new PTACallGraphNode(id, fun);
+    addGNode(id, callGraphNode);
     funToCallGraphNodeMap[fun] = callGraphNode;
     callGraphNodeNum++;
 }
@@ -130,31 +134,33 @@ void PTACallGraph::addCallGraphNode(const SVFFunction* fun)
 /*!
  *  Whether we have already created this call graph edge
  */
-PTACallGraphEdge* PTACallGraph::hasGraphEdge(PTACallGraphNode* src, PTACallGraphNode* dst,PTACallGraphEdge::CEDGEK kind, CallSiteID csId) const
-{
-    PTACallGraphEdge edge(src,dst,kind,csId);
-    PTACallGraphEdge* outEdge = src->hasOutgoingEdge(&edge);
-    PTACallGraphEdge* inEdge = dst->hasIncomingEdge(&edge);
-    if (outEdge && inEdge)
-    {
+PTACallGraphEdge *PTACallGraph::hasGraphEdge(PTACallGraphNode *src,
+                                             PTACallGraphNode *dst,
+                                             PTACallGraphEdge::CEDGEK kind,
+                                             CallSiteID csId) const {
+    PTACallGraphEdge edge(src, dst, kind, csId);
+    PTACallGraphEdge *outEdge = src->hasOutgoingEdge(&edge);
+    PTACallGraphEdge *inEdge = dst->hasIncomingEdge(&edge);
+    if (outEdge && inEdge) {
         assert(outEdge == inEdge && "edges not match");
         return outEdge;
     }
-    else
-        return nullptr;
+
+    return nullptr;
 }
 
 /*!
  * get CallGraph edge via nodes
  */
-PTACallGraphEdge* PTACallGraph::getGraphEdge(PTACallGraphNode* src, PTACallGraphNode* dst,PTACallGraphEdge::CEDGEK kind, CallSiteID)
-{
-    for (PTACallGraphEdge::CallGraphEdgeSet::iterator iter = src->OutEdgeBegin();
-            iter != src->OutEdgeEnd(); ++iter)
-    {
-        PTACallGraphEdge* edge = (*iter);
-        if (edge->getEdgeKind() == kind && edge->getDstID() == dst->getId())
+PTACallGraphEdge *PTACallGraph::getGraphEdge(PTACallGraphNode *src,
+                                             PTACallGraphNode *dst,
+                                             PTACallGraphEdge::CEDGEK kind,
+                                             CallSiteID) {
+    for (auto iter = src->OutEdgeBegin(); iter != src->OutEdgeEnd(); ++iter) {
+        PTACallGraphEdge *edge = (*iter);
+        if (edge->getEdgeKind() == kind && edge->getDstID() == dst->getId()) {
             return edge;
+        }
     }
     return nullptr;
 }
@@ -162,17 +168,18 @@ PTACallGraphEdge* PTACallGraph::getGraphEdge(PTACallGraphNode* src, PTACallGraph
 /*!
  * Add direct call edges
  */
-void PTACallGraph::addDirectCallGraphEdge(const CallBlockNode* cs,const SVFFunction* callerFun, const SVFFunction* calleeFun)
-{
+void PTACallGraph::addDirectCallGraphEdge(const CallBlockNode *cs,
+                                          const SVFFunction *callerFun,
+                                          const SVFFunction *calleeFun) {
 
-    PTACallGraphNode* caller = getCallGraphNode(callerFun);
-    PTACallGraphNode* callee = getCallGraphNode(calleeFun);
+    PTACallGraphNode *caller = getCallGraphNode(callerFun);
+    PTACallGraphNode *callee = getCallGraphNode(calleeFun);
 
     CallSiteID csId = addCallSite(cs, callee->getFunction());
 
-    if(!hasGraphEdge(caller,callee, PTACallGraphEdge::CallRetEdge,csId))
-    {
-        PTACallGraphEdge* edge = new PTACallGraphEdge(caller,callee,PTACallGraphEdge::CallRetEdge,csId);
+    if (!hasGraphEdge(caller, callee, PTACallGraphEdge::CallRetEdge, csId)) {
+        auto *edge = new PTACallGraphEdge(caller, callee,
+                                          PTACallGraphEdge::CallRetEdge, csId);
         edge->addDirectCallSite(cs);
         addEdge(edge);
         callinstToCallGraphEdgesMap[cs].insert(edge);
@@ -182,20 +189,21 @@ void PTACallGraph::addDirectCallGraphEdge(const CallBlockNode* cs,const SVFFunct
 /*!
  * Add indirect call edge to update call graph
  */
-void PTACallGraph::addIndirectCallGraphEdge(const CallBlockNode* cs,const SVFFunction* callerFun, const SVFFunction* calleeFun)
-{
+void PTACallGraph::addIndirectCallGraphEdge(const CallBlockNode *cs,
+                                            const SVFFunction *callerFun,
+                                            const SVFFunction *calleeFun) {
 
-    PTACallGraphNode* caller = getCallGraphNode(callerFun);
-    PTACallGraphNode* callee = getCallGraphNode(calleeFun);
+    PTACallGraphNode *caller = getCallGraphNode(callerFun);
+    PTACallGraphNode *callee = getCallGraphNode(calleeFun);
 
     numOfResolvedIndCallEdge++;
 
     CallSiteID csId = addCallSite(cs, callee->getFunction());
 
-    if(!hasGraphEdge(caller,callee, PTACallGraphEdge::CallRetEdge,csId))
-    {
-        PTACallGraphEdge* edge = new PTACallGraphEdge(caller,callee,PTACallGraphEdge::CallRetEdge, csId);
-        edge->addInDirectCallSite(cs);
+    if (!hasGraphEdge(caller, callee, PTACallGraphEdge::CallRetEdge, csId)) {
+        auto *edge = new PTACallGraphEdge(caller, callee,
+                                          PTACallGraphEdge::CallRetEdge, csId);
+        edge->addInDirectCallSite(cs, proj);
         addEdge(edge);
         callinstToCallGraphEdgesMap[cs].insert(edge);
     }
@@ -204,20 +212,20 @@ void PTACallGraph::addIndirectCallGraphEdge(const CallBlockNode* cs,const SVFFun
 /*!
  * Get all callsite invoking this callee
  */
-void PTACallGraph::getAllCallSitesInvokingCallee(const SVFFunction* callee, PTACallGraphEdge::CallInstSet& csSet)
-{
-    PTACallGraphNode* callGraphNode = getCallGraphNode(callee);
-    for(PTACallGraphNode::iterator it = callGraphNode->InEdgeBegin(), eit = callGraphNode->InEdgeEnd();
-            it!=eit; ++it)
-    {
-        for(PTACallGraphEdge::CallInstSet::const_iterator cit = (*it)->directCallsBegin(),
-                ecit = (*it)->directCallsEnd(); cit!=ecit; ++cit)
-        {
+void PTACallGraph::getAllCallSitesInvokingCallee(
+    const SVFFunction *callee, PTACallGraphEdge::CallInstSet &csSet) {
+    PTACallGraphNode *callGraphNode = getCallGraphNode(callee);
+    for (auto it = callGraphNode->InEdgeBegin(),
+              eit = callGraphNode->InEdgeEnd();
+         it != eit; ++it) {
+        for (auto cit = (*it)->directCallsBegin(),
+                  ecit = (*it)->directCallsEnd();
+             cit != ecit; ++cit) {
             csSet.insert((*cit));
         }
-        for(PTACallGraphEdge::CallInstSet::const_iterator cit = (*it)->indirectCallsBegin(),
-                ecit = (*it)->indirectCallsEnd(); cit!=ecit; ++cit)
-        {
+        for (auto cit = (*it)->indirectCallsBegin(),
+                  ecit = (*it)->indirectCallsEnd();
+             cit != ecit; ++cit) {
             csSet.insert((*cit));
         }
     }
@@ -226,15 +234,15 @@ void PTACallGraph::getAllCallSitesInvokingCallee(const SVFFunction* callee, PTAC
 /*!
  * Get direct callsite invoking this callee
  */
-void PTACallGraph::getDirCallSitesInvokingCallee(const SVFFunction* callee, PTACallGraphEdge::CallInstSet& csSet)
-{
-    PTACallGraphNode* callGraphNode = getCallGraphNode(callee);
-    for(PTACallGraphNode::iterator it = callGraphNode->InEdgeBegin(), eit = callGraphNode->InEdgeEnd();
-            it!=eit; ++it)
-    {
-        for(PTACallGraphEdge::CallInstSet::const_iterator cit = (*it)->directCallsBegin(),
-                ecit = (*it)->directCallsEnd(); cit!=ecit; ++cit)
-        {
+void PTACallGraph::getDirCallSitesInvokingCallee(
+    const SVFFunction *callee, PTACallGraphEdge::CallInstSet &csSet) {
+    PTACallGraphNode *callGraphNode = getCallGraphNode(callee);
+    for (auto it = callGraphNode->InEdgeBegin(),
+              eit = callGraphNode->InEdgeEnd();
+         it != eit; ++it) {
+        for (auto cit = (*it)->directCallsBegin(),
+                  ecit = (*it)->directCallsEnd();
+             cit != ecit; ++cit) {
             csSet.insert((*cit));
         }
     }
@@ -243,36 +251,37 @@ void PTACallGraph::getDirCallSitesInvokingCallee(const SVFFunction* callee, PTAC
 /*!
  * Get indirect callsite invoking this callee
  */
-void PTACallGraph::getIndCallSitesInvokingCallee(const SVFFunction* callee, PTACallGraphEdge::CallInstSet& csSet)
-{
-    PTACallGraphNode* callGraphNode = getCallGraphNode(callee);
-    for(PTACallGraphNode::iterator it = callGraphNode->InEdgeBegin(), eit = callGraphNode->InEdgeEnd();
-            it!=eit; ++it)
-    {
-        for(PTACallGraphEdge::CallInstSet::const_iterator cit = (*it)->indirectCallsBegin(),
-                ecit = (*it)->indirectCallsEnd(); cit!=ecit; ++cit)
-        {
+void PTACallGraph::getIndCallSitesInvokingCallee(
+    const SVFFunction *callee, PTACallGraphEdge::CallInstSet &csSet) {
+    PTACallGraphNode *callGraphNode = getCallGraphNode(callee);
+    for (auto it = callGraphNode->InEdgeBegin(),
+              eit = callGraphNode->InEdgeEnd();
+         it != eit; ++it) {
+        for (auto cit = (*it)->indirectCallsBegin(),
+                  ecit = (*it)->indirectCallsEnd();
+             cit != ecit; ++cit) {
             csSet.insert((*cit));
         }
     }
 }
 
 /*!
- * Issue a warning if the function which has indirect call sites can not be reached from program entry.
+ * Issue a warning if the function which has indirect call sites can not be
+ * reached from program entry.
  */
-void PTACallGraph::verifyCallGraph()
-{
-    CallEdgeMap::const_iterator it = indirectCallMap.begin();
-    CallEdgeMap::const_iterator eit = indirectCallMap.end();
-    for (; it != eit; ++it)
-    {
-        const FunctionSet& targets = it->second;
-        if (targets.empty() == false)
-        {
-            const CallBlockNode* cs = it->first;
-            const SVFFunction* func = cs->getCaller();
-            if (getCallGraphNode(func)->isReachableFromProgEntry() == false)
-                writeWrnMsg(func->getName().str() + " has indirect call site but not reachable from main");
+void PTACallGraph::verifyCallGraph() {
+    auto it = indirectCallMap.begin();
+    auto eit = indirectCallMap.end();
+    for (const auto &it : indirectCallMap) {
+        const FunctionSet &targets = it.second;
+        if (!targets.empty()) {
+            const CallBlockNode *cs = it.first;
+            const SVFFunction *func = cs->getCaller();
+            if (getCallGraphNode(func)->isReachableFromProgEntry() == false) {
+                writeWrnMsg(
+                    func->getName().str() +
+                    " has indirect call site but not reachable from main");
+            }
         }
     }
 }
@@ -280,28 +289,29 @@ void PTACallGraph::verifyCallGraph()
 /*!
  * Whether its reachable between two functions
  */
-bool PTACallGraph::isReachableBetweenFunctions(const SVFFunction* srcFn, const SVFFunction* dstFn) const
-{
-    PTACallGraphNode* dstNode = getCallGraphNode(dstFn);
+bool PTACallGraph::isReachableBetweenFunctions(const SVFFunction *srcFn,
+                                               const SVFFunction *dstFn) const {
+    PTACallGraphNode *dstNode = getCallGraphNode(dstFn);
 
-    std::stack<const PTACallGraphNode*> nodeStack;
+    std::stack<const PTACallGraphNode *> nodeStack;
     NodeBS visitedNodes;
     nodeStack.push(dstNode);
     visitedNodes.set(dstNode->getId());
 
-    while (nodeStack.empty() == false)
-    {
-        PTACallGraphNode* node = const_cast<PTACallGraphNode*>(nodeStack.top());
+    while (nodeStack.empty() == false) {
+        auto *node = const_cast<PTACallGraphNode *>(nodeStack.top());
         nodeStack.pop();
 
-        if (node->getFunction() == srcFn)
+        if (node->getFunction() == srcFn) {
             return true;
+        }
 
-        for (CallGraphEdgeConstIter it = node->InEdgeBegin(), eit = node->InEdgeEnd(); it != eit; ++it)
-        {
-            PTACallGraphEdge* edge = *it;
-            if (visitedNodes.test_and_set(edge->getSrcID()))
+        for (auto it = node->InEdgeBegin(), eit = node->InEdgeEnd(); it != eit;
+             ++it) {
+            PTACallGraphEdge *edge = *it;
+            if (visitedNodes.test_and_set(edge->getSrcID())) {
                 nodeStack.push(edge->getSrcNode());
+            }
         }
     }
 
@@ -311,84 +321,65 @@ bool PTACallGraph::isReachableBetweenFunctions(const SVFFunction* srcFn, const S
 /*!
  * Dump call graph into dot file
  */
-void PTACallGraph::dump(const std::string& filename)
-{
-      GraphPrinter::WriteGraphToFile(outs(), filename, this);
+void PTACallGraph::dump(const std::string &filename) {
+    GraphPrinter::WriteGraphToFile(outs(), filename, this);
 }
 
-
-namespace llvm
-{
+namespace llvm {
 
 /*!
  * Write value flow graph into dot file for debugging
  */
-template<>
-struct DOTGraphTraits<PTACallGraph*> : public DefaultDOTGraphTraits
-{
+template <>
+struct DOTGraphTraits<PTACallGraph *> : public DefaultDOTGraphTraits {
 
-    typedef PTACallGraphNode NodeType;
-    typedef NodeType::iterator ChildIteratorType;
-    DOTGraphTraits(bool isSimple = false) :
-        DefaultDOTGraphTraits(isSimple)
-    {
-    }
+    using NodeType = PTACallGraphNode;
+    using ChildIteratorType = NodeType::iterator;
+    DOTGraphTraits(bool isSimple = false) : DefaultDOTGraphTraits(isSimple) {}
 
     /// Return name of the graph
-    static std::string getGraphName(PTACallGraph*)
-    {
-        return "Call Graph";
-    }
+    static std::string getGraphName(PTACallGraph *) { return "Call Graph"; }
     /// Return function name;
-    static std::string getNodeLabel(PTACallGraphNode *node, PTACallGraph*)
-    {
+    static std::string getNodeLabel(PTACallGraphNode *node, PTACallGraph *) {
         return node->toString();
     }
 
-    static std::string getNodeAttributes(PTACallGraphNode *node, PTACallGraph*)
-    {
-        const SVFFunction* fun = node->getFunction();
-        if (!SVFUtil::isExtCall(fun))
-        {
+    static std::string getNodeAttributes(PTACallGraphNode *node,
+                                         PTACallGraph *) {
+        const SVFFunction *fun = node->getFunction();
+        if (!SVFUtil::isExtCall(fun)) {
             return "shape=circle";
         }
-        else
-            return "shape=Mrecord";
+
+        return "shape=Mrecord";
     }
 
-    template<class EdgeIter>
-    static std::string getEdgeAttributes(PTACallGraphNode*, EdgeIter EI, PTACallGraph*)
-    {
+    template <class EdgeIter>
+    static std::string getEdgeAttributes(PTACallGraphNode *, EdgeIter EI,
+                                         PTACallGraph *) {
 
-        //TODO: mark indirect call of Fork with different color
-        PTACallGraphEdge* edge = *(EI.getCurrent());
+        // TODO: mark indirect call of Fork with different color
+        PTACallGraphEdge *edge = *(EI.getCurrent());
         assert(edge && "No edge found!!");
 
         std::string color;
 
-        if (edge->getEdgeKind() == PTACallGraphEdge::TDJoinEdge)
-        {
+        if (edge->getEdgeKind() == PTACallGraphEdge::TDJoinEdge) {
             color = "color=green";
-        }
-        else if (edge->getEdgeKind() == PTACallGraphEdge::TDForkEdge)
-        {
+        } else if (edge->getEdgeKind() == PTACallGraphEdge::TDForkEdge) {
             color = "color=blue";
-        }
-        else
-        {
+        } else {
             color = "color=black";
         }
-        if (0 != edge->getIndirectCalls().size())
-        {
+        if (0 != edge->getIndirectCalls().size()) {
             color = "color=red";
         }
         return color;
     }
 
-    template<class EdgeIter>
-    static std::string getEdgeSourceLabel(NodeType*, EdgeIter EI)
-    {
-        PTACallGraphEdge* edge = *(EI.getCurrent());
+    template <class EdgeIter>
+    static std::string getEdgeSourceLabel(NodeType *, EdgeIter EI) {
+        PTACallGraphEdge *edge = *(EI.getCurrent());
         assert(edge && "No edge found!!");
 
         std::string str;

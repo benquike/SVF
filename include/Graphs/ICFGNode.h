@@ -30,12 +30,11 @@
 #ifndef ICFGNODE_H_
 #define ICFGNODE_H_
 
-#include "Util/SVFUtil.h"
 #include "Graphs/GenericGraph.h"
 #include "Graphs/ICFGEdge.h"
+#include "Util/SVFUtil.h"
 
-namespace SVF
-{
+namespace SVF {
 
 class ICFGNode;
 class RetBlockNode;
@@ -46,53 +45,47 @@ class PAGNode;
 class VFGNode;
 
 /*!
- * Interprocedural control-flow graph node, representing different kinds of program statements
- * including top-level pointers (ValPN) and address-taken objects (ObjPN)
+ * Interprocedural control-flow graph node, representing different kinds of
+ * program statements including top-level pointers (ValPN) and address-taken
+ * objects (ObjPN)
  */
-typedef GenericNode<ICFGNode, ICFGEdge> GenericICFGNodeTy;
+using GenericICFGNodeTy = GenericNode<ICFGNode, ICFGEdge>;
 
-class ICFGNode : public GenericICFGNodeTy
-{
+class ICFGNode : public GenericICFGNodeTy {
 
-public:
+  public:
     /// 22 kinds of ICFG node
     /// Gep represents offset edge for field sensitivity
-    enum ICFGNodeK
-    {
-        IntraBlock, FunEntryBlock, FunExitBlock, FunCallBlock, FunRetBlock, GlobalBlock
+    enum ICFGNodeK {
+        IntraBlock,
+        FunEntryBlock,
+        FunExitBlock,
+        FunCallBlock,
+        FunRetBlock,
+        GlobalBlock
     };
 
-    typedef ICFGEdge::ICFGEdgeSetTy::iterator iterator;
-    typedef ICFGEdge::ICFGEdgeSetTy::const_iterator const_iterator;
-    typedef Set<const CallPE *> CallPESet;
-    typedef Set<const RetPE *> RetPESet;
-    typedef std::list<const VFGNode*> VFGNodeList;
-    typedef std::list<const PAGEdge*> PAGEdgeList;
+    using iterator = ICFGEdge::ICFGEdgeSetTy::iterator;
+    using const_iterator = ICFGEdge::ICFGEdgeSetTy::const_iterator;
+    using CallPESet = Set<const CallPE *>;
+    using RetPESet = Set<const RetPE *>;
+    using VFGNodeList = std::list<const VFGNode *>;
+    using PAGEdgeList = std::list<const PAGEdge *>;
 
-public:
+  public:
     /// Constructor
-    ICFGNode(NodeID i, ICFGNodeK k) : GenericICFGNodeTy(i, k), fun(nullptr), bb(nullptr)
-    {
-
-    }
+    ICFGNode(NodeID i, ICFGNodeK k)
+        : GenericICFGNodeTy(i, k), fun(nullptr), bb(nullptr) {}
 
     /// Return the function of this ICFGNode
-    virtual const SVFFunction* getFun() const
-    {
-        return fun;
-    }
+    virtual const SVFFunction *getFun() const { return fun; }
 
     /// Return the function of this ICFGNode
-    virtual const BasicBlock* getBB() const
-    {
-        return bb;
-    }
-
+    virtual const BasicBlock *getBB() const { return bb; }
 
     /// Overloading operator << for dumping ICFG node ID
     //@{
-    friend raw_ostream &operator<<(raw_ostream &o, const ICFGNode &node)
-    {
+    friend raw_ostream &operator<<(raw_ostream &o, const ICFGNode &node) {
         o << node.toString();
         return o;
     }
@@ -100,66 +93,46 @@ public:
 
     /// Set/Get methods of VFGNodes
     ///@{
-    inline void addVFGNode(const VFGNode *vfgNode)
-    {
+    inline void addVFGNode(const VFGNode *vfgNode) {
         VFGNodes.push_back(vfgNode);
     }
 
-    inline const VFGNodeList& getVFGNodes() const
-    {
-        return VFGNodes;
-    }
+    inline const VFGNodeList &getVFGNodes() const { return VFGNodes; }
     ///@}
 
     /// Set/Get methods of VFGNodes
     ///@{
-    inline void addPAGEdge(const PAGEdge *edge)
-    {
-        pagEdges.push_back(edge);
-    }
+    inline void addPAGEdge(const PAGEdge *edge) { pagEdges.push_back(edge); }
 
-    inline const PAGEdgeList& getPAGEdges() const
-    {
-        return pagEdges;
-    }
+    inline const PAGEdgeList &getPAGEdges() const { return pagEdges; }
     ///@}
 
     virtual const std::string toString() const;
 
-protected:
-    const SVFFunction* fun;
-    const BasicBlock* bb;
+  protected:
+    const SVFFunction *fun;
+    const BasicBlock *bb;
     VFGNodeList VFGNodes; //< a list of VFGNodes
     PAGEdgeList pagEdges; //< a list of PAGEdges
-
 };
 
 /*!
  * Unique ICFG node stands for all global initializations
  */
-class GlobalBlockNode : public ICFGNode
-{
+class GlobalBlockNode : public ICFGNode {
 
-public:
-    GlobalBlockNode(NodeID id) : ICFGNode(id, GlobalBlock)
-    {
-    	bb = nullptr;
-    }
+  public:
+    GlobalBlockNode(NodeID id) : ICFGNode(id, GlobalBlock) { bb = nullptr; }
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const GlobalBlockNode *)
-    {
-        return true;
-    }
+    static inline bool classof(const GlobalBlockNode *) { return true; }
 
-    static inline bool classof(const ICFGNode *node)
-    {
+    static inline bool classof(const ICFGNode *node) {
         return node->getNodeKind() == GlobalBlock;
     }
 
-    static inline bool classof(const GenericICFGNodeTy *node)
-    {
+    static inline bool classof(const GenericICFGNodeTy *node) {
         return node->getNodeKind() == GlobalBlock;
     }
     //@}
@@ -170,37 +143,28 @@ public:
 /*!
  * ICFG node stands for a program statement
  */
-class IntraBlockNode : public ICFGNode
-{
-private:
+class IntraBlockNode : public ICFGNode {
+  private:
     const Instruction *inst;
 
-public:
-    IntraBlockNode(NodeID id, const Instruction *i) : ICFGNode(id, IntraBlock), inst(i)
-    {
-        fun = LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(inst->getFunction());
+  public:
+    IntraBlockNode(NodeID id, const Instruction *i, SVFModule *svfMod)
+        : ICFGNode(id, IntraBlock), inst(i) {
+        fun = svfMod->getLLVMModSet()->getSVFFunction(inst->getFunction());
         bb = inst->getParent();
     }
 
-    inline const Instruction *getInst() const
-    {
-        return inst;
-    }
+    inline const Instruction *getInst() const { return inst; }
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const IntraBlockNode *)
-    {
-        return true;
-    }
+    static inline bool classof(const IntraBlockNode *) { return true; }
 
-    static inline bool classof(const ICFGNode *node)
-    {
+    static inline bool classof(const ICFGNode *node) {
         return node->getNodeKind() == IntraBlock;
     }
 
-    static inline bool classof(const GenericICFGNodeTy *node)
-    {
+    static inline bool classof(const GenericICFGNodeTy *node) {
         return node->getNodeKind() == IntraBlock;
     }
     //@}
@@ -208,91 +172,69 @@ public:
     const std::string toString() const;
 };
 
-class InterBlockNode : public ICFGNode
-{
+class InterBlockNode : public ICFGNode {
 
-public:
+  public:
     /// Constructor
-    InterBlockNode(NodeID id, ICFGNodeK k) : ICFGNode(id, k)
-    {
-    }
+    InterBlockNode(NodeID id, ICFGNodeK k) : ICFGNode(id, k) {}
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const InterBlockNode *)
-    {
-        return true;
+    static inline bool classof(const InterBlockNode *) { return true; }
+
+    static inline bool classof(const ICFGNode *node) {
+        return node->getNodeKind() == FunEntryBlock ||
+               node->getNodeKind() == FunExitBlock ||
+               node->getNodeKind() == FunCallBlock ||
+               node->getNodeKind() == FunRetBlock;
     }
 
-    static inline bool classof(const ICFGNode *node)
-    {
-        return node->getNodeKind() == FunEntryBlock
-               || node->getNodeKind() == FunExitBlock
-               || node->getNodeKind() == FunCallBlock
-               || node->getNodeKind() == FunRetBlock;
-    }
-
-    static inline bool classof(const GenericICFGNodeTy *node)
-    {
-        return node->getNodeKind() == FunEntryBlock
-               || node->getNodeKind() == FunExitBlock
-               || node->getNodeKind() == FunCallBlock
-               || node->getNodeKind() == FunRetBlock;
+    static inline bool classof(const GenericICFGNodeTy *node) {
+        return node->getNodeKind() == FunEntryBlock ||
+               node->getNodeKind() == FunExitBlock ||
+               node->getNodeKind() == FunCallBlock ||
+               node->getNodeKind() == FunRetBlock;
     }
     //@}
 };
 
-
 /*!
- * Function entry ICFGNode containing a set of FormalParmVFGNodes of a function
+ * Function entry ICFGNode containing a set of
+ * FormalParmVFGNodes of a function
  */
-class FunEntryBlockNode : public InterBlockNode
-{
+class FunEntryBlockNode : public InterBlockNode {
 
-public:
-    typedef std::vector<const PAGNode *> FormalParmNodeVec;
-private:
+  public:
+    using FormalParmNodeVec = std::vector<const PAGNode *>;
+
+  private:
     FormalParmNodeVec FPNodes;
-public:
-    FunEntryBlockNode(NodeID id, const SVFFunction* f);
+
+  public:
+    FunEntryBlockNode(NodeID id, const SVFFunction *f);
 
     /// Return function
-    inline const SVFFunction* getFun() const
-    {
-        return fun;
-    }
+    inline const SVFFunction *getFun() const { return fun; }
 
     /// Return the set of formal parameters
-    inline const FormalParmNodeVec &getFormalParms() const
-    {
-        return FPNodes;
-    }
+    inline const FormalParmNodeVec &getFormalParms() const { return FPNodes; }
 
     /// Add formal parameters
-    inline void addFormalParms(const PAGNode *fp)
-    {
-        FPNodes.push_back(fp);
-    }
+    inline void addFormalParms(const PAGNode *fp) { FPNodes.push_back(fp); }
 
-    ///Methods for support type inquiry through isa, cast, and dyn_cast:
+    /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const FunEntryBlockNode *)
-    {
-        return true;
-    }
+    static inline bool classof(const FunEntryBlockNode *) { return true; }
 
-    static inline bool classof(const InterBlockNode *node)
-    {
+    static inline bool classof(const InterBlockNode *node) {
         return node->getNodeKind() == FunEntryBlock;
     }
 
-    static inline bool classof(const ICFGNode *node)
-    {
+    static inline bool classof(const ICFGNode *node) {
         return node->getNodeKind() == FunEntryBlock;
     }
 
-    static inline bool classof(const GenericICFGNodeTy *node)
-    {
+    static inline bool classof(const GenericICFGNodeTy *node) {
         return node->getNodeKind() == FunEntryBlock;
     }
     //@}
@@ -301,54 +243,40 @@ public:
 };
 
 /*!
- * Function exit ICFGNode containing (at most one) FormalRetVFGNodes of a function
+ * Function exit ICFGNode containing
+ * (at most one) FormalRetVFGNode of a function
  */
-class FunExitBlockNode : public InterBlockNode
-{
+class FunExitBlockNode : public InterBlockNode {
 
-private:
-    const SVFFunction* fun;
+  private:
+    const SVFFunction *fun;
     const PAGNode *formalRet;
-public:
-    FunExitBlockNode(NodeID id, const SVFFunction* f);
+
+  public:
+    FunExitBlockNode(NodeID id, const SVFFunction *f);
 
     /// Return function
-    inline const SVFFunction* getFun() const
-    {
-        return fun;
-    }
+    inline const SVFFunction *getFun() const { return fun; }
 
     /// Return actual return parameter
-    inline const PAGNode *getFormalRet() const
-    {
-        return formalRet;
-    }
+    inline const PAGNode *getFormalRet() const { return formalRet; }
 
     /// Add actual return parameter
-    inline void addFormalRet(const PAGNode *fr)
-    {
-        formalRet = fr;
-    }
+    inline void addFormalRet(const PAGNode *fr) { formalRet = fr; }
 
-    ///Methods for support type inquiry through isa, cast, and dyn_cast:
+    /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const FunEntryBlockNode *)
-    {
-        return true;
-    }
+    static inline bool classof(const FunEntryBlockNode *) { return true; }
 
-    static inline bool classof(const ICFGNode *node)
-    {
+    static inline bool classof(const ICFGNode *node) {
         return node->getNodeKind() == FunExitBlock;
     }
 
-    static inline bool classof(const InterBlockNode *node)
-    {
+    static inline bool classof(const InterBlockNode *node) {
         return node->getNodeKind() == FunExitBlock;
     }
 
-    static inline bool classof(const GenericICFGNodeTy *node)
-    {
+    static inline bool classof(const GenericICFGNodeTy *node) {
         return node->getNodeKind() == FunExitBlock;
     }
     //@}
@@ -359,90 +287,71 @@ public:
 /*!
  * Call ICFGNode containing a set of ActualParmVFGNodes at a callsite
  */
-class CallBlockNode : public InterBlockNode
-{
+class CallBlockNode : public InterBlockNode {
 
-public:
-    typedef std::vector<const PAGNode *> ActualParmVFGNodeVec;
-private:
-    const Instruction* cs;
-    const RetBlockNode* ret;
+  public:
+    using ActualParmVFGNodeVec = std::vector<const PAGNode *>;
+
+  private:
+    const Instruction *cs;
+    const RetBlockNode *ret;
+    const SVFModule *svfMod;
     ActualParmVFGNodeVec APNodes;
-public:
-    CallBlockNode(NodeID id, const Instruction* c) : InterBlockNode(id, FunCallBlock), cs(c), ret(nullptr)
-    {
-        fun = LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(cs->getFunction());
+
+  public:
+    CallBlockNode(NodeID id, const Instruction *c, SVFModule *svfMod)
+        : InterBlockNode(id, FunCallBlock), cs(c), ret(nullptr),
+          svfMod(svfMod) {
+        fun = svfMod->getLLVMModSet()->getSVFFunction(cs->getFunction());
         bb = cs->getParent();
     }
 
     /// Return callsite
-    inline const Instruction* getCallSite() const
-    {
-        return cs;
-    }
+    inline const Instruction *getCallSite() const { return cs; }
 
     /// Return callsite
-    inline const RetBlockNode* getRetBlockNode() const
-    {
-    	assert(ret && "RetBlockNode not set?");
+    inline const RetBlockNode *getRetBlockNode() const {
+        assert(ret && "RetBlockNode not set?");
         return ret;
     }
 
     /// Return callsite
-    inline void setRetBlockNode(const RetBlockNode* r)
-    {
-        ret = r;
-    }
+    inline void setRetBlockNode(const RetBlockNode *r) { ret = r; }
 
     /// Return callsite
-    inline const SVFFunction* getCaller() const
-    {
-        return LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(cs->getFunction());
+    inline const SVFFunction *getCaller() const {
+        return svfMod->getLLVMModSet()->getSVFFunction(cs->getFunction());
     }
 
     /// Return Basic Block
-    inline const BasicBlock* getParent() const
-    {
-        return cs->getParent();
-    }
+    inline const BasicBlock *getParent() const { return cs->getParent(); }
 
     /// Return true if this is an indirect call
-    inline bool isIndirectCall() const
-    {
-        return nullptr == SVFUtil::getCallee(cs);
+    inline bool isIndirectCall() const {
+        return nullptr == SVFUtil::getCallee(svfMod->getLLVMModSet(), cs);
     }
 
     /// Return the set of actual parameters
-    inline const ActualParmVFGNodeVec &getActualParms() const
-    {
+    inline const ActualParmVFGNodeVec &getActualParms() const {
         return APNodes;
     }
 
     /// Add actual parameters
-    inline void addActualParms(const PAGNode *ap)
-    {
-        APNodes.push_back(ap);
-    }
+    inline void addActualParms(const PAGNode *ap) { APNodes.push_back(ap); }
 
-    ///Methods for support type inquiry through isa, cast, and dyn_cast:
+    /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const CallBlockNode *)
-    {
-        return true;
-    }
+    static inline bool classof(const CallBlockNode *) { return true; }
 
-    static inline bool classof(const ICFGNode *node)
-    {
+    static inline bool classof(const ICFGNode *node) {
         return node->getNodeKind() == FunCallBlock;
     }
 
-    static inline bool classof(const InterBlockNode *node)
-    {
+    static inline bool classof(const InterBlockNode *node) {
         return node->getNodeKind() == FunCallBlock;
     }
 
-    static inline bool classof(const GenericICFGNodeTy *node)
-    {
+    static inline bool classof(const GenericICFGNodeTy *node) {
         return node->getNodeKind() == FunCallBlock;
     }
     //@}
@@ -450,66 +359,50 @@ public:
     virtual const std::string toString() const;
 };
 
-
 /*!
  * Return ICFGNode containing (at most one) ActualRetVFGNode at a callsite
  */
-class RetBlockNode : public InterBlockNode
-{
+class RetBlockNode : public InterBlockNode {
 
-private:
-    const Instruction* cs;
+  private:
+    const Instruction *cs;
     const PAGNode *actualRet;
-    const CallBlockNode* callBlockNode;
-public:
-    RetBlockNode(NodeID id, const Instruction* c, CallBlockNode* cb) :
-        InterBlockNode(id, FunRetBlock), cs(c), actualRet(nullptr), callBlockNode(cb)
-    {
-        fun = LLVMModuleSet::getLLVMModuleSet()->getSVFFunction(cs->getFunction());
+    const CallBlockNode *callBlockNode;
+
+  public:
+    RetBlockNode(NodeID id, const Instruction *c, CallBlockNode *cb,
+                 SVFModule *svfMod)
+        : InterBlockNode(id, FunRetBlock), cs(c), actualRet(nullptr),
+          callBlockNode(cb) {
+        fun = svfMod->getLLVMModSet()->getSVFFunction(cs->getFunction());
         bb = cs->getParent();
     }
 
     /// Return callsite
-    inline const Instruction* getCallSite() const
-    {
-        return cs;
-    }
+    inline const Instruction *getCallSite() const { return cs; }
 
-    inline const CallBlockNode* getCallBlockNode() const
-    {
+    inline const CallBlockNode *getCallBlockNode() const {
         return callBlockNode;
     }
     /// Return actual return parameter
-    inline const PAGNode *getActualRet() const
-    {
-        return actualRet;
-    }
+    inline const PAGNode *getActualRet() const { return actualRet; }
 
     /// Add actual return parameter
-    inline void addActualRet(const PAGNode *ar)
-    {
-        actualRet = ar;
-    }
+    inline void addActualRet(const PAGNode *ar) { actualRet = ar; }
 
-    ///Methods for support type inquiry through isa, cast, and dyn_cast:
+    /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const RetBlockNode *)
-    {
-        return true;
-    }
+    static inline bool classof(const RetBlockNode *) { return true; }
 
-    static inline bool classof(const InterBlockNode *node)
-    {
+    static inline bool classof(const InterBlockNode *node) {
         return node->getNodeKind() == FunRetBlock;
     }
 
-    static inline bool classof(const ICFGNode *node)
-    {
+    static inline bool classof(const ICFGNode *node) {
         return node->getNodeKind() == FunRetBlock;
     }
 
-    static inline bool classof(const GenericICFGNodeTy *node)
-    {
+    static inline bool classof(const GenericICFGNodeTy *node) {
         return node->getNodeKind() == FunRetBlock;
     }
     //@}

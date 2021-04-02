@@ -7,22 +7,22 @@
   Synopsis    [ADD ITE function and satellites.]
 
   Description [External procedures included in this module:
-		<ul>
-		<li> Cudd_addIte()
-		<li> Cudd_addIteConstant()
-		<li> Cudd_addEvalConst()
-		<li> Cudd_addCmpl()
-		<li> Cudd_addLeq()
-		</ul>
-	Internal procedures included in this module:
-		<ul>
-		<li> cuddAddIteRecur()
-		<li> cuddAddCmplRecur()
-		</ul>
-	Static procedures included in this module:
-		<ul>
-		<li> addVarToConst()
-		</ul>]
+        <ul>
+        <li> Cudd_addIte()
+        <li> Cudd_addIteConstant()
+        <li> Cudd_addEvalConst()
+        <li> Cudd_addCmpl()
+        <li> Cudd_addLeq()
+        </ul>
+    Internal procedures included in this module:
+        <ul>
+        <li> cuddAddIteRecur()
+        <li> cuddAddCmplRecur()
+        </ul>
+    Static procedures included in this module:
+        <ul>
+        <li> addVarToConst()
+        </ul>]
 
   Author      [Fabio Somenzi]
 
@@ -60,37 +60,33 @@
 
 ******************************************************************************/
 
-#include "CUDD/util.h"
 #include "CUDD/cuddInt.h"
+#include "CUDD/util.h"
 
 /*---------------------------------------------------------------------------*/
 /* Constant declarations                                                     */
 /*---------------------------------------------------------------------------*/
 
-
 /*---------------------------------------------------------------------------*/
 /* Stucture declarations                                                     */
 /*---------------------------------------------------------------------------*/
 
-
 /*---------------------------------------------------------------------------*/
 /* Type declarations                                                         */
 /*---------------------------------------------------------------------------*/
-
 
 /*---------------------------------------------------------------------------*/
 /* Variable declarations                                                     */
 /*---------------------------------------------------------------------------*/
 
 #ifndef lint
-static char rcsid[] DD_UNUSED = "$Id: cuddAddIte.c,v 1.16 2012/02/05 01:07:18 fabio Exp $";
+static char rcsid[] DD_UNUSED =
+    "$Id: cuddAddIte.c,v 1.16 2012/02/05 01:07:18 fabio Exp $";
 #endif
-
 
 /*---------------------------------------------------------------------------*/
 /* Macro declarations                                                        */
 /*---------------------------------------------------------------------------*/
-
 
 /**AutomaticStart*************************************************************/
 
@@ -98,15 +94,14 @@ static char rcsid[] DD_UNUSED = "$Id: cuddAddIte.c,v 1.16 2012/02/05 01:07:18 fa
 /* Static function prototypes                                                */
 /*---------------------------------------------------------------------------*/
 
-static void addVarToConst (DdNode *f, DdNode **gp, DdNode **hp, DdNode *one, DdNode *zero);
+static void addVarToConst(DdNode *f, DdNode **gp, DdNode **hp, DdNode *one,
+                          DdNode *zero);
 
 /**AutomaticEnd***************************************************************/
-
 
 /*---------------------------------------------------------------------------*/
 /* Definition of exported functions                                          */
 /*---------------------------------------------------------------------------*/
-
 
 /**Function********************************************************************
 
@@ -121,23 +116,16 @@ static void addVarToConst (DdNode *f, DdNode **gp, DdNode **hp, DdNode *one, DdN
   SeeAlso     [Cudd_bddIte Cudd_addIteConstant Cudd_addApply]
 
 ******************************************************************************/
-DdNode *
-Cudd_addIte(
-  DdManager * dd,
-  DdNode * f,
-  DdNode * g,
-  DdNode * h)
-{
+DdNode *Cudd_addIte(DdManager *dd, DdNode *f, DdNode *g, DdNode *h) {
     DdNode *res;
 
     do {
-	dd->reordered = 0;
-	res = cuddAddIteRecur(dd,f,g,h);
+        dd->reordered = 0;
+        res = cuddAddIteRecur(dd, f, g, h);
     } while (dd->reordered == 1);
-    return(res);
+    return (res);
 
 } /* end of Cudd_addIte */
-
 
 /**Function********************************************************************
 
@@ -155,87 +143,83 @@ Cudd_addIte(
   SeeAlso     [Cudd_addIte Cudd_addEvalConst Cudd_bddIteConstant]
 
 ******************************************************************************/
-DdNode *
-Cudd_addIteConstant(
-  DdManager * dd,
-  DdNode * f,
-  DdNode * g,
-  DdNode * h)
-{
-    DdNode *one,*zero;
-    DdNode *Fv,*Fnv,*Gv,*Gnv,*Hv,*Hnv,*r,*t,*e;
-    unsigned int topf,topg,toph,v;
+DdNode *Cudd_addIteConstant(DdManager *dd, DdNode *f, DdNode *g, DdNode *h) {
+    DdNode *one, *zero;
+    DdNode *Fv, *Fnv, *Gv, *Gnv, *Hv, *Hnv, *r, *t, *e;
+    unsigned int topf, topg, toph, v;
 
     statLine(dd);
     /* Trivial cases. */
-    if (f == (one = DD_ONE(dd))) {	/* ITE(1,G,H) = G */
-        return(g);
+    if (f == (one = DD_ONE(dd))) { /* ITE(1,G,H) = G */
+        return (g);
     }
-    if (f == (zero = DD_ZERO(dd))) {	/* ITE(0,G,H) = H */
-        return(h);
+    if (f == (zero = DD_ZERO(dd))) { /* ITE(0,G,H) = H */
+        return (h);
     }
 
     /* From now on, f is known not to be a constant. */
-    addVarToConst(f,&g,&h,one,zero);
+    addVarToConst(f, &g, &h, one, zero);
 
     /* Check remaining one variable cases. */
-    if (g == h) { 			/* ITE(F,G,G) = G */
-        return(g);
+    if (g == h) { /* ITE(F,G,G) = G */
+        return (g);
     }
     if (cuddIsConstant(g) && cuddIsConstant(h)) {
-        return(DD_NON_CONSTANT);
+        return (DD_NON_CONSTANT);
     }
 
-    topf = cuddI(dd,f->index);
-    topg = cuddI(dd,g->index);
-    toph = cuddI(dd,h->index);
-    v = ddMin(topg,toph);
+    topf = cuddI(dd, f->index);
+    topg = cuddI(dd, g->index);
+    toph = cuddI(dd, h->index);
+    v = ddMin(topg, toph);
 
     /* ITE(F,G,H) = (x,G,H) (non constant) if F = (x,1,0), x < top(G,H). */
     if (topf < v && cuddIsConstant(cuddT(f)) && cuddIsConstant(cuddE(f))) {
-	return(DD_NON_CONSTANT);
+        return (DD_NON_CONSTANT);
     }
 
     /* Check cache. */
-    r = cuddConstantLookup(dd,DD_ADD_ITE_CONSTANT_TAG,f,g,h);
+    r = cuddConstantLookup(dd, DD_ADD_ITE_CONSTANT_TAG, f, g, h);
     if (r != NULL) {
-        return(r);
+        return (r);
     }
 
     /* Compute cofactors. */
     if (topf <= v) {
-	v = ddMin(topf,v);	/* v = top_var(F,G,H) */
-        Fv = cuddT(f); Fnv = cuddE(f);
+        v = ddMin(topf, v); /* v = top_var(F,G,H) */
+        Fv = cuddT(f);
+        Fnv = cuddE(f);
     } else {
         Fv = Fnv = f;
     }
     if (topg == v) {
-        Gv = cuddT(g); Gnv = cuddE(g);
+        Gv = cuddT(g);
+        Gnv = cuddE(g);
     } else {
         Gv = Gnv = g;
     }
     if (toph == v) {
-        Hv = cuddT(h); Hnv = cuddE(h);
+        Hv = cuddT(h);
+        Hnv = cuddE(h);
     } else {
         Hv = Hnv = h;
     }
-    
+
     /* Recursive step. */
-    t = Cudd_addIteConstant(dd,Fv,Gv,Hv);
+    t = Cudd_addIteConstant(dd, Fv, Gv, Hv);
     if (t == DD_NON_CONSTANT || !cuddIsConstant(t)) {
-	cuddCacheInsert(dd, DD_ADD_ITE_CONSTANT_TAG, f, g, h, DD_NON_CONSTANT);
-	return(DD_NON_CONSTANT);
+        cuddCacheInsert(dd, DD_ADD_ITE_CONSTANT_TAG, f, g, h, DD_NON_CONSTANT);
+        return (DD_NON_CONSTANT);
     }
-    e = Cudd_addIteConstant(dd,Fnv,Gnv,Hnv);
+    e = Cudd_addIteConstant(dd, Fnv, Gnv, Hnv);
     if (e == DD_NON_CONSTANT || !cuddIsConstant(e) || t != e) {
-	cuddCacheInsert(dd, DD_ADD_ITE_CONSTANT_TAG, f, g, h, DD_NON_CONSTANT);
-	return(DD_NON_CONSTANT);
+        cuddCacheInsert(dd, DD_ADD_ITE_CONSTANT_TAG, f, g, h, DD_NON_CONSTANT);
+        return (DD_NON_CONSTANT);
     }
     cuddCacheInsert(dd, DD_ADD_ITE_CONSTANT_TAG, f, g, h, t);
-    return(t);
+    return (t);
 
 } /* end of Cudd_addIteConstant */
-
 
 /**Function********************************************************************
 
@@ -252,15 +236,10 @@ Cudd_addIteConstant(
   SeeAlso     [Cudd_addIteConstant Cudd_addLeq]
 
 ******************************************************************************/
-DdNode *
-Cudd_addEvalConst(
-  DdManager * dd,
-  DdNode * f,
-  DdNode * g)
-{
+DdNode *Cudd_addEvalConst(DdManager *dd, DdNode *f, DdNode *g) {
     DdNode *zero;
-    DdNode *Fv,*Fnv,*Gv,*Gnv,*r,*t,*e;
-    unsigned int topf,topg;
+    DdNode *Fv, *Fnv, *Gv, *Gnv, *r, *t, *e;
+    unsigned int topf, topg;
 
 #ifdef DD_DEBUG
     assert(!Cudd_IsComplement(f));
@@ -269,10 +248,10 @@ Cudd_addEvalConst(
     statLine(dd);
     /* Terminal cases. */
     if (f == DD_ONE(dd) || cuddIsConstant(g)) {
-        return(g);
+        return (g);
     }
     if (f == (zero = DD_ZERO(dd))) {
-        return(dd->background);
+        return (dd->background);
     }
 
 #ifdef DD_DEBUG
@@ -280,51 +259,52 @@ Cudd_addEvalConst(
 #endif
     /* From now on, f and g are known not to be constants. */
 
-    topf = cuddI(dd,f->index);
-    topg = cuddI(dd,g->index);
+    topf = cuddI(dd, f->index);
+    topg = cuddI(dd, g->index);
 
     /* Check cache. */
-    r = cuddConstantLookup(dd,DD_ADD_EVAL_CONST_TAG,f,g,g);
+    r = cuddConstantLookup(dd, DD_ADD_EVAL_CONST_TAG, f, g, g);
     if (r != NULL) {
-        return(r);
+        return (r);
     }
 
     /* Compute cofactors. */
     if (topf <= topg) {
-        Fv = cuddT(f); Fnv = cuddE(f);
+        Fv = cuddT(f);
+        Fnv = cuddE(f);
     } else {
         Fv = Fnv = f;
     }
     if (topg <= topf) {
-        Gv = cuddT(g); Gnv = cuddE(g);
+        Gv = cuddT(g);
+        Gnv = cuddE(g);
     } else {
         Gv = Gnv = g;
     }
-    
+
     /* Recursive step. */
     if (Fv != zero) {
-	t = Cudd_addEvalConst(dd,Fv,Gv);
-	if (t == DD_NON_CONSTANT || !cuddIsConstant(t)) {
-	    cuddCacheInsert2(dd, Cudd_addEvalConst, f, g, DD_NON_CONSTANT);
-	    return(DD_NON_CONSTANT);
-	}
-	if (Fnv != zero) {
-	    e = Cudd_addEvalConst(dd,Fnv,Gnv);
-	    if (e == DD_NON_CONSTANT || !cuddIsConstant(e) || t != e) {
-		cuddCacheInsert2(dd, Cudd_addEvalConst, f, g, DD_NON_CONSTANT);
-		return(DD_NON_CONSTANT);
-	    }
-	}
-	cuddCacheInsert2(dd,Cudd_addEvalConst,f,g,t);
-	return(t);
+        t = Cudd_addEvalConst(dd, Fv, Gv);
+        if (t == DD_NON_CONSTANT || !cuddIsConstant(t)) {
+            cuddCacheInsert2(dd, Cudd_addEvalConst, f, g, DD_NON_CONSTANT);
+            return (DD_NON_CONSTANT);
+        }
+        if (Fnv != zero) {
+            e = Cudd_addEvalConst(dd, Fnv, Gnv);
+            if (e == DD_NON_CONSTANT || !cuddIsConstant(e) || t != e) {
+                cuddCacheInsert2(dd, Cudd_addEvalConst, f, g, DD_NON_CONSTANT);
+                return (DD_NON_CONSTANT);
+            }
+        }
+        cuddCacheInsert2(dd, Cudd_addEvalConst, f, g, t);
+        return (t);
     } else { /* Fnv must be != zero */
-	e = Cudd_addEvalConst(dd,Fnv,Gnv);
-	cuddCacheInsert2(dd, Cudd_addEvalConst, f, g, e);
-	return(e);
+        e = Cudd_addEvalConst(dd, Fnv, Gnv);
+        cuddCacheInsert2(dd, Cudd_addEvalConst, f, g, e);
+        return (e);
     }
 
 } /* end of Cudd_addEvalConst */
-
 
 /**Function********************************************************************
 
@@ -339,21 +319,16 @@ Cudd_addEvalConst(
   SeeAlso     [Cudd_addNegate]
 
 ******************************************************************************/
-DdNode *
-Cudd_addCmpl(
-  DdManager * dd,
-  DdNode * f)
-{
+DdNode *Cudd_addCmpl(DdManager *dd, DdNode *f) {
     DdNode *res;
 
     do {
-	dd->reordered = 0;
-	res = cuddAddCmplRecur(dd,f);
+        dd->reordered = 0;
+        res = cuddAddCmplRecur(dd, f);
     } while (dd->reordered == 1);
-    return(res);
+    return (res);
 
 } /* end of Cudd_addCmpl */
-
 
 /**Function********************************************************************
 
@@ -368,61 +343,62 @@ Cudd_addCmpl(
   SeeAlso     [Cudd_addIteConstant Cudd_addEvalConst Cudd_bddLeq]
 
 ******************************************************************************/
-int
-Cudd_addLeq(
-  DdManager * dd,
-  DdNode * f,
-  DdNode * g)
-{
+int Cudd_addLeq(DdManager *dd, DdNode *f, DdNode *g) {
     DdNode *tmp, *fv, *fvn, *gv, *gvn;
     unsigned int topf, topg, res;
 
     /* Terminal cases. */
-    if (f == g) return(1);
+    if (f == g)
+        return (1);
 
     statLine(dd);
     if (cuddIsConstant(f)) {
-	if (cuddIsConstant(g)) return(cuddV(f) <= cuddV(g));
-	if (f == DD_MINUS_INFINITY(dd)) return(1);
-	if (f == DD_PLUS_INFINITY(dd)) return(0); /* since f != g */
+        if (cuddIsConstant(g))
+            return (cuddV(f) <= cuddV(g));
+        if (f == DD_MINUS_INFINITY(dd))
+            return (1);
+        if (f == DD_PLUS_INFINITY(dd))
+            return (0); /* since f != g */
     }
-    if (g == DD_PLUS_INFINITY(dd)) return(1);
-    if (g == DD_MINUS_INFINITY(dd)) return(0); /* since f != g */
+    if (g == DD_PLUS_INFINITY(dd))
+        return (1);
+    if (g == DD_MINUS_INFINITY(dd))
+        return (0); /* since f != g */
 
     /* Check cache. */
-    tmp = cuddCacheLookup2(dd,(DD_CTFP)Cudd_addLeq,f,g);
+    tmp = cuddCacheLookup2(dd, (DD_CTFP)Cudd_addLeq, f, g);
     if (tmp != NULL) {
-	return(tmp == DD_ONE(dd));
+        return (tmp == DD_ONE(dd));
     }
 
     /* Compute cofactors. One of f and g is not constant. */
-    topf = cuddI(dd,f->index);
-    topg = cuddI(dd,g->index);
+    topf = cuddI(dd, f->index);
+    topg = cuddI(dd, g->index);
     if (topf <= topg) {
-	fv = cuddT(f); fvn = cuddE(f);
+        fv = cuddT(f);
+        fvn = cuddE(f);
     } else {
-	fv = fvn = f;
+        fv = fvn = f;
     }
     if (topg <= topf) {
-	gv = cuddT(g); gvn = cuddE(g);
+        gv = cuddT(g);
+        gvn = cuddE(g);
     } else {
-	gv = gvn = g;
+        gv = gvn = g;
     }
 
-    res = Cudd_addLeq(dd,fvn,gvn) && Cudd_addLeq(dd,fv,gv);
+    res = Cudd_addLeq(dd, fvn, gvn) && Cudd_addLeq(dd, fv, gv);
 
     /* Store result in cache and return. */
-    cuddCacheInsert2(dd,(DD_CTFP) Cudd_addLeq,f,g,
-		     Cudd_NotCond(DD_ONE(dd),res==0));
-    return(res);
+    cuddCacheInsert2(dd, (DD_CTFP)Cudd_addLeq, f, g,
+                     Cudd_NotCond(DD_ONE(dd), res == 0));
+    return (res);
 
 } /* end of Cudd_addLeq */
-
 
 /*---------------------------------------------------------------------------*/
 /* Definition of internal functions                                          */
 /*---------------------------------------------------------------------------*/
-
 
 /**Function********************************************************************
 
@@ -437,110 +413,108 @@ Cudd_addLeq(
   SeeAlso     [Cudd_addIte]
 
 ******************************************************************************/
-DdNode *
-cuddAddIteRecur(
-  DdManager * dd,
-  DdNode * f,
-  DdNode * g,
-  DdNode * h)
-{
-    DdNode *one,*zero;
-    DdNode *r,*Fv,*Fnv,*Gv,*Gnv,*Hv,*Hnv,*t,*e;
-    unsigned int topf,topg,toph,v;
+DdNode *cuddAddIteRecur(DdManager *dd, DdNode *f, DdNode *g, DdNode *h) {
+    DdNode *one, *zero;
+    DdNode *r, *Fv, *Fnv, *Gv, *Gnv, *Hv, *Hnv, *t, *e;
+    unsigned int topf, topg, toph, v;
     int index;
 
     statLine(dd);
     /* Trivial cases. */
 
     /* One variable cases. */
-    if (f == (one = DD_ONE(dd))) {	/* ITE(1,G,H) = G */
-        return(g);
+    if (f == (one = DD_ONE(dd))) { /* ITE(1,G,H) = G */
+        return (g);
     }
-    if (f == (zero = DD_ZERO(dd))) {	/* ITE(0,G,H) = H */
-        return(h);
+    if (f == (zero = DD_ZERO(dd))) { /* ITE(0,G,H) = H */
+        return (h);
     }
 
     /* From now on, f is known to not be a constant. */
-    addVarToConst(f,&g,&h,one,zero);
+    addVarToConst(f, &g, &h, one, zero);
 
     /* Check remaining one variable cases. */
-    if (g == h) {			/* ITE(F,G,G) = G */
-        return(g);
+    if (g == h) { /* ITE(F,G,G) = G */
+        return (g);
     }
 
-    if (g == one) {			/* ITE(F,1,0) = F */
-        if (h == zero) return(f);
+    if (g == one) { /* ITE(F,1,0) = F */
+        if (h == zero)
+            return (f);
     }
 
-    topf = cuddI(dd,f->index);
-    topg = cuddI(dd,g->index);
-    toph = cuddI(dd,h->index);
-    v = ddMin(topg,toph);
+    topf = cuddI(dd, f->index);
+    topg = cuddI(dd, g->index);
+    toph = cuddI(dd, h->index);
+    v = ddMin(topg, toph);
 
     /* A shortcut: ITE(F,G,H) = (x,G,H) if F=(x,1,0), x < top(G,H). */
     if (topf < v && cuddT(f) == one && cuddE(f) == zero) {
-	r = cuddUniqueInter(dd,(int)f->index,g,h);
-	return(r);
+        r = cuddUniqueInter(dd, (int)f->index, g, h);
+        return (r);
     }
     if (topf < v && cuddT(f) == zero && cuddE(f) == one) {
-	r = cuddUniqueInter(dd,(int)f->index,h,g);
-	return(r);
+        r = cuddUniqueInter(dd, (int)f->index, h, g);
+        return (r);
     }
 
     /* Check cache. */
-    r = cuddCacheLookup(dd,DD_ADD_ITE_TAG,f,g,h);
+    r = cuddCacheLookup(dd, DD_ADD_ITE_TAG, f, g, h);
     if (r != NULL) {
-        return(r);
+        return (r);
     }
 
     /* Compute cofactors. */
     if (topf <= v) {
-	v = ddMin(topf,v);	/* v = top_var(F,G,H) */
-	index = f->index;
-        Fv = cuddT(f); Fnv = cuddE(f);
+        v = ddMin(topf, v); /* v = top_var(F,G,H) */
+        index = f->index;
+        Fv = cuddT(f);
+        Fnv = cuddE(f);
     } else {
         Fv = Fnv = f;
     }
     if (topg == v) {
-	index = g->index;
-        Gv = cuddT(g); Gnv = cuddE(g);
+        index = g->index;
+        Gv = cuddT(g);
+        Gnv = cuddE(g);
     } else {
         Gv = Gnv = g;
     }
     if (toph == v) {
-	index = h->index;
-        Hv = cuddT(h); Hnv = cuddE(h);
+        index = h->index;
+        Hv = cuddT(h);
+        Hnv = cuddE(h);
     } else {
         Hv = Hnv = h;
     }
-    
+
     /* Recursive step. */
-    t = cuddAddIteRecur(dd,Fv,Gv,Hv);
-    if (t == NULL) return(NULL);
+    t = cuddAddIteRecur(dd, Fv, Gv, Hv);
+    if (t == NULL)
+        return (NULL);
     cuddRef(t);
 
-    e = cuddAddIteRecur(dd,Fnv,Gnv,Hnv);
+    e = cuddAddIteRecur(dd, Fnv, Gnv, Hnv);
     if (e == NULL) {
-	Cudd_RecursiveDeref(dd,t);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, t);
+        return (NULL);
     }
     cuddRef(e);
 
-    r = (t == e) ? t : cuddUniqueInter(dd,index,t,e);
+    r = (t == e) ? t : cuddUniqueInter(dd, index, t, e);
     if (r == NULL) {
-	Cudd_RecursiveDeref(dd,t);
-	Cudd_RecursiveDeref(dd,e);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, t);
+        Cudd_RecursiveDeref(dd, e);
+        return (NULL);
     }
     cuddDeref(t);
     cuddDeref(e);
 
-    cuddCacheInsert(dd,DD_ADD_ITE_TAG,f,g,h,r);
+    cuddCacheInsert(dd, DD_ADD_ITE_TAG, f, g, h, r);
 
-    return(r);
+    return (r);
 
 } /* end of cuddAddIteRecur */
-
 
 /**Function********************************************************************
 
@@ -554,58 +528,53 @@ cuddAddIteRecur(
   SeeAlso     [Cudd_addCmpl]
 
 ******************************************************************************/
-DdNode *
-cuddAddCmplRecur(
-  DdManager * dd,
-  DdNode * f)
-{
-    DdNode *one,*zero;
-    DdNode *r,*Fv,*Fnv,*t,*e;
+DdNode *cuddAddCmplRecur(DdManager *dd, DdNode *f) {
+    DdNode *one, *zero;
+    DdNode *r, *Fv, *Fnv, *t, *e;
 
     statLine(dd);
     one = DD_ONE(dd);
-    zero = DD_ZERO(dd); 
+    zero = DD_ZERO(dd);
 
     if (cuddIsConstant(f)) {
         if (f == zero) {
-	    return(one);
-	} else {
-	    return(zero);
-	}
+            return (one);
+        } else {
+            return (zero);
+        }
     }
-    r = cuddCacheLookup1(dd,Cudd_addCmpl,f);
+    r = cuddCacheLookup1(dd, Cudd_addCmpl, f);
     if (r != NULL) {
-	return(r);
+        return (r);
     }
     Fv = cuddT(f);
     Fnv = cuddE(f);
-    t = cuddAddCmplRecur(dd,Fv);
-    if (t == NULL) return(NULL);
+    t = cuddAddCmplRecur(dd, Fv);
+    if (t == NULL)
+        return (NULL);
     cuddRef(t);
-    e = cuddAddCmplRecur(dd,Fnv);
+    e = cuddAddCmplRecur(dd, Fnv);
     if (e == NULL) {
-	Cudd_RecursiveDeref(dd,t);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, t);
+        return (NULL);
     }
     cuddRef(e);
-    r = (t == e) ? t : cuddUniqueInter(dd,(int)f->index,t,e);
+    r = (t == e) ? t : cuddUniqueInter(dd, (int)f->index, t, e);
     if (r == NULL) {
-	Cudd_RecursiveDeref(dd, t);
-	Cudd_RecursiveDeref(dd, e);
-	return(NULL);
+        Cudd_RecursiveDeref(dd, t);
+        Cudd_RecursiveDeref(dd, e);
+        return (NULL);
     }
     cuddDeref(t);
     cuddDeref(e);
-    cuddCacheInsert1(dd,Cudd_addCmpl,f,r);
-    return(r);
+    cuddCacheInsert1(dd, Cudd_addCmpl, f, r);
+    return (r);
 
 } /* end of cuddAddCmplRecur */
-
 
 /*---------------------------------------------------------------------------*/
 /* Definition of static functions                                            */
 /*---------------------------------------------------------------------------*/
-
 
 /**Function********************************************************************
 
@@ -617,23 +586,17 @@ cuddAddCmplRecur(
   SideEffects [None]
 
 ******************************************************************************/
-static void
-addVarToConst(
-  DdNode * f,
-  DdNode ** gp,
-  DdNode ** hp,
-  DdNode * one,
-  DdNode * zero)
-{
+static void addVarToConst(DdNode *f, DdNode **gp, DdNode **hp, DdNode *one,
+                          DdNode *zero) {
     DdNode *g = *gp;
     DdNode *h = *hp;
 
     if (f == g) { /* ITE(F,F,H) = ITE(F,1,H) = F + H */
-	*gp = one;
+        *gp = one;
     }
 
     if (f == h) { /* ITE(F,G,F) = ITE(F,G,0) = F * G */
-	*hp = zero;
+        *hp = zero;
     }
 
 } /* end of addVarToConst */

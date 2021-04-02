@@ -8,8 +8,8 @@
 #ifndef PCG_H_
 #define PCG_H_
 
-#include "Util/ThreadAPI.h"
 #include "Graphs/PTACallGraph.h"
+#include "Util/ThreadAPI.h"
 #include "Util/WorkList.h"
 #include "WPA/Andersen.h"
 #include <set>
@@ -17,65 +17,58 @@
 
 #include "MHP.h"
 
-namespace SVF
-{
+namespace SVF {
 
 /*!
- * This class serves as a base may-happen in parallel analysis for multithreaded program
- * It distinguish thread spawner, spawnee, follower in procedure level by
- * modeling pthread_create, pthread_join, pthread_exit, pthread_cancel synchronization operations
+ * This class serves as a base may-happen in parallel analysis for multithreaded
+ * program It distinguish thread spawner, spawnee, follower in procedure level
+ * by modeling pthread_create, pthread_join, pthread_exit, pthread_cancel
+ * synchronization operations
  */
-class PCG
-{
+class PCG {
 
-public:
-    typedef Set<const Function*> FunSet;
-    typedef std::vector<const Function*> FunVec;
-    typedef Set<const Instruction*> CallInstSet;
-    typedef FIFOWorkList<const Function*> FunWorkList;
-    typedef FIFOWorkList<const BasicBlock*> BBWorkList;
+  public:
+    using FunSet = Set<const Function *>;
+    using FunVec = std::vector<const Function *>;
+    using CallInstSet = Set<const Instruction *>;
+    using FunWorkList = FIFOWorkList<const Function *>;
+    using BBWorkList = FIFOWorkList<const BasicBlock *>;
 
-private:
+  private:
     FunSet spawners;
     FunSet spawnees;
     FunSet followers;
     FunSet mhpfuns;
-    PTACallGraph* callgraph;
-    SVFModule* mod;
-    PointerAnalysis* pta;
-    ThreadAPI* tdAPI;
+    PTACallGraph *callgraph;
+    SVFModule *mod;
+    PointerAnalysis *pta;
+    ThreadAPI *tdAPI;
 
     /// Callsites direct or Indirect call a function which spawn a thread
     CallInstSet spawnCallSites;
 
     /// Add/Get methods for thread properties of a procedure
     //@{
-    inline bool isSpawnerFun(const Function* fun) const
-    {
+    inline bool isSpawnerFun(const Function *fun) const {
         return spawners.find(fun) != spawners.end();
     }
-    inline bool isSpawneeFun(const Function* fun) const
-    {
+    inline bool isSpawneeFun(const Function *fun) const {
         return spawnees.find(fun) != spawnees.end();
     }
-    inline bool isFollowerFun(const Function* fun) const
-    {
+    inline bool isFollowerFun(const Function *fun) const {
         return followers.find(fun) != followers.end();
     }
-    inline bool addSpawnerFun(const Function* fun)
-    {
+    inline bool addSpawnerFun(const Function *fun) {
         if (fun->isDeclaration())
             return false;
         return spawners.insert(fun).second;
     }
-    inline bool addSpawneeFun(const Function* fun)
-    {
+    inline bool addSpawneeFun(const Function *fun) {
         if (fun->isDeclaration())
             return false;
         return spawnees.insert(fun).second;
     }
-    inline bool addFollowerFun(const Function* fun)
-    {
+    inline bool addFollowerFun(const Function *fun) {
         if (fun->isDeclaration())
             return false;
         return followers.insert(fun).second;
@@ -84,34 +77,28 @@ private:
 
     /// Add/search spawn sites which directly or indirectly create a thread
     //@{
-    inline bool addSpawnsite(const Instruction* callInst)
-    {
+    inline bool addSpawnsite(const Instruction *callInst) {
         return spawnCallSites.insert(callInst).second;
     }
-    inline bool isSpawnsite(const Instruction* callInst)
-    {
+    inline bool isSpawnsite(const Instruction *callInst) {
         return spawnCallSites.find(callInst) != spawnCallSites.end();
     }
     //@}
     /// Spawn sites iterators
     //@{
-    inline CallInstSet::iterator spawnSitesBegin() const
-    {
+    inline CallInstSet::iterator spawnSitesBegin() const {
         return spawnCallSites.begin();
     }
-    inline CallInstSet::iterator spawnSitesEnd() const
-    {
+    inline CallInstSet::iterator spawnSitesEnd() const {
         return spawnCallSites.end();
     }
     //@}
 
-public:
-
+  public:
     /// Constructor
-    PCG(PointerAnalysis* an) : pta(an)
-    {
+    PCG(PointerAnalysis *an) : pta(an) {
         mod = pta->getModule();
-        tdAPI=ThreadAPI::getThreadAPI();
+        tdAPI = ThreadAPI::getThreadAPI();
         callgraph = pta->getPTACallGraph();
     }
 
@@ -119,21 +106,19 @@ public:
     virtual bool analyze();
 
     /// Destructor
-    virtual ~PCG()
-    {
-    }
+    virtual ~PCG() {}
 
     /// Interface to query whether two function may happen-in-parallel
-    virtual bool mayHappenInParallel(const Instruction* i1, const Instruction* i2) const;
-    bool mayHappenInParallelBetweenFunctions(const Function* fun1, const Function* fun2) const;
-    //bool mayHappenInParallel(const Function* fun1, const Function* fun2) const;
-    inline const FunSet& getMHPFunctions() const
-    {
-        return mhpfuns;
-    }
+    virtual bool mayHappenInParallel(const Instruction *i1,
+                                     const Instruction *i2) const;
+    bool mayHappenInParallelBetweenFunctions(const Function *fun1,
+                                             const Function *fun2) const;
+    // bool mayHappenInParallel(const Function* fun1, const Function* fun2)
+    // const;
+    inline const FunSet &getMHPFunctions() const { return mhpfuns; }
 
     /// Initialize spawner and spawnee sets with threadAPI
-    void initFromThreadAPI(SVFModule* module);
+    void initFromThreadAPI(SVFModule *module);
 
     /// Infer spawner spawnee and followers sets by traversing on callGraph
     //@{
@@ -146,44 +131,29 @@ public:
 
     /// Get spawners/spawnees/followers
     //@{
-    inline const FunSet& getSpawners() const
-    {
-        return spawners;
-    }
-    inline const FunSet& getSpawnees() const
-    {
-        return spawnees;
-    }
-    inline const FunSet& getFollowers() const
-    {
-        return followers;
-    }
+    inline const FunSet &getSpawners() const { return spawners; }
+    inline const FunSet &getSpawnees() const { return spawnees; }
+    inline const FunSet &getFollowers() const { return followers; }
     //@}
 
     /// Iterators for thread properties of a procedure
     //@{
-    inline FunSet::iterator spawnersBegin(const Function* fun) const
-    {
+    inline FunSet::iterator spawnersBegin(const Function *fun) const {
         return spawners.begin();
     }
-    inline FunSet::iterator spawnersEnd(const Function* fun) const
-    {
+    inline FunSet::iterator spawnersEnd(const Function *fun) const {
         return spawners.end();
     }
-    inline FunSet::iterator spawneesBegin(const Function* fun) const
-    {
+    inline FunSet::iterator spawneesBegin(const Function *fun) const {
         return spawnees.begin();
     }
-    inline FunSet::iterator spawneesEnd(const Function* fun) const
-    {
+    inline FunSet::iterator spawneesEnd(const Function *fun) const {
         return spawnees.end();
     }
-    inline FunSet::iterator followersBegin(const Function* fun) const
-    {
+    inline FunSet::iterator followersBegin(const Function *fun) const {
         return followers.begin();
     }
-    inline FunSet::iterator followersEnd(const Function* fun) const
-    {
+    inline FunSet::iterator followersEnd(const Function *fun) const {
         return followers.end();
     }
     //@}

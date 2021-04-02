@@ -1,4 +1,5 @@
-//===- CallGraphBuilder.h ----------------------------------------------------------------//
+//===- CallGraphBuilder.h
+//----------------------------------------------------------------//
 //
 //                     SVF: Static Value-Flow Analysis
 //
@@ -20,7 +21,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 /*
  * CallGraphBuilder.h
  *
@@ -34,41 +34,35 @@
 #include "Graphs/PTACallGraph.h"
 #include "Graphs/ThreadCallGraph.h"
 
-namespace SVF
-{
+namespace SVF {
 
 class ICFG;
 
-class CallGraphBuilder
-{
+class CallGraphBuilder {
 
-protected:
-    PTACallGraph* callgraph;
-    ICFG* icfg;
-public:
-    CallGraphBuilder(PTACallGraph* cg, ICFG* i): callgraph(cg),icfg(i)
-    {
-    }
+  protected:
+    PTACallGraph *callgraph;
+    ICFG *icfg;
+    SVFProject *proj;
+
+  public:
+    CallGraphBuilder(SVFProject *proj, PTACallGraph *cg)
+        : callgraph(cg), icfg(proj->getICFG()), proj(proj) {}
 
     /// Build normal callgraph
-    PTACallGraph* buildCallGraph(SVFModule* svfModule);
-
+    PTACallGraph *buildCallGraph();
 };
 
-class ThreadCallGraphBuilder : public CallGraphBuilder
-{
+class ThreadCallGraphBuilder : public CallGraphBuilder {
 
-public:
-    ThreadCallGraphBuilder(ThreadCallGraph* cg, ICFG* i): CallGraphBuilder(cg,i)
-    {
-    }
+  public:
+    ThreadCallGraphBuilder(SVFProject *proj, ThreadCallGraph *cg)
+        : CallGraphBuilder(proj, cg) {}
 
     /// Build thread-aware callgraph
-    PTACallGraph* buildThreadCallGraph(SVFModule* svfModule);
-
+    PTACallGraph *buildThreadCallGraph();
 };
 
 } // End namespace SVF
-
 
 #endif /* INCLUDE_UTIL_CALLGRAPHBUILDER_H_ */

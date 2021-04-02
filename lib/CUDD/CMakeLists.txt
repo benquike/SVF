@@ -37,10 +37,13 @@ set(SOURCES
 	st.c
 )
 
-add_llvm_library(Cudd SHARED ${SOURCES} LINK_LIBS m)
+add_library(Cudd SHARED ${SOURCES})
 
-set_target_properties(Cudd PROPERTIES COMPILE_FLAGS "-Wno-format -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast -O3 -w -DHAVE_IEEE_754 -DSIZEOF_VOID_P=8 -DSIZEOF_LONG=8")
+add_compile_definitions(HAVE_IEEE_754)
+add_compile_definitions(SIZEOF_VOID_P=8)
+add_compile_definitions(SIZEOF_LONG=8)
 
-if(DEFINED IN_SOURCE_BUILD)
-    add_dependencies(Cudd intrinsics_gen)
-endif()
+set_target_properties(Cudd PROPERTIES COMPILE_FLAGS "-Wno-format \
+-Wno-int-to-pointer-cast -Wno-pointer-to-int-cast \
+-Wno-sign-compare \
+-Wno-implicit-fallthrough")
