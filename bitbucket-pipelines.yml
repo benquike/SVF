@@ -13,8 +13,6 @@ pipelines:
     - step:
         name: Checkout Submodules & Edit and Build Test-Suite
         script:
-          - echo $BITBUCKET_CLONE_DIR
-          - cd $BITBUCKET_CLONE_DIR
           - git submodule init
           - git submodule update
           - cd Test-Suite
@@ -24,7 +22,8 @@ pipelines:
     - step:
         name: Prepare build directory
         script:
-          - cd $BITBUCKET_CLONE_DIR
+          - git submodule init
+          - git submodule update
           - cmake -E make_directory Debug-build
           - cd Debug-build
           - cmake -DSVF_BUILD_UNITTESTS=On -DCMAKE_BUILD_TYPE=Debug ..
@@ -32,19 +31,22 @@ pipelines:
     - step:
         name: Check code format
         script:
-          - cd $BITBUCKET_CLONE_DIR
+          - git submodule init
+          - git submodule update
           - cmake --build Debug-build --target check-format
 
     - step:
         name: Build source code
         script:
-          - cd $BITBUCKET_CLONE_DIR
+          - git submodule init
+          - git submodule update
           - cd Debug-build
           - cmake --build . --config Debug -j
 
     - step:
         name: Run unittest
         script:
-          - cd $BITBUCKET_CLONE_DIR
+          - git submodule init
+          - git submodule update
           - cd Debug-build
           - ctest
