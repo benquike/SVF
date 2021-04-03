@@ -11,29 +11,31 @@ image:
 pipelines:
   default:
     - step:
-      name: Checkout submodules
-      script:
-        - git submodule init; git submodule update
-        - cd Test-Suite; sed -i 's|/vfs_tests/|/fs_tests/|g' CMakeLists.txt; ./generate_bc.sh
+        name: Checkout Submodules
+        script:
+          - git submodule init
+          - git submodule update
+          - cd Test-Suite
+          - sed -i 's|/vfs_tests/|/fs_tests/|g' CMakeLists.txt
+          - ./generate_bc.sh
 
     - step:
         name: Prepare build directory
         script:
           - cmake -E make_directory Debug-build
-          - cd Debug-build;
+          - cd Debug-build
           - cmake -DSVF_BUILD_UNITTESTS=On -DCMAKE_BUILD_TYPE=Debug ..
 
     - step:
-      name: Check code format
-      script:
-        - cmake --build Debug-build --target check-format
+        name: Check code format
+        script:
+          - cmake --build Debug-build --target check-format
 
     - step:
-        name: Build the source
+        name: Build source code
         script:
           - cd Debug-build
           - cmake --build . --config Debug -j
-
 
     - step:
         name: Run unittest
