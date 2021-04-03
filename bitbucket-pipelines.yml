@@ -11,7 +11,7 @@ image:
 pipelines:
   default:
     - step:
-        name: Checkout Submodules & Edit and Build Test-Suite
+        name: Checkout Submodules & Check code format & Build & Test
         script:
           - git submodule init
           - git submodule update
