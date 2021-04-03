@@ -26,6 +26,8 @@ RUN rm -rf /var/lib/apt/lists/*
 RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-10 40  \
     --slave /usr/bin/clang++ clang++ /usr/bin/clang++-10  \
     --slave /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-10 \
+    --slave /usr/bin/opt opt /usr/bin/opt-10 \
+    --slave /usr/bin/llvm-as llvm-as /usr/bin/llvm-as-10 \
     --slave /usr/bin/llvm-symbolizer llvm-symbolizer /usr/bin/llvm-symbolizer-10
 
 RUN useradd -ms /bin/bash test
