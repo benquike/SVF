@@ -17,36 +17,10 @@ pipelines:
           - git submodule update
           - cd Test-Suite
           - sed -i 's|/vfs_tests/|/fs_tests/|g' CMakeLists.txt
-          - ./generate_bc.sh
-
-    - step:
-        name: Prepare build directory
-        script:
-          - git submodule init
-          - git submodule update
+          - ./generate_bc.sh; cd ..
           - cmake -E make_directory Debug-build
           - cd Debug-build
-          - cmake -DSVF_BUILD_UNITTESTS=On -DCMAKE_BUILD_TYPE=Debug ..
-
-    - step:
-        name: Check code format
-        script:
-          - git submodule init
-          - git submodule update
-          - cmake --build Debug-build --target check-format
-
-    - step:
-        name: Build source code
-        script:
-          - git submodule init
-          - git submodule update
-          - cd Debug-build
-          - cmake --build . --config Debug -j
-
-    - step:
-        name: Run unittest
-        script:
-          - git submodule init
-          - git submodule update
-          - cd Debug-build
-          - ctest
+          - cmake -DSVF_BUILD_UNITTESTS=On -DCMAKE_BUILD_TYPE=Debug ..; cd ..
+          - cmake --build Debug-build --target check-format # check code format
+          - cmake --build . --config Debug -j # build the code
+          - ctest # run ctest
