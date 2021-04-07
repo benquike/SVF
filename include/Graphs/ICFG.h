@@ -110,6 +110,9 @@ class ICFG : public GenericICFGTy {
     /// Dump graph into dot file
     void dump(const std::string &file, bool simple = false);
 
+    /// View graph from the debugger
+    void view();
+
     /// update ICFG for indirect calls
     void updateCallGraph(PTACallGraph *callgraph);
 

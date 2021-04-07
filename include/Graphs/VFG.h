@@ -47,7 +47,9 @@ class VFG : public GenericVFGTy {
 
   public:
     /// VFG kind
-    enum VFGK { ORIGSVFGK, PTRONLYSVFGK };
+    enum VFGK {
+        FULLSVFG, PTRONLYSVFG, FULLSVFG_OPT, PTRONLYSVFG_OPT
+    };
 
     using VFGNodeIDToNodeMapTy = Map<NodeID, VFGNode *>;
     using VFGNodeSet = Set<VFGNode *>;
@@ -79,6 +81,7 @@ class VFG : public GenericVFGTy {
     using PAGNodeSet = Set<const PAGNode *>;
 
   protected:
+
     NodeID totalVFGNode;
     PAGNodeToDefMapTy
         PAGNodeToDefMap; ///< map a pag node to its definition SVG node
@@ -106,14 +109,13 @@ class VFG : public GenericVFGTy {
     PTACallGraph *callgraph;
     PAG *pag;
     VFGK kind;
-    bool dumpVFG;
 
     /// Clean up memory
     void destroy();
 
   public:
     /// Constructor
-    VFG(PTACallGraph *callgraph, PAG *pag, VFGK k = ORIGSVFGK);
+    VFG(PTACallGraph *callgraph, PAG *pag, VFGK k = FULLSVFG);
 
     /// Destructor
     virtual ~VFG() { destroy(); }
@@ -123,13 +125,10 @@ class VFG : public GenericVFGTy {
 
     /// Return true if this VFG only contains pointer related SVFGNodes for
     /// pointer analysis
-    inline bool isPtrOnlySVFG() const { return kind == PTRONLYSVFGK; }
-
-    /// Whether to dump VFG;
-    inline void setDumpVFG(bool flag) { dumpVFG = flag; }
-
-    /// Whether to dump VFG;
-    inline bool getDumpVFG() const { return dumpVFG; }
+    inline bool isPtrOnlySVFG() const
+    {
+        return (kind == PTRONLYSVFG) || (kind == PTRONLYSVFG_OPT);
+    }
 
     /// Return PAG
     inline PAG *getPAG() const { return pag; }

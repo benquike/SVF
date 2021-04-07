@@ -29,7 +29,6 @@
 
 
 #include "Util/Options.h"
-
 #include "WPA/FlowSensitive.h"
 #include "SVF-FE/DCHG.h"
 #include "Util/SVFModule.h"
@@ -52,9 +51,13 @@ void FlowSensitive::initialize() {
     ander = AndersenWaveDiff::createAndersenWaveDiff(getSVFProject());
     // When evaluating ctir aliases, we want the whole SVFG.
 
-    svfg = Options::CTirAliasEval ?
-        svfgBuilder.buildFullSVFG(ander) :
-        svfgBuilder.buildPTROnlySVFG(ander);
+    if(Options::OPTSVFG)
+        svfg = Options::CTirAliasEval ?
+            svfgBuilder.buildFullSVFG(ander) :
+            svfgBuilder.buildPTROnlySVFG(ander);
+    else
+        svfg = svfgBuilder.buildPTROnlySVFGWithoutOPT(ander);
+
     setGraph(svfg);
 
     // AndersenWaveDiff::releaseAndersenWaveDiff();
@@ -102,9 +105,10 @@ void FlowSensitive::analyze() {
 /*!
  * Finalize analysis
  */
-void FlowSensitive::finalize() {
-    if (svfg->getDumpVFG())
-        svfg->dump("fs_solved", true);
+void FlowSensitive::finalize()
+{
+	if(Options::DumpVFG)
+		svfg->dump("fs_solved", true);
 
     NodeStack &nodeStack = WPASolver<SVFG *>::SCCDetect();
     while (nodeStack.empty() == false) {

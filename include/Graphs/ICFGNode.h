@@ -109,9 +109,11 @@ class ICFGNode : public GenericICFGNodeTy {
 
     virtual const std::string toString() const;
 
-  protected:
-    const SVFFunction *fun;
-    const BasicBlock *bb;
+    void dump() const;
+
+protected:
+    const SVFFunction* fun;
+    const BasicBlock* bb;
     VFGNodeList VFGNodes; //< a list of VFGNodes
     PAGEdgeList pagEdges; //< a list of PAGEdges
 };

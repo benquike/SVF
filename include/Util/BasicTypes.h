@@ -236,6 +236,12 @@ class SVFFunction : public SVFValue {
     inline u32_t arg_size() const { return getLLVMFun()->arg_size(); }
 
     inline bool isVarArg() const { return getLLVMFun()->isVarArg(); }
+    // Dump Control Flow Graph of llvm function, with instructions
+    void viewCFG();
+
+    // Dump Control Flow Graph of llvm function, without instructions
+    void viewCFGOnly();
+
 };
 
 class SVFGlobal : public SVFValue {

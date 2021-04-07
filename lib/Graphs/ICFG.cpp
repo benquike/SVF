@@ -31,6 +31,8 @@
  *     2021-03-21
  */
 
+#include <Util/Options.h>
+#include "Util/SVFModule.h"
 #include "Graphs/ICFG.h"
 #include "Graphs/PAG.h"
 #include "Graphs/PTACallGraph.h"
@@ -65,6 +67,10 @@ const std::string ICFGNode::toString() const {
     raw_string_ostream rawstr(str);
     rawstr << "ICFGNode ID: " << getId();
     return rawstr.str();
+}
+
+void ICFGNode::dump() const {
+    outs() << this->toString() << "\n";
 }
 
 const std::string GlobalBlockNode::toString() const {
@@ -396,6 +402,14 @@ void ICFG::dump(const std::string &file, bool simple) {
 }
 
 /*!
+ * View ICFG
+ */
+void ICFG::view()
+{
+    llvm::ViewGraph(this, "Interprocedural Control-Flow Graph");
+}
+
+/*!
  * Update ICFG for indirect calls
  */
 void ICFG::updateCallGraph(PTACallGraph *callgraph) {
@@ -473,10 +487,14 @@ template <> struct DOTGraphTraits<ICFG *> : public DOTGraphTraits<PAG *> {
         if (auto* bNode = SVFUtil::dyn_cast<IntraBlockNode>(node))
         {
             rawstr << "IntraBlockNode ID: " << bNode->getId() << " \t";
-            PAG::PAGEdgeList &edges =
-                g->getPAG()->getInstPTAPAGEdgeList(bNode);
-            for (auto edge : edges) {
-                rawstr << edge->toString();
+
+            PAG::PAGEdgeList&  edges = g->getPAG()->getInstPTAPAGEdgeList(bNode);
+            if (edges.empty()) {
+                rawstr << value2String(bNode->getInst()) << " \t";
+            } else {
+                for (auto edge : edges) {
+                    rawstr << edge->toString();
+                }
             }
             rawstr << " {fun: " << bNode->getFun()->getName() << "}";
         }

@@ -46,7 +46,7 @@ static std::string KeepNoneSelfCycle = "none";
 void SVFGOPT::buildSVFG() {
     SVFG::buildSVFG();
 
-    if (getDumpVFG()) {
+    if(Options::DumpVFG) {
         dump("SVFG_before_opt");
     }
 

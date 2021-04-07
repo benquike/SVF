@@ -575,18 +575,17 @@ NodeID PAG::getGepObjNode(NodeID id, const LocationSet &ls) {
 NodeID PAG::getGepObjNode(const MemObj *obj, const LocationSet &ls) {
     NodeID base = getObjectNode(obj);
 
-    // Base and first field are the same memory location.
-    if (Options::FirstFieldEqBase && ls.getOffset() == 0) return base;
-
-    /// if this obj is field-insensitive, just return the field-insensitive
-    /// node.
+    /// if this obj is field-insensitive, just return the field-insensitive node.
     if (obj->isFieldInsensitive()) {
         return getFIObjNode(obj);
     }
 
     LocationSet newLS = symbolTableInfo->getModulusOffset(obj, ls);
 
-    auto iter = GepObjNodeMap.find(std::make_pair(base, newLS));
+    // Base and first field are the same memory location.
+    if (Options::FirstFieldEqBase && newLS.getOffset() == 0) return base;
+
+    NodeLocationSetMap::iterator iter = GepObjNodeMap.find(std::make_pair(base, newLS));
     if (iter == GepObjNodeMap.end()) {
         return addGepObjNode(obj, newLS);
     }

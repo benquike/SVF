@@ -224,7 +224,15 @@ std::string SVFUtil::getSourceLoc(const Value *val) {
             unsigned Line = Loc->getLine();
             unsigned Column = Loc->getColumn();
             StringRef File = Loc->getFilename();
-            // StringRef Dir = Loc.getDirectory();
+            //StringRef Dir = Loc.getDirectory();
+            if(File.str().empty() || Line == 0) {
+                auto inlineLoc = Loc->getInlinedAt();
+                if(inlineLoc) {
+                    Line = inlineLoc->getLine();
+                    Column = inlineLoc->getColumn();
+                    File = inlineLoc->getFilename();
+                }   
+            }
             rawstr << "ln: " << Line << "  cl: " << Column << "  fl: " << File;
         }
     } else if (const auto *argument = SVFUtil::dyn_cast<Argument>(val)) {
@@ -293,4 +301,16 @@ const std::string SVFUtil::value2String(const Value* value) {
         rawstr << getSourceLoc(value);
     }
     return rawstr.str();
+}
+
+void SVFFunction::viewCFG() {
+    if (fun != nullptr) {
+        fun->viewCFG();
+    }
+}
+
+void SVFFunction::viewCFGOnly() {
+    if (fun != nullptr) {
+        fun->viewCFGOnly();
+    }
 }

@@ -208,7 +208,9 @@ void SVFG::destroy() {
  *    a) between two statements (PAGEdges)
  *    b) between two memory SSA operators (MSSAPHI MSSAMU and MSSACHI)
  */
+
 void SVFG::buildSVFG() {
+    DBOUT(DGENERAL, outs() << pasMsg("Build Sparse Value-Flow Graph \n"));
     stat->startClk();
 
     DBOUT(DGENERAL, outs() << pasMsg("\tCreate SVFG Addr-taken Node\n"));
