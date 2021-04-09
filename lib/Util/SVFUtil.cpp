@@ -27,9 +27,9 @@
  *      Author: Yulei Sui
  */
 
-#include "Util/Options.h"
 #include "Util/SVFUtil.h"
 #include "SVF-FE/LLVMUtil.h"
+#include "Util/Options.h"
 
 #include "Util/Conditions.h"
 #include <llvm/Demangle/Demangle.h>
@@ -47,7 +47,6 @@ using namespace SVF;
 #define KCYA "\x1B[1;36m"
 #define KWHT "\x1B[1;37m"
 
-
 /*!
  * print successful message by converting a string into green string output
  */
@@ -58,9 +57,9 @@ std::string SVFUtil::sucMsg(std::string msg) { return KGRN + msg + KNRM; }
  */
 std::string SVFUtil::wrnMsg(std::string msg) { return KYEL + msg + KNRM; }
 
-void SVFUtil::writeWrnMsg(std::string msg)
-{
-    if(Options::DisableWarn) return;
+void SVFUtil::writeWrnMsg(std::string msg) {
+    if (Options::DisableWarn)
+        return;
     outs() << wrnMsg(msg) << "\n";
 }
 
@@ -224,14 +223,14 @@ std::string SVFUtil::getSourceLoc(const Value *val) {
             unsigned Line = Loc->getLine();
             unsigned Column = Loc->getColumn();
             StringRef File = Loc->getFilename();
-            //StringRef Dir = Loc.getDirectory();
-            if(File.str().empty() || Line == 0) {
+            // StringRef Dir = Loc.getDirectory();
+            if (File.str().empty() || Line == 0) {
                 auto inlineLoc = Loc->getInlinedAt();
-                if(inlineLoc) {
+                if (inlineLoc) {
                     Line = inlineLoc->getLine();
                     Column = inlineLoc->getColumn();
                     File = inlineLoc->getFilename();
-                }   
+                }
             }
             rawstr << "ln: " << Line << "  cl: " << Column << "  fl: " << File;
         }
@@ -268,33 +267,28 @@ std::string SVFUtil::getSourceLoc(const Value *val) {
         }
     } else if (const auto *func = SVFUtil::dyn_cast<Function>(val)) {
         rawstr << getSourceLocOfFunction(func);
-    }
-    else if (const BasicBlock* bb = SVFUtil::dyn_cast<BasicBlock>(val))
-    {
-        rawstr << "basic block: " << bb->getName() << " " << getSourceLoc(bb->getFirstNonPHI());
-    }
-    else if(SVFUtil::isConstantData(val))
-    {
+    } else if (const BasicBlock *bb = SVFUtil::dyn_cast<BasicBlock>(val)) {
+        rawstr << "basic block: " << bb->getName() << " "
+               << getSourceLoc(bb->getFirstNonPHI());
+    } else if (SVFUtil::isConstantData(val)) {
         rawstr << "constant data";
-    }
-    else
-    {
-        rawstr << "Can only get source location for instruction, argument, global var, function or constant data.";
+    } else {
+        rawstr << "Can only get source location for instruction, argument, "
+                  "global var, function or constant data.";
     }
     rawstr << " }";
 
     return rawstr.str();
 }
 
-
 /*!
  * return string of an LLVM Value
  */
-const std::string SVFUtil::value2String(const Value* value) {
+const std::string SVFUtil::value2String(const Value *value) {
     std::string str;
     raw_string_ostream rawstr(str);
-    if(value){
-        if(const SVF::Function* fun = SVFUtil::dyn_cast<Function>(value))
+    if (value) {
+        if (const SVF::Function *fun = SVFUtil::dyn_cast<Function>(value))
             rawstr << " " << fun->getName() << " ";
         else
             rawstr << " " << *value << " ";

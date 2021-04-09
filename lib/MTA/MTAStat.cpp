@@ -5,7 +5,6 @@
  *      Author: Yulei Sui, Peng Di
  */
 
-#include "Util/Options.h"
 #include "MTA/MTAStat.h"
 #include "Graphs/ThreadCallGraph.h"
 #include "MTA/FSMPTA.h"
@@ -13,6 +12,7 @@
 #include "MTA/MHP.h"
 #include "MTA/MTAAnnotator.h"
 #include "MTA/TCT.h"
+#include "Util/Options.h"
 
 using namespace SVF;
 
@@ -86,8 +86,7 @@ void MTAStat::performTCTStat(TCT *tct) {
  */
 void MTAStat::performMHPPairStat(MHP *mhp, LockAnalysis *lsa) {
 
-    if(Options::AllPairMHP)
-    {
+    if (Options::AllPairMHP) {
         InstSet instSet1;
         InstSet instSet2;
         SVFModule *mod = mhp->getThreadCallGraph()->getModule();

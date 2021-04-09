@@ -32,9 +32,9 @@
  *
  */
 
-#include "Util/Options.h"
 #include "Graphs/SVFGOPT.h"
 #include "Graphs/SVFGStat.h"
+#include "Util/Options.h"
 
 using namespace SVF;
 using namespace SVFUtil;
@@ -46,7 +46,7 @@ static std::string KeepNoneSelfCycle = "none";
 void SVFGOPT::buildSVFG() {
     SVFG::buildSVFG();
 
-    if(Options::DumpVFG) {
+    if (Options::DumpVFG) {
         dump("SVFG_before_opt");
     }
 
@@ -63,8 +63,9 @@ void SVFGOPT::buildSVFG() {
 /*!
  *
  */
-SVFGEdge* SVFGOPT::addCallIndirectSVFGEdge(NodeID srcId, NodeID dstId, CallSiteID csid, const PointsTo& cpts)
-{
+SVFGEdge *SVFGOPT::addCallIndirectSVFGEdge(NodeID srcId, NodeID dstId,
+                                           CallSiteID csid,
+                                           const PointsTo &cpts) {
     if (Options::ContextInsensitive) {
         return addIntraIndirectVFEdge(srcId, dstId, cpts);
     } else {
@@ -75,8 +76,9 @@ SVFGEdge* SVFGOPT::addCallIndirectSVFGEdge(NodeID srcId, NodeID dstId, CallSiteI
 /*!
  *
  */
-SVFGEdge* SVFGOPT::addRetIndirectSVFGEdge(NodeID srcId, NodeID dstId, CallSiteID csid, const PointsTo& cpts)
-{
+SVFGEdge *SVFGOPT::addRetIndirectSVFGEdge(NodeID srcId, NodeID dstId,
+                                          CallSiteID csid,
+                                          const PointsTo &cpts) {
     if (Options::ContextInsensitive) {
         return addIntraIndirectVFEdge(srcId, dstId, cpts);
     } else {
@@ -376,9 +378,10 @@ bool SVFGOPT::canBeRemoved(const SVFGNode *node) {
 /*!
  *
  */
-void SVFGOPT::parseSelfCycleHandleOption()
-{
-    std::string choice = (Options::SelfCycle.getValue().empty()) ? "" : Options::SelfCycle.getValue();
+void SVFGOPT::parseSelfCycleHandleOption() {
+    std::string choice = (Options::SelfCycle.getValue().empty())
+                             ? ""
+                             : Options::SelfCycle.getValue();
     if (choice.empty() || choice == KeepAllSelfCycle) {
         keepAllSelfCycle = true;
     } else if (choice == KeepContextSelfCycle) {

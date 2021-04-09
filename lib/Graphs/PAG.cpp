@@ -31,21 +31,23 @@
  *     2021-03-21
  */
 
-#include <sstream> // std::stringstream
-#include <string>
-#include "Util/Options.h"
-#include "Graphs/ExternalPAG.h"
 #include "Graphs/PAG.h"
+#include "Graphs/ExternalPAG.h"
 #include "SVF-FE/ICFGBuilder.h"
 #include "SVF-FE/LLVMUtil.h"
 #include "SVF-FE/PAGBuilder.h"
+#include "Util/Options.h"
+#include <sstream> // std::stringstream
+#include <string>
 
 using namespace SVF;
 using namespace SVFUtil;
 
-llvm::cl::list<std::string> ExternalPAGArgs("extpags",
-                                            llvm::cl::desc("ExternalPAGs to use during PAG construction (format: func1@/path/to/graph,func2@/foo,..."),
-                                            llvm::cl::CommaSeparated);
+llvm::cl::list<std::string> ExternalPAGArgs(
+    "extpags",
+    llvm::cl::desc("ExternalPAGs to use during PAG construction (format: "
+                   "func1@/path/to/graph,func2@/foo,..."),
+    llvm::cl::CommaSeparated);
 
 u64_t PAGEdge::callEdgeLabelCounter = 0;
 u64_t PAGEdge::storeEdgeLabelCounter = 0;
@@ -79,7 +81,8 @@ const std::string GepValPN::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
 
-    rawstr << "GepValPN ID: " << getId() << " with offset_" + llvm::utostr(getOffset());
+    rawstr << "GepValPN ID: " << getId()
+           << " with offset_" + llvm::utostr(getOffset());
     rawstr << value2String(value);
     return rawstr.str();
 }
@@ -87,7 +90,8 @@ const std::string GepValPN::toString() const {
 const std::string GepObjPN::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
-    rawstr << "GepObjPN ID: " << getId() << " with offset_" + llvm::itostr(ls.getOffset());
+    rawstr << "GepObjPN ID: " << getId()
+           << " with offset_" + llvm::itostr(ls.getOffset());
     rawstr << value2String(value);
     return rawstr.str();
 }
@@ -429,7 +433,7 @@ RetPE *PAG::addRetPE(NodeID src, NodeID dst, const CallBlockNode *cs) {
  */
 
 PAGEdge *PAG::addBlackHoleAddrPE(NodeID node) {
-    if(Options::HandBlackHole) {
+    if (Options::HandBlackHole) {
         return addAddrPE(getBlackHoleNodeID(), node);
     }
 
@@ -575,7 +579,8 @@ NodeID PAG::getGepObjNode(NodeID id, const LocationSet &ls) {
 NodeID PAG::getGepObjNode(const MemObj *obj, const LocationSet &ls) {
     NodeID base = getObjectNode(obj);
 
-    /// if this obj is field-insensitive, just return the field-insensitive node.
+    /// if this obj is field-insensitive, just return the field-insensitive
+    /// node.
     if (obj->isFieldInsensitive()) {
         return getFIObjNode(obj);
     }
@@ -583,9 +588,11 @@ NodeID PAG::getGepObjNode(const MemObj *obj, const LocationSet &ls) {
     LocationSet newLS = symbolTableInfo->getModulusOffset(obj, ls);
 
     // Base and first field are the same memory location.
-    if (Options::FirstFieldEqBase && newLS.getOffset() == 0) return base;
+    if (Options::FirstFieldEqBase && newLS.getOffset() == 0)
+        return base;
 
-    NodeLocationSetMap::iterator iter = GepObjNodeMap.find(std::make_pair(base, newLS));
+    NodeLocationSetMap::iterator iter =
+        GepObjNodeMap.find(std::make_pair(base, newLS));
     if (iter == GepObjNodeMap.end()) {
         return addGepObjNode(obj, newLS);
     }
@@ -959,10 +966,7 @@ void PAG::dump(std::string name) {
  * Whether to handle blackhole edge
  */
 
-void PAG::handleBlackHole(bool b)
-{
-    Options::HandBlackHole = b;
-}
+void PAG::handleBlackHole(bool b) { Options::HandBlackHole = b; }
 
 void PAG::initializeExternalPAGs() {
     std::vector<std::pair<std::string, std::string>> parsedExternalPAGs =

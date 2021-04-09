@@ -27,12 +27,11 @@
  *      Author: Yulei Sui
  */
 
-#include "Util/Options.h"
-#include "MSSA/MemPartition.h"
 #include "MSSA/MemSSA.h"
 #include "Graphs/SVFGStat.h"
 #include "MSSA/MemPartition.h"
 #include "SVF-FE/LLVMUtil.h"
+#include "Util/Options.h"
 
 using namespace SVF;
 using namespace SVFUtil;
@@ -55,8 +54,7 @@ MemSSA::MemSSA(BVDataPTAImpl *p, bool ptrOnlyMSSA)
 
     assert((pta->getAnalysisTy() != PointerAnalysis::Default_PTA) &&
            "please specify a pointer analysis");
-    if (!Options::MemPar.getValue().empty())
-    {
+    if (!Options::MemPar.getValue().empty()) {
         std::string strategy = Options::MemPar.getValue();
         if (strategy == kDistinctMemPar)
             mrGen = new DistinctMRG(pta, ptrOnlyMSSA);
@@ -497,8 +495,7 @@ u32_t MemSSA::getBBPhiNum() const {
 /*!
  * Print SSA
  */
-void MemSSA::dumpMSSA(raw_ostream& Out)
-{
+void MemSSA::dumpMSSA(raw_ostream &Out) {
     if (!Options::DumpMSSA)
         return;
 

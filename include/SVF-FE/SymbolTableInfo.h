@@ -353,9 +353,7 @@ class SymbolTableInfo {
     /// Another debug method
     virtual void dump();
 
-    NodeIDAllocator &getNodeIDAllocator() {
-        return nodeIDAllocator;
-    }
+    NodeIDAllocator &getNodeIDAllocator() { return nodeIDAllocator; }
 
   protected:
     /// Collect the struct info

@@ -36,12 +36,11 @@
 #include <stack>
 #include <vector>
 
-#include "Util/Options.h"
-#include "SVF-FE/CPPUtil.h"
 #include "SVF-FE/CHG.h"
 #include "SVF-FE/CPPUtil.h"
 #include "SVF-FE/LLVMUtil.h"
 #include "SVF-FE/SymbolTableInfo.h"
+#include "Util/Options.h"
 #include "Util/SVFModule.h"
 #include "Util/SVFUtil.h"
 
@@ -374,7 +373,7 @@ CHGraph::getInstancesAndDescendants(const string &className) {
 void CHGraph::addFuncToFuncVector(CHNode::FuncVector &v, const SVFFunction *f) {
     const auto *lf = f->getLLVMFun();
     if (isCPPThunkFunction(lf)) {
-        if(const auto *tf = getThunkTarget(lf))
+        if (const auto *tf = getThunkTarget(lf))
             v.push_back(svfMod->getSVFFunction(tf));
     } else {
         v.push_back(f);

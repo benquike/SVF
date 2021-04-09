@@ -47,9 +47,7 @@ class VFG : public GenericVFGTy {
 
   public:
     /// VFG kind
-    enum VFGK {
-        FULLSVFG, PTRONLYSVFG, FULLSVFG_OPT, PTRONLYSVFG_OPT
-    };
+    enum VFGK { FULLSVFG, PTRONLYSVFG, FULLSVFG_OPT, PTRONLYSVFG_OPT };
 
     using VFGNodeIDToNodeMapTy = Map<NodeID, VFGNode *>;
     using VFGNodeSet = Set<VFGNode *>;
@@ -81,7 +79,6 @@ class VFG : public GenericVFGTy {
     using PAGNodeSet = Set<const PAGNode *>;
 
   protected:
-
     NodeID totalVFGNode;
     PAGNodeToDefMapTy
         PAGNodeToDefMap; ///< map a pag node to its definition SVG node
@@ -125,8 +122,7 @@ class VFG : public GenericVFGTy {
 
     /// Return true if this VFG only contains pointer related SVFGNodes for
     /// pointer analysis
-    inline bool isPtrOnlySVFG() const
-    {
+    inline bool isPtrOnlySVFG() const {
         return (kind == PTRONLYSVFG) || (kind == PTRONLYSVFG_OPT);
     }
 

@@ -5,14 +5,13 @@
  *      Author: Yulei Sui, Sen Ye
  */
 
-#include "Util/Options.h"
 #include "DDA/FlowDDA.h"
 #include "DDA/DDAClient.h"
+#include "Util/Options.h"
 
 using namespace std;
 using namespace SVF;
 using namespace SVFUtil;
-
 
 /*!
  * Compute points-to set for queries

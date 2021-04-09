@@ -31,9 +31,9 @@
  *     2021-03-19
  */
 
-#include "Util/Options.h"
 #include "SABER/SrcSnkDDA.h"
 #include "Graphs/SVFGStat.h"
+#include "Util/Options.h"
 
 using namespace SVF;
 using namespace SVFUtil;
@@ -95,7 +95,7 @@ void SrcSnkDDA::analyze() {
                          << " (size = " << getCurSlice()->getBackwardSliceSize()
                          << ")\n");
 
-            if(Options::DumpSlice)
+            if (Options::DumpSlice)
                 annotateSlice(_curSlice);
 
             if (_curSlice->AllPathReachableSolve() == true)
@@ -272,8 +272,8 @@ void SrcSnkDDA::annotateSlice(ProgSlice *slice) {
 }
 
 void SrcSnkDDA::dumpSlices() {
-    if(Options::DumpSlice)
-        const_cast<SVFG*>(getSVFG())->dump("Slice",true);
+    if (Options::DumpSlice)
+        const_cast<SVFG *>(getSVFG())->dump("Slice", true);
 }
 
 void SrcSnkDDA::printBDDStat() {

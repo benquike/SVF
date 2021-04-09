@@ -5,20 +5,21 @@
  *      Author: Yulei Sui, Peng Di
  */
 
-#include "Util/Options.h"
 #include "MTA/MTA.h"
 #include "MTA/FSMPTA.h"
 #include "MTA/LockAnalysis.h"
 #include "MTA/MHP.h"
 #include "MTA/MTAStat.h"
 #include "MTA/TCT.h"
+#include "Util/Options.h"
 #include "Util/SVFUtil.h"
 #include "WPA/Andersen.h"
 
 using namespace SVF;
 using namespace SVFUtil;
 
-static llvm::RegisterPass<MTA> RACEDETECOR("pmhp", "May-Happen-in-Parallel Analysis");
+static llvm::RegisterPass<MTA> RACEDETECOR("pmhp",
+                                           "May-Happen-in-Parallel Analysis");
 char MTA::ID = 0;
 ModulePass *MTA::modulePass = nullptr;
 MTA::FunToSEMap MTA::func2ScevMap;

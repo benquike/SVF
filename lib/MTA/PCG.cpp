@@ -5,8 +5,8 @@
  *      Author: Yulei Sui, Peng Di
  */
 
-#include "Util/Options.h"
 #include "MTA/PCG.h"
+#include "Util/Options.h"
 #include "Util/SVFUtil.h"
 
 using namespace SVF;
@@ -31,10 +31,9 @@ bool PCG::analyze() {
 
     // interferenceAnalysis();
 
-
-    //if (Options::TDPrint) {
-    //printResults();
-    //tdAPI->performAPIStat(mod);
+    // if (Options::TDPrint) {
+    // printResults();
+    // tdAPI->performAPIStat(mod);
     //}
     return false;
 }

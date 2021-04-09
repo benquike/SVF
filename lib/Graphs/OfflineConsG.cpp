@@ -28,8 +28,8 @@
  *      Author: Yuxiang Lei
  */
 
-#include "Util/Options.h"
 #include "Graphs/OfflineConsG.h"
+#include "Util/Options.h"
 
 using namespace SVF;
 using namespace SVFUtil;
@@ -163,8 +163,7 @@ NodeID OfflineConsG::solveRep(OSCC *oscc, NodeID rep) {
  * Dump offline constraint graph
  */
 
-void OfflineConsG::dump(std::string name)
-{
+void OfflineConsG::dump(std::string name) {
     if (Options::OCGDotGraph) {
         GraphPrinter::WriteGraphToFile(outs(), name, this);
     }

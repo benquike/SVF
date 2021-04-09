@@ -9,9 +9,9 @@
 
 #include <sstream>
 
-#include "Util/Options.h"
-#include "SVF-FE/DCHG.h"
 #include "SVF-FE/CPPUtil.h"
+#include "SVF-FE/DCHG.h"
+#include "Util/Options.h"
 #include "Util/SVFUtil.h"
 
 #include "llvm/IR/DebugInfo.h"
@@ -497,8 +497,7 @@ void DCHGraph::buildCHG(bool extend) {
         }
     }
 
-    if (Options::PrintDCHG)
-    {
+    if (Options::PrintDCHG) {
         print();
     }
 }

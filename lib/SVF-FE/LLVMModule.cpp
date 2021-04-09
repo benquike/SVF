@@ -31,12 +31,12 @@
  *     2021-03-19
  */
 
-#include <queue>
+#include "SVF-FE/LLVMUtil.h"
+#include "SVF-FE/SymbolTableInfo.h"
 #include "Util/Options.h"
 #include "Util/SVFModule.h"
 #include "Util/SVFUtil.h"
-#include "SVF-FE/LLVMUtil.h"
-#include "SVF-FE/SymbolTableInfo.h"
+#include <queue>
 
 using namespace std;
 using namespace SVF;
@@ -70,10 +70,8 @@ SVFModule *
 LLVMModuleSet::buildSVFModule(const std::vector<std::string> &moduleNameVec) {
 
     // We read PAG from LLVM IR
-    if(Options::Graphtxt.getValue().empty())
-    {
-        if(moduleNameVec.empty())
-        {
+    if (Options::Graphtxt.getValue().empty()) {
+        if (moduleNameVec.empty()) {
             SVFUtil::outs() << "no LLVM bc file is found!\n";
             exit(0);
         }
@@ -132,8 +130,7 @@ void LLVMModuleSet::loadModules(const std::vector<std::string> &moduleNameVec) {
     }
 }
 
-void LLVMModuleSet::initialize()
-{
+void LLVMModuleSet::initialize() {
     if (Options::SVFMain)
         addSVFMain();
 

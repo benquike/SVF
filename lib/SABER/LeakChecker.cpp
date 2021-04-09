@@ -27,9 +27,9 @@
  *      Author: Yulei Sui
  */
 
-#include "Util/Options.h"
-#include "SVF-FE/LLVMUtil.h"
 #include "SABER/LeakChecker.h"
+#include "SVF-FE/LLVMUtil.h"
+#include "Util/Options.h"
 
 using namespace SVF;
 using namespace SVFUtil;
@@ -147,7 +147,7 @@ void LeakChecker::reportBug(ProgSlice *slice) {
         slice->annotatePaths();
     }
 
-    if(Options::ValidateTests)
+    if (Options::ValidateTests)
         testsValidation(slice);
 }
 

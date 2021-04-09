@@ -27,9 +27,9 @@
  *      Author: Yulei Sui
  */
 
-#include "Util/Options.h"
 #include "Graphs/VFG.h"
 #include "SVF-FE/LLVMUtil.h"
+#include "Util/Options.h"
 #include "Util/SVFModule.h"
 #include <llvm-10/llvm/Demangle/Demangle.h>
 

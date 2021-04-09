@@ -27,11 +27,10 @@
  *      Author: Yulei Sui
  */
 
-#include "Util/Options.h"
-#include "Util/SVFModule.h"
 #include "MSSA/MemRegion.h"
 #include "MSSA/MSSAMuChi.h"
 #include "SVF-FE/LLVMUtil.h"
+#include "Util/Options.h"
 #include "Util/SVFModule.h"
 
 using namespace SVF;
@@ -39,7 +38,6 @@ using namespace SVFUtil;
 
 Size_t MemRegion::totalMRNum = 0;
 Size_t MRVer::totalVERNum = 0;
-
 
 /*!
  * Clean up memory

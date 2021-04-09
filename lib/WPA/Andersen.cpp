@@ -27,9 +27,9 @@
  *      Author: Yulei Sui
  */
 
-#include "Util/Options.h"
 #include "WPA/Andersen.h"
 #include "SVF-FE/LLVMUtil.h"
+#include "Util/Options.h"
 
 using namespace SVF;
 using namespace SVFUtil;
@@ -64,8 +64,8 @@ void AndersenBase::initialize() {
     setGraph(consCG);
     /// Create statistic class
     stat = new AndersenStat(this);
-	if (Options::ConsCGDotGraph)
-		consCG->dump("consCG_initial");
+    if (Options::ConsCGDotGraph)
+        consCG->dump("consCG_initial");
 }
 
 /*!
@@ -73,11 +73,11 @@ void AndersenBase::initialize() {
  */
 void AndersenBase::finalize() {
     /// dump constraint graph if PAGDotGraph flag is enabled
-	if (Options::ConsCGDotGraph)
-		consCG->dump("consCG_final");
+    if (Options::ConsCGDotGraph)
+        consCG->dump("consCG_final");
 
-	if (Options::PrintCGGraph)
-		consCG->print();
+    if (Options::PrintCGGraph)
+        consCG->print();
 
     BVDataPTAImpl::finalize();
 }
@@ -90,7 +90,7 @@ void AndersenBase::analyze() {
     initialize();
 
     bool readResultsFromFile = false;
-    if(!Options::ReadAnder.empty())
+    if (!Options::ReadAnder.empty())
         readResultsFromFile = this->readFromFile(Options::ReadAnder);
 
     if (!readResultsFromFile) {
@@ -459,16 +459,14 @@ bool Andersen::collapseField(NodeID nodeId) {
     // replace all occurrences of each field with the field-insensitive node
     NodeID baseId = consCG->getFIObjNode(nodeId);
     NodeID baseRepNodeId = consCG->sccRepNode(baseId);
-    NodeBS & allFields = consCG->getAllFieldsObjNode(baseId);
-    for (const auto& fieldId : allFields)
-    {
-         if (fieldId != baseId)
-        {
-            // use the reverse pts of this field node to find all pointers point to it
+    NodeBS &allFields = consCG->getAllFieldsObjNode(baseId);
+    for (const auto &fieldId : allFields) {
+        if (fieldId != baseId) {
+            // use the reverse pts of this field node to find all pointers point
+            // to it
 
             const NodeBS &revPts = getRevPts(fieldId);
-            for (const NodeID o : revPts)
-            {
+            for (const NodeID o : revPts) {
                 // change the points-to target from field to base node
                 clearPts(o, fieldId);
                 addPts(o, baseId);

@@ -5,10 +5,10 @@
  *      Author: Yulei Sui, Peng Di
  */
 
-#include "Util/Options.h"
 #include "MTA/TCT.h"
 #include "MTA/MTA.h"
 #include "SVF-FE/DataFlowUtil.h"
+#include "Util/Options.h"
 
 #include <string>
 
@@ -425,8 +425,7 @@ void TCT::build() {
 
     collectMultiForkedThreads();
 
-    if (Options::TCTDotGraph)
-    {
+    if (Options::TCTDotGraph) {
         print();
         dump("tct");
     }
@@ -523,8 +522,7 @@ void TCT::dumpCxt(CallStrCxt &cxt) {
 /*!
  * Dump call graph into dot file
  */
-void TCT::dump(const std::string& filename)
-{
+void TCT::dump(const std::string &filename) {
     if (Options::TCTDotGraph)
 
         GraphPrinter::WriteGraphToFile(outs(), filename, this);

@@ -31,14 +31,13 @@
  *     2021-03-21
  */
 
-#include <Util/Options.h>
-#include "Util/SVFModule.h"
 #include "Graphs/ICFG.h"
 #include "Graphs/PAG.h"
 #include "Graphs/PTACallGraph.h"
 #include "SVF-FE/ICFGBuilder.h"
 #include "SVF-FE/LLVMUtil.h"
 #include "Util/SVFModule.h"
+#include <Util/Options.h>
 #include <llvm/Demangle/Demangle.h>
 
 using namespace SVF;
@@ -69,9 +68,7 @@ const std::string ICFGNode::toString() const {
     return rawstr.str();
 }
 
-void ICFGNode::dump() const {
-    outs() << this->toString() << "\n";
-}
+void ICFGNode::dump() const { outs() << this->toString() << "\n"; }
 
 const std::string GlobalBlockNode::toString() const {
     std::string str;
@@ -84,7 +81,8 @@ const std::string IntraBlockNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "IntraBlockNode ID: " << getId();
-    rawstr << value2String(getInst()) << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
+    rawstr << value2String(getInst())
+           << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
     return rawstr.str();
 }
 
@@ -123,7 +121,8 @@ const std::string CallBlockNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "CallBlockNode ID: " << getId();
-    rawstr << value2String(getCallSite()) << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
+    rawstr << value2String(getCallSite())
+           << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
     return rawstr.str();
 }
 
@@ -131,7 +130,8 @@ const std::string RetBlockNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "RetBlockNode ID: " << getId();
-    rawstr << value2String(getCallSite()) << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
+    rawstr << value2String(getCallSite())
+           << " {fun: " << llvm::demangle(getFun()->getName().str()) << "}";
     return rawstr.str();
 }
 
@@ -160,16 +160,20 @@ const std::string IntraCFGEdge::toString() const {
 const std::string CallCFGEdge::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
-    rawstr << "CallCFGEdge " << " [";
-    rawstr << getDstID() << "<--" << getSrcID() << "]\t CallSite: " << *cs << "\t";
+    rawstr << "CallCFGEdge "
+           << " [";
+    rawstr << getDstID() << "<--" << getSrcID() << "]\t CallSite: " << *cs
+           << "\t";
     return rawstr.str();
 }
 
 const std::string RetCFGEdge::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
-    rawstr << "RetCFGEdge " << " [";
-    rawstr << getDstID() << "<--" << getSrcID() << "]\t CallSite: " << *cs << "\t";
+    rawstr << "RetCFGEdge "
+           << " [";
+    rawstr << getDstID() << "<--" << getSrcID() << "]\t CallSite: " << *cs
+           << "\t";
     return rawstr.str();
 }
 
@@ -404,8 +408,7 @@ void ICFG::dump(const std::string &file, bool simple) {
 /*!
  * View ICFG
  */
-void ICFG::view()
-{
+void ICFG::view() {
     llvm::ViewGraph(this, "Interprocedural Control-Flow Graph");
 }
 
@@ -482,13 +485,10 @@ template <> struct DOTGraphTraits<ICFG *> : public DOTGraphTraits<PAG *> {
         raw_string_ostream rawstr(str);
         rawstr << "NodeID: " << node->getId() << "\n";
 
-
-
-        if (auto* bNode = SVFUtil::dyn_cast<IntraBlockNode>(node))
-        {
+        if (auto *bNode = SVFUtil::dyn_cast<IntraBlockNode>(node)) {
             rawstr << "IntraBlockNode ID: " << bNode->getId() << " \t";
 
-            PAG::PAGEdgeList&  edges = g->getPAG()->getInstPTAPAGEdgeList(bNode);
+            PAG::PAGEdgeList &edges = g->getPAG()->getInstPTAPAGEdgeList(bNode);
             if (edges.empty()) {
                 rawstr << value2String(bNode->getInst()) << " \t";
             } else {
@@ -497,9 +497,7 @@ template <> struct DOTGraphTraits<ICFG *> : public DOTGraphTraits<PAG *> {
                 }
             }
             rawstr << " {fun: " << bNode->getFun()->getName() << "}";
-        }
-        else if (auto* entry = SVFUtil::dyn_cast<FunEntryBlockNode>(node))
-        {
+        } else if (auto *entry = SVFUtil::dyn_cast<FunEntryBlockNode>(node)) {
             rawstr << entry->toString();
         } else if (auto *exit = SVFUtil::dyn_cast<FunExitBlockNode>(node)) {
             rawstr << exit->toString();

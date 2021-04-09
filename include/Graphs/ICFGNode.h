@@ -111,9 +111,9 @@ class ICFGNode : public GenericICFGNodeTy {
 
     void dump() const;
 
-protected:
-    const SVFFunction* fun;
-    const BasicBlock* bb;
+  protected:
+    const SVFFunction *fun;
+    const BasicBlock *bb;
     VFGNodeList VFGNodes; //< a list of VFGNodes
     PAGEdgeList pagEdges; //< a list of PAGEdges
 };

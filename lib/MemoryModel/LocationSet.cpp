@@ -29,9 +29,9 @@
  *
  */
 
-#include "Util/Options.h"
 #include "MemoryModel/LocationSet.h"
 #include "MemoryModel/MemModel.h"
+#include "Util/Options.h"
 
 using namespace SVF;
 
@@ -46,8 +46,7 @@ void LocationSet::addElemNumStridePair(const NodePair &pair) {
         return;
     }
 
-    if (Options::SingleStride)
-    {
+    if (Options::SingleStride) {
         if (numStridePair.empty()) {
             numStridePair.push_back(
                 std::make_pair(StInfo::getMaxFieldLimit(), pair.second));

@@ -241,7 +241,6 @@ class SVFFunction : public SVFValue {
 
     // Dump Control Flow Graph of llvm function, without instructions
     void viewCFGOnly();
-
 };
 
 class SVFGlobal : public SVFValue {

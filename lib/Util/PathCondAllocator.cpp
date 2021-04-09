@@ -27,10 +27,10 @@
  *      Author: Yulei Sui
  */
 
-#include "Util/Options.h"
 #include "Util/PathCondAllocator.h"
 #include "SVF-FE/LLVMUtil.h"
 #include "Util/DPItem.h"
+#include "Util/Options.h"
 #include <limits.h>
 
 using namespace SVF;
@@ -43,7 +43,7 @@ u32_t VFPathCond::maximumPathLen = 0;
 u32_t VFPathCond::maximumPath = 0;
 
 u32_t PathCondAllocator::totalCondNum = 0;
-BddCondManager* PathCondAllocator::bddCondMgr = nullptr;
+BddCondManager *PathCondAllocator::bddCondMgr = nullptr;
 
 /*!
  * Allocate path condition for each branch
@@ -64,7 +64,7 @@ void PathCondAllocator::allocate() {
         }
     }
 
-    if(Options::PrintPathCond)
+    if (Options::PrintPathCond)
         printPathCond();
 
     DBOUT(DGENERAL, outs() << pasMsg("path condition allocation ends\n"));

@@ -27,38 +27,33 @@
  *      Author: Yulei Sui
  */
 
-#include <sstream>
-#include "Util/Options.h"
-#include "MSSA/MemSSA.h"
-#include "Util/SVFModule.h"
-#include "SVF-FE/LLVMUtil.h"
-#include "MSSA/MemSSA.h"
-#include "Graphs/SVFG.h"
 #include "MSSA/SVFGBuilder.h"
+#include "Graphs/SVFG.h"
+#include "MSSA/MemSSA.h"
+#include "SVF-FE/LLVMUtil.h"
+#include "Util/Options.h"
+#include "Util/SVFModule.h"
 #include "WPA/Andersen.h"
+#include <sstream>
 
 using namespace SVF;
 using namespace SVFUtil;
 
-SVFG* SVFGBuilder::globalSvfg = nullptr;
+SVFG *SVFGBuilder::globalSvfg = nullptr;
 
-SVFG* SVFGBuilder::buildPTROnlySVFG(BVDataPTAImpl* pta)
-{
+SVFG *SVFGBuilder::buildPTROnlySVFG(BVDataPTAImpl *pta) {
     return build(pta, VFG::PTRONLYSVFG_OPT);
 }
 
-SVFG* SVFGBuilder::buildPTROnlySVFGWithoutOPT(BVDataPTAImpl* pta)
-{
+SVFG *SVFGBuilder::buildPTROnlySVFGWithoutOPT(BVDataPTAImpl *pta) {
     return build(pta, VFG::PTRONLYSVFG);
 }
 
-SVFG* SVFGBuilder::buildFullSVFG(BVDataPTAImpl* pta)
-{
+SVFG *SVFGBuilder::buildFullSVFG(BVDataPTAImpl *pta) {
     return build(pta, VFG::FULLSVFG_OPT);
 }
 
-SVFG* SVFGBuilder::buildFullSVFGWithoutOPT(BVDataPTAImpl* pta)
-{
+SVFG *SVFGBuilder::buildFullSVFGWithoutOPT(BVDataPTAImpl *pta) {
     return build(pta, VFG::FULLSVFG);
 }
 
@@ -75,25 +70,21 @@ void SVFGBuilder::buildSVFG() {
 /// Create DDA SVFG
 SVFG *SVFGBuilder::build(BVDataPTAImpl *pta, VFG::VFGK kind) {
 
-    MemSSA* mssa = buildMSSA(pta,
-                             (VFG::PTRONLYSVFG==kind ||
-                              VFG::PTRONLYSVFG_OPT==kind));
+    MemSSA *mssa = buildMSSA(
+        pta, (VFG::PTRONLYSVFG == kind || VFG::PTRONLYSVFG_OPT == kind));
 
     DBOUT(DGENERAL, outs() << pasMsg("Build Sparse Value-Flow Graph \n"));
-    if(Options::SingleVFG)
-    {
-        if(globalSvfg==nullptr) {
+    if (Options::SingleVFG) {
+        if (globalSvfg == nullptr) {
             /// Note that we use callgraph from andersen analysis here
-            if(kind == VFG::FULLSVFG_OPT || kind == VFG::PTRONLYSVFG_OPT)
+            if (kind == VFG::FULLSVFG_OPT || kind == VFG::PTRONLYSVFG_OPT)
                 svfg = globalSvfg = new SVFGOPT(mssa, pta->getPAG(), kind);
             else
                 svfg = globalSvfg = new SVFG(mssa, pta->getPAG(), kind);
             buildSVFG();
         }
-    }
-    else
-    {
-        if(kind == VFG::FULLSVFG_OPT || kind == VFG::PTRONLYSVFG_OPT)
+    } else {
+        if (kind == VFG::FULLSVFG_OPT || kind == VFG::PTRONLYSVFG_OPT)
             svfg = new SVFGOPT(mssa, pta->getPAG(), kind);
         else
             svfg = new SVFG(mssa, pta->getPAG(), kind);
@@ -101,10 +92,10 @@ SVFG *SVFGBuilder::build(BVDataPTAImpl *pta, VFG::VFGK kind) {
     }
 
     /// Update call graph using pre-analysis results
-    if(Options::SVFGWithIndirectCall || SVFGWithIndCall)
+    if (Options::SVFGWithIndirectCall || SVFGWithIndCall)
         svfg->updateCallGraph(pta);
 
-    if(Options::DumpVFG)
+    if (Options::DumpVFG)
         svfg->dump("svfg_final");
 
     return svfg;

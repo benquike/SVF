@@ -21,7 +21,6 @@
 using namespace SVF;
 using namespace SVFUtil;
 
-
 void DDAClient::answerQueries(PointerAnalysis *pta) {
 
     auto *stat = static_cast<DDAStat *>(pta->getStat());

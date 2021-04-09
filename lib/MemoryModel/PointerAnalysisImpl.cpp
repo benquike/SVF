@@ -5,7 +5,6 @@
  *      Author: yulei
  */
 
-#include "Util/Options.h"
 #include "MemoryModel/PointerAnalysisImpl.h"
 #include "SVF-FE/CPPUtil.h"
 #include "SVF-FE/DCHG.h"
@@ -77,26 +76,20 @@ void BVDataPTAImpl::writeToFile(const string &filename) {
     }
 
     // Write analysis results to file
-    for (auto it = pag->begin(), ie = pag->end(); it != ie; ++it)
-    {
+    for (auto it = pag->begin(), ie = pag->end(); it != ie; ++it) {
         NodeID var = it->first;
         const PointsTo &pts = getPts(var);
 
         F.os() << var << " -> { ";
-        if (pts.empty())
-        {
+        if (pts.empty()) {
             F.os() << " ";
-        }
-        else
-        {
-            for (auto it = pts.begin(), ie = pts.end(); it != ie; ++it)
-            {
+        } else {
+            for (auto it = pts.begin(), ie = pts.end(); it != ie; ++it) {
                 F.os() << *it << " ";
             }
         }
         F.os() << "}\n";
     }
-
 
     // Write GepPAGNodes to file
     for (auto it = pag->begin(), ie = pag->end(); it != ie; ++it) {

@@ -4,15 +4,13 @@
  * @date: 01/07/2014
  */
 
-
-#include "Util/Options.h"
-#include "MemoryModel/PointerAnalysisImpl.h"
 #include "DDA/DDAPass.h"
 #include "DDA/ContextDDA.h"
 #include "DDA/DDAClient.h"
 #include "DDA/FlowDDA.h"
 #include "MemoryModel/PointerAnalysisImpl.h"
 #include "SVF-FE/PAGBuilder.h"
+#include "Util/Options.h"
 
 #include <limits.h>
 #include <sstream>
@@ -22,9 +20,9 @@ using namespace SVFUtil;
 
 char DDAPass::ID = 0;
 
-static llvm::RegisterPass<DDAPass> DDAPA("dda", "Demand-driven Pointer Analysis Pass");
-DDAPass::~DDAPass()
-{
+static llvm::RegisterPass<DDAPass> DDAPA("dda",
+                                         "Demand-driven Pointer Analysis Pass");
+DDAPass::~DDAPass() {
     // _pta->dumpStat();
     if (_client != nullptr) {
         delete _client;
@@ -55,24 +53,21 @@ bool DDAPass::runOnModule(Module &module) {
 /// select a client to initialize queries
 void DDAPass::selectClient(SVFModule *module) {
 
-    if (!Options::UserInputQuery.empty())
-    {
+    if (!Options::UserInputQuery.empty()) {
         /// solve function pointer
-        if (Options::UserInputQuery == "funptr")
-        {
+        if (Options::UserInputQuery == "funptr") {
             _client = new FunptrDDAClient(module);
-        }
-        else if (Options::UserInputQuery == "alias")
-        {
+        } else if (Options::UserInputQuery == "alias") {
             _client = new AliasDDAClient(module);
         }
         /// allow user specify queries
         else {
             _client = new DDAClient(module);
-            if (Options::UserInputQuery != "all")
-            {
+            if (Options::UserInputQuery != "all") {
                 u32_t buf; // Have a buffer
-                stringstream ss(Options::UserInputQuery); // Insert the user input string into a stream
+                stringstream ss(
+                    Options::UserInputQuery); // Insert the user input string
+                                              // into a stream
                 while (ss >> buf) {
                     _client->setQuery(buf);
                 }
@@ -107,8 +102,7 @@ void DDAPass::runPointerAnalysis(SVFProject *proj, u32_t kind) {
         break;
     }
 
-
-    if(Options::WPANum) {
+    if (Options::WPANum) {
         _client->collectWPANum(proj->getSVFModule());
     } else {
         /// initialize
@@ -117,7 +111,7 @@ void DDAPass::runPointerAnalysis(SVFProject *proj, u32_t kind) {
         _client->answerQueries(_pta);
         /// finalize
         _pta->finalize();
-        if(Options::PrintCPts) {
+        if (Options::PrintCPts) {
             _pta->dumpCPts();
         }
 
@@ -134,12 +128,13 @@ void DDAPass::runPointerAnalysis(SVFProject *proj, u32_t kind) {
 /*!
  * Initialize context insensitive Edge for DDA
  */
-void DDAPass::initCxtInsensitiveEdges(PointerAnalysis* pta, const SVFG* svfg,const SVFGSCC* svfgSCC, SVFGEdgeSet& insensitveEdges)
-{
-    if(Options::InsenRecur)
-        collectCxtInsenEdgeForRecur(pta,svfg,insensitveEdges);
-    else if(Options::InsenCycle)
-        collectCxtInsenEdgeForVFCycle(pta,svfg,svfgSCC,insensitveEdges);
+void DDAPass::initCxtInsensitiveEdges(PointerAnalysis *pta, const SVFG *svfg,
+                                      const SVFGSCC *svfgSCC,
+                                      SVFGEdgeSet &insensitveEdges) {
+    if (Options::InsenRecur)
+        collectCxtInsenEdgeForRecur(pta, svfg, insensitveEdges);
+    else if (Options::InsenCycle)
+        collectCxtInsenEdgeForVFCycle(pta, svfg, svfgSCC, insensitveEdges);
 }
 
 /*!

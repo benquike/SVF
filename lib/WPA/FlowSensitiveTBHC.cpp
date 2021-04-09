@@ -7,10 +7,10 @@
  *      Author: Mohamad Barbar
  */
 
-#include "Util/Options.h"
-#include "SVF-FE/DCHG.h"
-#include "SVF-FE/CPPUtil.h"
 #include "WPA/FlowSensitiveTBHC.h"
+#include "SVF-FE/CPPUtil.h"
+#include "SVF-FE/DCHG.h"
+#include "Util/Options.h"
 #include "WPA/Andersen.h"
 #include "WPA/WPAStat.h"
 
@@ -240,9 +240,9 @@ bool FlowSensitiveTBHC::processGep(const GepSVFGNode *gep) {
     NodeID q = gep->getPAGSrcNodeID();
 
     const DIType *tildet = getTypeFromCTirMetadata(gep);
-    if (tildet != undefType)
-    {
-        bool reuse = Options::TBHCAllReuse || (Options::TBHCStoreReuse && !gepIsLoad(gep->getId()));
+    if (tildet != undefType) {
+        bool reuse = Options::TBHCAllReuse ||
+                     (Options::TBHCStoreReuse && !gepIsLoad(gep->getId()));
         changed = init(gep->getId(), q, tildet, reuse, true);
     }
 
@@ -328,9 +328,9 @@ bool FlowSensitiveTBHC::processLoad(const LoadSVFGNode *load) {
 
     bool changed = false;
     const DIType *tildet = getTypeFromCTirMetadata(load);
-    if (tildet != undefType)
-    {
-        changed = init(load->getId(), load->getPAGSrcNodeID(), tildet, Options::TBHCAllReuse);
+    if (tildet != undefType) {
+        changed = init(load->getId(), load->getPAGSrcNodeID(), tildet,
+                       Options::TBHCAllReuse);
     }
 
     // We want to perform the initialisation for non-pointer nodes but not
@@ -380,9 +380,9 @@ bool FlowSensitiveTBHC::processStore(const StoreSVFGNode *store) {
 
     bool changed = false;
     const DIType *tildet = getTypeFromCTirMetadata(store);
-    if (tildet != undefType)
-    {
-        changed = init(store->getId(), store->getPAGDstNodeID(), tildet, Options::TBHCAllReuse || Options::TBHCStoreReuse);
+    if (tildet != undefType) {
+        changed = init(store->getId(), store->getPAGDstNodeID(), tildet,
+                       Options::TBHCAllReuse || Options::TBHCStoreReuse);
     }
 
     // Like processLoad: we want to perform initialisation for non-pointers but

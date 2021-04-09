@@ -27,7 +27,6 @@
  *      Author: Yulei Sui
  */
 
-#include "Util/Options.h"
 #include "WPA/TypeAnalysis.h"
 #include "Graphs/ICFGStat.h"
 #include "Graphs/VFG.h"
@@ -35,13 +34,12 @@
 #include "SVF-FE/CHG.h"
 #include "SVF-FE/CPPUtil.h"
 #include "SVF-FE/ICFGBuilder.h"
+#include "Util/Options.h"
 
 using namespace SVF;
 using namespace SVFUtil;
 using namespace cppUtil;
 using namespace std;
-
-
 
 /// Initialize analysis
 void TypeAnalysis::initialize() {

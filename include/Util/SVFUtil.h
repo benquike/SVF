@@ -228,7 +228,7 @@ inline const SVFFunction *getCallee(LLVMModuleSet *llvmModSet,
 //@{
 std::string getSourceLoc(const Value *val);
 std::string getSourceLocOfFunction(const Function *F);
-const std::string value2String(const Value* value);
+const std::string value2String(const Value *value);
 //@}
 
 } // End namespace SVFUtil

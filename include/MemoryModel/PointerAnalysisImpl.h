@@ -40,16 +40,20 @@ namespace SVF {
  */
 class BVDataPTAImpl : public PointerAnalysis {
 
-public:
+  public:
     using PTDataTy = PTData<NodeID, NodeBS, NodeID, PointsTo>;
     using MutPTDataTy = MutablePTData<NodeID, NodeBS, NodeID, PointsTo>;
     using DiffPTDataTy = DiffPTData<NodeID, NodeBS, NodeID, PointsTo>;
     using MutDiffPTDataTy = MutableDiffPTData<NodeID, NodeBS, NodeID, PointsTo>;
     using DFPTDataTy = DFPTData<NodeID, NodeBS, NodeID, PointsTo>;
     using MutDFPTDataTy = MutableDFPTData<NodeID, NodeBS, NodeID, PointsTo>;
-    using IncMutDFPTDataTy = IncMutableDFPTData<NodeID, NodeBS, NodeID, PointsTo>;
-    using VersionedPTDataTy = VersionedPTData<NodeID, NodeBS, NodeID, PointsTo, VersionedVar, Set<VersionedVar>>;
-    using MutVersionedPTDataTy = MutableVersionedPTData<NodeID, NodeBS, NodeID, PointsTo, VersionedVar, Set<VersionedVar>>;
+    using IncMutDFPTDataTy =
+        IncMutableDFPTData<NodeID, NodeBS, NodeID, PointsTo>;
+    using VersionedPTDataTy = VersionedPTData<NodeID, NodeBS, NodeID, PointsTo,
+                                              VersionedVar, Set<VersionedVar>>;
+    using MutVersionedPTDataTy =
+        MutableVersionedPTData<NodeID, NodeBS, NodeID, PointsTo, VersionedVar,
+                               Set<VersionedVar>>;
 
     /// Constructor
     BVDataPTAImpl(SVFProject *proj, PointerAnalysis::PTATY type,
@@ -74,8 +78,7 @@ public:
         return ptD->getPts(id);
     }
 
-    inline const NodeBS& getRevPts(NodeID nodeId) override
-    {
+    inline const NodeBS &getRevPts(NodeID nodeId) override {
         return ptD->getRevPts(nodeId);
     }
     //@}
@@ -188,8 +191,8 @@ public:
   public:
     /// Interface expose to users of our pointer analysis, given Location infos
 
-    AliasResult alias(const MemoryLocation  &LocA,
-                      const MemoryLocation  &LocB) override;
+    AliasResult alias(const MemoryLocation &LocA,
+                      const MemoryLocation &LocB) override;
 
     /// Interface expose to users of our pointer analysis, given Value infos
     AliasResult alias(const Value *V1, const Value *V2) override;
@@ -218,12 +221,15 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
 
   public:
     typedef CondVar<Cond> CVar;
-    typedef CondStdSet<CVar>  CPtSet;
+    typedef CondStdSet<CVar> CPtSet;
     typedef PTData<CVar, Set<CVar>, CVar, CPtSet> PTDataTy;
     typedef MutablePTData<CVar, Set<CVar>, CVar, CPtSet> MutPTDataTy;
-    typedef Map<NodeID,PointsTo> PtrToBVPtsMap; /// map a pointer to its BitVector points-to representation
+    typedef Map<NodeID, PointsTo>
+        PtrToBVPtsMap; /// map a pointer to its BitVector points-to
+                       /// representation
     typedef Map<NodeID, NodeBS> PtrToNSMap;
-    typedef Map<NodeID,CPtSet> PtrToCPtsMap;	 /// map a pointer to its conditional points-to set
+    typedef Map<NodeID, CPtSet>
+        PtrToCPtsMap; /// map a pointer to its conditional points-to set
 
     /// Constructor
     CondPTAImpl(SVFProject *proj, PointerAnalysis::PTATY type)
@@ -271,13 +277,9 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
 
     /// Get points-to and reverse points-to
     ///@{
-    virtual inline const CPtSet& getPts(CVar id)
-    {
-        return ptD->getPts(id);
-    }
+    virtual inline const CPtSet &getPts(CVar id) { return ptD->getPts(id); }
 
-    virtual inline const Set<CVar>& getRevPts(CVar nodeId)
-    {
+    virtual inline const Set<CVar> &getRevPts(CVar nodeId) {
         return ptD->getRevPts(nodeId);
     }
     //@}
@@ -458,9 +460,10 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
         return ptrToCPtsMap[ptr];
     }
     /// Given an object return all pointers points to this object
-    virtual inline NodeBS& getRevPts(NodeID obj)
-    {
-        assert(normalized && "Pts of all context-var have to be merged/normalized. Want to use getPts(CVar cvar)??");
+    virtual inline NodeBS &getRevPts(NodeID obj) {
+        assert(normalized &&
+               "Pts of all context-var have to be merged/normalized. Want to "
+               "use getPts(CVar cvar)??");
         return objToNSRevPtsMap[obj];
     }
 

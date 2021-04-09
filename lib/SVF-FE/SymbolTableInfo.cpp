@@ -64,9 +64,9 @@ void MemObj::init(const Value *val) {
 
     if (refTy) {
         Type *objTy = refTy->getElementType();
-        if(Options::LocMemModel) {
-            typeInfo = new LocObjTypeInfo(symbolTableInfo, val,
-                                          objTy, Options::MaxFieldLimit);
+        if (Options::LocMemModel) {
+            typeInfo = new LocObjTypeInfo(symbolTableInfo, val, objTy,
+                                          Options::MaxFieldLimit);
         } else {
             typeInfo = new ObjTypeInfo(symbolTableInfo, val, objTy,
                                        Options::MaxFieldLimit);
@@ -932,73 +932,67 @@ void SymbolTableInfo::printFlattenFields(const Type *type) {
     }
 }
 
-std::string SymbolTableInfo::toString(SYMTYPE symtype)
-{
+std::string SymbolTableInfo::toString(SYMTYPE symtype) {
     switch (symtype) {
-        case SYMTYPE::BlackHole: {
-            return "BlackHole";
-        }
-        case SYMTYPE::ConstantObj: {
-            return "ConstantObj";
-        }
-        case SYMTYPE::BlkPtr: {
-            return "BlkPtr";
-        }
-        case SYMTYPE::NullPtr: {
-            return "NullPtr";
-        }
-        case SYMTYPE::ValSym: {
-            return "ValSym";
-        }
-        case SYMTYPE::ObjSym: {
-            return "ObjSym";
-        }
-        case SYMTYPE::RetSym: {
-            return "RetSym";
-        }
-        case SYMTYPE::VarargSym: {
-            return "VarargSym";
-        }
-        default: {
-            return "Invalid SYMTYPE";
-        }
+    case SYMTYPE::BlackHole: {
+        return "BlackHole";
+    }
+    case SYMTYPE::ConstantObj: {
+        return "ConstantObj";
+    }
+    case SYMTYPE::BlkPtr: {
+        return "BlkPtr";
+    }
+    case SYMTYPE::NullPtr: {
+        return "NullPtr";
+    }
+    case SYMTYPE::ValSym: {
+        return "ValSym";
+    }
+    case SYMTYPE::ObjSym: {
+        return "ObjSym";
+    }
+    case SYMTYPE::RetSym: {
+        return "RetSym";
+    }
+    case SYMTYPE::VarargSym: {
+        return "VarargSym";
+    }
+    default: {
+        return "Invalid SYMTYPE";
+    }
     }
 }
 
-void SymbolTableInfo::dump()
-{
-    OrderedMap<SymID, Value*> idmap;
+void SymbolTableInfo::dump() {
+    OrderedMap<SymID, Value *> idmap;
     SymID maxid = 0;
-    for (ValueToIDMapTy::iterator iter = valSymMap.begin(); iter != valSymMap.end();
-         ++iter)
-    {
+    for (ValueToIDMapTy::iterator iter = valSymMap.begin();
+         iter != valSymMap.end(); ++iter) {
         const SymID i = iter->second;
         maxid = max(i, maxid);
-        Value* val = (Value*) iter->first;
+        Value *val = (Value *)iter->first;
         idmap[i] = val;
     }
-    for (ValueToIDMapTy::iterator iter = objSymMap.begin(); iter != objSymMap.end();
-         ++iter)
-    {
+    for (ValueToIDMapTy::iterator iter = objSymMap.begin();
+         iter != objSymMap.end(); ++iter) {
         const SymID i = iter->second;
         maxid = max(i, maxid);
-        Value* val = (Value*) iter->first;
+        Value *val = (Value *)iter->first;
         idmap[i] = val;
     }
-    for (FunToIDMapTy::iterator iter = returnSymMap.begin(); iter != returnSymMap.end();
-         ++iter)
-    {
+    for (FunToIDMapTy::iterator iter = returnSymMap.begin();
+         iter != returnSymMap.end(); ++iter) {
         const SymID i = iter->second;
         maxid = max(i, maxid);
-        Value* val = (Value*) iter->first;
+        Value *val = (Value *)iter->first;
         idmap[i] = val;
     }
-    for (FunToIDMapTy::iterator iter = varargSymMap.begin(); iter != varargSymMap.end();
-         ++iter)
-    {
+    for (FunToIDMapTy::iterator iter = varargSymMap.begin();
+         iter != varargSymMap.end(); ++iter) {
         const SymID i = iter->second;
         maxid = max(i, maxid);
-        Value* val = (Value*) iter->first;
+        Value *val = (Value *)iter->first;
         idmap[i] = val;
     }
     outs() << "{SymbolTableInfo \n";
@@ -1014,7 +1008,7 @@ void SymbolTableInfo::dump()
                 outs() << "No value\n";
                 break;
             }
-            const Value* val = I->second;
+            const Value *val = I->second;
             outs() << " -> " << value2String(val) << "\n";
         }
     }

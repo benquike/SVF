@@ -294,7 +294,6 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
         funRetMap[fun] = ret;
     }
 
-
     ///
     /// \brief set up one actual arguement for a callsite
     ///

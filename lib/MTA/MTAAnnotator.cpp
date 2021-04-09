@@ -5,10 +5,10 @@
  *      Author: Yulei Sui, Peng Di
  */
 
-#include "Util/Options.h"
 #include "MTA/MTAAnnotator.h"
 #include "MTA/LockAnalysis.h"
 #include "SVF-FE/LLVMUtil.h"
+#include "Util/Options.h"
 #include <sstream>
 
 using namespace SVF;
@@ -87,8 +87,7 @@ void MTAAnnotator::initialize(MHP *m, LockAnalysis *la) {
     collectLoadStoreInst(mhp->getTCT()->getPTA()->getModule());
 }
 
-void MTAAnnotator::pruneThreadLocal(PointerAnalysis* pta)
-{
+void MTAAnnotator::pruneThreadLocal(PointerAnalysis *pta) {
     bool AnnoLocal = Options::AnnoFlag & ANNO_LOCAL;
     if (!AnnoLocal)
         return;
@@ -224,8 +223,7 @@ void MTAAnnotator::pruneAliasMHP(PointerAnalysis *pta) {
         numOfAliasLd = loadset.size();
     }
 }
-void MTAAnnotator::performAnnotate()
-{
+void MTAAnnotator::performAnnotate() {
     if (!Options::AnnoFlag)
         return;
     for (const auto *it : storeset) {

@@ -5,11 +5,11 @@
  *      Author: Yulei Sui, Peng Di
  */
 
-#include "Util/Options.h"
 #include "MTA/MHP.h"
 #include "MTA/LockAnalysis.h"
 #include "MTA/MTA.h"
 #include "MTA/MTAResultValidator.h"
+#include "Util/Options.h"
 #include "Util/SVFUtil.h"
 
 using namespace SVF;
@@ -144,7 +144,7 @@ void MHP::analyzeInterleaving() {
 
     /// update non-candidate functions' interleaving
     updateNonCandidateFunInterleaving();
-    if(Options::PrintInterLev)
+    if (Options::PrintInterLev)
         printInterleaving();
 
     validateResults();

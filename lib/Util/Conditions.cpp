@@ -27,8 +27,8 @@
  *      Author: Yulei Sui
  */
 
-#include "Util/Options.h"
 #include "Util/Conditions.h"
+#include "Util/Options.h"
 #include "Util/SVFUtil.h"
 
 using namespace SVF;
@@ -46,9 +46,8 @@ DdNode *BddCondManager::AND(DdNode *lhs, DdNode *rhs) {
     if (rhs == getTrueCond())
         return lhs;
 
-    DdNode* tmp = Cudd_bddAndLimit(m_bdd_mgr, lhs, rhs, Options::MaxBddSize);
-    if(tmp==nullptr)
-    {
+    DdNode *tmp = Cudd_bddAndLimit(m_bdd_mgr, lhs, rhs, Options::MaxBddSize);
+    if (tmp == nullptr) {
         SVFUtil::writeWrnMsg("exceeds max bdd size \n");
         /// drop the rhs condition
         return lhs;
@@ -70,9 +69,8 @@ DdNode *BddCondManager::OR(DdNode *lhs, DdNode *rhs) {
 
     if (rhs == getFalseCond())
         return lhs;
-    DdNode* tmp = Cudd_bddOrLimit(m_bdd_mgr, lhs, rhs, Options::MaxBddSize);
-    if(tmp==nullptr)
-    {
+    DdNode *tmp = Cudd_bddOrLimit(m_bdd_mgr, lhs, rhs, Options::MaxBddSize);
+    if (tmp == nullptr) {
         SVFUtil::writeWrnMsg("exceeds max bdd size \n");
         /// drop the two conditions here
         return getTrueCond();

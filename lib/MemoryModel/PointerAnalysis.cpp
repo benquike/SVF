@@ -31,12 +31,12 @@
  *     2021-03-19
  */
 
-#include "Util/Options.h"
 #include "SVF-FE/CHG.h"
 #include "SVF-FE/CPPUtil.h"
 #include "SVF-FE/CallGraphBuilder.h"
 #include "SVF-FE/DCHG.h"
 #include "SVF-FE/LLVMUtil.h"
+#include "Util/Options.h"
 #include "Util/SVFModule.h"
 #include "Util/SVFUtil.h"
 
@@ -56,28 +56,32 @@ using namespace SVF;
 using namespace SVFUtil;
 using namespace cppUtil;
 
-const std::string PointerAnalysis::aliasTestMayAlias            = "MAYALIAS";
-const std::string PointerAnalysis::aliasTestMayAliasMangled     = "_Z8MAYALIASPvS_";
-const std::string PointerAnalysis::aliasTestNoAlias             = "NOALIAS";
-const std::string PointerAnalysis::aliasTestNoAliasMangled      = "_Z7NOALIASPvS_";
-const std::string PointerAnalysis::aliasTestPartialAlias        = "PARTIALALIAS";
-const std::string PointerAnalysis::aliasTestPartialAliasMangled = "_Z12PARTIALALIASPvS_";
-const std::string PointerAnalysis::aliasTestMustAlias           = "MUSTALIAS";
-const std::string PointerAnalysis::aliasTestMustAliasMangled    = "_Z9MUSTALIASPvS_";
-const std::string PointerAnalysis::aliasTestFailMayAlias        = "EXPECTEDFAIL_MAYALIAS";
-const std::string PointerAnalysis::aliasTestFailMayAliasMangled = "_Z21EXPECTEDFAIL_MAYALIASPvS_";
-const std::string PointerAnalysis::aliasTestFailNoAlias         = "EXPECTEDFAIL_NOALIAS";
-const std::string PointerAnalysis::aliasTestFailNoAliasMangled  = "_Z20EXPECTEDFAIL_NOALIASPvS_";
-
+const std::string PointerAnalysis::aliasTestMayAlias = "MAYALIAS";
+const std::string PointerAnalysis::aliasTestMayAliasMangled = "_Z8MAYALIASPvS_";
+const std::string PointerAnalysis::aliasTestNoAlias = "NOALIAS";
+const std::string PointerAnalysis::aliasTestNoAliasMangled = "_Z7NOALIASPvS_";
+const std::string PointerAnalysis::aliasTestPartialAlias = "PARTIALALIAS";
+const std::string PointerAnalysis::aliasTestPartialAliasMangled =
+    "_Z12PARTIALALIASPvS_";
+const std::string PointerAnalysis::aliasTestMustAlias = "MUSTALIAS";
+const std::string PointerAnalysis::aliasTestMustAliasMangled =
+    "_Z9MUSTALIASPvS_";
+const std::string PointerAnalysis::aliasTestFailMayAlias =
+    "EXPECTEDFAIL_MAYALIAS";
+const std::string PointerAnalysis::aliasTestFailMayAliasMangled =
+    "_Z21EXPECTEDFAIL_MAYALIASPvS_";
+const std::string PointerAnalysis::aliasTestFailNoAlias =
+    "EXPECTEDFAIL_NOALIAS";
+const std::string PointerAnalysis::aliasTestFailNoAliasMangled =
+    "_Z20EXPECTEDFAIL_NOALIASPvS_";
 
 /*!
  * Constructor
  */
 PointerAnalysis::PointerAnalysis(SVFProject *proj, PTATY ty, bool alias_check)
-    :  pag(proj->getPAG()), svfMod(proj->getSVFModule()),
-       ptaTy(ty),  stat(nullptr), ptaCallGraph(nullptr),
-       callGraphSCC(nullptr), icfg(proj->getICFG()),
-       typeSystem(nullptr), proj(proj) {
+    : pag(proj->getPAG()), svfMod(proj->getSVFModule()), ptaTy(ty),
+      stat(nullptr), ptaCallGraph(nullptr), callGraphSCC(nullptr),
+      icfg(proj->getICFG()), typeSystem(nullptr), proj(proj) {
     OnTheFlyIterBudgetForStat = Options::StatBudget;
     print_stat = Options::PStat;
     ptaImplTy = BaseImpl;
@@ -137,9 +141,8 @@ void PointerAnalysis::initialize() {
     // dump ICFG
 
     if (Options::DumpICFG) {
-    	pag->getICFG()->dump("icfg_initial");
+        pag->getICFG()->dump("icfg_initial");
     }
-
 
     // print to command line of the PAG graph
     if (Options::PAGPrint) {
@@ -159,8 +162,8 @@ void PointerAnalysis::initialize() {
     callGraphSCCDetection();
 
     // dump callgraph
-	if (Options::CallGraphDotGraph) {
-		getPTACallGraph()->dump("callgraph_initial");
+    if (Options::CallGraphDotGraph) {
+        getPTACallGraph()->dump("callgraph_initial");
     }
 }
 
@@ -197,10 +200,7 @@ void PointerAnalysis::resetObjFieldSensitive() {
 /*!
  * Flag in order to dump graph
  */
-bool PointerAnalysis::dumpGraph()
-{
-    return Options::PAGDotGraph;
-}
+bool PointerAnalysis::dumpGraph() { return Options::PAGDotGraph; }
 
 /*
  * Dump statistics
@@ -229,9 +229,9 @@ void PointerAnalysis::finalize() {
     }
 
     // dump ICFG
-    if (Options::DumpICFG){
-		pag->getICFG()->updateCallGraph(ptaCallGraph);
-		pag->getICFG()->dump("icfg_final");
+    if (Options::DumpICFG) {
+        pag->getICFG()->updateCallGraph(ptaCallGraph);
+        pag->getICFG()->dump("icfg_final");
     }
 
     if (!DumpPAGFunctions.empty()) {
@@ -239,8 +239,7 @@ void PointerAnalysis::finalize() {
     }
 
     /// Dump results
-    if (Options::PTSPrint)
-    {
+    if (Options::PTSPrint) {
         dumpTopLevelPtsTo();
         // dumpAllPts();
         // dumpCPts();
@@ -250,11 +249,9 @@ void PointerAnalysis::finalize() {
         dumpAllTypes();
     }
 
-
-    if(Options::PTSAllPrint) {
+    if (Options::PTSAllPrint) {
         dumpAllPts();
     }
-
 
     if (Options::FuncPointerPrint) {
         printIndCSTargets();
@@ -262,10 +259,9 @@ void PointerAnalysis::finalize() {
 
     getPTACallGraph()->verifyCallGraph();
 
-	if (Options::CallGraphDotGraph) {
+    if (Options::CallGraphDotGraph) {
         getPTACallGraph()->dump("callgraph_final");
     }
-
 
     // FSTBHC has its own TBHC-specific test validation.
     if (!pag->isBuiltFromFile() && alias_validation &&
@@ -431,10 +427,9 @@ void PointerAnalysis::resolveIndCalls(const CallBlockNode *cs,
     /// discover indirect pointer target
     for (const auto &ii : target) {
 
-
-        if(getNumOfResolvedIndCallEdge() >= Options::IndirectCallLimit)
-        {
-            wrnMsg("Resolved Indirect Call Edges are Out-Of-Budget, please increase the limit");
+        if (getNumOfResolvedIndCallEdge() >= Options::IndirectCallLimit) {
+            wrnMsg("Resolved Indirect Call Edges are Out-Of-Budget, please "
+                   "increase the limit");
             return;
         }
 
