@@ -28,6 +28,9 @@ RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-10 40  \
     --slave /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-10 \
     --slave /usr/bin/opt opt /usr/bin/opt-10 \
     --slave /usr/bin/llvm-as llvm-as /usr/bin/llvm-as-10 \
-    --slave /usr/bin/llvm-symbolizer llvm-symbolizer /usr/bin/llvm-symbolizer-10
+    --slave /usr/bin/llvm-symbolizer llvm-symbolizer /usr/bin/llvm-symbolizer-10 \
+    --slave /usr/bin/clang-format clang-format /usr/bin/clang-format-10
+
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 40
 
 RUN useradd -ms /bin/bash test
