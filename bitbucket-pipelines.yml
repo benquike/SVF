@@ -22,5 +22,5 @@ pipelines:
           - cd Debug-build
           - cmake -DSVF_BUILD_UNITTESTS=On -DCMAKE_BUILD_TYPE=Debug ..; cd ..
           - cmake --build Debug-build --target check-format # check code format
-          - cd Debug-build; cmake --build . --config Debug -j # build the code
+          - cd Debug-build; cmake --build . --config Debug # build the code
           - ctest # run ctest
