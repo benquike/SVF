@@ -163,6 +163,8 @@ void PointerAnalysis::initialize() {
         CallGraphBuilder bd(proj, cg);
         ptaCallGraph = bd.buildCallGraph();
     }
+    /// initialize the  Strong-Connected-Component
+    /// module for building the callgraph
     callGraphSCCDetection();
 
     // dump callgraph

@@ -344,9 +344,9 @@ struct DOTGraphTraits<PTACallGraph *> : public DefaultDOTGraphTraits {
         return node->toString();
     }
 
-    static std::string getNodeAttributes(PTACallGraphNode *node, PTACallGraph*)
-    {
-        const SVFFunction* fun = node->getFunction();
+    static std::string getNodeAttributes(PTACallGraphNode *node,
+                                         PTACallGraph *) {
+        const SVFFunction *fun = node->getFunction();
         if (!SVFUtil::isExtCall(fun)) {
             return "shape=box";
         }

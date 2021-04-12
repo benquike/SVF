@@ -502,9 +502,7 @@ void ConstraintGraph::print() {
 /*!
  * View dot graph of Constraint graph from debugger.
  */
-void ConstraintGraph::view() {
-    llvm::ViewGraph(this, "Constraint Graph");
-}
+void ConstraintGraph::view() { llvm::ViewGraph(this, "Constraint Graph"); }
 
 /*!
  * GraphTraits specialization for constraint graph
@@ -527,10 +525,10 @@ struct DOTGraphTraits<ConstraintGraph *> : public DOTGraphTraits<PAG *> {
     }
 
     /// Return label of a VFG node with two display mode
-    /// Either you can choose to display the name of the value or the whole instruction
-    static std::string getNodeLabel(NodeType *n, ConstraintGraph* g)
-    {
-        PAGNode* node = g->getPAG()->getPAGNode(n->getId());
+    /// Either you can choose to display the name of the value or the whole
+    /// instruction
+    static std::string getNodeLabel(NodeType *n, ConstraintGraph *g) {
+        PAGNode *node = g->getPAG()->getPAGNode(n->getId());
         bool briefDisplay = Options::BriefConsCGDotGraph;
         bool nameDisplay = true;
         std::string str;
@@ -550,7 +548,8 @@ struct DOTGraphTraits<ConstraintGraph *> : public DOTGraphTraits<PAG *> {
             // print the whole value
             if (!SVFUtil::isa<DummyValPN>(node) &&
                 !SVFUtil::isa<DummyObjPN>(node)) {
-                rawstr << node->getId() << ":" << value2String(node->getValue());
+                rawstr << node->getId() << ":"
+                       << value2String(node->getValue());
             } else {
                 rawstr << node->getId() << ":";
             }
@@ -559,9 +558,8 @@ struct DOTGraphTraits<ConstraintGraph *> : public DOTGraphTraits<PAG *> {
         return rawstr.str();
     }
 
-    static std::string getNodeAttributes(NodeType *n, ConstraintGraph* g)
-    {
-        PAGNode* node = g->getPAG()->getPAGNode(n->getId());
+    static std::string getNodeAttributes(NodeType *n, ConstraintGraph *g) {
+        PAGNode *node = g->getPAG()->getPAGNode(n->getId());
         return node->getNodeAttrForDotDisplay();
     }
 

@@ -64,44 +64,33 @@ const std::string PAGNode::toString() const {
 const std::string PAGNode::getNodeAttrForDotDisplay() const {
     // TODO: Maybe use over-rides instead of these ifs,
     // But this puts them conveniently together.
-    if (SVFUtil::isa<ValPN>(this))
-    {
-        if(SVFUtil::isa<GepValPN>(this))
+    if (SVFUtil::isa<ValPN>(this)) {
+        if (SVFUtil::isa<GepValPN>(this))
             return "shape=hexagon";
         else if (SVFUtil::isa<DummyValPN>(this))
             return "shape=diamond";
         else
             return "shape=box";
-    }
-    else if (SVFUtil::isa<ObjPN>(this))
-    {
-        if(SVFUtil::isa<GepObjPN>(this))
+    } else if (SVFUtil::isa<ObjPN>(this)) {
+        if (SVFUtil::isa<GepObjPN>(this))
             return "shape=doubleoctagon";
-        else if(SVFUtil::isa<FIObjPN>(this))
+        else if (SVFUtil::isa<FIObjPN>(this))
             return "shape=box3d";
         else if (SVFUtil::isa<DummyObjPN>(this))
             return "shape=tab";
         else
             return "shape=component";
-    }
-    else if (SVFUtil::isa<RetPN>(this))
-    {
+    } else if (SVFUtil::isa<RetPN>(this)) {
         return "shape=Mrecord";
-    }
-    else if (SVFUtil::isa<VarArgPN>(this))
-    {
+    } else if (SVFUtil::isa<VarArgPN>(this)) {
         return "shape=octagon";
-    }
-    else
-    {
+    } else {
         assert(0 && "no such kind!!");
     }
     return "";
 }
 
-void PAGNode::dump() const {
-    outs() << this->toString() << "\n";
-}
+void PAGNode::dump() const { outs() << this->toString() << "\n"; }
 
 const std::string ValPN::toString() const {
     std::string str;
@@ -1066,10 +1055,7 @@ void PAG::dump(std::string name) {
 /*!
  * View PAG
  */
-void PAG::view()
-{
-    llvm::ViewGraph(this, "ProgramAssignmentGraph");
-}
+void PAG::view() { llvm::ViewGraph(this, "ProgramAssignmentGraph"); }
 
 /*!
  * Whether to handle blackhole edge
@@ -1415,8 +1401,7 @@ template <> struct DOTGraphTraits<PAG *> : public DefaultDOTGraphTraits {
         return rawstr.str();
     }
 
-    static std::string getNodeAttributes(PAGNode *node, PAG*)
-    {
+    static std::string getNodeAttributes(PAGNode *node, PAG *) {
         return node->getNodeAttrForDotDisplay();
     }
 

@@ -47,8 +47,8 @@ void FlowSensitive::initialize() {
     PointerAnalysis::initialize();
 
     ander = AndersenWaveDiff::createAndersenWaveDiff(getSVFProject());
-    // When evaluating ctir aliases, we want the whole SVFG.
 
+    // When evaluating ctir aliases, we want the whole SVFG.
     if (Options::OPTSVFG)
         svfg = Options::CTirAliasEval ? svfgBuilder.buildFullSVFG(ander)
                                       : svfgBuilder.buildPTROnlySVFG(ander);

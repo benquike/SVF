@@ -221,8 +221,7 @@ struct DOTGraphTraits<OfflineConsG *> : public DOTGraphTraits<PAG *> {
         return rawstr.str();
     }
 
-
-    static std::string getNodeAttributes(NodeType *n, OfflineConsG* g) {
+    static std::string getNodeAttributes(NodeType *n, OfflineConsG *g) {
         PAG *pag = g->getPAG();
 
         if (pag->findPAGNode(n->getId())) {
