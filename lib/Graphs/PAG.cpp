@@ -60,11 +60,57 @@ const std::string PAGNode::toString() const {
     return rawstr.str();
 }
 
+/// Get shape and/or color of node for .dot display.
+const std::string PAGNode::getNodeAttrForDotDisplay() const {
+    // TODO: Maybe use over-rides instead of these ifs,
+    // But this puts them conveniently together.
+    if (SVFUtil::isa<ValPN>(this))
+    {
+        if(SVFUtil::isa<GepValPN>(this))
+            return "shape=hexagon";
+        else if (SVFUtil::isa<DummyValPN>(this))
+            return "shape=diamond";
+        else
+            return "shape=box";
+    }
+    else if (SVFUtil::isa<ObjPN>(this))
+    {
+        if(SVFUtil::isa<GepObjPN>(this))
+            return "shape=doubleoctagon";
+        else if(SVFUtil::isa<FIObjPN>(this))
+            return "shape=box3d";
+        else if (SVFUtil::isa<DummyObjPN>(this))
+            return "shape=tab";
+        else
+            return "shape=component";
+    }
+    else if (SVFUtil::isa<RetPN>(this))
+    {
+        return "shape=Mrecord";
+    }
+    else if (SVFUtil::isa<VarArgPN>(this))
+    {
+        return "shape=octagon";
+    }
+    else
+    {
+        assert(0 && "no such kind!!");
+    }
+    return "";
+}
+
+void PAGNode::dump() const {
+    outs() << this->toString() << "\n";
+}
+
 const std::string ValPN::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "ValPN ID: " << getId();
 
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(value);
     return rawstr.str();
 }
@@ -73,6 +119,9 @@ const std::string ObjPN::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "ObjPN ID: " << getId();
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(value);
     return rawstr.str();
 }
@@ -83,6 +132,9 @@ const std::string GepValPN::toString() const {
 
     rawstr << "GepValPN ID: " << getId()
            << " with offset_" + llvm::utostr(getOffset());
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(value);
     return rawstr.str();
 }
@@ -90,8 +142,12 @@ const std::string GepValPN::toString() const {
 const std::string GepObjPN::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
+
     rawstr << "GepObjPN ID: " << getId()
            << " with offset_" + llvm::itostr(ls.getOffset());
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(value);
     return rawstr.str();
 }
@@ -100,6 +156,9 @@ const std::string FIObjPN::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "FIObjPN ID: " << getId() << " (base object)";
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(value);
     return rawstr.str();
 }
@@ -166,6 +225,9 @@ const std::string AddrPE::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "AddrPE: [" << getDstID() << "<--" << getSrcID() << "]\t";
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(getValue());
     return rawstr.str();
 }
@@ -174,6 +236,9 @@ const std::string CopyPE::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "CopyPE: [" << getDstID() << "<--" << getSrcID() << "]\t";
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(getValue());
     return rawstr.str();
 }
@@ -182,6 +247,9 @@ const std::string CmpPE::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "CmpPE: [" << getDstID() << "<--" << getSrcID() << "]\t";
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(getValue());
     return rawstr.str();
 }
@@ -190,6 +258,9 @@ const std::string BinaryOPPE::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "BinaryOPPE: [" << getDstID() << "<--" << getSrcID() << "]\t";
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(getValue());
     return rawstr.str();
 }
@@ -198,6 +269,9 @@ const std::string UnaryOPPE::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "UnaryOPPE: [" << getDstID() << "<--" << getSrcID() << "]\t";
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(getValue());
     return rawstr.str();
 }
@@ -206,6 +280,9 @@ const std::string LoadPE::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "LoadPE: [" << getDstID() << "<--" << getSrcID() << "]\t";
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(getValue());
     return rawstr.str();
 }
@@ -214,6 +291,9 @@ const std::string StorePE::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "StorePE: [" << getDstID() << "<--" << getSrcID() << "]\t";
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(getValue());
     return rawstr.str();
 }
@@ -222,6 +302,9 @@ const std::string GepPE::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "GepPE: [" << getDstID() << "<--" << getSrcID() << "]\t";
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(getValue());
     return rawstr.str();
 }
@@ -229,7 +312,10 @@ const std::string GepPE::toString() const {
 const std::string NormalGepPE::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
-    rawstr << "VariantGepPE: [" << getDstID() << "<--" << getSrcID() << "]\t";
+    rawstr << "NormalGepPE: [" << getDstID() << "<--" << getSrcID() << "]\t";
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(getValue());
     return rawstr.str();
 }
@@ -238,6 +324,9 @@ const std::string VariantGepPE::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "VariantGepPE: [" << getDstID() << "<--" << getSrcID() << "]\t";
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(getValue());
     return rawstr.str();
 }
@@ -246,6 +335,9 @@ const std::string CallPE::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "CallPE: [" << getDstID() << "<--" << getSrcID() << "]\t";
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(getValue());
     return rawstr.str();
 }
@@ -254,6 +346,9 @@ const std::string RetPE::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "RetPE: [" << getDstID() << "<--" << getSrcID() << "]\t";
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(getValue());
     return rawstr.str();
 }
@@ -262,6 +357,9 @@ const std::string TDForkPE::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "TDForkPE: [" << getDstID() << "<--" << getSrcID() << "]\t";
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(getValue());
     return rawstr.str();
 }
@@ -270,6 +368,9 @@ const std::string TDJoinPE::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << "TDJoinPE: [" << getDstID() << "<--" << getSrcID() << "]\t";
+    if (Options::PAGDotGraphShorter) {
+        rawstr << "\n";
+    }
     rawstr << value2String(getValue());
     return rawstr.str();
 }
@@ -963,9 +1064,16 @@ void PAG::dump(std::string name) {
 }
 
 /*!
+ * View PAG
+ */
+void PAG::view()
+{
+    llvm::ViewGraph(this, "ProgramAssignmentGraph");
+}
+
+/*!
  * Whether to handle blackhole edge
  */
-
 void PAG::handleBlackHole(bool b) { Options::HandBlackHole = b; }
 
 void PAG::initializeExternalPAGs() {
@@ -1307,39 +1415,9 @@ template <> struct DOTGraphTraits<PAG *> : public DefaultDOTGraphTraits {
         return rawstr.str();
     }
 
-    static std::string getNodeAttributes(PAGNode *node, PAG *) {
-        if (SVFUtil::isa<ValPN>(node)) {
-            if (SVFUtil::isa<GepValPN>(node)) {
-                return "shape=hexagon";
-            }
-
-            if (SVFUtil::isa<DummyValPN>(node)) {
-                return "shape=diamond";
-            }
-
-            return "shape=circle";
-        } else if (SVFUtil::isa<ObjPN>(node)) {
-            if (SVFUtil::isa<GepObjPN>(node)) {
-                return "shape=doubleoctagon";
-            }
-
-            if (SVFUtil::isa<FIObjPN>(node)) {
-                return "shape=septagon";
-            }
-
-            if (SVFUtil::isa<DummyObjPN>(node)) {
-                return "shape=Mcircle";
-            }
-
-            return "shape=doublecircle";
-        } else if (SVFUtil::isa<RetPN>(node)) {
-            return "shape=Mrecord";
-        } else if (SVFUtil::isa<VarArgPN>(node)) {
-            return "shape=octagon";
-        } else {
-            assert(0 && "no such kind node!!");
-        }
-        return "";
+    static std::string getNodeAttributes(PAGNode *node, PAG*)
+    {
+        return node->getNodeAttrForDotDisplay();
     }
 
     template <class EdgeIter>

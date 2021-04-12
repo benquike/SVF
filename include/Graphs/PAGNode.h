@@ -243,6 +243,12 @@ class PAGNode : public GenericPAGNodeTy {
 
     virtual const std::string toString() const;
 
+    /// Get shape and/or color of node for .dot display.
+    virtual const std::string getNodeAttrForDotDisplay() const;
+
+    /// Dump to console for debugging
+    void dump() const;
+
     //@}
     /// Overloading operator << for dumping PAGNode value
     //@{

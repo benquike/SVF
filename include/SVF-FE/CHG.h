@@ -165,12 +165,14 @@ class CHGraph : public CommonCHGraph, public GenericCHGraphTy {
     void buildCSToCHAVtblsAndVfnsMap();
     void readInheritanceMetadataFromModule(const Module &M);
     void analyzeVTables(const Module &M);
+
     const CHGraph::CHNodeSetTy &
     getInstancesAndDescendants(const std::string &className);
     const CHNodeSetTy &getCSClasses(CallSite cs);
     void getVFnsFromVtbls(CallSite cs, const VTableSet &vtbls,
                           VFunSet &virtualFunctions) override;
     void dump(const std::string &filename);
+    void view();
     void printCH();
 
     inline s32_t getVirtualFunctionID(const SVFFunction *vfn) const {

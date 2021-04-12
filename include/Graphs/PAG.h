@@ -836,6 +836,9 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
 
     /// Dump PAG
     void dump(std::string name);
+
+    /// View graph from the debugger
+    void view();
 };
 
 } // End namespace SVF

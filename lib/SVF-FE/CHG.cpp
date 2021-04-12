@@ -838,7 +838,12 @@ void CHGraph::dump(const std::string &filename) {
     printCH();
 }
 
-namespace llvm {
+void CHGraph::view() {
+    llvm::ViewGraph(this, "Class Hierarchy Graph");
+}
+
+namespace llvm
+{
 
 /*!
  * Write value flow graph into dot file for debugging
@@ -857,12 +862,12 @@ template <> struct DOTGraphTraits<CHGraph *> : public DefaultDOTGraphTraits {
         return node->getName();
     }
 
-    static std::string getNodeAttributes(CHNode *node, CHGraph *) {
+    static std::string getNodeAttributes(CHNode *node, CHGraph*) {
         if (node->isPureAbstract()) {
-            return "shape=Mcircle";
+            return "shape=tab";
         }
 
-        return "shape=circle";
+        return "shape=box";
     }
 
     template <class EdgeIter>

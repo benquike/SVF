@@ -185,6 +185,10 @@ const llvm::cl::opt<bool>
     Options::PAGDotGraph("dump-pag", llvm::cl::init(false),
                          llvm::cl::desc("Dump dot graph of PAG"));
 
+const llvm::cl::opt<bool> Options::PAGDotGraphShorter(
+    "dump-pag-shorter", llvm::cl::init(true),
+    llvm::cl::desc("If dumping dot graph of PAG, use shorter lines"));
+
 const llvm::cl::opt<bool>
     Options::DumpICFG("dump-icfg", llvm::cl::init(false),
                       llvm::cl::desc("Dump dot graph of ICFG"));
@@ -386,6 +390,10 @@ const llvm::cl::opt<bool> Options::ConsCGDotGraph(
     "dump-constraint-graph", llvm::cl::init(false),
     llvm::cl::desc("Dump dot graph of Constraint Graph"));
 
+const llvm::cl::opt<bool> Options::BriefConsCGDotGraph(
+    "brief-constraint-graph", llvm::cl::init(true),
+    llvm::cl::desc("Dump dot graph of Constraint Graph"));
+
 const llvm::cl::opt<bool>
     Options::PrintCGGraph("print-constraint-graph", llvm::cl::init(false),
                           llvm::cl::desc("Print Constraint Graph to Terminal"));
@@ -478,4 +486,5 @@ llvm::cl::bits<WPAPass::AliasCheckRule> Options::AliasRule(
                                 "return MayAlias if any pta says alias"),
                      clEnumValN(WPAPass::Veto, "veto",
                                 "return NoAlias if any pta says no alias")));
+
 }; // namespace SVF.

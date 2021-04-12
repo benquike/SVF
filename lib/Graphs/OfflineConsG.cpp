@@ -221,49 +221,16 @@ struct DOTGraphTraits<OfflineConsG *> : public DOTGraphTraits<PAG *> {
         return rawstr.str();
     }
 
-    static std::string getNodeAttributes(NodeType *n, OfflineConsG *g) {
-        if (g->getPAG()->findPAGNode(n->getId())) {
-            PAGNode *node = g->getPAG()->getPAGNode(n->getId());
-            if (SVFUtil::isa<ValPN>(node)) {
-                if (SVFUtil::isa<GepValPN>(node)) {
-                    return "shape=hexagon";
-                }
 
-                if (SVFUtil::isa<DummyValPN>(node)) {
-                    return "shape=diamond";
-                }
+    static std::string getNodeAttributes(NodeType *n, OfflineConsG* g) {
+        PAG *pag = g->getPAG();
 
-                return "shape=circle";
-            }
-
-            if (SVFUtil::isa<ObjPN>(node)) {
-                if (SVFUtil::isa<GepObjPN>(node)) {
-                    return "shape=doubleoctagon";
-                }
-
-                if (SVFUtil::isa<FIObjPN>(node)) {
-                    return "shape=septagon";
-                }
-
-                if (SVFUtil::isa<DummyObjPN>(node)) {
-                    return "shape=Mcircle";
-                }
-                return "shape=doublecircle";
-            }
-
-            if (SVFUtil::isa<RetPN>(node)) {
-                return "shape=Mrecord";
-            }
-
-            if (SVFUtil::isa<VarArgPN>(node)) {
-                return "shape=octagon";
-            }
-
-            assert(0 && "no such kind node!!");
-            return "";
+        if (pag->findPAGNode(n->getId())) {
+            PAGNode *node = pag->getPAGNode(n->getId());
+            return node->getNodeAttrForDotDisplay();
         }
 
-        return "shape=doublecircle";
+        return "shape=folder";
     }
 
     template <class EdgeIter>
