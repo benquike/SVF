@@ -112,7 +112,11 @@ void PointerAnalysis::destroy() {
 }
 
 /*!
+ *
  * Initialization of pointer analysis
+ * 1. build class hierarchy graph
+ * 2. build PTA callgraph
+ *
  */
 void PointerAnalysis::initialize() {
 

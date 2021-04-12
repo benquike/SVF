@@ -414,6 +414,8 @@ void ICFG::view() {
 
 /*!
  * Update ICFG for indirect calls
+ * using the PTACallGraph, which resolves function pointers
+ * called at callsites
  */
 void ICFG::updateCallGraph(PTACallGraph *callgraph) {
 
