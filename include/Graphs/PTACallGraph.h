@@ -397,6 +397,10 @@ class PTACallGraph : public GenericCallGraphTy {
 
     /// Dump the graph
     void dump(const std::string &filename);
+
+    void view() override {
+        llvm::ViewGraph(this, "PTA Call Graph");
+    }
 };
 
 } // End namespace SVF

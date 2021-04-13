@@ -146,7 +146,7 @@ class CHGraph : public CommonCHGraph, public GenericCHGraphTy {
         : CommonCHGraph(symInfo), classNum(0), vfID(0), buildingCHGTime(0) {
         this->kind = Standard;
     }
-    ~CHGraph();
+    ~CHGraph() override;
 
     void buildCHG();
     void buildInternalMaps();

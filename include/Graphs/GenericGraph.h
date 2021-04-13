@@ -254,6 +254,8 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
     /// Destructor
     virtual ~GenericGraph() { destroy(); }
 
+    virtual void view() {}
+
     /// Release memory
     void destroy() {
         for (iterator I = IDToNodeMap.begin(), E = IDToNodeMap.end(); I != E;
