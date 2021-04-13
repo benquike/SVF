@@ -80,16 +80,23 @@ class PTASCEV {
     /// Enable compare operator to avoid duplicated item insertion in map or set
     /// to be noted that two vectors can also overload operator()
     inline bool operator<(const PTASCEV &rhs) const {
-        if (start != rhs.start)
+        if (start != rhs.start) {
             return start < rhs.start;
-        else if (step != rhs.step)
+        }
+
+        if (step != rhs.step) {
             return step < rhs.step;
-        else if (ptr != rhs.ptr)
+        }
+
+        if (ptr != rhs.ptr) {
             return ptr < rhs.ptr;
-        else if (tripcount != rhs.tripcount)
+        }
+
+        if (tripcount != rhs.tripcount) {
             return tripcount < rhs.tripcount;
-        else
-            return inloop < rhs.inloop;
+        }
+
+        return inloop < rhs.inloop;
     }
     /// Overloading operator=
     inline PTASCEV &operator=(const PTASCEV &rhs) {

@@ -75,9 +75,9 @@ class SVFModule {
 
   public:
     /// Constructors
-    SVFModule(string moduleName);
-    SVFModule(vector<string> &modVec);
-    SVFModule(Module &module);
+    explicit SVFModule(string moduleName);
+    explicit SVFModule(vector<string> &modVec);
+    explicit SVFModule(Module &module);
 
     static inline void setPagFromTXT(std::string txt) { pagReadFromTxt = txt; }
 

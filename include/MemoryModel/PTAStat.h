@@ -143,7 +143,7 @@ class PTAStat {
 
     using TIMEStatMap = Map<const char *, double>;
 
-    PTAStat(PointerAnalysis *p);
+    explicit PTAStat(PointerAnalysis *p);
     virtual ~PTAStat() {}
 
     virtual inline void startClk() { startTime = CLOCK_IN_MS(); }
@@ -152,8 +152,10 @@ class PTAStat {
     /// is only returned when Options::MarkedClocksOnly is not set. Default call
     /// for getClk is unmarked, while MarkedClocksOnly is false by default.
     static inline double getClk(bool mark = false) {
-        if (Options::MarkedClocksOnly && !mark)
+        if (Options::MarkedClocksOnly && !mark) {
             return 0.0;
+        }
+
         return CLOCK_IN_MS();
     }
 

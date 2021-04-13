@@ -97,7 +97,7 @@ class SymbolTableInfo {
 
   public:
     /// Constructor
-    SymbolTableInfo(SVFModule *mod)
+    explicit SymbolTableInfo(SVFModule *mod)
         : mod(mod), modelConstants(false), totalSymNum(0), maxStruct(nullptr),
           maxStSize(0) {
         // start building the memory model
@@ -385,24 +385,24 @@ class LocSymTableInfo : public SymbolTableInfo {
 
   public:
     /// Constructor
-    LocSymTableInfo(SVFModule *mod) : SymbolTableInfo(mod) {}
+    explicit LocSymTableInfo(SVFModule *mod) : SymbolTableInfo(mod) {}
     /// Destructor
-    virtual ~LocSymTableInfo() {}
+    ~LocSymTableInfo() override {}
     /// Compute gep offset
-    virtual bool computeGepOffset(const User *V, LocationSet &ls);
+    bool computeGepOffset(const User *V, LocationSet &ls) override;
     /// Given an offset from a Gep Instruction, return it modulus offset by
     /// considering memory layout
-    virtual LocationSet getModulusOffset(const MemObj *obj,
-                                         const LocationSet &ls);
+    LocationSet getModulusOffset(const MemObj *obj,
+                                 const LocationSet &ls) override;
 
     /// Verify struct size construction
     void verifyStructSize(StInfo *stInfo, u32_t structSize);
 
   protected:
     /// Collect the struct info
-    virtual void collectStructInfo(const StructType *T);
+    void collectStructInfo(const StructType *T) override;
     /// Collect the array info
-    virtual void collectArrayInfo(const ArrayType *T);
+    void collectArrayInfo(const ArrayType *T) override;
 };
 
 class LocObjTypeInfo : public ObjTypeInfo {
@@ -413,9 +413,9 @@ class LocObjTypeInfo : public ObjTypeInfo {
                    Size_t max)
         : ObjTypeInfo(symInfo, val, t, max) {}
     /// Destructor
-    virtual ~LocObjTypeInfo() {}
+    ~LocObjTypeInfo() override {}
     /// Get the size of this object
-    u32_t getObjSize(const Value *val);
+    u32_t getObjSize(const Value *val) override;
 };
 
 } // End namespace SVF

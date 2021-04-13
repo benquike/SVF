@@ -61,11 +61,11 @@ class AndersenStat : public PTAStat {
     u32_t _NumOfConstantPtr;
     u32_t _NumOfBlackholePtr;
 
-    AndersenStat(AndersenBase *p);
+    explicit AndersenStat(AndersenBase *p);
 
-    virtual ~AndersenStat() {}
+    ~AndersenStat() override {}
 
-    virtual void performStat();
+    void performStat() override;
 
     void collectCycleInfo(ConstraintGraph *consCG);
 
@@ -90,7 +90,7 @@ class FlowSensitiveStat : public PTAStat {
         startClk();
     }
 
-    virtual ~FlowSensitiveStat() {}
+    ~FlowSensitiveStat() override {}
 
     void performStat() override;
 
@@ -159,13 +159,14 @@ class VersionedFlowSensitiveStat : public PTAStat {
   public:
     VersionedFlowSensitive *vfspta;
 
-    VersionedFlowSensitiveStat(VersionedFlowSensitive *pta) : PTAStat(pta) {
+    explicit VersionedFlowSensitiveStat(VersionedFlowSensitive *pta)
+        : PTAStat(pta) {
         vfspta = pta;
         clearStat();
         startClk();
     }
 
-    virtual ~VersionedFlowSensitiveStat() {}
+    ~VersionedFlowSensitiveStat() override {}
 
     void performStat() override;
 

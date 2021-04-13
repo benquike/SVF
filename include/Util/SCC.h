@@ -86,7 +86,7 @@ template <class GraphType> class SCCDetection {
     using GNODESCCInfoMap = Map<NodeID, GNodeSCCInfo>;
     using NodeToNodeMap = Map<NodeID, NodeID>;
 
-    SCCDetection(const GraphType &GT) : _graph(GT), _I(0) {}
+    explicit SCCDetection(const GraphType &GT) : _graph(GT), _I(0) {}
 
     // Return a handle to the stack of nodes in topological
     // order.  This will be used to seed the initial solution
@@ -112,17 +112,17 @@ template <class GraphType> class SCCDetection {
         if (subNodes(rep).count() > 1) {
             return true;
         }
+
         // self-cycle
-        else {
-            child_iterator EI = GTraits::direct_child_begin(Node(rep));
-            child_iterator EE = GTraits::direct_child_end(Node(rep));
-            for (; EI != EE; ++EI) {
-                NodeID w = Node_Index(*EI);
-                if (w == rep)
-                    return true;
+        child_iterator EI = GTraits::direct_child_begin(Node(rep));
+        child_iterator EE = GTraits::direct_child_end(Node(rep));
+        for (; EI != EE; ++EI) {
+            NodeID w = Node_Index(*EI);
+            if (w == rep) {
+                return true;
             }
-            return false;
         }
+        return false;
     }
 
     /// get all subnodes in one scc, if size is empty insert itself into the set
@@ -171,42 +171,61 @@ template <class GraphType> class SCCDetection {
         return GTraits::getNodeID(node);
     }
 
+    /// A standard Tarjan algorithm to compute strongly-connected
+    /// components
     void visit(NodeID v) {
         // SVFUtil::outs() << "visit GNODE: " << Node_Index(v)<< "\n";
+        // save the timestamp of node v
         _I += 1;
         _D[v] = _I;
-        this->rep(v, v);
-        this->setVisited(v, true);
+
+        // set v as the representative of itself
+        rep(v, v);
+        setVisited(v, true);
 
         child_iterator EI = GTraits::direct_child_begin(Node(v));
         child_iterator EE = GTraits::direct_child_end(Node(v));
 
+        // DFS the graph
         for (; EI != EE; ++EI) {
             NodeID w = Node_Index(*EI);
 
-            if (!this->visited(w))
+            if (!visited(w)) {
                 visit(w);
-            if (!this->inSCC(w)) {
+            }
+
+            if (!inSCC(w)) {
+                // if this is a back-edge
+                // (the dest is still in the stack)
+                // set the root (representative) of v as the one with the
+                // lowest timestamp
                 NodeID rep;
                 rep = _D[this->rep(v)] < _D[this->rep(w)] ? this->rep(v)
                                                           : this->rep(w);
                 this->rep(v, rep);
             }
         }
-        if (this->rep(v) == v) {
-            this->setInSCC(v, true);
+        if (rep(v) == v) {
+            // this is a root (representative)
+            // of a strongly-connected component
+            setInSCC(v, true);
             while (!_SS.empty()) {
                 NodeID w = _SS.top();
-                if (_D[w] <= _D[v])
+                if (_D[w] <= _D[v]) {
                     break;
+                }
 
                 _SS.pop();
-                this->setInSCC(w, true);
-                this->rep(w, v);
+                setInSCC(w, true);
+                rep(w, v);
             }
+
+            // Save the root (representative) of each
+            // strongly-connected component to the stack
             _T.push(v);
-        } else
+        } else {
             _SS.push(v);
+        }
     }
 
     void clear() {
@@ -214,10 +233,14 @@ template <class GraphType> class SCCDetection {
         _I = 0;
         _D.clear();
         repNodes.clear();
-        while (!_SS.empty())
+
+        while (!_SS.empty()) {
             _SS.pop();
-        while (!_T.empty())
+        }
+
+        while (!_T.empty()) {
             _T.pop();
+        }
     }
 
   public:
@@ -229,30 +252,34 @@ template <class GraphType> class SCCDetection {
         node_iterator E = GTraits::nodes_end(_graph);
         for (; I != E; ++I) {
             NodeID node = Node_Index(*I);
-            if (!this->visited(node)) {
+            if (!visited(node)) {
                 // We skip any nodes that have a representative other than
                 // themselves.  Such nodes occur as a result of merging
                 // nodes either through unifying an ACC or other node
                 // merging optimizations.  Any such node should have no
                 // outgoing edges and therefore should no longer be a member
                 // of an SCC.
-                if (this->rep(node) == UINT_MAX || this->rep(node) == node)
+                if (this->rep(node) == UINT_MAX || this->rep(node) == node) {
                     visit(node);
-                else
-                    this->visited(node);
+                } else {
+                    // what is the point of the else branch????
+                    visited(node);
+                }
             }
         }
     }
 
-    void find(NodeSet &candidates) {
+    void find(const NodeSet &candidates) {
         // This function is reloaded to only visit candidate NODES
         clear();
         for (NodeID node : candidates) {
-            if (!this->visited(node)) {
-                if (this->rep(node) == UINT_MAX || this->rep(node) == node)
+            if (!visited(node)) {
+                if (rep(node) == UINT_MAX || rep(node) == node) {
                     visit(node);
-                else
-                    this->visited(node);
+                } else {
+                    // what is the point of the else branch????
+                    visited(node);
+                }
             }
         }
     }

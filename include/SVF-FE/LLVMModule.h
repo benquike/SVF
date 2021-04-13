@@ -65,7 +65,7 @@ class LLVMModuleSet {
 
   public:
     /// Constructor
-    LLVMModuleSet(SVFModule *svfMod) : svfModule(svfMod), cxts(nullptr) {}
+    explicit LLVMModuleSet(SVFModule *svfMod) : svfModule(svfMod), cxts(nullptr) {}
 
     //// FIXME: update this interface
     SVFModule *buildSVFModule(Module &mod);
@@ -121,12 +121,14 @@ class LLVMModuleSet {
     }
 
     bool hasDeclaration(const SVFFunction *fun) const {
-        if (fun->isDeclaration() && !hasDefinition(fun))
+        if (fun->isDeclaration() && !hasDefinition(fun)) {
             return false;
+        }
 
         const SVFFunction *funDef = fun;
-        if (fun->isDeclaration() && hasDefinition(fun))
+        if (fun->isDeclaration() && hasDefinition(fun)) {
             funDef = getDefinition(fun);
+        }
 
         auto it = FunDefToDeclsMap.find(funDef);
         return it != FunDefToDeclsMap.end();
@@ -138,8 +140,9 @@ class LLVMModuleSet {
 
     const FunctionSetType &getDeclaration(const SVFFunction *fun) const {
         const SVFFunction *funDef = fun;
-        if (fun->isDeclaration() && hasDefinition(fun))
+        if (fun->isDeclaration() && hasDefinition(fun)) {
             funDef = getDefinition(fun);
+        }
 
         auto it = FunDefToDeclsMap.find(funDef);
         assert(it != FunDefToDeclsMap.end() &&

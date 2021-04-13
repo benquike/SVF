@@ -26,7 +26,7 @@ ContextDDA::ContextDDA(SVFProject *proj, DDAClient *client)
  * Destructor
  */
 ContextDDA::~ContextDDA() {
-    if (flowDDA) {
+    if (flowDDA != nullptr) {
         delete flowDDA;
     }
     flowDDA = nullptr;
@@ -62,7 +62,7 @@ const CxtPtSet &ContextDDA::computeDDAPts(const CxtVar &var) {
     DOTIMESTAT(ddaStat->_AnaTimePerQuery = DDAStat::getClk(true) - start);
     DOTIMESTAT(ddaStat->_TotalTimeOfQueries += ddaStat->_AnaTimePerQuery);
 
-    if (isOutOfBudgetQuery() == false) {
+    if (!isOutOfBudgetQuery()) {
         unionPts(var, cpts);
     } else {
         handleOutOfBudgetDpm(dpm);
@@ -174,9 +174,9 @@ bool ContextDDA::testIndCallReachability(CxtLocDPItem &dpm,
         PointsTo pts = getBVPointsTo(findPT(funptrDpm));
         if (pts.test(getPAG()->getObjectNode(callee->getLLVMFun()))) {
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
     return true;
 }
@@ -251,7 +251,7 @@ bool ContextDDA::handleBKCondition(CxtLocDPItem &dpm, const SVFGEdge *edge) {
                                    << "in recursion \n");
                 popRecursiveCallSites(dpm);
             } else {
-                if (dpm.matchContext(csId) == false) {
+                if (!dpm.matchContext(csId)) {
                     DBOUT(DDDA, outs() << "\t\t context not match, edge "
                                        << edge->getDstID() << " --| "
                                        << edge->getSrcID() << " \t");

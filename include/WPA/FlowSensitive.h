@@ -55,7 +55,7 @@ class FlowSensitive : public WPASVFGFSSolver, public BVDataPTAImpl {
     using PtsMap = BVDataPTAImpl::MutDFPTDataTy::PtsMap;
 
     /// Constructor
-    FlowSensitive(SVFProject *proj, PTATY type = FSSPARSE_WPA)
+    explicit FlowSensitive(SVFProject *proj, PTATY type = FSSPARSE_WPA)
         : WPASVFGFSSolver(), BVDataPTAImpl(proj, type) {
         svfg = nullptr;
         solveTime = sccTime = processTime = propagationTime = updateTime = 0;
@@ -71,9 +71,11 @@ class FlowSensitive : public WPASVFGFSSolver, public BVDataPTAImpl {
     }
 
     /// Destructor
-    virtual ~FlowSensitive() {
-        if (svfg != nullptr)
+    ~FlowSensitive() override {
+        if (svfg != nullptr) {
             delete svfg;
+        }
+
         svfg = nullptr;
     }
 
@@ -94,8 +96,10 @@ class FlowSensitive : public WPASVFGFSSolver, public BVDataPTAImpl {
 
     /// Release flow-sensitive pointer analysis
     static void releaseFSWPA() {
-        if (fspta)
+        if (fspta) {
             delete fspta;
+        }
+
         fspta = nullptr;
     }
 

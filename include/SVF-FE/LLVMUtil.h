@@ -266,7 +266,7 @@ inline bool ArgInDeadFunction(const Value *val, SVFModule *svfMod) {
 //@{
 /// Return true if this is a program entry function (e.g. main)
 inline bool isProgEntryFunction(const SVFFunction *fun) {
-    return fun && fun->getName().str() == "main";
+    return (fun != nullptr) && fun->getName().str() == "main";
 }
 
 inline bool isProgEntryFunction(const Function *fun) {

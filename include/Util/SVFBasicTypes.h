@@ -210,10 +210,13 @@ template <typename T, typename U> struct std::hash<std::pair<T, U>> {
 /// Specialise hash for SmallVectors.
 template <typename T, unsigned N> struct std::hash<SVF::SmallVector<T, N>> {
     size_t operator()(const SVF::SmallVector<T, N> &sv) const {
-        if (sv.empty())
+        if (sv.empty()) {
             return 0;
-        if (sv.size() == 1)
+        }
+
+        if (sv.size() == 1) {
             return sv[0];
+        }
 
         // Iterate and accumulate the hash.
         size_t hash = 0;

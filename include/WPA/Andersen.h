@@ -50,30 +50,29 @@ using WPAConstraintSolver = WPASolver<ConstraintGraph *>;
 class AndersenBase : public WPAConstraintSolver, public BVDataPTAImpl {
   public:
     /// Constructor
-    AndersenBase(SVFProject *proj, PTATY type = Andersen_BASE,
-                 bool alias_check = true)
+    explicit AndersenBase(SVFProject *proj, PTATY type = Andersen_BASE,
+                          bool alias_check = true)
         : BVDataPTAImpl(proj, type, alias_check), consCG(nullptr) {
         iterationForPrintStat = OnTheFlyIterBudgetForStat;
     }
 
     /// Destructor
-    virtual ~AndersenBase() {
-        if (consCG != nullptr)
-            delete consCG;
+    ~AndersenBase() override {
+        delete consCG;
         consCG = nullptr;
     }
 
     /// Andersen analysis
-    virtual void analyze();
+    void analyze() override;
 
     /// Initialize analysis
-    virtual void initialize();
+    void initialize() override;
 
     /// Finalize analysis
-    virtual void finalize();
+    void finalize() override;
 
     /// Implement it in child class to update call graph
-    virtual inline bool updateCallGraph(const CallSiteToFunPtrMap &) {
+    inline bool updateCallGraph(const CallSiteToFunPtrMap &) override {
         return false;
     }
 
@@ -137,18 +136,18 @@ class Andersen : public AndersenBase {
     using CallSite2DummyValPN = OrderedMap<CallSite, NodeID>;
 
     /// Constructor
-    Andersen(SVFProject *proj, PTATY type = Andersen_WPA,
-             bool alias_check = true)
+    explicit Andersen(SVFProject *proj, PTATY type = Andersen_WPA,
+                      bool alias_check = true)
         : AndersenBase(proj, type, alias_check), pwcOpt(false), diffOpt(true) {}
 
     /// Destructor
-    virtual ~Andersen() {}
+    ~Andersen() override {}
 
     /// Initialize analysis
-    virtual void initialize();
+    void initialize() override;
 
     /// Finalize analysis
-    virtual void finalize();
+    void finalize() override;
 
     /// Reset data
     inline void resetData() {
@@ -175,34 +174,40 @@ class Andersen : public AndersenBase {
 
     /// SCC methods
     //@{
-    inline NodeID sccRepNode(NodeID id) const { return consCG->sccRepNode(id); }
+    inline NodeID sccRepNode(NodeID id) const override {
+        return consCG->sccRepNode(id);
+    }
+
     inline NodeBS &sccSubNodes(NodeID repId) {
         return consCG->sccSubNodes(repId);
     }
     //@}
 
     /// Operation of points-to set
-    virtual inline const PointsTo &getPts(NodeID id) {
+    inline const PointsTo &getPts(NodeID id) override {
         return getPTDataTy()->getPts(sccRepNode(id));
     }
-    virtual inline bool unionPts(NodeID id, const PointsTo &target) {
+
+    inline bool unionPts(NodeID id, const PointsTo &target) override {
         id = sccRepNode(id);
         return getPTDataTy()->unionPts(id, target);
     }
-    virtual inline bool unionPts(NodeID id, NodeID ptd) {
+
+    inline bool unionPts(NodeID id, NodeID ptd) override {
         id = sccRepNode(id);
         ptd = sccRepNode(ptd);
         return getPTDataTy()->unionPts(id, ptd);
     }
 
-    void dumpTopLevelPtsTo();
+    void dumpTopLevelPtsTo() override;
 
     void setPWCOpt(bool flag) {
         pwcOpt = flag;
-        if (pwcOpt)
+        if (pwcOpt) {
             setSCCEdgeFlag(ConstraintNode::Direct);
-        else
+        } else {
             setSCCEdgeFlag(ConstraintNode::Copy);
+        }
     }
 
     bool mergePWC() const { return pwcOpt; }
@@ -231,16 +236,19 @@ class Andersen : public AndersenBase {
     }
     virtual inline const PointsTo &getDiffPts(NodeID id) {
         NodeID rep = sccRepNode(id);
-        if (enableDiff())
+        if (enableDiff()) {
             return getDiffPTDataTy()->getDiffPts(rep);
-        else
-            return getPTDataTy()->getPts(rep);
+        }
+
+        return getPTDataTy()->getPts(rep);
     }
 
     /// Handle propagated points-to set.
     inline void updatePropaPts(NodeID dstId, NodeID srcId) {
-        if (!enableDiff())
+        if (!enableDiff()) {
             return;
+        }
+
         NodeID srcRep = sccRepNode(srcId);
         NodeID dstRep = sccRepNode(dstId);
         getDiffPTDataTy()->updatePropaPtsMap(srcRep, dstRep);
@@ -252,14 +260,14 @@ class Andersen : public AndersenBase {
         }
     }
 
-    virtual void initWorklist() {}
+    void initWorklist() override {}
 
     virtual void setSCCEdgeFlag(ConstraintNode::SCCEdgeFlag f) {
         ConstraintNode::sccEdgeFlag = f;
     }
 
     /// Override WPASolver function in order to use the default solver
-    virtual void processNode(NodeID nodeId);
+    void processNode(NodeID nodeId) override;
 
     /// handling various constraints
     //@{
@@ -277,7 +285,7 @@ class Andersen : public AndersenBase {
 
     /// Add copy edge on constraint graph
     virtual inline bool addCopyEdge(NodeID src, NodeID dst) {
-        if (consCG->addCopyCGEdge(src, dst)) {
+        if (consCG->addCopyCGEdge(src, dst) != nullptr) {
             updatePropaPts(src, dst);
             return true;
         }
@@ -285,7 +293,7 @@ class Andersen : public AndersenBase {
     }
 
     /// Update call graph for the input indirect callsites
-    virtual bool updateCallGraph(const CallSiteToFunPtrMap &callsites);
+    bool updateCallGraph(const CallSiteToFunPtrMap &callsites) override;
 
     /// Connect formal and actual parameters for indirect callsites
     void connectCaller2CalleeParams(CallSite cs, const SVFFunction *F,
@@ -303,8 +311,8 @@ class Andersen : public AndersenBase {
     //@}
     /// Collapse a field object into its base for field insensitive anlaysis
     //@{
-    void collapsePWCNode(NodeID nodeId);
-    void collapseFields();
+    void collapsePWCNode(NodeID nodeId) override;
+    void collapseFields() override;
     bool collapseNodePts(NodeID nodeId);
     bool collapseField(NodeID nodeId);
     //@}
@@ -313,7 +321,7 @@ class Andersen : public AndersenBase {
     void updateNodeRepAndSubs(NodeID nodeId, NodeID newRepId);
 
     /// SCC detection
-    virtual NodeStack &SCCDetect();
+    NodeStack &SCCDetect() override;
 
     /// Sanitize pts for field insensitive objects
     void sanitizePts() {
@@ -324,11 +332,12 @@ class Andersen : public AndersenBase {
             NodeBS fldInsenObjs;
             for (NodeBS::iterator pit = pts.begin(), epit = pts.end();
                  pit != epit; ++pit) {
-                if (isFieldInsensitive(*pit))
+                if (isFieldInsensitive(*pit)) {
                     fldInsenObjs.set(*pit);
+                }
             }
             for (NodeBS::iterator pit = fldInsenObjs.begin(),
-                                  epit = fldInsenObjs.end();
+                     epit = fldInsenObjs.end();
                  pit != epit; ++pit) {
                 unionPts(it->first, consCG->getAllFieldsObjNode(*pit));
             }
@@ -336,16 +345,14 @@ class Andersen : public AndersenBase {
     }
 
     /// Get PTA name
-    virtual const std::string PTAName() const { return "AndersenWPA"; }
+    const std::string PTAName() const override { return "AndersenWPA"; }
 
     /// match types for Gep Edges
     virtual bool matchType(NodeID, NodeID, const NormalGepCGEdge *) {
         return true;
     }
     /// add type for newly created GepObjNode
-    virtual void addTypeForGepObjNode(NodeID, const NormalGepCGEdge *) {
-        return;
-    }
+    virtual void addTypeForGepObjNode(NodeID, const NormalGepCGEdge *) {}
 };
 
 /**
@@ -357,6 +364,7 @@ class AndersenWaveDiff : public Andersen {
     static AndersenWaveDiff *diffWave; // static instance
 
   public:
+    explicit
     AndersenWaveDiff(SVFProject *proj, PTATY type = AndersenWaveDiff_WPA,
                      bool alias_check = true)
         : Andersen(proj, type, alias_check) {}
@@ -372,25 +380,28 @@ class AndersenWaveDiff : public Andersen {
         }
         return diffWave;
     }
+
     static void releaseAndersenWaveDiff() {
-        if (diffWave)
+        if (diffWave != nullptr) {
             delete diffWave;
+        }
+
         diffWave = nullptr;
     }
 
-    virtual void solveWorklist();
-    virtual void processNode(NodeID nodeId);
+    void solveWorklist() override;
+    void processNode(NodeID nodeId) override;
     virtual void postProcessNode(NodeID nodeId);
-    virtual void handleCopyGep(ConstraintNode *node);
+    void handleCopyGep(ConstraintNode *node) override;
     virtual bool handleLoad(NodeID id, const ConstraintEdge *load);
     virtual bool handleStore(NodeID id, const ConstraintEdge *store);
-    virtual bool processCopy(NodeID node, const ConstraintEdge *edge);
+    bool processCopy(NodeID node, const ConstraintEdge *edge) override;
 
   protected:
-    virtual void mergeNodeToRep(NodeID nodeId, NodeID newRepId);
+    void mergeNodeToRep(NodeID nodeId, NodeID newRepId) override;
 
     /// process "bitcast" CopyCGEdge
-    virtual void processCast(const ConstraintEdge *) { return; }
+    virtual void processCast(const ConstraintEdge *) {}
 };
 
 /**
@@ -404,8 +415,7 @@ class AndersenWaveDiffWithType : public AndersenWaveDiff {
     TypeMismatchedObjToEdgeTy typeMismatchedObjToEdges;
 
     void recordTypeMismatchedGep(NodeID obj, const GepCGEdge *gepEdge) {
-        TypeMismatchedObjToEdgeTy::iterator it =
-            typeMismatchedObjToEdges.find(obj);
+        auto it = typeMismatchedObjToEdges.find(obj);
         if (it != typeMismatchedObjToEdges.end()) {
             Set<const GepCGEdge *> &edges = it->second;
             edges.insert(gepEdge);
@@ -420,17 +430,18 @@ class AndersenWaveDiffWithType : public AndersenWaveDiff {
 
     /// Handle diff points-to set.
     //@{
-    virtual inline void computeDiffPts(NodeID id) {
+    inline void computeDiffPts(NodeID id) override {
         NodeID rep = sccRepNode(id);
         getDiffPTDataTy()->computeDiffPts(rep, getDiffPTDataTy()->getPts(rep));
     }
-    virtual inline const PointsTo &getDiffPts(NodeID id) {
+    inline const PointsTo &getDiffPts(NodeID id) override {
         NodeID rep = sccRepNode(id);
         return getDiffPTDataTy()->getDiffPts(rep);
     }
     //@}
 
   public:
+    explicit
     AndersenWaveDiffWithType(SVFProject *proj,
                              PTATY type = AndersenWaveDiffWithType_WPA)
         : AndersenWaveDiff(proj, type) {
@@ -449,29 +460,32 @@ class AndersenWaveDiffWithType : public AndersenWaveDiff {
         }
         return diffWaveWithType;
     }
+
     static void releaseAndersenWaveDiffWithType() {
-        if (diffWaveWithType)
+        if (diffWaveWithType != nullptr) {
             delete diffWaveWithType;
+        }
+
         diffWaveWithType = nullptr;
     }
 
   protected:
     /// SCC detection
-    virtual NodeStack &SCCDetect();
+    NodeStack &SCCDetect() override;
     /// merge types of nodes in a cycle
     void mergeTypeOfNodes(const NodeBS &nodes);
     /// process "bitcast" CopyCGEdge
-    virtual void processCast(const ConstraintEdge *edge);
+    void processCast(const ConstraintEdge *edge) override;
     /// update type of objects when process "bitcast" CopyCGEdge
     void updateObjType(const Type *type, const PointsTo &objs);
     /// process mismatched gep edges
     void processTypeMismatchedGep(NodeID obj, const Type *type);
     /// match types for Gep Edges
-    virtual bool matchType(NodeID ptrid, NodeID objid,
-                           const NormalGepCGEdge *normalGepEdge);
+    bool matchType(NodeID ptrid, NodeID objid,
+                   const NormalGepCGEdge *normalGepEdge) override;
     /// add type for newly created GepObjNode
-    virtual void addTypeForGepObjNode(NodeID id,
-                                      const NormalGepCGEdge *normalGepEdge);
+    void addTypeForGepObjNode(NodeID id,
+                              const NormalGepCGEdge *normalGepEdge) override;
 };
 
 /*
@@ -485,7 +499,7 @@ class AndersenLCD : virtual public Andersen {
     NodeSet lcdCandidates;
 
   public:
-    AndersenLCD(SVFProject *proj, PTATY type = AndersenLCD_WPA)
+    explicit AndersenLCD(SVFProject *proj, PTATY type = AndersenLCD_WPA)
         : Andersen(proj, type), metEdges({}), lcdCandidates({}) {}
 
     /// Create an singleton instance directly instead of invoking llvm pass
@@ -500,8 +514,10 @@ class AndersenLCD : virtual public Andersen {
     }
 
     static void releaseAndersenLCD() {
-        if (lcdAndersen)
+        if (lcdAndersen) {
             delete lcdAndersen;
+        }
+
         lcdAndersen = nullptr;
     }
 
@@ -520,7 +536,7 @@ class AndersenLCD : virtual public Andersen {
     // redundant visit
     //@{
     bool isMetEdge(ConstraintEdge *edge) const {
-        EdgeSet::const_iterator it = metEdges.find(edge->getEdgeID());
+        auto it = metEdges.find(edge->getEdgeID());
         return it != metEdges.end();
     };
     void addMetEdge(ConstraintEdge *edge) {
@@ -529,15 +545,15 @@ class AndersenLCD : virtual public Andersen {
     //@}
 
     // AndersenLCD worklist processer
-    void solveWorklist();
+    void solveWorklist() override;
     // Solve constraints of each nodes
-    virtual void handleCopyGep(ConstraintNode *node);
+    void handleCopyGep(ConstraintNode *node) override;
     // Collapse nodes and fields based on 'lcdCandidates'
     virtual void mergeSCC();
     // AndersenLCD specified SCC detector, need to input a nodeStack
     // 'lcdCandidate'
-    NodeStack &SCCDetect();
-    bool mergeSrcToTgt(NodeID nodeId, NodeID newRepId);
+    NodeStack &SCCDetect() override;
+    bool mergeSrcToTgt(NodeID nodeId, NodeID newRepId) override;
 };
 
 /*!
@@ -554,7 +570,7 @@ class AndersenHCD : virtual public Andersen {
     OfflineConsG *oCG;
 
   public:
-    AndersenHCD(SVFProject *proj, PTATY type = AndersenHCD_WPA)
+    explicit AndersenHCD(SVFProject *proj, PTATY type = AndersenHCD_WPA)
         : Andersen(proj, type), oCG(nullptr) {}
 
     /// Create an singleton instance directly instead of invoking llvm pass
@@ -569,13 +585,15 @@ class AndersenHCD : virtual public Andersen {
     }
 
     static void releaseAndersenHCD() {
-        if (hcdAndersen)
+        if (hcdAndersen != nullptr) {
             delete hcdAndersen;
+        }
+
         hcdAndersen = nullptr;
     }
 
   protected:
-    virtual void initialize();
+    void initialize() override;
 
     // Get offline rep node from offline constraint graph
     //@{
@@ -595,12 +613,13 @@ class AndersenHCD : virtual public Andersen {
         return it != mergedNodes.end();
     };
     inline void setMergedNode(NodeID node) {
-        if (!isaMergedNode(node))
+        if (!isaMergedNode(node)) {
             mergedNodes.insert(node);
+        }
     };
     //@}
 
-    virtual void solveWorklist();
+    void solveWorklist() override;
     virtual void mergeSCC(NodeID nodeId);
     void mergeNodeAndPts(NodeID node, NodeID tgt);
 };
@@ -614,7 +633,7 @@ class AndersenHLCD : public AndersenHCD, public AndersenLCD {
     static AndersenHLCD *hlcdAndersen;
 
   public:
-    AndersenHLCD(SVFProject *proj, PTATY type = AndersenHLCD_WPA)
+    explicit AndersenHLCD(SVFProject *proj, PTATY type = AndersenHLCD_WPA)
         : Andersen(proj, type), AndersenHCD(proj, type),
           AndersenLCD(proj, type) {}
 
@@ -630,19 +649,21 @@ class AndersenHLCD : public AndersenHCD, public AndersenLCD {
     }
 
     static void releaseAndersenHLCD() {
-        if (hlcdAndersen)
+        if (hlcdAndersen != nullptr) {
             delete hlcdAndersen;
+        }
+
         hlcdAndersen = nullptr;
     }
 
   protected:
-    void initialize() { AndersenHCD::initialize(); }
-    void solveWorklist() { AndersenHCD::solveWorklist(); }
-    void handleCopyGep(ConstraintNode *node) {
+    void initialize() override { AndersenHCD::initialize(); }
+    void solveWorklist() override { AndersenHCD::solveWorklist(); }
+    void handleCopyGep(ConstraintNode *node) override {
         AndersenLCD::handleCopyGep(node);
     }
-    void mergeSCC(NodeID nodeId);
-    bool mergeSrcToTgt(NodeID nodeId, NodeID newRepId) {
+    void mergeSCC(NodeID nodeId) override;
+    bool mergeSrcToTgt(NodeID nodeId, NodeID newRepId) override {
         return AndersenLCD::mergeSrcToTgt(nodeId, newRepId);
     }
 };

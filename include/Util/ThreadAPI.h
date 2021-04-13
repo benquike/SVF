@@ -76,10 +76,12 @@ class ThreadAPI {
 
     /// Get the function type if it is a threadAPI function
     inline TD_TYPE getType(const SVFFunction *F) const {
-        if (F) {
+        if (F != nullptr) {
             TDAPIMap::const_iterator it = tdAPIMap.find(F->getName().str());
-            if (it != tdAPIMap.end())
+            if (it != tdAPIMap.end()) {
                 return it->second;
+            }
+
         }
         return TD_DUMMY;
     }
@@ -88,7 +90,7 @@ class ThreadAPI {
 
   public:
     /// Constructor
-    ThreadAPI(SVFModule *svfMod) : svfMod(svfMod) { init(); }
+    explicit ThreadAPI(SVFModule *svfMod) : svfMod(svfMod) { init(); }
 
     /// Return true if this call create a new thread
     //@{
@@ -199,10 +201,15 @@ class ThreadAPI {
         assert(isTDJoin(inst) && "not a thread join function!");
         CallSite cs = SVFUtil::getLLVMCallSite(inst);
         Value *join = cs.getArgument(0);
-        if (SVFUtil::isa<LoadInst>(join))
+
+        if (SVFUtil::isa<LoadInst>(join)) {
             return SVFUtil::cast<LoadInst>(join)->getPointerOperand();
-        else if (SVFUtil::isa<Argument>(join))
+        }
+
+        if (SVFUtil::isa<Argument>(join)) {
             return join;
+        }
+
         assert(false && "the value of the first argument at join is not a load "
                         "instruction?");
         return nullptr;

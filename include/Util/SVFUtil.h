@@ -177,7 +177,7 @@ inline const SVFFunction *getFunction(LLVMModuleSet *llvmModSet,
     for (u32_t i = 0; i < llvmModSet->getModuleNum(); ++i) {
         Module *mod = llvmModSet->getModule(i);
         fun = mod->getFunction(name);
-        if (fun) {
+        if (fun != nullptr) {
             return llvmModSet->getSVFFunction(fun);
         }
     }

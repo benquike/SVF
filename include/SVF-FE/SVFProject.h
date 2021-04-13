@@ -47,18 +47,18 @@ class SVFProject {
     // bool _built = false;
 
   public:
-    SVFProject(string &modName) {
+    explicit SVFProject(string &modName) {
         modNameVec.push_back(modName);
         svfModule = new SVFModule(modName);
     }
 
-    SVFProject(vector<string> &modVec) {
+    explicit SVFProject(vector<string> &modVec) {
         assert(!modVec.empty() && "no module files are provided");
         modNameVec.insert(modNameVec.end(), modVec.begin(), modVec.end());
         svfModule = new SVFModule(modVec);
     }
 
-    SVFProject(Module &module) {
+    explicit SVFProject(Module &module) {
         modNameVec.push_back(module.getModuleIdentifier());
         svfModule = new SVFModule(module);
     }

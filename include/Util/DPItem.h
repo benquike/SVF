@@ -50,7 +50,7 @@ class DPItem {
 
   public:
     /// Constructor
-    DPItem(NodeID c) : cur(c) {}
+    explicit DPItem(NodeID c) : cur(c) {}
     /// Copy constructor
     DPItem(const DPItem &dps) : cur(dps.cur) {}
     /// Destructor
@@ -92,7 +92,7 @@ template <class LocCond> class StmtDPItem : public DPItem {
     /// Copy constructor
     StmtDPItem(const StmtDPItem &dps) : DPItem(dps), curloc(dps.curloc) {}
     /// Destructor
-    virtual ~StmtDPItem() {}
+    ~StmtDPItem() override {}
     /// Get context
     inline const LocCond *getLoc() const { return this->curloc; }
     /// Set location
@@ -274,7 +274,7 @@ template <class LocCond> class CxtStmtDPItem : public StmtDPItem<LocCond> {
     CxtStmtDPItem(const CxtStmtDPItem<LocCond> &dps)
         : StmtDPItem<LocCond>(dps), context(dps.context) {}
     /// Destructor
-    virtual ~CxtStmtDPItem() {}
+    ~CxtStmtDPItem() override {}
     /// Get context var
     inline CxtVar getCondVar() const {
         CxtVar var(this->context, this->cur);
@@ -567,13 +567,13 @@ class CxtDPItem : public DPItem {
   public:
     /// Constructor
     CxtDPItem(NodeID c, const ContextCond &cxt) : DPItem(c), context(cxt) {}
-    CxtDPItem(const CxtVar &var)
+    explicit CxtDPItem(const CxtVar &var)
         : DPItem(var.get_id()), context(var.get_cond()) {}
     /// Copy constructor
     CxtDPItem(const CxtDPItem &dps)
         : DPItem(dps.getCurNodeID()), context(dps.context) {}
     /// Destructor
-    virtual ~CxtDPItem() {}
+    ~CxtDPItem() override {}
 
     /// Get context
     inline const ContextCond &getContexts() const { return context; }

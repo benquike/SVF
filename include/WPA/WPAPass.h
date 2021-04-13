@@ -65,7 +65,7 @@ class WPAPass : public ModulePass {
     WPAPass() : ModulePass(ID) {}
 
     /// Destructor
-    virtual ~WPAPass();
+    ~WPAPass() override;
 
     /// LLVM analysis usage
     inline void getAnalysisUsage(AnalysisUsage &au) const override {

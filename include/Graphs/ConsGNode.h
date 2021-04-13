@@ -167,65 +167,65 @@ class ConstraintNode : public GenericConsNodeTy {
     inline iterator directOutEdgeBegin() override {
         if (sccEdgeFlag == Copy) {
             return copyOutEdges.begin();
-        } else {
-            return directOutEdges.begin();
         }
+
+        return directOutEdges.begin();
     }
 
     inline iterator directOutEdgeEnd() override {
         if (sccEdgeFlag == Copy) {
             return copyOutEdges.end();
-        } else {
-            return directOutEdges.end();
         }
+
+        return directOutEdges.end();
     }
 
     inline iterator directInEdgeBegin() override {
         if (sccEdgeFlag == Copy) {
             return copyInEdges.begin();
-        } else {
-            return directInEdges.begin();
         }
+
+        return directInEdges.begin();
     }
 
     inline iterator directInEdgeEnd() override {
         if (sccEdgeFlag == Copy) {
             return copyInEdges.end();
-        } else {
-            return directInEdges.end();
         }
+
+        return directInEdges.end();
     }
 
     inline const_iterator directOutEdgeBegin() const override {
         if (sccEdgeFlag == Copy) {
             return copyOutEdges.begin();
-        } else {
-            return directOutEdges.begin();
         }
+
+        return directOutEdges.begin();
     }
 
     inline const_iterator directOutEdgeEnd() const override {
         if (sccEdgeFlag == Copy) {
             return copyOutEdges.end();
-        } else {
-            return directOutEdges.end();
         }
+
+        return directOutEdges.end();
     }
 
     inline const_iterator directInEdgeBegin() const override {
         if (sccEdgeFlag == Copy) {
             return copyInEdges.begin();
-        } else {
-            return directInEdges.begin();
         }
+
+        return directInEdges.begin();
     }
 
     inline const_iterator directInEdgeEnd() const override {
         if (sccEdgeFlag == Copy) {
             return copyInEdges.end();
-        } else {
-            return directInEdges.end();
         }
+
+        return directInEdges.end();
     }
 
     ConstraintEdge::ConstraintEdgeSetTy &incomingAddrEdges() {

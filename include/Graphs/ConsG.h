@@ -209,9 +209,9 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
         auto it = nodeToRepMap.find(id);
         if (it == nodeToRepMap.end()) {
             return id;
-        } else {
-            return it->second;
         }
+
+        return it->second;
     }
     inline NodeBS &sccSubNodes(NodeID id) {
         nodeToSubsMap[id].set(id);

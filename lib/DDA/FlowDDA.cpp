@@ -29,7 +29,7 @@ void FlowDDA::computeDDAPts(NodeID id) {
     DOTIMESTAT(ddaStat->_AnaTimePerQuery = DDAStat::getClk(true) - start);
     DOTIMESTAT(ddaStat->_TotalTimeOfQueries += ddaStat->_AnaTimePerQuery);
 
-    if (isOutOfBudgetQuery() == false) {
+    if (!isOutOfBudgetQuery()) {
         unionPts(node->getId(), pts);
     } else {
         handleOutOfBudgetDpm(dpm);

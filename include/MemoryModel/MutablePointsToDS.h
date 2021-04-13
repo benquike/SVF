@@ -372,10 +372,13 @@ class MutableDFPTData : public DFPTData<Key, KeySet, Data, DataSet> {
                  ptsIt != ptsEit; ++ptsIt) {
                 const Key var = ptsIt->first;
                 /// Enable strong updates if it is required to do so
-                if (strongUpdates && var == singleton)
+                if (strongUpdates && var == singleton) {
                     continue;
-                if (updateDFOutFromIn(loc, var, loc, var))
+                }
+
+                if (updateDFOutFromIn(loc, var, loc, var)) {
                     changed = true;
+                }
             }
         }
         return changed;
@@ -409,7 +412,7 @@ class MutableDFPTData : public DFPTData<Key, KeySet, Data, DataSet> {
         return unionPts(mutPTData.ptsMap[dstKey], srcDataSet);
     }
 
-    virtual void clearPts(const Key &var, const Data &element) override {
+    void clearPts(const Key &var, const Data &element) override {
         mutPTData.clearPts(var, element);
     }
     void clearFullPts(const Key &var) override { mutPTData.clearFullPts(var); }

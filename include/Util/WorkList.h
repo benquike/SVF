@@ -53,7 +53,7 @@ namespace SVF {
 template <class Data> class List {
     class ListNode {
       public:
-        ListNode(Data d) {
+        explicit ListNode(Data d) {
             data = d;
             next = nullptr;
         }

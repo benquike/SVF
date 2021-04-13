@@ -217,11 +217,11 @@ class SVFFunction : public SVFValue {
     Function *fun;
 
   public:
-    SVFFunction(const std::string &val)
+    explicit SVFFunction(const std::string &val)
         : SVFValue(val, SVFValue::SVFFunc), isDecl(false), isIntri(false),
           fun(nullptr) {}
 
-    SVFFunction(Function *f)
+    explicit SVFFunction(Function *f)
         : SVFValue(f->getName(), SVFValue::SVFFunc), isDecl(f->isDeclaration()),
           isIntri(f->isIntrinsic()), fun(f) {}
     inline Function *getLLVMFun() const {
@@ -246,19 +246,22 @@ class SVFFunction : public SVFValue {
 class SVFGlobal : public SVFValue {
 
   public:
-    SVFGlobal(const std::string &val) : SVFValue(val, SVFValue::SVFGlob) {}
+    explicit SVFGlobal(const std::string &val)
+        : SVFValue(val, SVFValue::SVFGlob) {}
 };
 
 class SVFBasicBlock : public SVFValue {
 
   public:
-    SVFBasicBlock(const std::string &val) : SVFValue(val, SVFValue::SVFBB) {}
+    explicit SVFBasicBlock(const std::string &val)
+        : SVFValue(val, SVFValue::SVFBB) {}
 };
 
 class SVFInstruction : public SVFValue {
 
   public:
-    SVFInstruction(const std::string &val) : SVFValue(val, SVFValue::SVFInst) {}
+    explicit SVFInstruction(const std::string &val)
+        : SVFValue(val, SVFValue::SVFInst) {}
 };
 
 template <typename F, typename S>

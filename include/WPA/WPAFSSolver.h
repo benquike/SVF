@@ -50,13 +50,13 @@ template <class GraphType> class WPAFSSolver : public WPASolver<GraphType> {
     virtual ~WPAFSSolver() {}
 
     /// SCC methods
-    virtual inline NodeID sccRepNode(NodeID id) const { return id; }
+    inline NodeID sccRepNode(NodeID id) const override { return id; }
 
   protected:
     NodeStack nodeStack; ///< stack used for processing nodes.
 
     /// SCC detection
-    virtual NodeStack &SCCDetect() {
+    NodeStack &SCCDetect() override {
         /// SCC detection
         this->getSCCDetector()->find();
 
@@ -104,8 +104,9 @@ template <class GraphType> class WPASCCSolver : public WPAFSSolver<GraphType> {
     virtual void solve() {
         /// All nodes will be solved afterwards, so the worklist
         /// can be cleared before each solve iteration.
-        while (!this->isWorklistEmpty())
+        while (!this->isWorklistEmpty()) {
             this->popFromWorklist();
+        }
 
         NodeStack &nodeStack = this->SCCDetect();
 
@@ -116,12 +117,13 @@ template <class GraphType> class WPASCCSolver : public WPAFSSolver<GraphType> {
             setCurrentSCC(rep);
 
             const NodeBS &sccNodes = this->getSCCDetector()->subNodes(rep);
-            for (NodeBS::iterator it = sccNodes.begin(), eit = sccNodes.end();
-                 it != eit; ++it)
-                this->pushIntoWorklist(*it);
+            for (auto sccNode : sccNodes) {
+                this->pushIntoWorklist(sccNode);
+            }
 
-            while (!this->isWorklistEmpty())
+            while (!this->isWorklistEmpty()) {
                 this->processNode(this->popFromWorklist());
+            }
         }
     }
 
@@ -130,21 +132,23 @@ template <class GraphType> class WPASCCSolver : public WPAFSSolver<GraphType> {
         child_iterator EI = GTraits::direct_child_begin(v);
         child_iterator EE = GTraits::direct_child_end(v);
         for (; EI != EE; ++EI) {
-            if (this->propFromSrcToDst(*(EI.getCurrent())))
+            if (this->propFromSrcToDst(*(EI.getCurrent()))) {
                 addNodeIntoWorkList(this->Node_Index(*EI));
+            }
         }
     }
 
     virtual inline void addNodeIntoWorkList(NodeID node) {
-        if (isInCurrentSCC(node))
+        if (isInCurrentSCC(node)) {
             this->pushIntoWorklist(node);
+        }
     }
 
     inline bool isInCurrentSCC(NodeID node) {
         return (const_cast<NodeBS &>(
-                    this->getSCCDetector()->subNodes(curSCCID)))
-            .test(node);
+                    this->getSCCDetector()->subNodes(curSCCID))).test(node);
     }
+
     inline void setCurrentSCC(NodeID id) {
         curSCCID = this->getSCCDetector()->repNode(id);
     }
@@ -173,8 +177,9 @@ class WPAMinimumSolver : public WPASCCSolver<GraphType> {
         /// in worklist. Otherwise all nodes in the graph will be processed.
         if (!this->isWorklistEmpty()) {
             solveAll = false;
-            while (!this->isWorklistEmpty())
+            while (!this->isWorklistEmpty()) {
                 addNewCandidate(this->popFromWorklist());
+            }
         }
 
         NodeStack &nodeStack = this->SCCDetect();
@@ -186,16 +191,19 @@ class WPAMinimumSolver : public WPASCCSolver<GraphType> {
             this->setCurrentSCC(rep);
 
             NodeBS sccNodes = this->getSCCDetector()->subNodes(rep);
-            if (solveAll == false)
+            if (!solveAll) {
                 sccNodes &= getCandidates(); /// get nodes which need to be
                                              /// processed in this SCC cycle
+            }
 
             for (NodeBS::iterator it = sccNodes.begin(), eit = sccNodes.end();
-                 it != eit; ++it)
+                 it != eit; ++it) {
                 this->pushIntoWorklist(*it);
+            }
 
-            while (!this->isWorklistEmpty())
+            while (!this->isWorklistEmpty()) {
                 this->processNode(this->popFromWorklist());
+            }
 
             removeCandidates(sccNodes); /// remove nodes which have been
                                         /// processed from the candidate set
@@ -203,10 +211,11 @@ class WPAMinimumSolver : public WPASCCSolver<GraphType> {
     }
 
     virtual inline void addNodeIntoWorkList(NodeID node) {
-        if (this->isInCurrentSCC(node))
+        if (this->isInCurrentSCC(node)) {
             this->pushIntoWorklist(node);
-        else
+        } else {
             addNewCandidate(node);
+        }
     }
 
   private:

@@ -70,8 +70,9 @@ template <class GraphType> class WPASolver {
     const inline GraphType graph() { return _graph; }
     inline void setGraph(GraphType g) {
         _graph = g;
-        if (!scc)
+        if (!scc) {
             scc = new SCC(_graph);
+        }
     }
     //@}
 
@@ -118,8 +119,9 @@ template <class GraphType> class WPASolver {
         child_iterator EI = GTraits::direct_child_begin(*v);
         child_iterator EE = GTraits::direct_child_end(*v);
         for (; EI != EE; ++EI) {
-            if (propFromSrcToDst(*(EI.getCurrent())))
+            if (propFromSrcToDst(*(EI.getCurrent()))) {
                 pushIntoWorklist(Node_Index(*EI));
+            }
         }
     }
     /// Propagate information from source to destination node, to be implemented

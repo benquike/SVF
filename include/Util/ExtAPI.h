@@ -201,9 +201,9 @@ class ExtAPI {
             return i_iec->second;
         }
 
-        bool res;
+        bool res = false;
         if (F->isDeclaration() || F->isIntrinsic()) {
-            res = 1;
+            res = true;
         } else {
             extf_t t = get_type(F);
             res = t == EFT_ALLOC || t == EFT_REALLOC ||

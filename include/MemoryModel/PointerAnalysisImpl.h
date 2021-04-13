@@ -220,16 +220,16 @@ class BVDataPTAImpl : public PointerAnalysis {
 template <class Cond> class CondPTAImpl : public PointerAnalysis {
 
   public:
-    typedef CondVar<Cond> CVar;
-    typedef CondStdSet<CVar> CPtSet;
-    typedef PTData<CVar, Set<CVar>, CVar, CPtSet> PTDataTy;
-    typedef MutablePTData<CVar, Set<CVar>, CVar, CPtSet> MutPTDataTy;
-    typedef Map<NodeID, PointsTo>
-        PtrToBVPtsMap; /// map a pointer to its BitVector points-to
+    using CVar = CondVar<Cond>;
+    using CPtSet = CondStdSet<CVar>;
+    using PTDataTy = PTData<CVar, Set<CVar>, CVar, CPtSet>;
+    using MutPTDataTy = MutablePTData<CVar, Set<CVar>, CVar, CPtSet>;
+    using PtrToBVPtsMap = Map<NodeID, PointsTo> ; /// map a pointer to
+                                                  /// its BitVector points-to
                        /// representation
-    typedef Map<NodeID, NodeBS> PtrToNSMap;
-    typedef Map<NodeID, CPtSet>
-        PtrToCPtsMap; /// map a pointer to its conditional points-to set
+    using PtrToNSMap = Map<NodeID, NodeBS>;
+    using PtrToCPtsMap = Map<NodeID, CPtSet>; /// map a pointer to its
+                                              /// conditional points-to set
 
     /// Constructor
     CondPTAImpl(SVFProject *proj, PointerAnalysis::PTATY type)
@@ -244,7 +244,7 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
     }
 
     /// Destructor
-    virtual ~CondPTAImpl() { destroy(); }
+    ~CondPTAImpl() override { destroy(); }
 
     static inline bool classof(const PointerAnalysis *pta) {
         return pta->getImplTy() == CondImpl;
@@ -285,7 +285,7 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
     //@}
 
     /// Clear all data
-    virtual inline void clearPts() { ptD->clear(); }
+    inline void clearPts() override { ptD->clear(); }
 
     /// Whether cpts1 and cpts2 have overlap points-to targets
     bool overlap(const CPtSet &cpts1, const CPtSet &cpts2) const {
@@ -322,7 +322,7 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
   protected:
     /// Finalization of pointer analysis, and normalize points-to information to
     /// Bit Vector representation
-    virtual void finalize() {
+    void finalize() override {
         normalizePointsTo();
         PointerAnalysis::finalize();
     }
@@ -434,7 +434,7 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
 
   public:
     /// Print out conditional pts
-    virtual void dumpCPts() { ptD->dumpPTData(); }
+    void dumpCPts() override { ptD->dumpPTData(); }
     /// Given a conditional pts return its bit vector points-to
     virtual inline PointsTo getBVPointsTo(const CPtSet &cpts) const {
         PointsTo pts;
@@ -446,7 +446,7 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
         return pts;
     }
     /// Given a pointer return its bit vector points-to
-    virtual inline PointsTo &getPts(NodeID ptr) {
+    inline PointsTo &getPts(NodeID ptr) override {
         assert(normalized &&
                "Pts of all context-var have to be merged/normalized. Want to "
                "use getPts(CVar cvar)??");
@@ -460,7 +460,7 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
         return ptrToCPtsMap[ptr];
     }
     /// Given an object return all pointers points to this object
-    virtual inline NodeBS &getRevPts(NodeID obj) {
+    inline NodeBS &getRevPts(NodeID obj) override {
         assert(normalized &&
                "Pts of all context-var have to be merged/normalized. Want to "
                "use getPts(CVar cvar)??");
@@ -468,16 +468,16 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
     }
 
     /// Interface expose to users of our pointer analysis, given Location infos
-    virtual inline AliasResult alias(const MemoryLocation &LocA,
-                                     const MemoryLocation &LocB) {
+    inline AliasResult alias(const MemoryLocation &LocA,
+                             const MemoryLocation &LocB) override {
         return alias(LocA.Ptr, LocB.Ptr);
     }
     /// Interface expose to users of our pointer analysis, given Value infos
-    virtual inline AliasResult alias(const Value *V1, const Value *V2) {
+    inline AliasResult alias(const Value *V1, const Value *V2) override {
         return alias(pag->getValueNode(V1), pag->getValueNode(V2));
     }
     /// Interface expose to users of our pointer analysis, given two pointers
-    virtual inline AliasResult alias(NodeID node1, NodeID node2) {
+    inline AliasResult alias(NodeID node1, NodeID node2) override {
         return alias(getCondPointsTo(node1), getCondPointsTo(node2));
     }
     /// Interface expose to users of our pointer analysis, given conditional
@@ -494,14 +494,18 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
         expandFIObjs(pts2, cpts2);
         if (containBlackHoleNode(cpts1) || containBlackHoleNode(cpts2)) {
             return llvm::MayAlias;
-        } else if (this->getAnalysisTy() == PathS_DDA &&
-                   contains(cpts1, cpts2) && contains(cpts2, cpts1)) {
-            return llvm::MustAlias;
-        } else if (overlap(cpts1, cpts2)) {
-            return llvm::MayAlias;
-        } else {
-            return llvm::NoAlias;
         }
+
+        if (this->getAnalysisTy() == PathS_DDA &&
+            contains(cpts1, cpts2) && contains(cpts2, cpts1)) {
+            return llvm::MustAlias;
+        }
+
+        if (overlap(cpts1, cpts2)) {
+            return llvm::MayAlias;
+        }
+
+        return llvm::NoAlias;
     }
     /// Test blk node for cpts
     inline bool containBlackHoleNode(const CPtSet &cpts) {
@@ -530,7 +534,7 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
                                   bool singleton) const = 0;
 
     /// Dump points-to information of top-level pointers
-    void dumpTopLevelPtsTo() {
+    void dumpTopLevelPtsTo() override {
         for (OrderedNodeSet::iterator nIter = this->getAllValidPtrs().begin();
              nIter != this->getAllValidPtrs().end(); ++nIter) {
             const PAGNode *node = this->getPAG()->getPAGNode(*nIter);

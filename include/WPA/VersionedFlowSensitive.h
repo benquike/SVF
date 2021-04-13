@@ -52,7 +52,7 @@ class VersionedFlowSensitive : public FlowSensitive {
     static VersionedVar atKey(NodeID, Version);
 
     /// Constructor
-    VersionedFlowSensitive(SVFProject *proj, PTATY type = VFS_WPA);
+    explicit VersionedFlowSensitive(SVFProject *proj, PTATY type = VFS_WPA);
 
     /// Initialize analysis
     void initialize() override;
@@ -85,8 +85,10 @@ class VersionedFlowSensitive : public FlowSensitive {
 
     /// Release flow-sensitive pointer analysis
     static void releaseVFSWPA() {
-        if (vfspta)
+        if (vfspta != nullptr) {
             delete vfspta;
+        }
+
         vfspta = nullptr;
     }
 
@@ -105,9 +107,9 @@ class VersionedFlowSensitive : public FlowSensitive {
   private:
     /// Prelabel the SVFG: set y(o) for stores and c(o) for delta nodes to a new
     /// version.
-    void prelabel(void);
+    void prelabel();
     /// Meld label the prelabeled SVFG.
-    void meldLabel(void);
+    void meldLabel();
     /// Melds v2 into v1 (in place), returns whether a change occurred.
     bool meld(MeldVersion &mv1, MeldVersion &mv2);
 
@@ -125,7 +127,7 @@ class VersionedFlowSensitive : public FlowSensitive {
     /// Determine which versions rely on which versions (e.g. c_l'(o) relies on
     /// y_l(o) given l-o->l' and y_l(o) = a, c_l'(o) = b), and which statements
     /// rely on which versions (e.g. node l relies on c_l(o)).
-    void determineReliance(void);
+    void determineReliance();
 
     /// Propagates version v of o to any version of o which relies on v when o/v
     /// is changed. Recursively applies to reliant versions till no new changes
@@ -135,7 +137,7 @@ class VersionedFlowSensitive : public FlowSensitive {
     void propagateVersion(NodeID o, Version v, bool recurse = false);
 
     /// Dumps versionReliance and stmtReliance.
-    void dumpReliances(void) const;
+    void dumpReliances() const;
 
     /// Dumps a MeldVersion to stdout.
     static void dumpMeldVersion(MeldVersion &v);
