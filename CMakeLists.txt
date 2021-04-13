@@ -57,6 +57,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # add -std=gnu++17
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# setup clang-tidy
+# not enable for the moment
+# set(CMAKE_CXX_CLANG_TIDY
+#     clang-tidy;
+#     -checks=*;
+#     -header-filter=.;
+#     -warnings-as-errors=*;)
+
 set(COMMON_FLAGS "-fPIC -Werror -Wall -Wextra -Wno-unused-parameter \
  -Wno-unused-variable")
 
