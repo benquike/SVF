@@ -75,9 +75,11 @@ void CHNode::getVirtualFunctions(u32_t idx,
 }
 
 CHGraph::~CHGraph() {
-    for (auto &it : *this) {
-        delete it.second;
-    }
+    // duplicated, already done in
+    // the destructor of GenericGraph
+    // for (auto &it : *this) {
+    //     delete it.second;
+    // }
 }
 
 void CHGraph::buildCHG() {
