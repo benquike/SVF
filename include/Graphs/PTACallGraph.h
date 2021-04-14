@@ -229,7 +229,7 @@ class PTACallGraph : public GenericCallGraphTy {
     void addCallGraphNode(const SVFFunction *fun);
 
     /// Destructor
-    virtual ~PTACallGraph() { destroy(); }
+    ~PTACallGraph() override { destroy(); }
 
     /// Return type of this callgraph
     inline CGEK getKind() const { return kind; }

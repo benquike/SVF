@@ -75,7 +75,7 @@ class CHNode : public GenericCHNodeTy {
 
     CHNode(const std::string name, NodeID i = 0, GNodeK k = 0)
         : GenericCHNodeTy(i, k), vtable(nullptr), className(name), flags(0) {}
-    ~CHNode() {}
+    ~CHNode() override {}
     std::string getName() const { return className; }
     /// Flags
     //@{
@@ -106,6 +106,8 @@ class CHNode : public GenericCHNodeTy {
     const GlobalValue *getVTable() const { return vtable; }
 
     void setVTable(const GlobalValue *vtbl) { vtable = vtbl; }
+
+    virtual const std::string toString() const;
 
   private:
     const GlobalValue *vtable;

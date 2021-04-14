@@ -36,6 +36,8 @@
 #include <stack>
 #include <vector>
 
+#include <llvm/Demangle/Demangle.h>
+
 #include "SVF-FE/CHG.h"
 #include "SVF-FE/CPPUtil.h"
 #include "SVF-FE/LLVMUtil.h"
@@ -72,6 +74,38 @@ void CHNode::getVirtualFunctions(u32_t idx,
             virtualFunctions.push_back(virtualFunctionVector[idx]);
         }
     }
+}
+
+const std::string CHNode::toString() const {
+    std::string str;
+    raw_string_ostream rawstr(str);
+    rawstr << "id:" << getId() << ",\n";
+    rawstr << "name:" << getName() << ",\n";
+    rawstr << "flag:";
+    if (hasFlag(CLASSATTR::PURE_ABSTRACT)) {
+        rawstr << "ABS";
+    }
+    if (hasFlag(CLASSATTR::MULTI_INHERITANCE)) {
+        rawstr << "|M_I";
+    }
+    if (hasFlag(CLASSATTR::TEMPLATE)) {
+        rawstr << "|TPL";
+    }
+    rawstr << ",\n";
+
+    rawstr << "vtbls:\n";
+    unsigned i = 0;
+    for (const auto &fv : virtualFunctionVectors) {
+        rawstr << " - vtbl " << i << ":\n";
+
+        for (const auto *svfFunc: fv ) {
+            rawstr << "  -- " << llvm::demangle(svfFunc->getName()) << ",\n";
+        }
+
+        i ++;
+    }
+
+    return rawstr.str();
 }
 
 CHGraph::~CHGraph() {
@@ -858,7 +892,7 @@ template <> struct DOTGraphTraits<CHGraph *> : public DefaultDOTGraphTraits {
     }
     /// Return function name;
     static std::string getNodeLabel(CHNode *node, CHGraph *) {
-        return node->getName();
+        return node->toString();
     }
 
     static std::string getNodeAttributes(CHNode *node, CHGraph *) {

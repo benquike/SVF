@@ -443,10 +443,12 @@ void SymbolTableInfo::buildMemModel() {
     // Pointer #2 always represents the pointer points-to black hole.
     assert(totalSymNum == BlkPtr && "Something changed!");
     symTyMap.insert(std::make_pair(totalSymNum++, BlkPtr));
+    // no object for BlkPtr?
 
     // Pointer #3 always represents the null pointer.
     assert(totalSymNum == NullPtr && "Something changed!");
-    symTyMap.insert(std::make_pair(totalSymNum, NullPtr));
+    symTyMap.insert(std::make_pair(totalSymNum++, NullPtr));
+    // no object for NullPtr?
 
     // Add symbols for all the globals .
     for (auto I = mod->global_begin(), E = mod->global_end(); I != E; ++I) {

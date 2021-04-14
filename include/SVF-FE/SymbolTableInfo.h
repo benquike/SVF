@@ -282,10 +282,13 @@ class SymbolTableInfo {
     inline ValueToIDMapTy &objSyms() { return objSymMap; }
 
     inline IDToMemMapTy &idToObjMap() { return objMap; }
+    inline IDToValueMapTy &idToValueMap() { return idValueMap; }
 
     inline FunToIDMapTy &retSyms() { return returnSymMap; }
 
     inline FunToIDMapTy &varargSyms() { return varargSymMap; }
+
+    inline IDToSymTyMapTy &symIDToTypeMap() { return symTyMap; }
 
     //@}
 

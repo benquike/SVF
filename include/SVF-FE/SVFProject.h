@@ -49,13 +49,13 @@ class SVFProject {
   public:
     explicit SVFProject(string &modName) {
         modNameVec.push_back(modName);
-        svfModule = new SVFModule(modName);
+        svfModule = new SVFModule(modNameVec);
     }
 
     explicit SVFProject(vector<string> &modVec) {
         assert(!modVec.empty() && "no module files are provided");
         modNameVec.insert(modNameVec.end(), modVec.begin(), modVec.end());
-        svfModule = new SVFModule(modVec);
+        svfModule = new SVFModule(modNameVec);
     }
 
     explicit SVFProject(Module &module) {

@@ -27,6 +27,7 @@
  *      Author: Yulei Sui
  */
 
+#include <llvm/Demangle/Demangle.h>
 #include "Graphs/PTACallGraph.h"
 #include "SVF-FE/LLVMUtil.h"
 #include "SVF-FE/SVFProject.h"
@@ -77,7 +78,8 @@ const std::string PTACallGraphEdge::toString() const {
 const std::string PTACallGraphNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
-    rawstr << "CallGraphNode ID: " << getId() << " {fun: " << fun->getName()
+    rawstr << "CallGraphNode ID: " << getId() << " {fun: "
+           << llvm::demangle(fun->getName())
            << "}";
     return rawstr.str();
 }
@@ -338,7 +340,7 @@ struct DOTGraphTraits<PTACallGraph *> : public DefaultDOTGraphTraits {
     DOTGraphTraits(bool isSimple = false) : DefaultDOTGraphTraits(isSimple) {}
 
     /// Return name of the graph
-    static std::string getGraphName(PTACallGraph *) { return "Call Graph"; }
+    static std::string getGraphName(PTACallGraph *) { return "PTA Call Graph"; }
     /// Return function name;
     static std::string getNodeLabel(PTACallGraphNode *node, PTACallGraph *) {
         return node->toString();
