@@ -22,6 +22,7 @@
 #include "SVF-FE/PAGBuilder.h"
 #include "gtest/gtest.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -33,14 +34,31 @@
 using namespace SVF;
 using namespace std;
 
-TEST(CHGTestSuite, BasicTest_0) {
+
+class CHGTestSuite: public ::testing::Test {
+    protected:
+        unique_ptr<CHGraph> p_chg;
+    
+        void test_input_common(string &bc_fname) {
+            SVFProject proj(bc_fname);
+
+            p_chg = make_unique<CHGraph>(proj.getSymbolTableInfo());
+            p_chg->buildCHG();
+            p_chg->view();
+            for (const auto it : *p_chg) {
+                llvm::outs() << it.first << "\n";
+            }
+        }
+};
+
+TEST_F(CHGTestSuite, BasicTest_0) {
     string test_bc = SVF_BUILD_DIR "/tests/CHG/callsite_cpp.ll";
-    SVFProject proj(test_bc);
+    test_input_common(test_bc);
+}
 
-    CHGraph *chg = new CHGraph(proj.getSymbolTableInfo());
-    ASSERT_TRUE(chg != nullptr);
-
-    chg->buildCHG();
+TEST_F(CHGTestSuite, BasicTest_1) {
+    string test_bc = SVF_BUILD_DIR "/tests/ICFG/virt_call_test_cpp.ll";
+    test_input_common(test_bc);
 }
 
 int main(int argc, char *argv[]) {
