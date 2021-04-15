@@ -237,10 +237,8 @@ void LLVMModuleSet::buildFunToFunMap() {
         }
     }
     // Find the intersectNames
-    Set<string>::iterator declIter;
-    Set<string>::iterator defIter;
-    declIter = declNames.begin();
-    defIter = defNames.begin();
+    Set<string>::iterator declIter = declNames.begin();
+    Set<string>::iterator defIter = defNames.begin();
     while (declIter != declNames.end() && defIter != defNames.end()) {
         if (*declIter < *defIter) {
             declIter++;
