@@ -95,6 +95,9 @@ class SymbolTableInfo {
     /// total number of symbols
     SymID totalSymNum;
 
+  private:
+    void collectInst(const Instruction *inst);
+
   public:
     /// Constructor
     explicit SymbolTableInfo(SVFModule *mod)
