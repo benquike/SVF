@@ -205,18 +205,13 @@ class CallCFGEdge : public ICFGEdge {
     template <typename Archive>
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<ICFGEdge>(*this);
-        ar &getIdByValueFromCurrentProject(cs);
+        SAVE_Value(ar, cs);
     }
 
     template <typename Archive>
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<ICFGEdge>(*this);
-
-        SymID csId;
-        ar &csId;
-
-        const auto *csVal = getValueByIdFromCurrentProject(csId);
-        cs = llvm::dyn_cast<Instruction>(csVal);
+        LOAD_Value(ar, Instruction, cs);
     }
     /// @}
 };
@@ -259,18 +254,13 @@ class RetCFGEdge : public ICFGEdge {
     template <typename Archive>
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<ICFGEdge>(*this);
-        ar &getIdByValueFromCurrentProject(cs);
+        SAVE_Value(ar, cs);
     }
 
     template <typename Archive>
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<ICFGEdge>(*this);
-
-        SymID csId;
-        ar &csId;
-
-        const auto *csVal = getValueByIdFromCurrentProject(csId);
-        cs = llvm::dyn_cast<Instruction>(csVal);
+        LOAD_Value(ar, Instruction, cs);
     }
     /// @}
 };

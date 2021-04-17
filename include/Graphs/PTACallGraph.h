@@ -173,17 +173,13 @@ class PTACallGraphNode : public GenericCallGraphNodeTy {
     template <typename Archive>
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<GenericCallGraphNodeTy>(*this);
-        ar &getIdByValueFromCurrentProject(fun->getLLVMFun());
+        SAVE_SVFFunction(ar, fun);
     }
 
     template <typename Archive>
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<GenericCallGraphNodeTy>(*this);
-        SymID id;
-        ar &id;
-        const Value *v = getValueByIdFromCurrentProject(id);
-        SVFModule *mod = SVFProject::getCurrentProject()->getSVFModule();
-        fun = mod->getSVFFunction(llvm::dyn_cast<Function>(v));
+        LOAD_SVFFunction(ar, fun);
     }
     /// @}
 

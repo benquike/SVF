@@ -273,7 +273,7 @@ class PAGNode : public GenericPAGNodeTy {
     template <typename Archive>
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<GenericPAGNodeTy>(*this);
-        ar &getIdByValueFromCurrentProject(value);
+        SAVE_Value(ar, value);
 
         ar &InEdgeKindToSetMap;
         ar &OutEdgeKindToSetMap;
@@ -284,11 +284,7 @@ class PAGNode : public GenericPAGNodeTy {
     template <typename Archive>
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<GenericPAGNodeTy>(*this);
-
-        SymID Id;
-        ar &Id;
-        value = getValueByIdFromCurrentProject(Id);
-
+        LOAD_Value(ar, Value, value);
         ar &InEdgeKindToSetMap;
         ar &OutEdgeKindToSetMap;
         ar &isTLPointer;
@@ -405,15 +401,13 @@ class ObjPN : public PAGNode {
     template <typename Archive>
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<PAGNode>(*this);
-        ar &getIdByMemObjFromCurrentProject(mem);
+        SAVE_MemObj(ar, mem);
     }
 
     template <typename Archive>
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<PAGNode>(*this);
-        SymID id;
-        ar &id;
-        mem = getMemObjByIdFromCurrentProject(id);
+        LOAD_MemObj(ar, mem);
     }
     /// @}
 };
@@ -477,9 +471,8 @@ class GepValPN : public ValPN {
     template <typename Archive>
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<ValPN>(*this);
-
         ar &ls;
-        ar &getIdByTypeFromCurrentProject(gepValType);
+        SAVE_Type(ar, gepValType);
         ar &fieldIdx;
     }
 
@@ -487,9 +480,7 @@ class GepValPN : public ValPN {
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<ValPN>(*this);
         ar &ls;
-        SymID id;
-        ar &id;
-        gepValType = getTypeByIdFromCurrentProject(id);
+        LOAD_Type(ar, gepValType);
         ar &fieldIdx;
     }
     /// @}

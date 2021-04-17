@@ -130,20 +130,8 @@ class ICFGNode : public GenericICFGNodeTy {
         // save parent object
         ar &boost::serialization::base_object<GenericICFGNodeTy>(*this);
 
-        if (fun != nullptr) {
-            auto *llvm_fun = fun->getLLVMFun();
-            auto fun_id = getIdByValueFromCurrentProject(llvm_fun);
-            ar &fun_id;
-        } else {
-            ar &numeric_limits<SymID>::max();
-        }
-
-        if (bb != nullptr) {
-            auto bb_id = getIdByValueFromCurrentProject(bb);
-            ar &bb_id;
-        } else {
-            ar &numeric_limits<SymID>::max();
-        }
+        SAVE_SVFFunction(ar, fun);
+        SAVE_Value(ar, bb);
 
         ar &VFGNodes;
         ar &pagEdges;
@@ -156,24 +144,9 @@ class ICFGNode : public GenericICFGNodeTy {
 
         SVFProject *currProject = SVFProject::getCurrentProject();
         assert(currProject != nullptr && "current project is null");
-        SymID fun_id;
-        SymID bb_id;
 
-        ar &fun_id;
-        ar &bb_id;
-
-        if (fun_id < numeric_limits<SymID>::max()) {
-            SVFModule *mod = currProject->getSVFModule();
-            auto *fun_val = getValueByIdFromCurrentProject(fun_id);
-            assert(llvm::isa<Function>(fun_val) && "fun_id not a Function");
-            fun = mod->getSVFFunction(llvm::dyn_cast<Function>(fun_val));
-        }
-
-        if (bb_id < numeric_limits<SymID>::max()) {
-            auto *bb_val = getValueByIdFromCurrentProject(bb_id);
-            assert(llvm::isa<BasicBlock>(bb_val) && "bb_id not a BasicBlock");
-            bb = llvm::dyn_cast<BasicBlock>(bb_val);
-        }
+        LOAD_SVFFunction(ar, fun);
+        LOAD_Value(ar, BasicBlock, bb);
 
         ar &VFGNodes;
         ar &pagEdges;
@@ -253,21 +226,13 @@ class IntraBlockNode : public ICFGNode {
     template <typename Archive>
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<ICFGNode>(*this);
-        auto inst_id = getIdByValueFromCurrentProject(inst);
-        ar &inst_id;
+        SAVE_Value(ar, inst);
     }
 
     template <typename Archive>
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<ICFGNode>(*this);
-
-        SymID inst_id;
-        ar &inst_id;
-
-        auto *inst_val = getValueByIdFromCurrentProject(inst_id);
-        assert(llvm::isa<Instruction>(inst_val) &&
-               "inst_id not an Instruction");
-        inst = llvm::dyn_cast<Instruction>(inst_val);
+        LOAD_Value(ar, Instruction, inst);
     }
 };
 
@@ -410,25 +375,14 @@ class FunExitBlockNode : public InterBlockNode {
     template <typename Archive>
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<InterBlockNode>(*this);
-        auto *llvm_fun = fun->getLLVMFun();
-        auto fun_id = getIdByValueFromCurrentProject(llvm_fun);
-        ar &fun_id;
+        SAVE_SVFFunction(ar, fun);
         ar &formalRet;
     }
 
     template <typename Archive>
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<InterBlockNode>(*this);
-
-        SymID fun_id;
-        ar &fun_id;
-        const Value *fun_val = getValueByIdFromCurrentProject(fun_id);
-        assert(llvm::isa<Function>(fun_val) && "not a function");
-
-        SVFProject *currProject = SVFProject::getCurrentProject();
-        SVFModule *mod = currProject->getSVFModule();
-        fun = mod->getSVFFunction(llvm::dyn_cast<Function>(fun_val));
-
+        LOAD_SVFFunction(ar, fun);
         ar &formalRet;
     }
 };
@@ -516,9 +470,7 @@ class CallBlockNode : public InterBlockNode {
     template <typename Archive>
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<InterBlockNode>(*this);
-
-        auto csId = getIdByValueFromCurrentProject(cs);
-        ar &csId;
+        SAVE_Value(ar, cs);
         ar &ret;
         ar &APNodes;
     }
@@ -526,13 +478,7 @@ class CallBlockNode : public InterBlockNode {
     template <typename Archive>
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<InterBlockNode>(*this);
-
-        SymID csId;
-        ar &csId;
-        const auto *cs_val = getValueByIdFromCurrentProject(csId);
-        assert(llvm::isa<Instruction>(cs_val) && "Not an Instruction");
-        cs = llvm::dyn_cast<Instruction>(cs_val);
-
+        LOAD_Value(ar, Instruction, cs);
         ar &ret;
         ar &APNodes;
 
@@ -599,10 +545,7 @@ class RetBlockNode : public InterBlockNode {
     template <typename Archive>
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<InterBlockNode>(*this);
-
-        auto csId = getIdByValueFromCurrentProject(cs);
-        ar &csId;
-
+        SAVE_Value(ar, cs);
         ar &actualRet;
         ar &callBlockNode;
     }
@@ -610,14 +553,7 @@ class RetBlockNode : public InterBlockNode {
     template <typename Archive>
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<InterBlockNode>(*this);
-
-        SymID csId;
-        ar &csId;
-
-        const auto *cs_val = getValueByIdFromCurrentProject(csId);
-        assert(llvm::isa<Instruction>(cs_val) && "Not an Instruction");
-        cs = llvm::dyn_cast<Instruction>(cs_val);
-
+        LOAD_Value(ar, Instruction, cs);
         ar &actualRet;
         ar &callBlockNode;
     }

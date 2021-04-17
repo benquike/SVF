@@ -857,21 +857,14 @@ class FormalParmVFGNode : public ArgumentVFGNode {
     template <typename Archive>
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<ArgumentVFGNode>(*this);
-        auto *llvm_fun = fun->getLLVMFun();
-        ar &getIdByValueFromCurrentProject(llvm_fun);
+        SAVE_SVFFunction(ar, fun);
         ar &callPEs;
     }
 
     template <typename Archive>
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<ArgumentVFGNode>(*this);
-        SymID id;
-        ar &id;
-        const auto *fun_val = getValueByIdFromCurrentProject(id);
-        auto *llvm_fun = llvm::dyn_cast<Function>(fun_val);
-        auto *mod = SVFProject::getCurrentProject()->getSVFModule();
-        fun = mod->getSVFFunction(llvm_fun);
-
+        LOAD_SVFFunction(ar, fun);
         ar &callPEs;
     }
     /// @}
@@ -980,20 +973,14 @@ class FormalRetVFGNode : public ArgumentVFGNode {
     template <typename Archive>
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<ArgumentVFGNode>(*this);
-        ar &getIdByValueFromCurrentProject(fun->getLLVMFun());
+        SAVE_SVFFunction(ar, fun);
         ar &retPEs;
     }
 
     template <typename Archive>
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<ArgumentVFGNode>(*this);
-
-        SymID id;
-        ar &id;
-        const Value *v = getValueByIdFromCurrentProject(id);
-        SVFModule *mod = SVFProject::getCurrentProject()->getSVFModule();
-        fun = mod->getSVFFunction(llvm::dyn_cast<Function>(v));
-
+        LOAD_SVFFunction(ar, fun);
         ar &retPEs;
     }
     /// @}
@@ -1063,21 +1050,14 @@ class InterPHIVFGNode : public PHIVFGNode {
     template <typename Archive>
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<PHIVFGNode>(*this);
-        auto *llvm_fun = fun->getLLVMFun();
-        ar &getIdByValueFromCurrentProject(llvm_fun);
+        SAVE_SVFFunction(ar, fun);
         ar &callInst;
     }
 
     template <typename Archive>
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<PHIVFGNode>(*this);
-        SymID id;
-        ar &id;
-        const auto *fun_val = getValueByIdFromCurrentProject(id);
-        auto *llvm_fun = llvm::dyn_cast<Function>(fun_val);
-        auto *mod = SVFProject::getCurrentProject()->getSVFModule();
-        fun = mod->getSVFFunction(llvm_fun);
-
+        LOAD_SVFFunction(ar, fun);
         ar &callInst;
     }
     /// @}

@@ -173,8 +173,9 @@ class PAGEdge : public GenericPAGEdgeTy {
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<GenericPAGEdgeTy>(*this);
 
-        ar &getIdByValueFromCurrentProject(value);
-        ar &getIdByValueFromCurrentProject(basicBlock);
+        SAVE_Value(ar, value);
+        SAVE_Value(ar, basicBlock);
+
         ar &icfgNode;
         ar &edgeId;
 
@@ -190,15 +191,8 @@ class PAGEdge : public GenericPAGEdgeTy {
     template <typename Archive>
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<GenericPAGEdgeTy>(*this);
-
-        SymID id;
-        ar &id;
-        value = getValueByIdFromCurrentProject(id);
-
-        ar &id;
-        basicBlock =
-            llvm::dyn_cast<BasicBlock>(getValueByIdFromCurrentProject(id));
-
+        LOAD_Value(ar, Value, value);
+        LOAD_Value(ar, BasicBlock, basicBlock);
         ar &icfgNode;
         ar &edgeId;
 

@@ -67,6 +67,92 @@ using namespace std;
 BOOST_SERIALIZATION_SPLIT_FREE(NodeBS)
 BOOST_SERIALIZATION_SPLIT_FREE(Set<const SVFFunction *>)
 
+// Save a pointer to SVFFunction
+#define SAVE_SVFFunction(ar, fun)                                              \
+    do {                                                                       \
+        if (fun != nullptr) {                                                  \
+            auto *llvm_fun = fun->getLLVMFun();                                \
+            ar &getIdByValueFromCurrentProject(llvm_fun);                      \
+        } else {                                                               \
+            ar &numeric_limits<SymID>::max();                                  \
+        }                                                                      \
+    } while (0)
+
+// Load a pointer to SVFFunction
+#define LOAD_SVFFunction(ar, fun)                                              \
+    do {                                                                       \
+        SymID id;                                                              \
+        ar &id;                                                                \
+        if (id < numeric_limits<SymID>::max()) {                               \
+            SVFModule *m = SVFProject::getCurrentProject()->getSVFModule();    \
+            auto *val = getValueByIdFromCurrentProject(id);                    \
+            assert(llvm::isa<Function>(val) && "id not a Function");           \
+            fun = m->getSVFFunction(llvm::dyn_cast<Function>(val));            \
+        }                                                                      \
+    } while (0)
+
+// Save a pointer to MemObj
+#define SAVE_MemObj(ar, mem)                                                   \
+    do {                                                                       \
+        if (mem != nullptr) {                                                  \
+            ar &getIdByMemObjFromCurrentProject(mem);                          \
+        } else {                                                               \
+            ar &numeric_limits<SymID>::max();                                  \
+        }                                                                      \
+    } while (0)
+
+// Load a pointer to MemObj
+#define LOAD_MemObj(ar, mem)                                                   \
+    do {                                                                       \
+        SymID id;                                                              \
+        ar &id;                                                                \
+        if (id < numeric_limits<SymID>::max()) {                               \
+            mem = getMemObjByIdFromCurrentProject(id);                         \
+        }                                                                      \
+    } while (0)
+
+// Save a pointer to llvm::Type
+#define SAVE_Type(ar, type)                                                    \
+    do {                                                                       \
+        if (type != nullptr) {                                                 \
+            ar &getIdByTypeFromCurrentProject(type);                           \
+        } else {                                                               \
+            ar &numeric_limits<SymID>::max();                                  \
+        }                                                                      \
+    } while (0)
+
+// Load a pointer to llvm::Type
+#define LOAD_Type(ar, type)                                                    \
+    do {                                                                       \
+        SymID id;                                                              \
+        ar &id;                                                                \
+        if (id < numeric_limits<SymID>::max()) {                               \
+            type = getTypeByIdFromCurrentProject(id);                          \
+        }                                                                      \
+    } while (0)
+
+// Save any pointer of type llvm::Value (or its derivative types)
+#define SAVE_Value(ar, val)                                                    \
+    do {                                                                       \
+        if (val != nullptr) {                                                  \
+            ar &getIdByValueFromCurrentProject(val);                           \
+        } else {                                                               \
+            ar &numeric_limits<SymID>::max();                                  \
+        }                                                                      \
+    } while (0)
+
+// load any pointer of type llvm::Value (or its derivative types)
+#define LOAD_Value(ar, Type, val)                                              \
+    do {                                                                       \
+        SymID id;                                                              \
+        ar &id;                                                                \
+        if (id < numeric_limits<SymID>::max()) {                               \
+            auto *lval = getValueByIdFromCurrentProject(id);                   \
+            assert(llvm::isa<Type>(lval) && "id not of current type");         \
+            val = llvm::dyn_cast<Type>(lval);                                  \
+        }                                                                      \
+    } while (0)
+
 namespace boost {
 namespace serialization {
 
