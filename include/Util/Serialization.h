@@ -62,6 +62,8 @@
 using namespace SVF;
 using namespace std;
 
+#include "Util/boost_classes_export_key.h"
+
 BOOST_SERIALIZATION_SPLIT_FREE(NodeBS)
 BOOST_SERIALIZATION_SPLIT_FREE(Set<const SVFFunction *>)
 

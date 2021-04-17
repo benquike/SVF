@@ -1,0 +1,207 @@
+/// Automatically genenerated by ./gen_serialization_exports.py
+/// Date & time: 04/17/2021 07:46:55
+/// Note: do not include this file directly
+
+#ifndef __UTIL_BOOST_CLASSES_EXPORT_KEY_H__
+#define __UTIL_BOOST_CLASSES_EXPORT_KEY_H__
+namespace SVF {
+// ICFG Edges
+class ICFGEdge;
+class IntraCFGEdge;
+class CallCFGEdge;
+class RetCFGEdge;
+// ICFG Graphs
+class ICFG;
+// ICFG Nodes
+class ICFGNode;
+class GlobalBlockNode;
+class IntraBlockNode;
+class FunEntryBlockNode;
+class FunExitBlockNode;
+class CallBlockNode;
+class RetBlockNode;
+// PAG Edges
+class PAGEdge;
+class AddrPE;
+class CopyPE;
+class CmpPE;
+class BinaryOPPE;
+class UnaryOPPE;
+class StorePE;
+class LoadPE;
+class GepPE;
+class NormalGepPE;
+class VariantGepPE;
+class CallPE;
+class RetPE;
+class TDForkPE;
+class TDJoinPE;
+// PAG Graphs
+class PAG;
+// PAG Nodes
+class PAGNode;
+class ValPN;
+class ObjPN;
+class GepValPN;
+class FIObjPN;
+class RetPN;
+class VarArgPN;
+class DummyValPN;
+class DummyObjPN;
+class CloneDummyObjPN;
+class CloneGepObjPN;
+class CloneFIObjPN;
+// PTA Callgraph Edges
+class PTACallGraphEdge;
+// PTA Callgraph Nodes
+class PTACallGraphNode;
+// PTA Callgraphs
+class PTACallGraph;
+// SVFG
+class SVFG;
+// SVFG Edges
+class IndirectSVFGEdge;
+class IntraIndSVFGEdge;
+class CallIndSVFGEdge;
+class RetIndSVFGEdge;
+class ThreadMHPIndSVFGEdge;
+// SVFG Nodes
+class MRSVFGNode;
+class FormalINSVFGNode;
+class FormalOUTSVFGNode;
+class ActualINSVFGNode;
+class ActualOUTSVFGNode;
+class MSSAPHISVFGNode;
+class IntraMSSAPHISVFGNode;
+class InterMSSAPHISVFGNode;
+// SVFGOPT
+class SVFGOPT;
+// VFG Edges
+class VFGEdge;
+class DirectSVFGEdge;
+class IntraDirSVFGEdge;
+class CallDirSVFGEdge;
+class RetDirSVFGEdge;
+// VFG Nodes
+class VFGNode;
+class StmtVFGNode;
+class LoadVFGNode;
+class StoreVFGNode;
+class CopyVFGNode;
+class CmpVFGNode;
+class BinaryOPVFGNode;
+class UnaryOPVFGNode;
+class GepVFGNode;
+class PHIVFGNode;
+class IntraPHIVFGNode;
+class AddrVFGNode;
+class ArgumentVFGNode;
+class ActualParmVFGNode;
+class FormalParmVFGNode;
+class ActualRetVFGNode;
+class FormalRetVFGNode;
+class InterPHIVFGNode;
+class NullPtrVFGNode;
+// VFGS
+class VFG;
+} // end of namespace SVF
+// ICFG Edges
+BOOST_CLASS_EXPORT_KEY(SVF::ICFGEdge)
+BOOST_CLASS_EXPORT_KEY(SVF::IntraCFGEdge)
+BOOST_CLASS_EXPORT_KEY(SVF::CallCFGEdge)
+BOOST_CLASS_EXPORT_KEY(SVF::RetCFGEdge)
+// ICFG Graphs
+BOOST_CLASS_EXPORT_KEY(SVF::ICFG)
+// ICFG Nodes
+BOOST_CLASS_EXPORT_KEY(SVF::ICFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::GlobalBlockNode)
+BOOST_CLASS_EXPORT_KEY(SVF::IntraBlockNode)
+BOOST_CLASS_EXPORT_KEY(SVF::FunEntryBlockNode)
+BOOST_CLASS_EXPORT_KEY(SVF::FunExitBlockNode)
+BOOST_CLASS_EXPORT_KEY(SVF::CallBlockNode)
+BOOST_CLASS_EXPORT_KEY(SVF::RetBlockNode)
+// PAG Edges
+BOOST_CLASS_EXPORT_KEY(SVF::PAGEdge)
+BOOST_CLASS_EXPORT_KEY(SVF::AddrPE)
+BOOST_CLASS_EXPORT_KEY(SVF::CopyPE)
+BOOST_CLASS_EXPORT_KEY(SVF::CmpPE)
+BOOST_CLASS_EXPORT_KEY(SVF::BinaryOPPE)
+BOOST_CLASS_EXPORT_KEY(SVF::UnaryOPPE)
+BOOST_CLASS_EXPORT_KEY(SVF::StorePE)
+BOOST_CLASS_EXPORT_KEY(SVF::LoadPE)
+BOOST_CLASS_EXPORT_KEY(SVF::GepPE)
+BOOST_CLASS_EXPORT_KEY(SVF::NormalGepPE)
+BOOST_CLASS_EXPORT_KEY(SVF::VariantGepPE)
+BOOST_CLASS_EXPORT_KEY(SVF::CallPE)
+BOOST_CLASS_EXPORT_KEY(SVF::RetPE)
+BOOST_CLASS_EXPORT_KEY(SVF::TDForkPE)
+BOOST_CLASS_EXPORT_KEY(SVF::TDJoinPE)
+// PAG Graphs
+BOOST_CLASS_EXPORT_KEY(SVF::PAG)
+// PAG Nodes
+BOOST_CLASS_EXPORT_KEY(SVF::PAGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::ValPN)
+BOOST_CLASS_EXPORT_KEY(SVF::ObjPN)
+BOOST_CLASS_EXPORT_KEY(SVF::GepValPN)
+BOOST_CLASS_EXPORT_KEY(SVF::FIObjPN)
+BOOST_CLASS_EXPORT_KEY(SVF::RetPN)
+BOOST_CLASS_EXPORT_KEY(SVF::VarArgPN)
+BOOST_CLASS_EXPORT_KEY(SVF::DummyValPN)
+BOOST_CLASS_EXPORT_KEY(SVF::DummyObjPN)
+BOOST_CLASS_EXPORT_KEY(SVF::CloneDummyObjPN)
+BOOST_CLASS_EXPORT_KEY(SVF::CloneGepObjPN)
+BOOST_CLASS_EXPORT_KEY(SVF::CloneFIObjPN)
+// PTA Callgraph Edges
+BOOST_CLASS_EXPORT_KEY(SVF::PTACallGraphEdge)
+// PTA Callgraph Nodes
+BOOST_CLASS_EXPORT_KEY(SVF::PTACallGraphNode)
+// PTA Callgraphs
+BOOST_CLASS_EXPORT_KEY(SVF::PTACallGraph)
+// SVFG
+BOOST_CLASS_EXPORT_KEY(SVF::SVFG)
+// SVFG Edges
+BOOST_CLASS_EXPORT_KEY(SVF::IndirectSVFGEdge)
+BOOST_CLASS_EXPORT_KEY(SVF::IntraIndSVFGEdge)
+BOOST_CLASS_EXPORT_KEY(SVF::CallIndSVFGEdge)
+BOOST_CLASS_EXPORT_KEY(SVF::RetIndSVFGEdge)
+BOOST_CLASS_EXPORT_KEY(SVF::ThreadMHPIndSVFGEdge)
+// SVFG Nodes
+BOOST_CLASS_EXPORT_KEY(SVF::MRSVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::FormalINSVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::FormalOUTSVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::ActualINSVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::ActualOUTSVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::MSSAPHISVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::IntraMSSAPHISVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::InterMSSAPHISVFGNode)
+// SVFGOPT
+BOOST_CLASS_EXPORT_KEY(SVF::SVFGOPT)
+// VFG Edges
+BOOST_CLASS_EXPORT_KEY(SVF::VFGEdge)
+BOOST_CLASS_EXPORT_KEY(SVF::DirectSVFGEdge)
+BOOST_CLASS_EXPORT_KEY(SVF::IntraDirSVFGEdge)
+BOOST_CLASS_EXPORT_KEY(SVF::CallDirSVFGEdge)
+BOOST_CLASS_EXPORT_KEY(SVF::RetDirSVFGEdge)
+// VFG Nodes
+BOOST_CLASS_EXPORT_KEY(SVF::VFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::StmtVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::LoadVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::StoreVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::CopyVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::CmpVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::BinaryOPVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::UnaryOPVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::GepVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::PHIVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::IntraPHIVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::AddrVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::ArgumentVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::ActualParmVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::FormalParmVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::ActualRetVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::FormalRetVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::InterPHIVFGNode)
+BOOST_CLASS_EXPORT_KEY(SVF::NullPtrVFGNode)
+// VFGS
+BOOST_CLASS_EXPORT_KEY(SVF::VFG)
+#endif
