@@ -141,6 +141,9 @@ else()
 endif()
 
 add_subdirectory(lib)
+
+set(TOOL_LIBS Svf Cudd ${llvm_libs} ${Boost_LIBRARIES})
+
 add_subdirectory(tools)
 
 if (SVF_BUILD_UNITTESTS)

@@ -13,6 +13,7 @@ function(add_unittest test_name)
         Svf
         Cudd
         ${llvm_libs}
+        ${Boost_LIBRARIES}
         ${ARGN})
 
     add_test(NAME "${test}"
