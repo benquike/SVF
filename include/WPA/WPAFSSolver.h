@@ -146,7 +146,8 @@ template <class GraphType> class WPASCCSolver : public WPAFSSolver<GraphType> {
 
     inline bool isInCurrentSCC(NodeID node) {
         return (const_cast<NodeBS &>(
-                    this->getSCCDetector()->subNodes(curSCCID))).test(node);
+                    this->getSCCDetector()->subNodes(curSCCID)))
+            .test(node);
     }
 
     inline void setCurrentSCC(NodeID id) {

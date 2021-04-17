@@ -37,8 +37,9 @@ using namespace SVF;
 using namespace SVFUtil;
 
 Size_t MemRegion::totalMRNum = 0;
+bool MemRegion::static_members_serialized = false;
 Size_t MRVer::totalVERNum = 0;
-
+bool MRVer::static_members_serialized = false;
 /*!
  * Clean up memory
  */

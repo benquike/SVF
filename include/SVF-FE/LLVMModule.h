@@ -65,7 +65,8 @@ class LLVMModuleSet {
 
   public:
     /// Constructor
-    explicit LLVMModuleSet(SVFModule *svfMod) : svfModule(svfMod), cxts(nullptr) {}
+    explicit LLVMModuleSet(SVFModule *svfMod)
+        : svfModule(svfMod), cxts(nullptr) {}
 
     //// FIXME: update this interface
     SVFModule *buildSVFModule(Module &mod);

@@ -45,6 +45,7 @@ class MRSVFGNode : public VFGNode {
 
     // This constructor can only be used by derived classes
     MRSVFGNode(NodeID id, VFGNodeK k) : VFGNode(id, k) {}
+    MRSVFGNode() = default;
 
   public:
     /// Return points-to of the MR
@@ -69,6 +70,18 @@ class MRSVFGNode : public VFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFGNode>(*this);
+        ar &cpts;
+    }
+    /// @}
 };
 
 /*
@@ -84,6 +97,9 @@ class FormalINSVFGNode : public MRSVFGNode {
         : MRSVFGNode(id, FPIN), chi(entry) {
         cpts = entry->getMR()->getPointsTo();
     }
+
+    FormalINSVFGNode() = default;
+
     /// EntryCHI
     inline const MemSSA::ENTRYCHI *getEntryChi() const { return chi; }
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
@@ -98,6 +114,18 @@ class FormalINSVFGNode : public MRSVFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    // ignore chi
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<MRSVFGNode>(*this);
+    }
+    /// @}
 };
 
 /*
@@ -110,7 +138,7 @@ class FormalOUTSVFGNode : public MRSVFGNode {
   public:
     /// Constructor
     FormalOUTSVFGNode(NodeID id, const MemSSA::RETMU *exit);
-
+    FormalOUTSVFGNode() = default;
     /// RetMU
     inline const MemSSA::RETMU *getRetMU() const { return mu; }
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
@@ -125,6 +153,18 @@ class FormalOUTSVFGNode : public MRSVFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    // ignore mu
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<MRSVFGNode>(*this);
+    }
+    /// @}
 };
 
 /*
@@ -141,6 +181,8 @@ class ActualINSVFGNode : public MRSVFGNode {
         : MRSVFGNode(id, APIN), mu(m), cs(c) {
         cpts = m->getMR()->getPointsTo();
     }
+    ActualINSVFGNode() = default;
+
     /// Callsite
     inline const CallBlockNode *getCallSite() const { return cs; }
     /// CallMU
@@ -158,6 +200,19 @@ class ActualINSVFGNode : public MRSVFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    // ignore mu
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<MRSVFGNode>(*this);
+        ar &cs;
+    }
+    /// @}
 };
 
 /*
@@ -175,6 +230,7 @@ class ActualOUTSVFGNode : public MRSVFGNode {
         : MRSVFGNode(id, APOUT), chi(c), cs(cal) {
         cpts = c->getMR()->getPointsTo();
     }
+    ActualOUTSVFGNode() = default;
     /// Callsite
     inline const CallBlockNode *getCallSite() const { return cs; }
     /// CallCHI
@@ -192,6 +248,19 @@ class ActualOUTSVFGNode : public MRSVFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    // ignore chi
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<MRSVFGNode>(*this);
+        ar &cs;
+    }
+    /// @}
 };
 
 /*
@@ -211,6 +280,8 @@ class MSSAPHISVFGNode : public MRSVFGNode {
         : MRSVFGNode(id, k), res(def) {
         cpts = def->getMR()->getPointsTo();
     }
+    MSSAPHISVFGNode() = default;
+
     /// MSSA phi operands
     //@{
     inline const MRVer *getOpVer(u32_t pos) const {
@@ -246,6 +317,18 @@ class MSSAPHISVFGNode : public MRSVFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    // ignore chi
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<MRSVFGNode>(*this);
+    }
+    /// @}
 };
 
 /*
@@ -257,6 +340,7 @@ class IntraMSSAPHISVFGNode : public MSSAPHISVFGNode {
     /// Constructor
     IntraMSSAPHISVFGNode(NodeID id, const MemSSA::PHI *phi)
         : MSSAPHISVFGNode(id, phi, MIntraPhi) {}
+    IntraMSSAPHISVFGNode() = default;
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
@@ -276,6 +360,18 @@ class IntraMSSAPHISVFGNode : public MSSAPHISVFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    // ignore chi
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<MSSAPHISVFGNode>(*this);
+    }
+    /// @}
 };
 
 /*
@@ -292,6 +388,8 @@ class InterMSSAPHISVFGNode : public MSSAPHISVFGNode {
     InterMSSAPHISVFGNode(NodeID id, const ActualOUTSVFGNode *ao)
         : MSSAPHISVFGNode(id, ao->getCallCHI(), MInterPhi), fun(nullptr),
           callInst(ao->getCallSite()) {}
+
+    InterMSSAPHISVFGNode() = default;
 
     inline bool isFormalINPHI() const {
         return (fun != nullptr) && (callInst == nullptr);
@@ -333,6 +431,33 @@ class InterMSSAPHISVFGNode : public MSSAPHISVFGNode {
   private:
     const SVFFunction *fun;
     const CallBlockNode *callInst;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const {
+        ar &boost::serialization::base_object<MSSAPHISVFGNode>(*this);
+        ar &getIdByValueFromCurrentProject(fun->getLLVMFun());
+        ar &callInst;
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<MSSAPHISVFGNode>(*this);
+        SymID id;
+        ar &id;
+
+        const Value *v = getValueByIdFromCurrentProject(id);
+        SVFModule *mod = SVFProject::getCurrentProject()->getSVFModule();
+        fun = mod->getSVFFunction(llvm::dyn_cast<Function>(v));
+
+        ar &callInst;
+    }
+    /// @}
 };
 
 } // End namespace SVF

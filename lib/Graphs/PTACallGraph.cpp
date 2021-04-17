@@ -27,11 +27,11 @@
  *      Author: Yulei Sui
  */
 
-#include <llvm/Demangle/Demangle.h>
 #include "Graphs/PTACallGraph.h"
 #include "SVF-FE/LLVMUtil.h"
 #include "SVF-FE/SVFProject.h"
 #include "Util/SVFModule.h"
+#include <llvm/Demangle/Demangle.h>
 
 using namespace SVF;
 using namespace SVFUtil;
@@ -78,9 +78,8 @@ const std::string PTACallGraphEdge::toString() const {
 const std::string PTACallGraphNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
-    rawstr << "CallGraphNode ID: " << getId() << " {fun: "
-           << llvm::demangle(fun->getName())
-           << "}";
+    rawstr << "CallGraphNode ID: " << getId()
+           << " {fun: " << llvm::demangle(fun->getName()) << "}";
     return rawstr.str();
 }
 

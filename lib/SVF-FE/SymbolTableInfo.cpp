@@ -231,6 +231,31 @@ void SymbolTableInfo::collectSimpleTypeInfo(const Type *ty) {
 }
 
 /*!
+** Collect the ids of LLVM Type info
+*/
+void SymbolTableInfo::collectTypeID(const Value *val) {
+    auto *type = val->getType();
+
+    collectTypeID(type);
+
+    if (type->isPointerTy()) {
+        auto *ptype = llvm::dyn_cast<Type>(type);
+        collectTypeID(ptype);
+    }
+}
+
+void SymbolTableInfo::collectTypeID(const Type *type) {
+    if (Type2IdMap.find(type) != Type2IdMap.end()) {
+        return;
+    }
+
+    SymID tid = nodeIDAllocator.allocateObjectId();
+    addTypeId(type, tid);
+
+    /// TODO: get types of containing elements
+}
+
+/*!
  * Compute gep offset
  */
 bool SymbolTableInfo::computeGepOffset(const User *V, LocationSet &ls) {
@@ -564,7 +589,7 @@ void SymbolTableInfo::collectInst(const Instruction *inst) {
  */
 void SymbolTableInfo::destroy() {
 
-    for (auto &iter : objMap) {
+    for (auto &iter : Id2MemMap) {
         if (iter.second) {
             delete iter.second;
         }
@@ -585,6 +610,8 @@ void SymbolTableInfo::collectSym(const Value *val) {
     // (!SVFUtil::isa<PointerType>(val->getType()))  return;
 
     DBOUT(DMemModel, outs() << "collect sym from ##" << *val << " \n");
+
+    collectTypeID(val);
 
     // special sym here
     if (isNullPtrSym(val) || isBlackholeSym(val)) {
@@ -607,6 +634,8 @@ void SymbolTableInfo::collectSym(const Value *val) {
  * Get value sym, if not available create a new one
  */
 void SymbolTableInfo::collectVal(const Value *val) {
+    collectTypeID(val);
+
     auto iter = valSymMap.find(val);
     if (iter == valSymMap.end()) {
         // create val sym and sym type
@@ -633,6 +662,8 @@ void SymbolTableInfo::collectVal(const Value *val) {
  * Get memory object sym, if not available create a new one
  */
 void SymbolTableInfo::collectObj(const Value *val) {
+    collectTypeID(val);
+
     auto iter = objSymMap.find(val);
     if (iter == objSymMap.end()) {
         // if the object pointed by the pointer is a constant data (e.g., i32 0)
@@ -652,8 +683,8 @@ void SymbolTableInfo::collectObj(const Value *val) {
 
             // create a memory object
             auto *mem = new MemObj(val, id, this);
-            assert(objMap.find(id) == objMap.end());
-            objMap[id] = mem;
+            assert(Id2MemMap.find(id) == Id2MemMap.end());
+            addMemObj(mem, id);
         }
     }
 }

@@ -36,6 +36,7 @@
 #define SVFGOPT_H_
 
 #include "Graphs/SVFG.h"
+#include "Util/Serialization.h"
 #include "Util/WorkList.h"
 
 namespace SVF {
@@ -62,6 +63,8 @@ class SVFGOPT : public SVFG {
     SVFGOPT(MemSSA *_mssa, PAG *pag, VFGK kind) : SVFG(_mssa, pag, kind) {
         keepAllSelfCycle = keepContextSelfCycle = keepActualOutFormalIn = false;
     }
+    SVFGOPT() = default;
+
     /// Destructor
     virtual ~SVFGOPT() {}
 
@@ -348,6 +351,23 @@ class SVFGOPT : public SVFG {
     bool keepActualOutFormalIn;
     bool keepAllSelfCycle;
     bool keepContextSelfCycle;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<SVFG>(*this);
+        ar &actualInToDefMap;
+        ar &formalOutToDefMap;
+        ar &defNodes;
+        ar &keepActualOutFormalIn;
+        ar &keepAllSelfCycle;
+        ar &keepContextSelfCycle;
+    }
+    /// @}
 };
 
 } // End namespace SVF

@@ -337,7 +337,7 @@ class Andersen : public AndersenBase {
                 }
             }
             for (NodeBS::iterator pit = fldInsenObjs.begin(),
-                     epit = fldInsenObjs.end();
+                                  epit = fldInsenObjs.end();
                  pit != epit; ++pit) {
                 unionPts(it->first, consCG->getAllFieldsObjNode(*pit));
             }
@@ -364,9 +364,9 @@ class AndersenWaveDiff : public Andersen {
     static AndersenWaveDiff *diffWave; // static instance
 
   public:
-    explicit
-    AndersenWaveDiff(SVFProject *proj, PTATY type = AndersenWaveDiff_WPA,
-                     bool alias_check = true)
+    explicit AndersenWaveDiff(SVFProject *proj,
+                              PTATY type = AndersenWaveDiff_WPA,
+                              bool alias_check = true)
         : Andersen(proj, type, alias_check) {}
 
     /// Create an singleton instance directly instead of invoking llvm pass
@@ -441,9 +441,8 @@ class AndersenWaveDiffWithType : public AndersenWaveDiff {
     //@}
 
   public:
-    explicit
-    AndersenWaveDiffWithType(SVFProject *proj,
-                             PTATY type = AndersenWaveDiffWithType_WPA)
+    explicit AndersenWaveDiffWithType(SVFProject *proj,
+                                      PTATY type = AndersenWaveDiffWithType_WPA)
         : AndersenWaveDiff(proj, type) {
         assert(getTypeSystem() != nullptr &&
                "a type system is required for this pointer analysis");

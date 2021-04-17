@@ -113,8 +113,37 @@ class SVFG : public VFG {
     /// Constructor
     SVFG(MemSSA *mssa, PAG *pag, VFGK k);
 
+    SVFG() = default;
+
     /// Start building SVFG
     virtual void buildSVFG();
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const {
+        ar &boost::serialization::base_object<VFG>(*this);
+        ar &MSSAVarToDefMap;
+        ar &callSiteToActualINMap;
+        ar &callSiteToActualOUTMap;
+        boost::serialization::save_map(ar, funToFormalINMap);
+        boost::serialization::save_map(ar, funToFormalOUTMap);
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFG>(*this);
+        ar &MSSAVarToDefMap;
+        ar &callSiteToActualINMap;
+        ar &callSiteToActualOUTMap;
+        boost::serialization::load_map(ar, funToFormalINMap);
+        boost::serialization::load_map(ar, funToFormalOUTMap);
+    }
+    /// @}
 
   public:
     friend class SVFGStat;

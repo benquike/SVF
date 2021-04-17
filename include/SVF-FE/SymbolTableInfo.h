@@ -50,13 +50,17 @@ class SymbolTableInfo {
     using ValueToIDMapTy = OrderedMap<const Value *, SymID>;
     /// sym id to memory object map
     using IDToValueMapTy = OrderedMap<SymID, const Value *>;
-    using IDToMemMapTy = OrderedMap<SymID, MemObj *>;
+    using IDToMemMapTy = OrderedMap<SymID, const MemObj *>;
+    using MemToIDMapTy = OrderedMap<const MemObj *, SymID>;
+
     /// function to sym id map
     using FunToIDMapTy = OrderedMap<const Function *, SymID>;
     /// sym id to sym type map
     using IDToSymTyMapTy = OrderedMap<SymID, SYMTYPE>;
     /// struct type to struct info map
     using TypeToFieldInfoMap = OrderedMap<const Type *, StInfo *>;
+    using IDToTypeMapTy = OrderedMap<SymID, const Type *>;
+    using TypeToIDMapTy = OrderedMap<const Type *, SymID>;
     using CallSiteSet = Set<CallSite>;
     using CallSiteToIDMapTy = OrderedMap<const Instruction *, CallSiteID>;
     using IDToCallSiteMapTy = OrderedMap<CallSiteID, const Instruction *>;
@@ -70,10 +74,14 @@ class SymbolTableInfo {
     ValueToIDMapTy valSymMap;  ///< map a value to its sym id
     ValueToIDMapTy objSymMap;  ///< map a obj reference to its sym id
     IDToValueMapTy idValueMap; ///< map from its id to the pointer
-    IDToMemMapTy objMap;       ///< map a memory sym id to its obj
+    IDToMemMapTy Id2MemMap;    ///< map a memory sym id to its obj
+    MemToIDMapTy mem2IdMap;
     IDToSymTyMapTy symTyMap;   /// < map a sym id to its type
     FunToIDMapTy returnSymMap; ///< return  map
     FunToIDMapTy varargSymMap; ///< vararg map
+
+    IDToTypeMapTy Id2TypeMap;
+    TypeToIDMapTy Type2IdMap;
 
     CallSiteSet callSiteSet;
 
@@ -97,6 +105,19 @@ class SymbolTableInfo {
 
   private:
     void collectInst(const Instruction *inst);
+
+    inline void addMemObj(const MemObj *memObj, SymID id) {
+        Id2MemMap[id] = memObj;
+        mem2IdMap[Id2MemMap[id]] = id;
+    }
+
+    inline void addTypeId(const Type *type, SymID id) {
+        Id2TypeMap[id] = type;
+        Type2IdMap[Id2TypeMap[id]] = id;
+    }
+
+    void collectTypeID(const Value *val);
+    void collectTypeID(const Type *type);
 
   public:
     /// Constructor
@@ -178,12 +199,15 @@ class SymbolTableInfo {
 
     inline void createBlkOrConstantObj(SymID symId) {
         assert(isBlkObjOrConstantObj(symId));
-        assert(objMap.find(symId) == objMap.end());
-        objMap[symId] = new MemObj(symId, this);
+        assert(Id2MemMap.find(symId) == Id2MemMap.end());
+        auto *memObj = new MemObj(symId, this);
+        addMemObj(memObj, symId);
     }
 
-    inline MemObj *getBlkObj() const { return getObj(blackholeSymID()); }
-    inline MemObj *getConstantObj() const { return getObj(constantSymID()); }
+    inline const MemObj *getBlkObj() const { return getObj(blackholeSymID()); }
+    inline const MemObj *getConstantObj() const {
+        return getObj(constantSymID());
+    }
 
     inline SymID blkPtrSymID() const { return BlkPtr; }
 
@@ -195,10 +219,10 @@ class SymbolTableInfo {
 
     /// Can only be invoked by PAG::addDummyNode() when creaing PAG from file.
     inline const MemObj *createDummyObj(SymID symId, const Type *type) {
-        assert(objMap.find(symId) == objMap.end() &&
+        assert(Id2MemMap.find(symId) == Id2MemMap.end() &&
                "this dummy obj has been created before");
         auto *memObj = new MemObj(symId, this, type);
-        objMap[symId] = memObj;
+        addMemObj(memObj, symId);
         return memObj;
     }
     // @}
@@ -228,6 +252,32 @@ class SymbolTableInfo {
         return iter->second;
     }
 
+    /// switch to this api.
+    SymID getValSymId(const Value *val) { return getValSym(val); }
+
+    SymID getMemObjId(const MemObj *memObj) {
+        assert(mem2IdMap.find(memObj) != mem2IdMap.end() &&
+               "MemObj not exists");
+
+        return mem2IdMap[memObj];
+    }
+
+    const MemObj *getMemObj(SymID id) {
+        assert(Id2MemMap.find(id) != Id2MemMap.end() && "MemObj ID not exists");
+
+        return Id2MemMap[id];
+    }
+
+    SymID getTypeId(const Type *type) {
+        assert(Type2IdMap.find(type) != Type2IdMap.end() && "Type not exist");
+        return Type2IdMap[type];
+    }
+
+    const Type *getType(SymID id) {
+        assert(Id2TypeMap.find(id) != Id2TypeMap.end() && "Type id not exist");
+        return Id2TypeMap[id];
+    }
+
     inline bool hasValSym(const Value *val) {
         if (isNullPtrSym(val) || isBlackholeSym(val)) {
             return true;
@@ -253,9 +303,9 @@ class SymbolTableInfo {
         return iter->second;
     }
 
-    inline MemObj *getObj(SymID id) const {
-        auto iter = objMap.find(id);
-        assert(iter != objMap.end() && "obj not found");
+    inline const MemObj *getObj(SymID id) const {
+        auto iter = Id2MemMap.find(id);
+        assert(iter != Id2MemMap.end() && "obj not found");
         return iter->second;
     }
 
@@ -284,7 +334,7 @@ class SymbolTableInfo {
 
     inline ValueToIDMapTy &objSyms() { return objSymMap; }
 
-    inline IDToMemMapTy &idToObjMap() { return objMap; }
+    inline IDToMemMapTy &idToObjMap() { return Id2MemMap; }
     inline IDToValueMapTy &idToValueMap() { return idValueMap; }
 
     inline FunToIDMapTy &retSyms() { return returnSymMap; }

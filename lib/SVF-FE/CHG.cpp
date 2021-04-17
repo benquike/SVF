@@ -98,11 +98,11 @@ const std::string CHNode::toString() const {
     for (const auto &fv : virtualFunctionVectors) {
         rawstr << " - vtbl " << i << ":\n";
 
-        for (const auto *svfFunc: fv ) {
+        for (const auto *svfFunc : fv) {
             rawstr << "  -- " << llvm::demangle(svfFunc->getName()) << ",\n";
         }
 
-        i ++;
+        i++;
     }
 
     return rawstr.str();

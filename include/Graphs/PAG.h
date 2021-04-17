@@ -43,7 +43,9 @@ namespace SVF {
  * Program Assignment Graph for pointer analysis
  * SymID and NodeID are equal here (same numbering).
  */
-class PAG : public GenericGraph<PAGNode, PAGEdge> {
+
+using GenericPAGTy = GenericGraph<PAGNode, PAGEdge>;
+class PAG : public GenericPAGTy {
 
   public:
     using CallSiteSet = Set<const CallBlockNode *>;
@@ -134,11 +136,92 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
     /// Clean up memory
     void destroy();
 
+    /// support for serialization
+    /// @ {
+    friend class boost::serialization::access;
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const {
+        ar &boost::serialization::base_object<GenericPAGTy>(*this);
+        boost::serialization::save_map(ar, functionToExternalPAGEntries);
+        boost::serialization::save_map(ar, functionToExternalPAGReturns);
+
+        ar &PAGEdgeKindToSetMap;
+        ar &PTAPAGEdgeKindToSetMap;
+        ar &inst2PAGEdgesMap;
+        ar &inst2PTAPAGEdgesMap;
+
+        boost::serialization::save_map(ar, GepValNodeMap);
+        ar &GepObjNodeMap;
+        ar &memToFieldsMap;
+        ar &globPAGEdgesSet;
+        ar &phiNodeMap;
+        ar &binaryNodeMap;
+        ar &unaryNodeMap;
+        ar &cmpNodeMap;
+
+        boost::serialization::save_map(ar, funArgsListMap);
+        ar &callSiteArgsListMap;
+        ar &callSiteRetMap;
+        boost::serialization::save_map(ar, funRetMap);
+
+        ar &indCallSiteToFunPtrMap;
+        ar &funPtrToCallSitesMap;
+        ar &fromFile;
+        ar &candidatePointers;
+        ar &nodeNumAfterPAGBuild;
+        ar &callSiteSet;
+
+        ar &icfg;
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<GenericPAGTy>(*this);
+
+        boost::serialization::load_map(ar, functionToExternalPAGEntries);
+        boost::serialization::load_map(ar, functionToExternalPAGReturns);
+
+        ar &PAGEdgeKindToSetMap;
+        ar &PTAPAGEdgeKindToSetMap;
+        ar &inst2PAGEdgesMap;
+        ar &inst2PTAPAGEdgesMap;
+
+        boost::serialization::load_map(ar, GepValNodeMap);
+        ar &GepObjNodeMap;
+        ar &memToFieldsMap;
+        ar &globPAGEdgesSet;
+        ar &phiNodeMap;
+        ar &binaryNodeMap;
+        ar &unaryNodeMap;
+        ar &cmpNodeMap;
+
+        boost::serialization::load_map(ar, funArgsListMap);
+        ar &callSiteArgsListMap;
+        ar &callSiteRetMap;
+        boost::serialization::load_map(ar, funRetMap);
+
+        ar &indCallSiteToFunPtrMap;
+        ar &funPtrToCallSitesMap;
+        ar &fromFile;
+        ar &candidatePointers;
+        ar &nodeNumAfterPAGBuild;
+        ar &callSiteSet;
+
+        ar &icfg;
+
+        proj = SVFProject::getCurrentProject();
+        // icfg = proj->getICFG();
+        symbolTableInfo = proj->getSymbolTableInfo();
+    }
+
   public:
     friend class ExternalPAG;
 
     /// Constructor
-    PAG(SVFProject *proj, bool buildFromFile = false);
+    explicit PAG(SVFProject *proj, bool buildFromFile = false);
+    PAG() = default;
 
     u32_t totalPTAPAGEdge;
 
@@ -652,7 +735,8 @@ class PAG : public GenericGraph<PAGNode, PAGEdge> {
 
     /// Add a memory obj node
     inline NodeID addObjNode(const Value *val, NodeID i) {
-        MemObj *mem = symbolTableInfo->getObj(symbolTableInfo->getObjSym(val));
+        const MemObj *mem =
+            symbolTableInfo->getObj(symbolTableInfo->getObjSym(val));
         assert(((mem->getSymId() == i) ||
                 (symbolTableInfo->getGlobalRep(val) != val)) &&
                "not same object id?");

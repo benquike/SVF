@@ -25,6 +25,9 @@
  *
  *  Created on: 18 Sep. 2018
  *      Author: Yulei Sui
+ *  Updated by:
+ *     Hui Peng <peng124@purdue.edu>
+ *     2021-04-15
  */
 
 #ifndef INCLUDE_UTIL_VFG_H_
@@ -110,10 +113,60 @@ class VFG : public GenericVFGTy {
     /// Clean up memory
     void destroy();
 
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const {
+        ar &boost::serialization::base_object<GenericVFGTy>(*this);
+        ar &totalVFGNode;
+        ar &PAGNodeToActualParmMap;
+        ar &PAGNodeToActualRetMap;
+        ar &PAGNodeToFormalParmMap;
+        ar &PAGNodeToFormalRetMap;
+        ar &PAGNodeToIntraPHIVFGNodeMap;
+        ar &PAGNodeToBinaryOPVFGNodeMap;
+        ar &PAGNodeToUnaryOPVFGNodeMap;
+        ar &PAGNodeToCmpVFGNodeMap;
+        ar &PAGEdgeToStmtVFGNodeMap;
+        ar &globalVFGNodes;
+        ar &kind;
+        ar &callgraph;
+        ar &pag;
+
+        boost::serialization::save_map(ar, funToVFGNodesMap);
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<GenericVFGTy>(*this);
+
+        ar &totalVFGNode;
+        ar &PAGNodeToActualParmMap;
+        ar &PAGNodeToActualRetMap;
+        ar &PAGNodeToFormalParmMap;
+        ar &PAGNodeToFormalRetMap;
+        ar &PAGNodeToIntraPHIVFGNodeMap;
+        ar &PAGNodeToBinaryOPVFGNodeMap;
+        ar &PAGNodeToUnaryOPVFGNodeMap;
+        ar &PAGNodeToCmpVFGNodeMap;
+        ar &PAGEdgeToStmtVFGNodeMap;
+        ar &globalVFGNodes;
+        ar &kind;
+        ar &callgraph;
+        ar &pag;
+
+        boost::serialization::load_map(ar, funToVFGNodesMap);
+    }
+    /// @}
+
   public:
     /// Constructor
     VFG(PTACallGraph *callgraph, PAG *pag, VFGK k = FULLSVFG);
-
+    VFG() = default;
     /// Destructor
     virtual ~VFG() { destroy(); }
 

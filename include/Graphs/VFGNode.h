@@ -26,6 +26,9 @@
  *
  *  Created on: 18 Sep. 2018
  *      Author: Yulei Sui
+ *  Updated by:
+ *     Hui Peng <peng124@purdue.edu>
+ *     2021-04-15
  */
 
 #ifndef INCLUDE_UTIL_VFGNODE_H_
@@ -34,6 +37,7 @@
 #include "Graphs/GenericGraph.h"
 #include "Graphs/VFGEdge.h"
 #include "MemoryModel/PointerAnalysisImpl.h"
+#include "Util/Serialization.h"
 
 namespace SVF {
 
@@ -86,7 +90,7 @@ class VFGNode : public GenericVFGNodeTy {
   public:
     /// Constructor
     VFGNode(NodeID i, VFGNodeK k) : GenericVFGNodeTy(i, k), icfgNode(nullptr) {}
-
+    VFGNode() = default;
     /// Return corresponding ICFG node
     virtual const ICFGNode *getICFGNode() const { return icfgNode; }
 
@@ -108,6 +112,18 @@ class VFGNode : public GenericVFGNodeTy {
 
   protected:
     const ICFGNode *icfgNode;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<GenericVFGNodeTy>(*this);
+        ar &icfgNode;
+    }
+    /// @}
 };
 
 /*!
@@ -122,6 +138,7 @@ class StmtVFGNode : public VFGNode {
     /// Constructor
     StmtVFGNode(NodeID id, const PAGEdge *e, VFGNodeK k)
         : VFGNode(id, k), pagEdge(e) {}
+    StmtVFGNode() = default;
 
     /// Whether this node is used for pointer analysis. Both src and dst
     /// PAGNodes are of ptr type.
@@ -161,6 +178,18 @@ class StmtVFGNode : public VFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFGNode>(*this);
+        ar &pagEdge;
+    }
+    /// @}
 };
 
 /*!
@@ -168,7 +197,7 @@ class StmtVFGNode : public VFGNode {
  */
 class LoadVFGNode : public StmtVFGNode {
   private:
-    LoadVFGNode();                       ///< place holder
+    LoadVFGNode() = default;             ///< place holder
     LoadVFGNode(const LoadVFGNode &);    ///< place holder
     void operator=(const LoadVFGNode &); ///< place holder
 
@@ -190,6 +219,17 @@ class LoadVFGNode : public StmtVFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<StmtVFGNode>(*this);
+    }
+    /// @}
 };
 
 /*!
@@ -197,7 +237,7 @@ class LoadVFGNode : public StmtVFGNode {
  */
 class StoreVFGNode : public StmtVFGNode {
   private:
-    StoreVFGNode();                       ///< place holder
+    StoreVFGNode() = default;             ///< place holder
     StoreVFGNode(const StoreVFGNode &);   ///< place holder
     void operator=(const StoreVFGNode &); ///< place holder
 
@@ -220,6 +260,17 @@ class StoreVFGNode : public StmtVFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<StmtVFGNode>(*this);
+    }
+    /// @}
 };
 
 /*!
@@ -227,7 +278,7 @@ class StoreVFGNode : public StmtVFGNode {
  */
 class CopyVFGNode : public StmtVFGNode {
   private:
-    CopyVFGNode();                       ///< place holder
+    CopyVFGNode() = default;             ///< place holder
     CopyVFGNode(const CopyVFGNode &);    ///< place holder
     void operator=(const CopyVFGNode &); ///< place holder
 
@@ -249,6 +300,17 @@ class CopyVFGNode : public StmtVFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<StmtVFGNode>(*this);
+    }
+    /// @}
 };
 
 /*!
@@ -264,7 +326,7 @@ class CmpVFGNode : public VFGNode {
     OPVers opVers;
 
   private:
-    CmpVFGNode();                       ///< place holder
+    CmpVFGNode() = default;             ///< place holder
     CmpVFGNode(const CmpVFGNode &);     ///< place holder
     void operator=(const CmpVFGNode &); ///< place holder
 
@@ -298,6 +360,19 @@ class CmpVFGNode : public VFGNode {
     inline OPVers::const_iterator opVerEnd() const { return opVers.end(); }
     //@}
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFGNode>(*this);
+        ar &res;
+        ar &opVers;
+    }
+    /// @}
 };
 
 /*!
@@ -312,7 +387,7 @@ class BinaryOPVFGNode : public VFGNode {
     OPVers opVers;
 
   private:
-    BinaryOPVFGNode();                        ///< place holder
+    BinaryOPVFGNode() = default;              ///< place holder
     BinaryOPVFGNode(const BinaryOPVFGNode &); ///< place holder
     void operator=(const BinaryOPVFGNode &);  ///< place holder
 
@@ -348,6 +423,19 @@ class BinaryOPVFGNode : public VFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFGNode>(*this);
+        ar &res;
+        ar &opVers;
+    }
+    /// @}
 };
 
 /*!
@@ -362,7 +450,7 @@ class UnaryOPVFGNode : public VFGNode {
     OPVers opVers;
 
   private:
-    UnaryOPVFGNode();                       ///< place holder
+    UnaryOPVFGNode() = default;             ///< place holder
     UnaryOPVFGNode(const UnaryOPVFGNode &); ///< place holder
     void operator=(const UnaryOPVFGNode &); ///< place holder
 
@@ -400,6 +488,19 @@ class UnaryOPVFGNode : public VFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFGNode>(*this);
+        ar &res;
+        ar &opVers;
+    }
+    /// @}
 };
 
 /*!
@@ -407,7 +508,7 @@ class UnaryOPVFGNode : public VFGNode {
  */
 class GepVFGNode : public StmtVFGNode {
   private:
-    GepVFGNode();                       ///< place holder
+    GepVFGNode() = default;             ///< place holder
     GepVFGNode(const GepVFGNode &);     ///< place holder
     void operator=(const GepVFGNode &); ///< place holder
 
@@ -429,6 +530,17 @@ class GepVFGNode : public StmtVFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<StmtVFGNode>(*this);
+    }
+    /// @}
 };
 
 /*
@@ -447,6 +559,7 @@ class PHIVFGNode : public VFGNode {
   public:
     /// Constructor
     PHIVFGNode(NodeID id, const PAGNode *r, VFGNodeK k = TPhi);
+    PHIVFGNode() = default;
 
     /// Whether this phi node is of pointer type (used for pointer analysis).
     inline bool isPTANode() const { return res->isPointer(); }
@@ -481,6 +594,19 @@ class PHIVFGNode : public VFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFGNode>(*this);
+        ar &res;
+        ar &opVers;
+    }
+    /// @}
 };
 
 /*
@@ -498,6 +624,8 @@ class IntraPHIVFGNode : public PHIVFGNode {
     /// Constructor
     IntraPHIVFGNode(NodeID id, const PAGNode *r)
         : PHIVFGNode(id, r, TIntraPhi) {}
+
+    IntraPHIVFGNode() = default;
 
     inline const ICFGNode *getOpIncomingBB(u32_t pos) const {
         auto it = opIncomingBBs.find(pos);
@@ -526,11 +654,23 @@ class IntraPHIVFGNode : public PHIVFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<PHIVFGNode>(*this);
+        ar &opIncomingBBs;
+    }
+    /// @}
 };
 
 class AddrVFGNode : public StmtVFGNode {
   private:
-    AddrVFGNode();                       ///< place holder
+    AddrVFGNode() = default;             ///< place holder
     AddrVFGNode(const AddrVFGNode &);    ///< place holder
     void operator=(const AddrVFGNode &); ///< place holder
 
@@ -552,6 +692,17 @@ class AddrVFGNode : public StmtVFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<StmtVFGNode>(*this);
+    }
+    /// @}
 };
 
 class ArgumentVFGNode : public VFGNode {
@@ -563,6 +714,8 @@ class ArgumentVFGNode : public VFGNode {
     /// Constructor
     ArgumentVFGNode(NodeID id, const PAGNode *p, VFGNodeK k)
         : VFGNode(id, k), param(p) {}
+
+    ArgumentVFGNode() = default;
 
     /// Whether this argument node is of pointer type (used for pointer
     /// analysis).
@@ -582,6 +735,18 @@ class ArgumentVFGNode : public VFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFGNode>(*this);
+        ar &param;
+    }
+    /// @}
 };
 
 /*
@@ -595,6 +760,7 @@ class ActualParmVFGNode : public ArgumentVFGNode {
     /// Constructor
     ActualParmVFGNode(NodeID id, const PAGNode *n, const CallBlockNode *c)
         : ArgumentVFGNode(id, n, AParm), cs(c) {}
+    ActualParmVFGNode() = default;
 
     /// Return callsite
     inline const CallBlockNode *getCallSite() const { return cs; }
@@ -617,6 +783,18 @@ class ActualParmVFGNode : public ArgumentVFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<ArgumentVFGNode>(*this);
+        ar &cs;
+    }
+    /// @}
 };
 
 /*
@@ -631,6 +809,7 @@ class FormalParmVFGNode : public ArgumentVFGNode {
     /// Constructor
     FormalParmVFGNode(NodeID id, const PAGNode *n, const SVFFunction *f)
         : ArgumentVFGNode(id, n, FParm), fun(f) {}
+    FormalParmVFGNode() = default;
 
     /// Return parameter
     inline const PAGNode *getParam() const { return param; }
@@ -662,6 +841,34 @@ class FormalParmVFGNode : public ArgumentVFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const {
+        ar &boost::serialization::base_object<ArgumentVFGNode>(*this);
+        auto *llvm_fun = fun->getLLVMFun();
+        ar &getIdByValueFromCurrentProject(llvm_fun);
+        ar &callPEs;
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<ArgumentVFGNode>(*this);
+        SymID id;
+        ar &id;
+        const auto *fun_val = getValueByIdFromCurrentProject(id);
+        auto *llvm_fun = llvm::dyn_cast<Function>(fun_val);
+        auto *mod = SVFProject::getCurrentProject()->getSVFModule();
+        fun = mod->getSVFFunction(llvm_fun);
+
+        ar &callPEs;
+    }
+    /// @}
 };
 
 /*!
@@ -671,7 +878,6 @@ class ActualRetVFGNode : public ArgumentVFGNode {
   private:
     const CallBlockNode *cs;
 
-    ActualRetVFGNode();                         ///< place holder
     ActualRetVFGNode(const ActualRetVFGNode &); ///< place holder
     void operator=(const ActualRetVFGNode &);   ///< place holder
 
@@ -679,6 +885,8 @@ class ActualRetVFGNode : public ArgumentVFGNode {
     /// Constructor
     ActualRetVFGNode(NodeID id, const PAGNode *n, const CallBlockNode *c)
         : ArgumentVFGNode(id, n, ARet), cs(c) {}
+    ActualRetVFGNode() = default;
+
     /// Return callsite
     inline const CallBlockNode *getCallSite() const { return cs; }
     /// Receive parameter at callsite
@@ -700,6 +908,18 @@ class ActualRetVFGNode : public ArgumentVFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<ArgumentVFGNode>(*this);
+        ar &cs;
+    }
+    /// @}
 };
 
 /*!
@@ -710,13 +930,13 @@ class FormalRetVFGNode : public ArgumentVFGNode {
     const SVFFunction *fun;
     RetPESet retPEs;
 
-    FormalRetVFGNode();                         ///< place holder
     FormalRetVFGNode(const FormalRetVFGNode &); ///< place holder
     void operator=(const FormalRetVFGNode &);   ///< place holder
 
   public:
     /// Constructor
     FormalRetVFGNode(NodeID id, const PAGNode *n, const SVFFunction *f);
+    FormalRetVFGNode() = default;
 
     /// Return value at callee
     inline const PAGNode *getRet() const { return param; }
@@ -744,6 +964,33 @@ class FormalRetVFGNode : public ArgumentVFGNode {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const {
+        ar &boost::serialization::base_object<ArgumentVFGNode>(*this);
+        ar &getIdByValueFromCurrentProject(fun->getLLVMFun());
+        ar &retPEs;
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<ArgumentVFGNode>(*this);
+
+        SymID id;
+        ar &id;
+        const Value *v = getValueByIdFromCurrentProject(id);
+        SVFModule *mod = SVFProject::getCurrentProject()->getSVFModule();
+        fun = mod->getSVFFunction(llvm::dyn_cast<Function>(v));
+
+        ar &retPEs;
+    }
+    /// @}
 };
 
 /*
@@ -760,6 +1007,8 @@ class InterPHIVFGNode : public PHIVFGNode {
     InterPHIVFGNode(NodeID id, const ActualRetVFGNode *ar)
         : PHIVFGNode(id, ar->getRev(), TInterPhi), fun(ar->getCaller()),
           callInst(ar->getCallSite()) {}
+
+    InterPHIVFGNode() = default;
 
     inline bool isFormalParmPHI() const {
         return (fun != nullptr) && (callInst == nullptr);
@@ -799,6 +1048,33 @@ class InterPHIVFGNode : public PHIVFGNode {
   private:
     const SVFFunction *fun;
     const CallBlockNode *callInst;
+
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const {
+        ar &boost::serialization::base_object<PHIVFGNode>(*this);
+        auto *llvm_fun = fun->getLLVMFun();
+        ar &getIdByValueFromCurrentProject(llvm_fun);
+        ar &callInst;
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<PHIVFGNode>(*this);
+        SymID id;
+        ar &id;
+        const auto *fun_val = getValueByIdFromCurrentProject(id);
+        auto *llvm_fun = llvm::dyn_cast<Function>(fun_val);
+        auto *mod = SVFProject::getCurrentProject()->getSVFModule();
+        fun = mod->getSVFFunction(llvm_fun);
+
+        ar &callInst;
+    }
+    /// @}
 };
 
 /*!
@@ -811,6 +1087,8 @@ class NullPtrVFGNode : public VFGNode {
   public:
     /// Constructor
     NullPtrVFGNode(NodeID id, const PAGNode *n) : VFGNode(id, NPtr), node(n) {}
+    NullPtrVFGNode() = default;
+
     /// Whether this node is of pointer type (used for pointer analysis).
     inline bool isPTANode() const { return node->isPointer(); }
     /// Return corresponding PAGNode
@@ -827,6 +1105,17 @@ class NullPtrVFGNode : public VFGNode {
     //@}
 
     const std::string toString() const override;
+
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFGNode>(*this);
+        ar &node;
+    }
+    /// @}
 };
 
 } // End namespace SVF

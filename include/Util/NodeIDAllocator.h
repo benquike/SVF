@@ -60,6 +60,9 @@ class NodeIDAllocator {
     /// Allocate a value ID as determined by the strategy.
     NodeID allocateValueId();
 
+    // Allocate a type id
+    NodeID allocateTypeId();
+
     /// Notify the allocator that all symbols have had IDs allocated.
     void endSymbolAllocation();
 
@@ -75,6 +78,9 @@ class NodeIDAllocator {
     NodeID numSymbols;
     /// Total number of objects and values allocated.
     NodeID numNodes;
+
+    /// Total number of Types.
+    NodeID numTypes;
     ///@}
 
     /// Strategy to allocate with.

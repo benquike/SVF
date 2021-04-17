@@ -25,14 +25,19 @@
 #include <string>
 #include <vector>
 
-#include "Graphs/ICFG.h"
-#include "SVF-FE/SymbolTableInfo.h"
-#include "Util/SVFModule.h"
-#include "Util/ThreadAPI.h"
+#include "Util/BasicTypes.h"
+
+using namespace std;
 
 namespace SVF {
 
 class PAG;
+class ICFG;
+class SymbolTableInfo;
+class SVFModule;
+class LLVMModuleSet;
+class ThreadAPI;
+class MemObj;
 
 class SVFProject {
   private:
@@ -45,161 +50,102 @@ class SVFProject {
 
     ThreadAPI *threadAPI = nullptr;
     // bool _built = false;
+    static SVFProject *currentProject;
 
   public:
-    explicit SVFProject(string &modName) {
-        modNameVec.push_back(modName);
-        svfModule = new SVFModule(modNameVec);
-    }
+    explicit SVFProject(string &modName);
+    explicit SVFProject(vector<string> &modVec);
+    explicit SVFProject(Module &module);
 
-    explicit SVFProject(vector<string> &modVec) {
-        assert(!modVec.empty() && "no module files are provided");
-        modNameVec.insert(modNameVec.end(), modVec.begin(), modVec.end());
-        svfModule = new SVFModule(modNameVec);
-    }
-
-    explicit SVFProject(Module &module) {
-        modNameVec.push_back(module.getModuleIdentifier());
-        svfModule = new SVFModule(module);
-    }
+    static SVFProject *getCurrentProject() { return currentProject; }
 
     virtual ~SVFProject();
 
     SVFModule *getSVFModule() const { return svfModule; }
 
-    SymbolTableInfo *getSymbolTableInfo() {
+    SymbolTableInfo *getSymbolTableInfo();
 
-        if (!symTableInfo) {
-            symTableInfo = new SymbolTableInfo(getSVFModule());
-        }
-
-        return symTableInfo;
-    }
-
-    LLVMModuleSet *getLLVMModSet() const { return svfModule->getLLVMModSet(); }
+    LLVMModuleSet *getLLVMModSet() const;
 
     PAG *getPAG();
 
     ICFG *getICFG();
 
-    ThreadAPI *getThreadAPI() {
-        if (!threadAPI) {
-            threadAPI = new ThreadAPI(getSVFModule());
-        }
-
-        return threadAPI;
-    }
+    ThreadAPI *getThreadAPI();
 
     /// Return true if this is a thread creation call
     ///@{
-    inline bool isThreadForkCall(const CallSite cs) {
-        return getThreadAPI()->isTDFork(cs);
-    }
-    inline bool isThreadForkCall(const Instruction *inst) {
-        return getThreadAPI()->isTDFork(inst);
-    }
+    bool isThreadForkCall(const CallSite cs);
+    bool isThreadForkCall(const Instruction *inst);
     //@}
 
     /// Return true if this is a hare_parallel_for call
     ///@{
-    inline bool isHareParForCall(const CallSite cs) {
-        return getThreadAPI()->isHareParFor(cs);
-    }
-    inline bool isHareParForCall(const Instruction *inst) {
-        return getThreadAPI()->isHareParFor(inst);
-    }
+    bool isHareParForCall(const CallSite cs);
+    bool isHareParForCall(const Instruction *inst);
     //@}
 
     /// Return true if this is a thread join call
     ///@{
-    inline bool isThreadJoinCall(const CallSite cs) {
-        return getThreadAPI()->isTDJoin(cs);
-    }
-    inline bool isThreadJoinCall(const Instruction *inst) {
-        return getThreadAPI()->isTDJoin(inst);
-    }
+    bool isThreadJoinCall(const CallSite cs);
+    bool isThreadJoinCall(const Instruction *inst);
     //@}
 
     /// Return true if this is a thread exit call
     ///@{
-    inline bool isThreadExitCall(const CallSite cs) {
-        return getThreadAPI()->isTDExit(cs);
-    }
-    inline bool isThreadExitCall(const Instruction *inst) {
-        return getThreadAPI()->isTDExit(inst);
-    }
+    bool isThreadExitCall(const CallSite cs);
+    bool isThreadExitCall(const Instruction *inst);
     //@}
 
     /// Return true if this is a lock acquire call
     ///@{
-    inline bool isLockAquireCall(const CallSite cs) {
-        return getThreadAPI()->isTDAcquire(cs);
-    }
-    inline bool isLockAquireCall(const Instruction *inst) {
-        return getThreadAPI()->isTDAcquire(inst);
-    }
+    bool isLockAquireCall(const CallSite cs);
+    bool isLockAquireCall(const Instruction *inst);
     //@}
 
     /// Return true if this is a lock acquire call
     ///@{
-    inline bool isLockReleaseCall(const CallSite cs) {
-        return getThreadAPI()->isTDRelease(cs);
-    }
-    inline bool isLockReleaseCall(const Instruction *inst) {
-        return getThreadAPI()->isTDRelease(inst);
-    }
+    bool isLockReleaseCall(const CallSite cs);
+    bool isLockReleaseCall(const Instruction *inst);
     //@}
 
     /// Return true if this is a barrier wait call
     //@{
-    inline bool isBarrierWaitCall(const CallSite cs) {
-        return getThreadAPI()->isTDBarWait(cs);
-    }
-    inline bool isBarrierWaitCall(const Instruction *inst) {
-        return getThreadAPI()->isTDBarWait(inst);
-    }
+    bool isBarrierWaitCall(const CallSite cs);
+    bool isBarrierWaitCall(const Instruction *inst);
     //@}
 
     /// Return thread fork function
     //@{
-    inline const Value *getForkedFun(const CallSite cs) {
-        return getThreadAPI()->getForkedFun(cs);
-    }
-    inline const Value *getForkedFun(const Instruction *inst) {
-        return getThreadAPI()->getForkedFun(inst);
-    }
+    const Value *getForkedFun(const CallSite cs);
+    const Value *getForkedFun(const Instruction *inst);
     //@}
 
     /// Return sole argument of the thread routine
     //@{
-    inline const Value *getActualParmAtForkSite(const CallSite cs) {
-        return getThreadAPI()->getActualParmAtForkSite(cs);
-    }
-    inline const Value *getActualParmAtForkSite(const Instruction *inst) {
-        return getThreadAPI()->getActualParmAtForkSite(inst);
-    }
+    const Value *getActualParmAtForkSite(const CallSite cs);
+    const Value *getActualParmAtForkSite(const Instruction *inst);
     //@}
 
     /// Return the task function of the parallel_for routine
     //@{
-    inline const Value *getTaskFuncAtHareParForSite(const CallSite cs) {
-        return getThreadAPI()->getTaskFuncAtHareParForSite(cs);
-    }
-    inline const Value *getTaskFuncAtHareParForSite(const Instruction *inst) {
-        return getThreadAPI()->getTaskFuncAtHareParForSite(inst);
-    }
+    const Value *getTaskFuncAtHareParForSite(const CallSite cs);
+    const Value *getTaskFuncAtHareParForSite(const Instruction *inst);
     //@}
 
     /// Return the task data argument of the parallel_for rountine
     //@{
-    inline const Value *getTaskDataAtHareParForSite(const CallSite cs) {
-        return getThreadAPI()->getTaskDataAtHareParForSite(cs);
-    }
-    inline const Value *getTaskDataAtHareParForSite(const Instruction *inst) {
-        return getThreadAPI()->getTaskDataAtHareParForSite(inst);
-    }
+    const Value *getTaskDataAtHareParForSite(const CallSite cs);
+    const Value *getTaskDataAtHareParForSite(const Instruction *inst);
     //@}
 };
+
+const Value *getValueByIdFromCurrentProject(SymID id);
+SymID getIdByValueFromCurrentProject(const Value *value);
+const MemObj *getMemObjByIdFromCurrentProject(SymID id);
+SymID getIdByMemObjFromCurrentProject(const MemObj *memObj);
+const Type *getTypeByIdFromCurrentProject(SymID id);
+SymID getIdByTypeFromCurrentProject(const Type *type);
 
 } // end of namespace SVF
 

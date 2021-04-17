@@ -224,9 +224,9 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
     using CPtSet = CondStdSet<CVar>;
     using PTDataTy = PTData<CVar, Set<CVar>, CVar, CPtSet>;
     using MutPTDataTy = MutablePTData<CVar, Set<CVar>, CVar, CPtSet>;
-    using PtrToBVPtsMap = Map<NodeID, PointsTo> ; /// map a pointer to
-                                                  /// its BitVector points-to
-                       /// representation
+    using PtrToBVPtsMap = Map<NodeID, PointsTo>; /// map a pointer to
+                                                 /// its BitVector points-to
+                                                 /// representation
     using PtrToNSMap = Map<NodeID, NodeBS>;
     using PtrToCPtsMap = Map<NodeID, CPtSet>; /// map a pointer to its
                                               /// conditional points-to set
@@ -496,8 +496,8 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
             return llvm::MayAlias;
         }
 
-        if (this->getAnalysisTy() == PathS_DDA &&
-            contains(cpts1, cpts2) && contains(cpts2, cpts1)) {
+        if (this->getAnalysisTy() == PathS_DDA && contains(cpts1, cpts2) &&
+            contains(cpts2, cpts1)) {
             return llvm::MustAlias;
         }
 

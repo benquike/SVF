@@ -33,6 +33,7 @@
 #define LOCATIONSET_H_
 
 #include "Util/BasicTypes.h"
+#include "Util/Serialization.h"
 
 namespace SVF {
 
@@ -238,6 +239,19 @@ class LocationSet {
     Size_t fldIdx;                      ///< offset relative to base
     Size_t byteOffset;                  ///< offset relative to base
     ElemNumStridePairVec numStridePair; ///< element number and stride pair
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &fldIdx;
+        ar &byteOffset;
+        ar &numStridePair;
+    }
+    /// @}
 };
 
 } // End namespace SVF

@@ -96,7 +96,7 @@ void AndersenBase::analyze() {
     if (!readResultsFromFile) {
         // Start solving constraints
         DBOUT(DGENERAL, outs()
-              << SVFUtil::pasMsg("Start Solving Constraints\n"));
+                            << SVFUtil::pasMsg("Start Solving Constraints\n"));
 
         initWorklist();
         do {
@@ -114,7 +114,7 @@ void AndersenBase::analyze() {
         } while (reanalyze);
 
         DBOUT(DGENERAL, outs()
-              << SVFUtil::pasMsg("Finish Solving Constraints\n"));
+                            << SVFUtil::pasMsg("Finish Solving Constraints\n"));
 
         // Finalize the analysis
         finalize();

@@ -32,6 +32,7 @@
 #define INCLUDE_UTIL_VFGEDGE_H_
 
 #include "Graphs/GenericGraph.h"
+#include "Util/Serialization.h"
 
 namespace SVF {
 
@@ -63,6 +64,8 @@ class VFGEdge : public GenericVFGEdgeTy {
   public:
     /// Constructor
     VFGEdge(VFGNode *s, VFGNode *d, GEdgeFlag k) : GenericVFGEdgeTy(s, d, k) {}
+    VFGEdge() = default;
+
     /// Destructor
     ~VFGEdge() {}
 
@@ -117,6 +120,17 @@ class VFGEdge : public GenericVFGEdgeTy {
     //@}
 
     virtual const std::string toString() const;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<GenericVFGEdgeTy>(*this);
+    }
+    /// @}
 };
 
 /*!
@@ -127,6 +141,8 @@ class DirectSVFGEdge : public VFGEdge {
   public:
     /// Constructor
     DirectSVFGEdge(VFGNode *s, VFGNode *d, GEdgeFlag k) : VFGEdge(s, d, k) {}
+    DirectSVFGEdge() = default;
+
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const DirectSVFGEdge *) { return true; }
@@ -143,6 +159,17 @@ class DirectSVFGEdge : public VFGEdge {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFGEdge>(*this);
+    }
+    /// @}
 };
 
 /*!
@@ -154,6 +181,8 @@ class IntraDirSVFGEdge : public DirectSVFGEdge {
     /// Constructor
     IntraDirSVFGEdge(VFGNode *s, VFGNode *d)
         : DirectSVFGEdge(s, d, IntraDirectVF) {}
+    IntraDirSVFGEdge() = default;
+
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const IntraDirSVFGEdge *) { return true; }
@@ -169,6 +198,17 @@ class IntraDirSVFGEdge : public DirectSVFGEdge {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<DirectSVFGEdge>(*this);
+    }
+    /// @}
 };
 
 /*!
@@ -185,6 +225,8 @@ class CallDirSVFGEdge : public DirectSVFGEdge {
     CallDirSVFGEdge(VFGNode *s, VFGNode *d, CallSiteID id)
         : DirectSVFGEdge(s, d, makeEdgeFlagWithInvokeID(CallDirVF, id)),
           csId(id) {}
+    CallDirSVFGEdge() = default;
+
     /// Return callsite ID
     inline CallSiteID getCallSiteId() const { return csId; }
 
@@ -203,6 +245,18 @@ class CallDirSVFGEdge : public DirectSVFGEdge {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<DirectSVFGEdge>(*this);
+        ar &csId;
+    }
+    /// @}
 };
 
 /*!
@@ -219,6 +273,8 @@ class RetDirSVFGEdge : public DirectSVFGEdge {
     RetDirSVFGEdge(VFGNode *s, VFGNode *d, CallSiteID id)
         : DirectSVFGEdge(s, d, makeEdgeFlagWithInvokeID(RetDirVF, id)),
           csId(id) {}
+    RetDirSVFGEdge() = default;
+
     /// Return callsite ID
     inline CallSiteID getCallSiteId() const { return csId; }
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
@@ -236,6 +292,18 @@ class RetDirSVFGEdge : public DirectSVFGEdge {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<DirectSVFGEdge>(*this);
+        ar &csId;
+    }
+    /// @}
 };
 
 } // End namespace SVF

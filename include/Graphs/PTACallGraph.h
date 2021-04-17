@@ -34,6 +34,8 @@
 #include "Graphs/ICFG.h"
 #include "SVF-FE/SVFProject.h"
 #include "Util/BasicTypes.h"
+#include "Util/Serialization.h"
+
 #include <set>
 
 namespace SVF {
@@ -58,12 +60,26 @@ class PTACallGraphEdge : public GenericCallGraphEdgeTy {
     CallInstSet indirectCalls;
     CallSiteID csId;
 
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<GenericCallGraphEdgeTy>(*this);
+        ar &directCalls;
+        ar &indirectCalls;
+        ar &csId;
+    }
+    /// @}
   public:
     /// Constructor
     PTACallGraphEdge(PTACallGraphNode *s, PTACallGraphNode *d, CEDGEK kind,
                      CallSiteID cs)
         : GenericCallGraphEdgeTy(s, d, makeEdgeFlagWithInvokeID(kind, cs)),
           csId(cs) {}
+    PTACallGraphEdge() = default;
+
     /// Destructor
     virtual ~PTACallGraphEdge() {}
     /// Compute the unique edgeFlag value from edge kind and CallSiteID.
@@ -149,10 +165,33 @@ class PTACallGraphNode : public GenericCallGraphNodeTy {
   private:
     const SVFFunction *fun;
 
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const {
+        ar &boost::serialization::base_object<GenericCallGraphNodeTy>(*this);
+        ar &getIdByValueFromCurrentProject(fun->getLLVMFun());
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<GenericCallGraphNodeTy>(*this);
+        SymID id;
+        ar &id;
+        const Value *v = getValueByIdFromCurrentProject(id);
+        SVFModule *mod = SVFProject::getCurrentProject()->getSVFModule();
+        fun = mod->getSVFFunction(llvm::dyn_cast<Function>(v));
+    }
+    /// @}
+
   public:
     /// Constructor
     PTACallGraphNode(NodeID i, const SVFFunction *f)
         : GenericCallGraphNodeTy(i, 0), fun(f) {}
+    PTACallGraphNode() = default;
 
     /// Get function of this call node
     inline const SVFFunction *getFunction() const { return fun; }
@@ -221,10 +260,53 @@ class PTACallGraph : public GenericCallGraphTy {
     /// Clean up memory
     void destroy();
 
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const {
+        ar &boost::serialization::base_object<GenericCallGraphTy>(*this);
+        ar &kind;
+        ar &indirectCallMap;
+        ar &csToIdMap;
+        ar &idToCSMap;
+        ar &totalCallSiteNum;
+
+        boost::serialization::save_map(ar, funToCallGraphNodeMap);
+
+        ar &callinstToCallGraphEdgesMap;
+        ar &callGraphNodeNum;
+        ar &numOfResolvedIndCallEdge;
+        ar &pag;
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<GenericCallGraphTy>(*this);
+        ar &kind;
+        ar &indirectCallMap;
+        ar &csToIdMap;
+        ar &idToCSMap;
+        ar &totalCallSiteNum;
+
+        boost::serialization::load_map(ar, funToCallGraphNodeMap);
+
+        ar &callinstToCallGraphEdgesMap;
+        ar &callGraphNodeNum;
+        ar &numOfResolvedIndCallEdge;
+        ar &pag;
+
+        proj = SVFProject::getCurrentProject();
+    }
+    /// @}
+
   public:
     /// Constructor
     PTACallGraph(SVFProject *proj, CGEK k = NormCallGraph);
-
+    PTACallGraph() = default;
     /// Add callgraph Node
     void addCallGraphNode(const SVFFunction *fun);
 
@@ -398,12 +480,44 @@ class PTACallGraph : public GenericCallGraphTy {
     /// Dump the graph
     void dump(const std::string &filename);
 
-    void view() override {
-        llvm::ViewGraph(this, "PTA Call Graph");
-    }
+    void view() override { llvm::ViewGraph(this, "PTA Call Graph"); }
 };
 
 } // End namespace SVF
+
+BOOST_SERIALIZATION_SPLIT_FREE(SVF::PTACallGraph::CallSitePair)
+
+/// TODO: move this to Serialization.h
+namespace boost {
+namespace serialization {
+
+template <typename Archive>
+void save(Archive &ar,
+          const std::pair<const CallBlockNode *, const SVFFunction *> &p,
+          unsigned int version) {
+
+    const SVFFunction *f = p.second;
+    SymID id = getIdByValueFromCurrentProject(f->getLLVMFun());
+    auto ps = std::make_pair(p.first, id);
+    ar &ps;
+}
+
+template <typename Archive>
+void load(Archive &ar, std::pair<const CallBlockNode *, const SVFFunction *> &p,
+          unsigned int version) {
+
+    std::pair<const CallBlockNode *, SymID> ps;
+    ar &ps;
+
+    p.first = ps.first;
+
+    const Value *v = getValueByIdFromCurrentProject(ps.second);
+    SVFModule *mod = SVFProject::getCurrentProject()->getSVFModule();
+    p.second = mod->getSVFFunction(llvm::dyn_cast<Function>(v));
+}
+
+} // namespace serialization
+} // namespace boost
 
 namespace llvm {
 /* !

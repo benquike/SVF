@@ -31,6 +31,7 @@
 #define MSSAMUCHI_H_
 
 #include "MSSA/MemRegion.h"
+#include "Util/Serialization.h"
 
 namespace SVF {
 
@@ -47,6 +48,8 @@ class MRVer {
   private:
     /// ver ID 0 is reserved
     static Size_t totalVERNum;
+    static bool static_members_serialized;
+
     const MemRegion *mr;
     MRVERSION version;
     MRVERID vid;
@@ -57,6 +60,8 @@ class MRVer {
     MRVer(const MemRegion *m, MRVERSION v, MSSADef *d)
         : mr(m), version(v), vid(totalVERNum++), def(d) {}
 
+    MRVer() = default;
+
     /// Return the memory region
     inline const MemRegion *getMR() const { return mr; }
 
@@ -65,6 +70,25 @@ class MRVer {
 
     /// Get MSSADef
     inline MSSADef *getDef() const { return def; }
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &mr;
+        ar & this->version;
+        ar &vid;
+        // ar &def;
+
+        if (!MRVer::static_members_serialized) {
+            ar &totalVERNum;
+            MRVer::static_members_serialized = true;
+        }
+    }
+    /// @}
 };
 
 /*!
@@ -259,6 +283,8 @@ class MSSADEF {
     /// Constructor/Destructer for MSSADEF
     //@{
     MSSADEF(DEFTYPE t, const MemRegion *m) : type(t), mr(m), resVer(nullptr) {}
+    MSSADEF() = default;
+
     virtual ~MSSADEF() {}
     //@}
 
@@ -288,6 +314,19 @@ class MSSADEF {
         SVFUtil::outs() << "DEF(MR_" << mr->getMRID() << "V_"
                         << resVer->getSSAVersion() << ")\n";
     }
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &type;
+        ar &mr;
+        ar &resVer;
+    }
+    /// @}
 };
 
 /*!

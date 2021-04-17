@@ -81,7 +81,6 @@ class ThreadAPI {
             if (it != tdAPIMap.end()) {
                 return it->second;
             }
-
         }
         return TD_DUMMY;
     }

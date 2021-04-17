@@ -33,6 +33,7 @@
 #include "Graphs/GenericGraph.h"
 #include "Graphs/ICFGEdge.h"
 #include "Util/SVFUtil.h"
+#include "Util/Serialization.h"
 
 namespace SVF {
 
@@ -77,6 +78,8 @@ class ICFGNode : public GenericICFGNodeTy {
     ICFGNode(NodeID i, ICFGNodeK k)
         : GenericICFGNodeTy(i, k), fun(nullptr), bb(nullptr) {}
 
+    ICFGNode() = default;
+
     /// Return the function of this ICFGNode
     virtual const SVFFunction *getFun() const { return fun; }
 
@@ -116,6 +119,53 @@ class ICFGNode : public GenericICFGNodeTy {
     const BasicBlock *bb;
     VFGNodeList VFGNodes; //< a list of VFGNodes
     PAGEdgeList pagEdges; //< a list of PAGEdges
+
+  private:
+    friend class boost::serialization::access;
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const {
+        // save parent object
+        ar &boost::serialization::base_object<GenericICFGNodeTy>(*this);
+
+        auto *llvm_fun = fun->getLLVMFun();
+        auto fun_id = getIdByValueFromCurrentProject(llvm_fun);
+        auto bb_id = getIdByValueFromCurrentProject(bb);
+
+        ar &fun_id;
+        ar &bb_id;
+        ar &VFGNodes;
+        ar &pagEdges;
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        // save parent object
+        ar &boost::serialization::base_object<GenericICFGNodeTy>(*this);
+
+        SVFProject *currProject = SVFProject::getCurrentProject();
+        assert(currProject != nullptr && "current project is null");
+        SymID fun_id;
+        SymID bb_id;
+
+        ar &fun_id;
+        ar &bb_id;
+
+        auto *fun_val = getValueByIdFromCurrentProject(fun_id);
+        auto *bb_val = getValueByIdFromCurrentProject(bb_id);
+
+        assert(llvm::isa<Function>(fun_val) && "fun_id not a Function");
+        assert(llvm::isa<BasicBlock>(bb_val) && "bb_id not a BasicBlock");
+
+        SVFModule *mod = currProject->getSVFModule();
+        fun = mod->getSVFFunction(llvm::dyn_cast<Function>(fun_val));
+        bb = llvm::dyn_cast<BasicBlock>(bb_val);
+
+        ar &VFGNodes;
+        ar &pagEdges;
+    }
 };
 
 /*!
@@ -125,7 +175,7 @@ class GlobalBlockNode : public ICFGNode {
 
   public:
     GlobalBlockNode(NodeID id) : ICFGNode(id, GlobalBlock) { bb = nullptr; }
-
+    GlobalBlockNode() = default;
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const GlobalBlockNode *) { return true; }
@@ -140,6 +190,14 @@ class GlobalBlockNode : public ICFGNode {
     //@}
 
     virtual const std::string toString() const;
+
+  private:
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<ICFGNode>(*this);
+    }
 };
 
 /*!
@@ -155,6 +213,8 @@ class IntraBlockNode : public ICFGNode {
         fun = svfMod->getLLVMModSet()->getSVFFunction(inst->getFunction());
         bb = inst->getParent();
     }
+
+    IntraBlockNode() = default;
 
     inline const Instruction *getInst() const { return inst; }
 
@@ -172,6 +232,31 @@ class IntraBlockNode : public ICFGNode {
     //@}
 
     const std::string toString() const;
+
+  private:
+    friend class boost::serialization::access;
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const {
+        ar &boost::serialization::base_object<ICFGNode>(*this);
+        auto inst_id = getIdByValueFromCurrentProject(inst);
+        ar &inst_id;
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<ICFGNode>(*this);
+
+        SymID inst_id;
+        ar &inst_id;
+
+        auto *inst_val = getValueByIdFromCurrentProject(inst_id);
+        assert(llvm::isa<Instruction>(inst_val) &&
+               "inst_id not an Instruction");
+        inst = llvm::dyn_cast<Instruction>(inst_val);
+    }
 };
 
 class InterBlockNode : public ICFGNode {
@@ -179,6 +264,7 @@ class InterBlockNode : public ICFGNode {
   public:
     /// Constructor
     InterBlockNode(NodeID id, ICFGNodeK k) : ICFGNode(id, k) {}
+    InterBlockNode() = default;
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
@@ -198,6 +284,14 @@ class InterBlockNode : public ICFGNode {
                node->getNodeKind() == FunRetBlock;
     }
     //@}
+
+  private:
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<ICFGNode>(*this);
+    }
 };
 
 /*!
@@ -214,6 +308,7 @@ class FunEntryBlockNode : public InterBlockNode {
 
   public:
     FunEntryBlockNode(NodeID id, const SVFFunction *f);
+    FunEntryBlockNode() = default;
 
     /// Return function
     inline const SVFFunction *getFun() const { return fun; }
@@ -242,6 +337,15 @@ class FunEntryBlockNode : public InterBlockNode {
     //@}
 
     const virtual std::string toString() const;
+
+  private:
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<InterBlockNode>(*this);
+        ar &FPNodes;
+    }
 };
 
 /*!
@@ -256,6 +360,7 @@ class FunExitBlockNode : public InterBlockNode {
 
   public:
     FunExitBlockNode(NodeID id, const SVFFunction *f);
+    FunExitBlockNode() = default;
 
     /// Return function
     inline const SVFFunction *getFun() const { return fun; }
@@ -284,6 +389,36 @@ class FunExitBlockNode : public InterBlockNode {
     //@}
 
     virtual const std::string toString() const;
+
+  private:
+    friend class boost::serialization::access;
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const {
+        ar &boost::serialization::base_object<InterBlockNode>(*this);
+        auto *llvm_fun = fun->getLLVMFun();
+        auto fun_id = getIdByValueFromCurrentProject(llvm_fun);
+        ar &fun_id;
+        ar &formalRet;
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<InterBlockNode>(*this);
+
+        SymID fun_id;
+        ar &fun_id;
+        const Value *fun_val = getValueByIdFromCurrentProject(fun_id);
+        assert(llvm::isa<Function>(fun_val) && "not a function");
+
+        SVFProject *currProject = SVFProject::getCurrentProject();
+        SVFModule *mod = currProject->getSVFModule();
+        fun = mod->getSVFFunction(llvm::dyn_cast<Function>(fun_val));
+
+        ar &formalRet;
+    }
 };
 
 /*!
@@ -308,6 +443,7 @@ class CallBlockNode : public InterBlockNode {
         bb = cs->getParent();
     }
 
+    CallBlockNode() = default;
     /// Return callsite
     inline const Instruction *getCallSite() const { return cs; }
 
@@ -359,6 +495,37 @@ class CallBlockNode : public InterBlockNode {
     //@}
 
     virtual const std::string toString() const;
+
+  private:
+    friend class boost::serialization::access;
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const {
+        ar &boost::serialization::base_object<InterBlockNode>(*this);
+
+        auto csId = getIdByValueFromCurrentProject(cs);
+        ar &csId;
+        ar &ret;
+        ar &APNodes;
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<InterBlockNode>(*this);
+
+        SymID csId;
+        ar &csId;
+        const auto *cs_val = getValueByIdFromCurrentProject(csId);
+        assert(llvm::isa<Instruction>(cs_val) && "Not an Instruction");
+        cs = llvm::dyn_cast<Instruction>(cs_val);
+
+        ar &ret;
+        ar &APNodes;
+
+        svfMod = SVFProject::getCurrentProject()->getSVFModule();
+    }
 };
 
 /*!
@@ -380,6 +547,7 @@ class RetBlockNode : public InterBlockNode {
         bb = cs->getParent();
     }
 
+    RetBlockNode() = default;
     /// Return callsite
     inline const Instruction *getCallSite() const { return cs; }
 
@@ -410,6 +578,37 @@ class RetBlockNode : public InterBlockNode {
     //@}
 
     virtual const std::string toString() const;
+
+  private:
+    friend class boost::serialization::access;
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const {
+        ar &boost::serialization::base_object<InterBlockNode>(*this);
+
+        auto csId = getIdByValueFromCurrentProject(cs);
+        ar &csId;
+
+        ar &actualRet;
+        ar &callBlockNode;
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<InterBlockNode>(*this);
+
+        SymID csId;
+        ar &csId;
+
+        const auto *cs_val = getValueByIdFromCurrentProject(csId);
+        assert(llvm::isa<Instruction>(cs_val) && "Not an Instruction");
+        cs = llvm::dyn_cast<Instruction>(cs_val);
+
+        ar &actualRet;
+        ar &callBlockNode;
+    }
 };
 
 } // End namespace SVF

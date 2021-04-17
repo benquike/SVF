@@ -31,6 +31,7 @@
 #define GENERICGRAPH_H_
 
 #include "Util/BasicTypes.h"
+#include "Util/Serialization.h"
 
 namespace SVF {
 
@@ -38,6 +39,16 @@ namespace SVF {
  * Generic edge on the graph as base class
  */
 template <class NodeTy> class GenericEdge {
+  private:
+    // Allow serialization to access non-public data members.
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &src;
+        ar &dst;
+        ar &edgeFlag;
+    }
 
   public:
     /// Node type
@@ -58,6 +69,9 @@ template <class NodeTy> class GenericEdge {
     /// Constructor
     GenericEdge(NodeTy *s, NodeTy *d, GEdgeFlag k)
         : src(s), dst(d), edgeFlag(k) {}
+
+    // to support serialization
+    GenericEdge() = default;
 
     /// Destructor
     virtual ~GenericEdge() {}
@@ -120,6 +134,18 @@ template <class NodeTy, class EdgeTy> class GenericNode {
     ///@}
 
   private:
+    // Allow serialization to access non-public data members.
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &id;
+        ar &nodeKind;
+        ar &InEdges;
+        ar &OutEdges;
+    }
+
+  private:
     NodeID id;       ///< Node ID
     GNodeK nodeKind; ///< Node kind
 
@@ -129,6 +155,8 @@ template <class NodeTy, class EdgeTy> class GenericNode {
   public:
     /// Constructor
     GenericNode(NodeID i, GNodeK k) : id(i), nodeKind(k) {}
+    // to support serialization
+    GenericNode() = default;
 
     /// Destructor
     virtual ~GenericNode() {}
@@ -320,6 +348,17 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
   public:
     u32_t edgeNum; ///< total num of node
     u32_t nodeNum; ///< total num of edge
+
+  private:
+    // Allow serialization to access non-public data members.
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &edgeNum;
+        ar &nodeNum;
+        ar &IDToNodeMap;
+    }
 };
 
 } // End namespace SVF

@@ -33,6 +33,7 @@
 #include "Graphs/ICFG.h"
 #include "Graphs/PTACallGraph.h"
 #include "MemoryModel/PointerAnalysisImpl.h"
+#include "Util/Serialization.h"
 #include "Util/WorkList.h"
 
 #include <set>
@@ -52,12 +53,30 @@ class MemRegion {
   private:
     /// region ID 0 is reserved
     static Size_t totalMRNum;
+    static bool static_members_serialized;
     MRID rid;
     const PointsTo cptsSet;
 
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &rid;
+        // ar &cptsSet;
+
+        if (!MemRegion::static_members_serialized) {
+            ar &totalMRNum;
+            MemRegion::static_members_serialized = true;
+        }
+    }
+    /// @}
   public:
     /// Constructor
     MemRegion(const PointsTo &cp) : rid(++totalMRNum), cptsSet(cp) {}
+    MemRegion() = default;
+
     /// Destructor
     ~MemRegion() {}
 

@@ -33,6 +33,7 @@
 #include "Graphs/GenericGraph.h"
 #include "Graphs/ICFGNode.h"
 #include "MemoryModel/LocationSet.h"
+#include "Util/Serialization.h"
 
 namespace SVF {
 
@@ -76,6 +77,8 @@ class PAGEdge : public GenericPAGEdgeTy {
 
     /// Constructor
     PAGEdge(PAGNode *s, PAGNode *d, PAG *pag, GEdgeFlag k);
+    PAGEdge() = default;
+
     /// Destructor
     ~PAGEdge() {}
 
@@ -157,6 +160,57 @@ class PAGEdge : public GenericPAGEdgeTy {
     static Inst2LabelMap inst2LabelMap; ///< Call site Instruction to label map
     static u64_t callEdgeLabelCounter;  ///< Call site Instruction counter
     static u64_t storeEdgeLabelCounter; ///< Store Instruction counter
+
+    static bool static_members_serialized;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const {
+        ar &boost::serialization::base_object<GenericPAGEdgeTy>(*this);
+
+        ar &getIdByValueFromCurrentProject(value);
+        ar &getIdByValueFromCurrentProject(basicBlock);
+        ar &icfgNode;
+        ar &edgeId;
+
+        if (!static_members_serialized) {
+            ar &totalEdgeNum;
+            ar &inst2LabelMap;
+            ar &callEdgeLabelCounter;
+            ar &storeEdgeLabelCounter;
+            static_members_serialized = true;
+        }
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<GenericPAGEdgeTy>(*this);
+
+        SymID id;
+        ar &id;
+        value = getValueByIdFromCurrentProject(id);
+
+        ar &id;
+        basicBlock =
+            llvm::dyn_cast<BasicBlock>(getValueByIdFromCurrentProject(id));
+
+        ar &icfgNode;
+        ar &edgeId;
+
+        if (!static_members_serialized) {
+            ar &totalEdgeNum;
+            ar &inst2LabelMap;
+            ar &callEdgeLabelCounter;
+            ar &storeEdgeLabelCounter;
+            static_members_serialized = true;
+        }
+    }
+    /// @}
 };
 
 /*!
@@ -164,7 +218,7 @@ class PAGEdge : public GenericPAGEdgeTy {
  */
 class AddrPE : public PAGEdge {
   private:
-    AddrPE();                       ///< place holder
+    AddrPE() = default;             ///< place holder
     AddrPE(const AddrPE &);         ///< place holder
     void operator=(const AddrPE &); ///< place holder
   public:
@@ -184,6 +238,17 @@ class AddrPE : public PAGEdge {
         : PAGEdge(s, d, pag, PAGEdge::Addr) {}
 
     virtual const std::string toString() const;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<PAGEdge>(*this);
+    }
+    /// @}
 };
 
 /*!
@@ -191,7 +256,7 @@ class AddrPE : public PAGEdge {
  */
 class CopyPE : public PAGEdge {
   private:
-    CopyPE();                       ///< place holder
+    CopyPE() = default;             ///< place holder
     CopyPE(const CopyPE &);         ///< place holder
     void operator=(const CopyPE &); ///< place holder
   public:
@@ -211,6 +276,17 @@ class CopyPE : public PAGEdge {
         : PAGEdge(s, d, pag, PAGEdge::Copy) {}
 
     virtual const std::string toString() const;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<PAGEdge>(*this);
+    }
+    /// @}
 };
 
 /*!
@@ -218,7 +294,7 @@ class CopyPE : public PAGEdge {
  */
 class CmpPE : public PAGEdge {
   private:
-    CmpPE();                       ///< place holder
+    CmpPE() = default;             ///< place holder
     CmpPE(const CmpPE &);          ///< place holder
     void operator=(const CmpPE &); ///< place holder
   public:
@@ -238,6 +314,17 @@ class CmpPE : public PAGEdge {
         : PAGEdge(s, d, pag, PAGEdge::Cmp) {}
 
     virtual const std::string toString() const;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<PAGEdge>(*this);
+    }
+    /// @}
 };
 
 /*!
@@ -245,7 +332,6 @@ class CmpPE : public PAGEdge {
  */
 class BinaryOPPE : public PAGEdge {
   private:
-    BinaryOPPE();                       ///< place holder
     BinaryOPPE(const BinaryOPPE &);     ///< place holder
     void operator=(const BinaryOPPE &); ///< place holder
   public:
@@ -263,8 +349,20 @@ class BinaryOPPE : public PAGEdge {
     /// constructor
     BinaryOPPE(PAGNode *s, PAGNode *d, PAG *pag)
         : PAGEdge(s, d, pag, PAGEdge::BinaryOp) {}
+    BinaryOPPE() = default;
 
     virtual const std::string toString() const;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<PAGEdge>(*this);
+    }
+    /// @}
 };
 
 /*!
@@ -272,7 +370,7 @@ class BinaryOPPE : public PAGEdge {
  */
 class UnaryOPPE : public PAGEdge {
   private:
-    UnaryOPPE();                       ///< place holder
+    UnaryOPPE() = default;             ///< place holder
     UnaryOPPE(const UnaryOPPE &);      ///< place holder
     void operator=(const UnaryOPPE &); ///< place holder
   public:
@@ -292,6 +390,17 @@ class UnaryOPPE : public PAGEdge {
         : PAGEdge(s, d, pag, PAGEdge::UnaryOp) {}
 
     virtual const std::string toString() const;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<PAGEdge>(*this);
+    }
+    /// @}
 };
 
 /*!
@@ -299,7 +408,7 @@ class UnaryOPPE : public PAGEdge {
  */
 class StorePE : public PAGEdge {
   private:
-    StorePE();                       ///< place holder
+    StorePE() = default;             ///< place holder
     StorePE(const StorePE &);        ///< place holder
     void operator=(const StorePE &); ///< place holder
 
@@ -320,6 +429,17 @@ class StorePE : public PAGEdge {
         : PAGEdge(s, d, pag, makeEdgeFlagWithStoreInst(PAGEdge::Store, st)) {}
 
     virtual const std::string toString() const;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<PAGEdge>(*this);
+    }
+    /// @}
 };
 
 /*!
@@ -327,7 +447,7 @@ class StorePE : public PAGEdge {
  */
 class LoadPE : public PAGEdge {
   private:
-    LoadPE();                       ///< place holder
+    LoadPE() = default;             ///< place holder
     LoadPE(const LoadPE &);         ///< place holder
     void operator=(const LoadPE &); ///< place holder
 
@@ -348,6 +468,17 @@ class LoadPE : public PAGEdge {
         : PAGEdge(s, d, pag, PAGEdge::Load) {}
 
     virtual const std::string toString() const;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<PAGEdge>(*this);
+    }
+    /// @}
 };
 
 /*!
@@ -355,7 +486,6 @@ class LoadPE : public PAGEdge {
  */
 class GepPE : public PAGEdge {
   private:
-    GepPE();                       ///< place holder
     GepPE(const GepPE &);          ///< place holder
     void operator=(const GepPE &); ///< place holder
 
@@ -376,8 +506,19 @@ class GepPE : public PAGEdge {
   protected:
     /// constructor
     GepPE(PAGNode *s, PAGNode *d, PAG *pag, PEDGEK k) : PAGEdge(s, d, pag, k) {}
-
+    GepPE() = default;
     virtual const std::string toString() const;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<PAGEdge>(*this);
+    }
+    /// @}
 };
 
 /*!
@@ -385,7 +526,6 @@ class GepPE : public PAGEdge {
  */
 class NormalGepPE : public GepPE {
   private:
-    NormalGepPE();                       ///< place holder
     NormalGepPE(const NormalGepPE &);    ///< place holder
     void operator=(const NormalGepPE &); ///< place holder
 
@@ -407,6 +547,7 @@ class NormalGepPE : public GepPE {
     //@}
 
     /// constructor
+    NormalGepPE() = default;
     NormalGepPE(PAGNode *s, PAGNode *d, PAG *pag, const LocationSet &l)
         : GepPE(s, d, pag, PAGEdge::NormalGep), ls(l) {}
 
@@ -415,6 +556,18 @@ class NormalGepPE : public GepPE {
     inline const LocationSet &getLocationSet() const { return ls; }
 
     virtual const std::string toString() const;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<GepPE>(*this);
+        ar &ls;
+    }
+    /// @}
 };
 
 /*!
@@ -422,7 +575,6 @@ class NormalGepPE : public GepPE {
  */
 class VariantGepPE : public GepPE {
   private:
-    VariantGepPE();                       ///< place holder
     VariantGepPE(const VariantGepPE &);   ///< place holder
     void operator=(const VariantGepPE &); ///< place holder
 
@@ -444,8 +596,19 @@ class VariantGepPE : public GepPE {
     /// constructor
     VariantGepPE(PAGNode *s, PAGNode *d, PAG *pag)
         : GepPE(s, d, pag, PAGEdge::VariantGep) {}
-
+    VariantGepPE() = default;
     virtual const std::string toString() const;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<GepPE>(*this);
+    }
+    /// @}
 };
 
 /*!
@@ -453,7 +616,6 @@ class VariantGepPE : public GepPE {
  */
 class CallPE : public PAGEdge {
   private:
-    CallPE();                       ///< place holder
     CallPE(const CallPE &);         ///< place holder
     void operator=(const CallPE &); ///< place holder
 
@@ -473,6 +635,7 @@ class CallPE : public PAGEdge {
     //@}
 
     /// constructor
+    CallPE() = default;
     CallPE(PAGNode *s, PAGNode *d, PAG *pag, const CallBlockNode *i,
            GEdgeKind k = PAGEdge::Call)
         : PAGEdge(s, d, pag, makeEdgeFlagWithCallInst(k, i)), inst(i) {}
@@ -484,6 +647,18 @@ class CallPE : public PAGEdge {
     //@}
 
     virtual const std::string toString() const;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<PAGEdge>(*this);
+        ar &inst;
+    }
+    /// @}
 };
 
 /*!
@@ -491,7 +666,6 @@ class CallPE : public PAGEdge {
  */
 class RetPE : public PAGEdge {
   private:
-    RetPE();                       ///< place holder
     RetPE(const RetPE &);          ///< place holder
     void operator=(const RetPE &); ///< place holder
 
@@ -511,6 +685,7 @@ class RetPE : public PAGEdge {
     //@}
 
     /// constructor
+    RetPE() = default;
     RetPE(PAGNode *s, PAGNode *d, PAG *pag, const CallBlockNode *i,
           GEdgeKind k = PAGEdge::Ret)
         : PAGEdge(s, d, pag, makeEdgeFlagWithCallInst(k, i)), inst(i) {}
@@ -522,6 +697,18 @@ class RetPE : public PAGEdge {
     //@}
 
     virtual const std::string toString() const;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<PAGEdge>(*this);
+        ar &inst;
+    }
+    /// @}
 };
 
 /*!
@@ -529,7 +716,6 @@ class RetPE : public PAGEdge {
  */
 class TDForkPE : public CallPE {
   private:
-    TDForkPE();                       ///< place holder
     TDForkPE(const TDForkPE &);       ///< place holder
     void operator=(const TDForkPE &); ///< place holder
 
@@ -546,10 +732,22 @@ class TDForkPE : public CallPE {
     //@}
 
     /// constructor
+    TDForkPE() = default;
     TDForkPE(PAGNode *s, PAGNode *d, PAG *pag, const CallBlockNode *i)
         : CallPE(s, d, pag, i, PAGEdge::ThreadFork) {}
 
     virtual const std::string toString() const;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<CallPE>(*this);
+    }
+    /// @}
 };
 
 /*!
@@ -557,7 +755,6 @@ class TDForkPE : public CallPE {
  */
 class TDJoinPE : public RetPE {
   private:
-    TDJoinPE();                       ///< place holder
     TDJoinPE(const TDJoinPE &);       ///< place holder
     void operator=(const TDJoinPE &); ///< place holder
 
@@ -574,10 +771,22 @@ class TDJoinPE : public RetPE {
     //@}
 
     /// Constructor
+    TDJoinPE() = default;
     TDJoinPE(PAGNode *s, PAGNode *d, PAG *pag, const CallBlockNode *i)
         : RetPE(s, d, pag, i, PAGEdge::ThreadJoin) {}
 
     virtual const std::string toString() const;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<RetPE>(*this);
+    }
+    /// @}
 };
 
 } // End namespace SVF

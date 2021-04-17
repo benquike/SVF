@@ -33,6 +33,7 @@
 
 #include "Graphs/VFGEdge.h"
 #include "MSSA/MemSSA.h"
+#include "Util/Serialization.h"
 
 namespace SVF {
 
@@ -52,6 +53,8 @@ class IndirectSVFGEdge : public VFGEdge {
   public:
     /// Constructor
     IndirectSVFGEdge(VFGNode *s, VFGNode *d, GEdgeFlag k) : VFGEdge(s, d, k) {}
+    IndirectSVFGEdge() = default;
+
     /// Handle memory region
     //@{
     inline bool addPointsTo(const PointsTo &c) { return (cpts |= c); }
@@ -83,6 +86,19 @@ class IndirectSVFGEdge : public VFGEdge {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFGEdge>(*this);
+        // ar &mrs;
+        ar &cpts;
+    }
+    /// @}
 };
 
 /*!
@@ -93,6 +109,8 @@ class IntraIndSVFGEdge : public IndirectSVFGEdge {
   public:
     IntraIndSVFGEdge(VFGNode *s, VFGNode *d)
         : IndirectSVFGEdge(s, d, IntraIndirectVF) {}
+    IntraIndSVFGEdge() = default;
+
     //@{ Methods for support type inquiry through isa, cast, and dyn_cast:
     static inline bool classof(const IntraIndSVFGEdge *) { return true; }
     static inline bool classof(const IndirectSVFGEdge *edge) {
@@ -107,6 +125,17 @@ class IntraIndSVFGEdge : public IndirectSVFGEdge {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<IndirectSVFGEdge>(*this);
+    }
+    /// @}
 };
 
 /*!
@@ -122,6 +151,8 @@ class CallIndSVFGEdge : public IndirectSVFGEdge {
     CallIndSVFGEdge(VFGNode *s, VFGNode *d, CallSiteID id)
         : IndirectSVFGEdge(s, d, makeEdgeFlagWithInvokeID(CallIndVF, id)),
           csId(id) {}
+    CallIndSVFGEdge() = default;
+
     inline CallSiteID getCallSiteId() const { return csId; }
     //@{ Methods for support type inquiry through isa, cast, and dyn_cast:
     static inline bool classof(const CallIndSVFGEdge *) { return true; }
@@ -137,6 +168,18 @@ class CallIndSVFGEdge : public IndirectSVFGEdge {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<IndirectSVFGEdge>(*this);
+        ar &csId;
+    }
+    /// @}
 };
 
 /*!
@@ -152,6 +195,8 @@ class RetIndSVFGEdge : public IndirectSVFGEdge {
     RetIndSVFGEdge(VFGNode *s, VFGNode *d, CallSiteID id)
         : IndirectSVFGEdge(s, d, makeEdgeFlagWithInvokeID(RetIndVF, id)),
           csId(id) {}
+    RetIndSVFGEdge() = default;
+
     inline CallSiteID getCallSiteId() const { return csId; }
     //@{ Methods for support type inquiry through isa, cast, and dyn_cast:
     static inline bool classof(const RetIndSVFGEdge *) { return true; }
@@ -167,6 +212,18 @@ class RetIndSVFGEdge : public IndirectSVFGEdge {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<IndirectSVFGEdge>(*this);
+        ar &csId;
+    }
+    /// @}
 };
 
 /*!
@@ -178,6 +235,8 @@ class ThreadMHPIndSVFGEdge : public IndirectSVFGEdge {
   public:
     ThreadMHPIndSVFGEdge(VFGNode *s, VFGNode *d)
         : IndirectSVFGEdge(s, d, TheadMHPIndirectVF) {}
+    ThreadMHPIndSVFGEdge() = default;
+
     //@{ Methods for support type inquiry through isa, cast, and dyn_cast:
     static inline bool classof(const ThreadMHPIndSVFGEdge *) { return true; }
     static inline bool classof(const IndirectSVFGEdge *edge) {
@@ -192,6 +251,17 @@ class ThreadMHPIndSVFGEdge : public IndirectSVFGEdge {
     //@}
 
     const std::string toString() const override;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<IndirectSVFGEdge>(*this);
+    }
+    /// @}
 };
 
 } // End namespace SVF

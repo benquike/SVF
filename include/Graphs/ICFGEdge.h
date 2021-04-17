@@ -31,6 +31,8 @@
 #define ICFGEdge_H_
 
 #include "Graphs/GenericGraph.h"
+#include "Util/Serialization.h"
+
 namespace SVF {
 
 class ICFGNode;
@@ -58,6 +60,9 @@ class ICFGEdge : public GenericICFGEdgeTy {
     /// Constructor
     ICFGEdge(ICFGNode *s, ICFGNode *d, GEdgeFlag k)
         : GenericICFGEdgeTy(s, d, k) {}
+
+    ICFGEdge() = default;
+
     /// Destructor
     ~ICFGEdge() {}
 
@@ -88,6 +93,17 @@ class ICFGEdge : public GenericICFGEdgeTy {
     //@}
 
     virtual const std::string toString() const;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<GenericICFGEdgeTy>(*this);
+    }
+    /// @}
 };
 
 /*!
@@ -107,6 +123,7 @@ class IntraCFGEdge : public ICFGEdge {
 
     /// Constructor
     IntraCFGEdge(ICFGNode *s, ICFGNode *d) : ICFGEdge(s, d, IntraCF) {}
+    IntraCFGEdge() = default;
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const IntraCFGEdge *) { return true; }
@@ -130,6 +147,24 @@ class IntraCFGEdge : public ICFGEdge {
 
   private:
     BranchCondition brCondition;
+
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const {
+        ar &boost::serialization::base_object<ICFGEdge>(*this);
+        boost::serialization::save_pair(ar, brCondition);
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<ICFGEdge>(*this);
+        boost::serialization::load_pair(ar, brCondition);
+    }
+    /// @}
 };
 
 /*!
@@ -145,6 +180,8 @@ class CallCFGEdge : public ICFGEdge {
     /// Constructor
     CallCFGEdge(ICFGNode *s, ICFGNode *d, const Instruction *c)
         : ICFGEdge(s, d, CallCF), cs(c) {}
+    CallCFGEdge() = default;
+
     /// Return callsite ID
     inline const Instruction *getCallSite() const { return cs; }
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
@@ -158,6 +195,30 @@ class CallCFGEdge : public ICFGEdge {
     }
     //@}
     virtual const std::string toString() const;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const {
+        ar &boost::serialization::base_object<ICFGEdge>(*this);
+        ar &getIdByValueFromCurrentProject(cs);
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<ICFGEdge>(*this);
+
+        SymID csId;
+        ar &csId;
+
+        const auto *csVal = getValueByIdFromCurrentProject(csId);
+        cs = llvm::dyn_cast<Instruction>(csVal);
+    }
+    /// @}
 };
 
 /*!
@@ -173,6 +234,8 @@ class RetCFGEdge : public ICFGEdge {
     /// Constructor
     RetCFGEdge(ICFGNode *s, ICFGNode *d, const Instruction *c)
         : ICFGEdge(s, d, RetCF), cs(c) {}
+    RetCFGEdge() = default;
+
     /// Return callsite ID
     inline const Instruction *getCallSite() const { return cs; }
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
@@ -186,6 +249,30 @@ class RetCFGEdge : public ICFGEdge {
     }
     //@}
     virtual const std::string toString() const;
+
+  private:
+    /// support for serialization
+    /// @{
+    friend class boost::serialization::access;
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+    template <typename Archive>
+    void save(Archive &ar, const unsigned int version) const {
+        ar &boost::serialization::base_object<ICFGEdge>(*this);
+        ar &getIdByValueFromCurrentProject(cs);
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<ICFGEdge>(*this);
+
+        SymID csId;
+        ar &csId;
+
+        const auto *csVal = getValueByIdFromCurrentProject(csId);
+        cs = llvm::dyn_cast<Instruction>(csVal);
+    }
+    /// @}
 };
 
 } // End namespace SVF
