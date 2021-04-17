@@ -57,6 +57,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # add -std=gnu++17
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+
+find_package(Boost 1.50.0 REQUIRED
+    COMPONENTS program_options system filesystem serialization)
+
+message(STATUS "Found Boost version: ${Boost_VERSION}")
+message(STATUS "Boost include dir: ${Boost_INCLUDE_DIR}")
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
+
 # setup clang-tidy
 # not enable for the moment
 # set(CMAKE_CXX_CLANG_TIDY
