@@ -130,12 +130,21 @@ class ICFGNode : public GenericICFGNodeTy {
         // save parent object
         ar &boost::serialization::base_object<GenericICFGNodeTy>(*this);
 
-        auto *llvm_fun = fun->getLLVMFun();
-        auto fun_id = getIdByValueFromCurrentProject(llvm_fun);
-        auto bb_id = getIdByValueFromCurrentProject(bb);
+        if (fun != nullptr) {
+            auto *llvm_fun = fun->getLLVMFun();
+            auto fun_id = getIdByValueFromCurrentProject(llvm_fun);
+            ar &fun_id;
+        } else {
+            ar &numeric_limits<SymID>::max();
+        }
 
-        ar &fun_id;
-        ar &bb_id;
+        if (bb != nullptr) {
+            auto bb_id = getIdByValueFromCurrentProject(bb);
+            ar &bb_id;
+        } else {
+            ar &numeric_limits<SymID>::max();
+        }
+
         ar &VFGNodes;
         ar &pagEdges;
     }
@@ -153,15 +162,18 @@ class ICFGNode : public GenericICFGNodeTy {
         ar &fun_id;
         ar &bb_id;
 
-        auto *fun_val = getValueByIdFromCurrentProject(fun_id);
-        auto *bb_val = getValueByIdFromCurrentProject(bb_id);
+        if (fun_id < numeric_limits<SymID>::max()) {
+            SVFModule *mod = currProject->getSVFModule();
+            auto *fun_val = getValueByIdFromCurrentProject(fun_id);
+            assert(llvm::isa<Function>(fun_val) && "fun_id not a Function");
+            fun = mod->getSVFFunction(llvm::dyn_cast<Function>(fun_val));
+        }
 
-        assert(llvm::isa<Function>(fun_val) && "fun_id not a Function");
-        assert(llvm::isa<BasicBlock>(bb_val) && "bb_id not a BasicBlock");
-
-        SVFModule *mod = currProject->getSVFModule();
-        fun = mod->getSVFFunction(llvm::dyn_cast<Function>(fun_val));
-        bb = llvm::dyn_cast<BasicBlock>(bb_val);
+        if (bb_id < numeric_limits<SymID>::max()) {
+            auto *bb_val = getValueByIdFromCurrentProject(bb_id);
+            assert(llvm::isa<BasicBlock>(bb_val) && "bb_id not a BasicBlock");
+            bb = llvm::dyn_cast<BasicBlock>(bb_val);
+        }
 
         ar &VFGNodes;
         ar &pagEdges;
