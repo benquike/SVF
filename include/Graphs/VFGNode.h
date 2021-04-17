@@ -197,13 +197,14 @@ class StmtVFGNode : public VFGNode {
  */
 class LoadVFGNode : public StmtVFGNode {
   private:
-    LoadVFGNode() = default;             ///< place holder
     LoadVFGNode(const LoadVFGNode &);    ///< place holder
     void operator=(const LoadVFGNode &); ///< place holder
 
   public:
     /// Constructor
     LoadVFGNode(NodeID id, const LoadPE *edge) : StmtVFGNode(id, edge, Load) {}
+    LoadVFGNode() = default;
+
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const LoadVFGNode *) { return true; }
@@ -237,7 +238,6 @@ class LoadVFGNode : public StmtVFGNode {
  */
 class StoreVFGNode : public StmtVFGNode {
   private:
-    StoreVFGNode() = default;             ///< place holder
     StoreVFGNode(const StoreVFGNode &);   ///< place holder
     void operator=(const StoreVFGNode &); ///< place holder
 
@@ -245,6 +245,8 @@ class StoreVFGNode : public StmtVFGNode {
     /// Constructor
     StoreVFGNode(NodeID id, const StorePE *edge)
         : StmtVFGNode(id, edge, Store) {}
+    StoreVFGNode() = default;
+
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const StoreVFGNode *) { return true; }
@@ -278,13 +280,13 @@ class StoreVFGNode : public StmtVFGNode {
  */
 class CopyVFGNode : public StmtVFGNode {
   private:
-    CopyVFGNode() = default;             ///< place holder
     CopyVFGNode(const CopyVFGNode &);    ///< place holder
     void operator=(const CopyVFGNode &); ///< place holder
 
   public:
     /// Constructor
     CopyVFGNode(NodeID id, const CopyPE *copy) : StmtVFGNode(id, copy, Copy) {}
+    CopyVFGNode() = default;
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const CopyVFGNode *) { return true; }
@@ -326,7 +328,6 @@ class CmpVFGNode : public VFGNode {
     OPVers opVers;
 
   private:
-    CmpVFGNode() = default;             ///< place holder
     CmpVFGNode(const CmpVFGNode &);     ///< place holder
     void operator=(const CmpVFGNode &); ///< place holder
 
@@ -336,6 +337,8 @@ class CmpVFGNode : public VFGNode {
         const auto *cmp = SVFUtil::dyn_cast<CmpInst>(r->getValue());
         assert(cmp && "not a binary operator?");
     }
+    CmpVFGNode() = default;
+
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const CmpVFGNode *) { return true; }
@@ -387,7 +390,6 @@ class BinaryOPVFGNode : public VFGNode {
     OPVers opVers;
 
   private:
-    BinaryOPVFGNode() = default;              ///< place holder
     BinaryOPVFGNode(const BinaryOPVFGNode &); ///< place holder
     void operator=(const BinaryOPVFGNode &);  ///< place holder
 
@@ -398,6 +400,8 @@ class BinaryOPVFGNode : public VFGNode {
         const auto *binary = SVFUtil::dyn_cast<BinaryOperator>(r->getValue());
         assert(binary && "not a binary operator?");
     }
+    BinaryOPVFGNode() = default;
+
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const BinaryOPVFGNode *) { return true; }
@@ -450,7 +454,6 @@ class UnaryOPVFGNode : public VFGNode {
     OPVers opVers;
 
   private:
-    UnaryOPVFGNode() = default;             ///< place holder
     UnaryOPVFGNode(const UnaryOPVFGNode &); ///< place holder
     void operator=(const UnaryOPVFGNode &); ///< place holder
 
@@ -463,6 +466,8 @@ class UnaryOPVFGNode : public VFGNode {
              SVFUtil::isa<BranchInst>(val) || SVFUtil::isa<SwitchInst>(val));
         assert(unop && "not a unary operator or a BranchInst or a SwitchInst?");
     }
+    UnaryOPVFGNode() = default;
+
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const UnaryOPVFGNode *) { return true; }
@@ -508,13 +513,14 @@ class UnaryOPVFGNode : public VFGNode {
  */
 class GepVFGNode : public StmtVFGNode {
   private:
-    GepVFGNode() = default;             ///< place holder
     GepVFGNode(const GepVFGNode &);     ///< place holder
     void operator=(const GepVFGNode &); ///< place holder
 
   public:
     /// Constructor
     GepVFGNode(NodeID id, const GepPE *edge) : StmtVFGNode(id, edge, Gep) {}
+    GepVFGNode() = default;
+
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const GepVFGNode *) { return true; }

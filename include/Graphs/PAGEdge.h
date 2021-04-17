@@ -218,7 +218,6 @@ class PAGEdge : public GenericPAGEdgeTy {
  */
 class AddrPE : public PAGEdge {
   private:
-    AddrPE() = default;             ///< place holder
     AddrPE(const AddrPE &);         ///< place holder
     void operator=(const AddrPE &); ///< place holder
   public:
@@ -236,6 +235,7 @@ class AddrPE : public PAGEdge {
     /// constructor
     AddrPE(PAGNode *s, PAGNode *d, PAG *pag)
         : PAGEdge(s, d, pag, PAGEdge::Addr) {}
+    AddrPE() = default;
 
     virtual const std::string toString() const;
 
@@ -256,7 +256,6 @@ class AddrPE : public PAGEdge {
  */
 class CopyPE : public PAGEdge {
   private:
-    CopyPE() = default;             ///< place holder
     CopyPE(const CopyPE &);         ///< place holder
     void operator=(const CopyPE &); ///< place holder
   public:
@@ -274,6 +273,7 @@ class CopyPE : public PAGEdge {
     /// constructor
     CopyPE(PAGNode *s, PAGNode *d, PAG *pag)
         : PAGEdge(s, d, pag, PAGEdge::Copy) {}
+    CopyPE() = default;
 
     virtual const std::string toString() const;
 
@@ -294,7 +294,6 @@ class CopyPE : public PAGEdge {
  */
 class CmpPE : public PAGEdge {
   private:
-    CmpPE() = default;             ///< place holder
     CmpPE(const CmpPE &);          ///< place holder
     void operator=(const CmpPE &); ///< place holder
   public:
@@ -312,6 +311,7 @@ class CmpPE : public PAGEdge {
     /// constructor
     CmpPE(PAGNode *s, PAGNode *d, PAG *pag)
         : PAGEdge(s, d, pag, PAGEdge::Cmp) {}
+    CmpPE() = default;
 
     virtual const std::string toString() const;
 
@@ -370,7 +370,6 @@ class BinaryOPPE : public PAGEdge {
  */
 class UnaryOPPE : public PAGEdge {
   private:
-    UnaryOPPE() = default;             ///< place holder
     UnaryOPPE(const UnaryOPPE &);      ///< place holder
     void operator=(const UnaryOPPE &); ///< place holder
   public:
@@ -388,6 +387,7 @@ class UnaryOPPE : public PAGEdge {
     /// constructor
     UnaryOPPE(PAGNode *s, PAGNode *d, PAG *pag)
         : PAGEdge(s, d, pag, PAGEdge::UnaryOp) {}
+    UnaryOPPE() = default;
 
     virtual const std::string toString() const;
 
@@ -408,7 +408,6 @@ class UnaryOPPE : public PAGEdge {
  */
 class StorePE : public PAGEdge {
   private:
-    StorePE() = default;             ///< place holder
     StorePE(const StorePE &);        ///< place holder
     void operator=(const StorePE &); ///< place holder
 
@@ -427,6 +426,8 @@ class StorePE : public PAGEdge {
     /// constructor
     StorePE(PAGNode *s, PAGNode *d, PAG *pag, const IntraBlockNode *st)
         : PAGEdge(s, d, pag, makeEdgeFlagWithStoreInst(PAGEdge::Store, st)) {}
+
+    StorePE() = default;
 
     virtual const std::string toString() const;
 
@@ -447,7 +448,6 @@ class StorePE : public PAGEdge {
  */
 class LoadPE : public PAGEdge {
   private:
-    LoadPE() = default;             ///< place holder
     LoadPE(const LoadPE &);         ///< place holder
     void operator=(const LoadPE &); ///< place holder
 
@@ -466,6 +466,7 @@ class LoadPE : public PAGEdge {
     /// constructor
     LoadPE(PAGNode *s, PAGNode *d, PAG *pag)
         : PAGEdge(s, d, pag, PAGEdge::Load) {}
+    LoadPE() = default;
 
     virtual const std::string toString() const;
 
