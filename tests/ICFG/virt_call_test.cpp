@@ -15,7 +15,7 @@ void dispatch(Base *b) {
 }
 
 int main() {
-    Base b;;
+    Base b;
     dispatch(&b);
     Child c;
     dispatch(&c);
