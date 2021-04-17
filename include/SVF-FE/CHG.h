@@ -174,7 +174,7 @@ class CHGraph : public CommonCHGraph, public GenericCHGraphTy {
     void getVFnsFromVtbls(CallSite cs, const VTableSet &vtbls,
                           VFunSet &virtualFunctions) override;
     void dump(const std::string &filename);
-    void view();
+    void view() override;
     void printCH();
 
     inline s32_t getVirtualFunctionID(const SVFFunction *vfn) const {
