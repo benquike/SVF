@@ -24,6 +24,8 @@
 #include <memory>
 #include <string>
 
+#include "SVF-FE/SymbolTableInfo.h"
+#include "Util/SVFModule.h"
 #include "SVF-FE/SVFProject.h"
 #include "config.h"
 #include "gtest/gtest.h"
