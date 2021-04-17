@@ -103,9 +103,9 @@ class SVFG : public VFG {
     CallSiteToActualOUTsMapTy callSiteToActualOUTMap;
     FunctionToFormalINsMapTy funToFormalINMap;
     FunctionToFormalOUTsMapTy funToFormalOUTMap;
-    SVFGStat *stat;
-    MemSSA *mssa;
-    PointerAnalysis *pta;
+    SVFGStat *stat = nullptr;
+    MemSSA *mssa = nullptr;
+    PointerAnalysis *pta = nullptr;
 
     /// Clean up memory
     void destroy();

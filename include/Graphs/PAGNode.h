@@ -77,7 +77,7 @@ class PAGNode : public GenericPAGNodeTy {
     };
 
   protected:
-    const Value *value; ///< value of this PAG node
+    const Value *value = nullptr; ///< value of this PAG node
     PAGEdge::PAGKindToEdgeSetMapTy InEdgeKindToSetMap;
     PAGEdge::PAGKindToEdgeSetMapTy OutEdgeKindToSetMap;
     bool isTLPointer; /// top-level pointer
@@ -351,7 +351,7 @@ class ValPN : public PAGNode {
 class ObjPN : public PAGNode {
 
   protected:
-    const MemObj *mem; ///< memory object
+    const MemObj *mem = nullptr; ///< memory object
     /// Constructor
     ObjPN(const Value *val, NodeID i, const MemObj *m, PNODEK ty = ObjNode)
         : PAGNode(val, i, ty), mem(m) {}
@@ -427,7 +427,7 @@ class GepValPN : public ValPN {
 
   private:
     LocationSet ls; // LocationSet
-    const Type *gepValType;
+    const Type *gepValType = nullptr;
     u32_t fieldIdx;
 
   public:
@@ -503,7 +503,7 @@ class GepObjPN : public ObjPN {
   private:
     LocationSet ls;
     NodeID base = 0;
-    SymbolTableInfo *symbolTableInfo;
+    SymbolTableInfo *symbolTableInfo = nullptr;
 
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:

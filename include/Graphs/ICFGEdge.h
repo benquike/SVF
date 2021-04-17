@@ -174,7 +174,7 @@ class IntraCFGEdge : public ICFGEdge {
 class CallCFGEdge : public ICFGEdge {
 
   private:
-    const Instruction *cs;
+    const Instruction *cs = nullptr;
 
   public:
     /// Constructor
@@ -228,7 +228,7 @@ class CallCFGEdge : public ICFGEdge {
 class RetCFGEdge : public ICFGEdge {
 
   private:
-    const Instruction *cs;
+    const Instruction *cs = nullptr;
 
   public:
     /// Constructor

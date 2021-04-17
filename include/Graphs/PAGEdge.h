@@ -68,10 +68,10 @@ class PAGEdge : public GenericPAGEdgeTy {
     };
 
   private:
-    const Value *value;           ///< LLVM value
-    const BasicBlock *basicBlock; ///< LLVM BasicBlock
-    ICFGNode *icfgNode;           ///< ICFGNode
-    EdgeID edgeId;                ///< Edge ID
+    const Value *value = nullptr;           ///< LLVM value
+    const BasicBlock *basicBlock = nullptr; ///< LLVM BasicBlock
+    ICFGNode *icfgNode = nullptr;           ///< ICFGNode
+    EdgeID edgeId;                          ///< Edge ID
   public:
     static Size_t totalEdgeNum; ///< Total edge number
 
@@ -619,7 +619,7 @@ class CallPE : public PAGEdge {
     CallPE(const CallPE &);         ///< place holder
     void operator=(const CallPE &); ///< place holder
 
-    const CallBlockNode *inst; ///< llvm instruction for this call
+    const CallBlockNode *inst = nullptr; ///< llvm instruction for this call
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
@@ -669,7 +669,7 @@ class RetPE : public PAGEdge {
     RetPE(const RetPE &);          ///< place holder
     void operator=(const RetPE &); ///< place holder
 
-    const CallBlockNode *inst; /// the callsite instruction return to
+    const CallBlockNode *inst = nullptr; /// the callsite instruction return to
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{

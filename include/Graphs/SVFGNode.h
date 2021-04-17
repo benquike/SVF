@@ -89,7 +89,7 @@ class MRSVFGNode : public VFGNode {
  */
 class FormalINSVFGNode : public MRSVFGNode {
   private:
-    const MemSSA::ENTRYCHI *chi;
+    const MemSSA::ENTRYCHI *chi = nullptr;
 
   public:
     /// Constructor
@@ -133,7 +133,7 @@ class FormalINSVFGNode : public MRSVFGNode {
  */
 class FormalOUTSVFGNode : public MRSVFGNode {
   private:
-    const MemSSA::RETMU *mu;
+    const MemSSA::RETMU *mu = nullptr;
 
   public:
     /// Constructor
@@ -172,8 +172,8 @@ class FormalOUTSVFGNode : public MRSVFGNode {
  */
 class ActualINSVFGNode : public MRSVFGNode {
   private:
-    const MemSSA::CALLMU *mu;
-    const CallBlockNode *cs;
+    const MemSSA::CALLMU *mu = nullptr;
+    const CallBlockNode *cs = nullptr;
 
   public:
     /// Constructor
@@ -220,8 +220,8 @@ class ActualINSVFGNode : public MRSVFGNode {
  */
 class ActualOUTSVFGNode : public MRSVFGNode {
   private:
-    const MemSSA::CALLCHI *chi;
-    const CallBlockNode *cs;
+    const MemSSA::CALLCHI *chi = nullptr;
+    const CallBlockNode *cs = nullptr;
 
   public:
     /// Constructor
@@ -271,7 +271,7 @@ class MSSAPHISVFGNode : public MRSVFGNode {
     using OPVers = Map<u32_t, const MRVer *>;
 
   protected:
-    const MemSSA::MDEF *res;
+    const MemSSA::MDEF *res = nullptr;
     OPVers opVers;
 
   public:
@@ -429,8 +429,8 @@ class InterMSSAPHISVFGNode : public MSSAPHISVFGNode {
     const std::string toString() const override;
 
   private:
-    const SVFFunction *fun;
-    const CallBlockNode *callInst;
+    const SVFFunction *fun = nullptr;
+    const CallBlockNode *callInst = nullptr;
 
   private:
     /// support for serialization

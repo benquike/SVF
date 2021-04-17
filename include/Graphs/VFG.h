@@ -106,8 +106,8 @@ class VFG : public GenericVFGTy {
     FunToVFGNodesMapTy funToVFGNodesMap; ///< map a function to its VFGNodes;
 
     GlobalVFGNodeSet globalVFGNodes; ///< set of global store VFG nodes
-    PTACallGraph *callgraph;
-    PAG *pag;
+    PTACallGraph *callgraph = nullptr;
+    PAG *pag = nullptr;
     VFGK kind;
 
     /// Clean up memory

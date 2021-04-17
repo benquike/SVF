@@ -163,7 +163,7 @@ class PTACallGraphNode : public GenericCallGraphNodeTy {
     using const_iterator = PTACallGraphEdge::CallGraphEdgeSet::const_iterator;
 
   private:
-    const SVFFunction *fun;
+    const SVFFunction *fun = nullptr;
 
     /// support for serialization
     /// @{
@@ -244,7 +244,7 @@ class PTACallGraph : public GenericCallGraphTy {
     IdToCallSiteMap idToCSMap;   ///< Map a callsite ID to a pair of call
                                  ///< instruction and callee
     CallSiteID totalCallSiteNum; ///< CallSiteIDs, start from 1;
-    PAG *pag;
+    PAG *pag = nullptr;
 
   protected:
     FunToCallGraphNodeMap funToCallGraphNodeMap; ///< Call Graph node map
@@ -255,7 +255,7 @@ class PTACallGraph : public GenericCallGraphTy {
     NodeID callGraphNodeNum;
     Size_t numOfResolvedIndCallEdge;
 
-    SVFProject *proj;
+    SVFProject *proj = nullptr;
 
     /// Clean up memory
     void destroy();

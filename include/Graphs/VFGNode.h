@@ -111,7 +111,7 @@ class VFGNode : public GenericVFGNodeTy {
     virtual const std::string toString() const;
 
   protected:
-    const ICFGNode *icfgNode;
+    const ICFGNode *icfgNode = nullptr;
 
   private:
     /// support for serialization
@@ -132,7 +132,7 @@ class VFGNode : public GenericVFGNodeTy {
 class StmtVFGNode : public VFGNode {
 
   private:
-    const PAGEdge *pagEdge;
+    const PAGEdge *pagEdge = nullptr;
 
   public:
     /// Constructor
@@ -322,7 +322,7 @@ class CmpVFGNode : public VFGNode {
     using OPVers = Map<u32_t, const PAGNode *>;
 
   protected:
-    const PAGNode *res;
+    const PAGNode *res = nullptr;
     OPVers opVers;
 
   private:
@@ -383,7 +383,7 @@ class BinaryOPVFGNode : public VFGNode {
     using OPVers = Map<u32_t, const PAGNode *>;
 
   protected:
-    const PAGNode *res;
+    const PAGNode *res = nullptr;
     OPVers opVers;
 
   private:
@@ -446,7 +446,7 @@ class UnaryOPVFGNode : public VFGNode {
     using OPVers = Map<u32_t, const PAGNode *>;
 
   protected:
-    const PAGNode *res;
+    const PAGNode *res = nullptr;
     OPVers opVers;
 
   private:
@@ -553,7 +553,7 @@ class PHIVFGNode : public VFGNode {
     using OPVers = Map<u32_t, const PAGNode *>;
 
   protected:
-    const PAGNode *res;
+    const PAGNode *res = nullptr;
     OPVers opVers;
 
   public:
@@ -708,7 +708,7 @@ class AddrVFGNode : public StmtVFGNode {
 class ArgumentVFGNode : public VFGNode {
 
   protected:
-    const PAGNode *param;
+    const PAGNode *param = nullptr;
 
   public:
     /// Constructor
@@ -754,7 +754,7 @@ class ArgumentVFGNode : public VFGNode {
  */
 class ActualParmVFGNode : public ArgumentVFGNode {
   private:
-    const CallBlockNode *cs;
+    const CallBlockNode *cs = nullptr;
 
   public:
     /// Constructor
@@ -802,7 +802,7 @@ class ActualParmVFGNode : public ArgumentVFGNode {
  */
 class FormalParmVFGNode : public ArgumentVFGNode {
   private:
-    const SVFFunction *fun;
+    const SVFFunction *fun = nullptr;
     CallPESet callPEs;
 
   public:
@@ -876,7 +876,7 @@ class FormalParmVFGNode : public ArgumentVFGNode {
  */
 class ActualRetVFGNode : public ArgumentVFGNode {
   private:
-    const CallBlockNode *cs;
+    const CallBlockNode *cs = nullptr;
 
     ActualRetVFGNode(const ActualRetVFGNode &); ///< place holder
     void operator=(const ActualRetVFGNode &);   ///< place holder
@@ -927,7 +927,7 @@ class ActualRetVFGNode : public ArgumentVFGNode {
  */
 class FormalRetVFGNode : public ArgumentVFGNode {
   private:
-    const SVFFunction *fun;
+    const SVFFunction *fun = nullptr;
     RetPESet retPEs;
 
     FormalRetVFGNode(const FormalRetVFGNode &); ///< place holder
@@ -1046,8 +1046,8 @@ class InterPHIVFGNode : public PHIVFGNode {
     const std::string toString() const override;
 
   private:
-    const SVFFunction *fun;
-    const CallBlockNode *callInst;
+    const SVFFunction *fun = nullptr;
+    const CallBlockNode *callInst = nullptr;
 
     /// support for serialization
     /// @{
@@ -1082,7 +1082,7 @@ class InterPHIVFGNode : public PHIVFGNode {
  */
 class NullPtrVFGNode : public VFGNode {
   private:
-    const PAGNode *node;
+    const PAGNode *node = nullptr;
 
   public:
     /// Constructor

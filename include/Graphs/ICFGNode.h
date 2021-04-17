@@ -115,8 +115,8 @@ class ICFGNode : public GenericICFGNodeTy {
     void dump() const;
 
   protected:
-    const SVFFunction *fun;
-    const BasicBlock *bb;
+    const SVFFunction *fun = nullptr;
+    const BasicBlock *bb = nullptr;
     VFGNodeList VFGNodes; //< a list of VFGNodes
     PAGEdgeList pagEdges; //< a list of PAGEdges
 
@@ -205,7 +205,7 @@ class GlobalBlockNode : public ICFGNode {
  */
 class IntraBlockNode : public ICFGNode {
   private:
-    const Instruction *inst;
+    const Instruction *inst = nullptr;
 
   public:
     IntraBlockNode(NodeID id, const Instruction *i, SVFModule *svfMod)
@@ -355,8 +355,8 @@ class FunEntryBlockNode : public InterBlockNode {
 class FunExitBlockNode : public InterBlockNode {
 
   private:
-    const SVFFunction *fun;
-    const PAGNode *formalRet;
+    const SVFFunction *fun = nullptr;
+    const PAGNode *formalRet = nullptr;
 
   public:
     FunExitBlockNode(NodeID id, const SVFFunction *f);
@@ -430,9 +430,9 @@ class CallBlockNode : public InterBlockNode {
     using ActualParmVFGNodeVec = std::vector<const PAGNode *>;
 
   private:
-    const Instruction *cs;
-    const RetBlockNode *ret;
-    const SVFModule *svfMod;
+    const Instruction *cs = nullptr;
+    const RetBlockNode *ret = nullptr;
+    const SVFModule *svfMod = nullptr;
     ActualParmVFGNodeVec APNodes;
 
   public:
@@ -534,9 +534,9 @@ class CallBlockNode : public InterBlockNode {
 class RetBlockNode : public InterBlockNode {
 
   private:
-    const Instruction *cs;
-    const PAGNode *actualRet;
-    const CallBlockNode *callBlockNode;
+    const Instruction *cs = nullptr;
+    const PAGNode *actualRet = nullptr;
+    const CallBlockNode *callBlockNode = nullptr;
 
   public:
     RetBlockNode(NodeID id, const Instruction *c, CallBlockNode *cb,

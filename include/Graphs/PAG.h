@@ -127,9 +127,9 @@ class PAG : public GenericPAGTy {
     NodeID
         nodeNumAfterPAGBuild; // initial node number after building PAG,
                               // excluding later added nodes, e.g., gepobj nodes
-    ICFG *icfg;               // ICFG
-    SymbolTableInfo *symbolTableInfo;
-    SVFProject *proj;
+    ICFG *icfg = nullptr;     // ICFG
+    SymbolTableInfo *symbolTableInfo = nullptr;
+    SVFProject *proj = nullptr;
 
     CallSiteSet callSiteSet; /// all the callsites of a program
 
