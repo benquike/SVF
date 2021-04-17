@@ -124,6 +124,8 @@ class FormalINSVFGNode : public MRSVFGNode {
     template <typename Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<MRSVFGNode>(*this);
+
+        // TODO: investigate serialization of chi
     }
     /// @}
 };
@@ -163,6 +165,7 @@ class FormalOUTSVFGNode : public MRSVFGNode {
     template <typename Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<MRSVFGNode>(*this);
+        // TODO: investigate mu
     }
     /// @}
 };
@@ -210,6 +213,9 @@ class ActualINSVFGNode : public MRSVFGNode {
     template <typename Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<MRSVFGNode>(*this);
+
+        // TODO: investigate mu
+
         ar &cs;
     }
     /// @}
@@ -258,6 +264,9 @@ class ActualOUTSVFGNode : public MRSVFGNode {
     template <typename Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<MRSVFGNode>(*this);
+
+        // TODO: investatigate chi
+
         ar &cs;
     }
     /// @}

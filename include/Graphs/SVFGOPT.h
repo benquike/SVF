@@ -363,6 +363,9 @@ class SVFGOPT : public SVFG {
         ar &actualInToDefMap;
         ar &formalOutToDefMap;
         ar &defNodes;
+
+        // TODO: investigate worklist
+
         ar &keepActualOutFormalIn;
         ar &keepAllSelfCycle;
         ar &keepContextSelfCycle;
