@@ -268,6 +268,8 @@ class SymbolTableInfo {
         return Id2MemMap[id];
     }
 
+    IDToTypeMapTy &getIdToTypeMap() { return Id2TypeMap; }
+
     SymID getTypeId(const Type *type) {
         assert(Type2IdMap.find(type) != Type2IdMap.end() && "Type not exist");
         return Type2IdMap[type];
