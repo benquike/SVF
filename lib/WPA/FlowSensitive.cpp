@@ -38,8 +38,6 @@
 using namespace SVF;
 using namespace SVFUtil;
 
-FlowSensitive *FlowSensitive::fspta = nullptr;
-
 /*!
  * Initialize analysis
  */

@@ -4,8 +4,6 @@
 using namespace SVF;
 using namespace SVFUtil;
 
-AndersenWaveDiffWithType *AndersenWaveDiffWithType::diffWaveWithType = nullptr;
-
 /// process "bitcast" CopyCGEdge
 void AndersenWaveDiffWithType::processCast(const ConstraintEdge *edge) {
     NodeID srcId = edge->getSrcID();

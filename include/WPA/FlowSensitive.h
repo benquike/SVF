@@ -25,6 +25,10 @@
  *
  *  Created on: Oct 28, 2013
  *      Author: Yulei Sui
+ *
+ *  Updated by:
+ *     Hui Peng <peng124@purdue.edu>
+ *     2021-04-18
  */
 
 #ifndef FLOWSENSITIVEANALYSIS_H_
@@ -80,27 +84,15 @@ class FlowSensitive : public WPASVFGFSSolver, public BVDataPTAImpl {
     }
 
     /// Create signle instance of flow-sensitive pointer analysis
-    /// TODO: remove this
     static FlowSensitive *createFSWPA(SVFProject *proj,
                                       bool vcall_cha = false) {
-        if (fspta == nullptr) {
-            fspta = new FlowSensitive(proj);
-            if (vcall_cha) {
-                fspta->connectCPPVirtualOnCHA();
-            }
-
-            fspta->analyze();
+        FlowSensitive *fspta = new FlowSensitive(proj);
+        if (vcall_cha) {
+            fspta->connectCPPVirtualOnCHA();
         }
+
+        fspta->analyze();
         return fspta;
-    }
-
-    /// Release flow-sensitive pointer analysis
-    static void releaseFSWPA() {
-        if (fspta) {
-            delete fspta;
-        }
-
-        fspta = nullptr;
     }
 
     /// We start from here
@@ -272,7 +264,6 @@ class FlowSensitive : public WPASVFGFSSolver, public BVDataPTAImpl {
     }
     ///@}
 
-    static FlowSensitive *fspta;
     SVFGBuilder svfgBuilder;
     AndersenWaveDiff *ander;
 

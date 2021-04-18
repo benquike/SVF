@@ -3,6 +3,9 @@
  *
  *  Created on: Jul 29, 2015
  *      Author: Yulei Sui, Peng Di
+ *  Updated by:
+ *     Hui Peng <peng124@purdue.edu>
+ *     2021-04-18
  */
 
 #ifndef FSPTANALYSIS_H_
@@ -145,25 +148,14 @@ class FSMPTA : public FlowSensitive {
 
     /// Create signle instance of flow-sensitive pointer analysis
     static FSMPTA *createFSMPTA(SVFModule *module, MHP *m, LockAnalysis *la) {
-        if (mfspta == nullptr) {
-            mfspta = new FSMPTA(m, la);
-            mfspta->analyze(module);
-        }
+        FSMPTA *mfspta = new FSMPTA(m, la);
+        mfspta->analyze(module);
         return mfspta;
     }
-
-    /// Release flow-sensitive pointer analysis
-    static void releaseFSMPTA() {
-        if (mfspta)
-            delete mfspta;
-        mfspta = nullptr;
-    }
-
     /// Get MHP
     inline MHP *getMHP() const { return mhp; }
 
   private:
-    static FSMPTA *mfspta;
     MHP *mhp;
     LockAnalysis *lockana;
 };

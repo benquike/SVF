@@ -3,6 +3,9 @@
  *
  *  Created on: Jul 29, 2015
  *      Author: Yulei Sui, Peng Di
+ *  Updated by:
+ *     Hui Peng <peng124@purdue.edu>
+ *     2021-04-18
  */
 
 #include "MTA/FSMPTA.h"
@@ -13,7 +16,6 @@
 using namespace SVF;
 using namespace SVFUtil;
 
-FSMPTA *FSMPTA::mfspta = nullptr;
 u32_t MTASVFGBuilder::numOfNewSVFGEdges = 0;
 u32_t MTASVFGBuilder::numOfRemovedSVFGEdges = 0;
 u32_t MTASVFGBuilder::numOfRemovedPTS = 0;

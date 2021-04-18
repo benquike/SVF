@@ -33,8 +33,6 @@
 using namespace SVF;
 using namespace SVFUtil;
 
-AndersenHLCD *AndersenHLCD::hlcdAndersen = nullptr;
-
 /*!
  * Collapse nodes and fields based on the result of both offline and online SCC
  * detection

@@ -33,8 +33,6 @@
 using namespace SVF;
 using namespace SVFUtil;
 
-AndersenWaveDiff *AndersenWaveDiff::diffWave = nullptr;
-
 /*!
  * solve worklist
  */

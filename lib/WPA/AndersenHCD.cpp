@@ -33,8 +33,6 @@
 using namespace SVF;
 using namespace SVFUtil;
 
-AndersenHCD *AndersenHCD::hcdAndersen = nullptr;
-
 // --- Methods of AndersenHCD ---
 
 /*!

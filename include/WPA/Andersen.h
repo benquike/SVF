@@ -25,6 +25,9 @@
  *
  *  Created on: Nov 12, 2013
  *      Author: Yulei Sui
+ *  Updated by:
+ *     Hui Peng <peng124@purdue.edu>
+ *     2021-04-18
  */
 
 #ifndef ANDERSENPASS_H_
@@ -360,9 +363,6 @@ class Andersen : public AndersenBase {
  */
 class AndersenWaveDiff : public Andersen {
 
-  private:
-    static AndersenWaveDiff *diffWave; // static instance
-
   public:
     explicit AndersenWaveDiff(SVFProject *proj,
                               PTATY type = AndersenWaveDiff_WPA,
@@ -371,22 +371,11 @@ class AndersenWaveDiff : public Andersen {
 
     /// Create an singleton instance directly instead of invoking llvm pass
     /// manager
-    /// FIXME: remove it
     static AndersenWaveDiff *createAndersenWaveDiff(SVFProject *proj) {
-        if (diffWave == nullptr) {
-            diffWave = new AndersenWaveDiff(proj, AndersenWaveDiff_WPA, false);
-            diffWave->analyze();
-            return diffWave;
-        }
+        AndersenWaveDiff *diffWave =
+            new AndersenWaveDiff(proj, AndersenWaveDiff_WPA, false);
+        diffWave->analyze();
         return diffWave;
-    }
-
-    static void releaseAndersenWaveDiff() {
-        if (diffWave != nullptr) {
-            delete diffWave;
-        }
-
-        diffWave = nullptr;
     }
 
     void solveWorklist() override;
@@ -426,8 +415,6 @@ class AndersenWaveDiffWithType : public AndersenWaveDiff {
         }
     }
 
-    static AndersenWaveDiffWithType *diffWaveWithType; // static instance
-
     /// Handle diff points-to set.
     //@{
     inline void computeDiffPts(NodeID id) override {
@@ -452,20 +439,10 @@ class AndersenWaveDiffWithType : public AndersenWaveDiff {
     /// manager
     static AndersenWaveDiffWithType *
     createAndersenWaveDiffWithType(SVFProject *proj) {
-        if (diffWaveWithType == nullptr) {
-            diffWaveWithType = new AndersenWaveDiffWithType(proj);
-            diffWaveWithType->analyze();
-            return diffWaveWithType;
-        }
+        AndersenWaveDiffWithType *diffWaveWithType =
+            new AndersenWaveDiffWithType(proj);
+        diffWaveWithType->analyze();
         return diffWaveWithType;
-    }
-
-    static void releaseAndersenWaveDiffWithType() {
-        if (diffWaveWithType != nullptr) {
-            delete diffWaveWithType;
-        }
-
-        diffWaveWithType = nullptr;
     }
 
   protected:
@@ -493,7 +470,6 @@ class AndersenWaveDiffWithType : public AndersenWaveDiff {
 class AndersenLCD : virtual public Andersen {
 
   private:
-    static AndersenLCD *lcdAndersen;
     EdgeSet metEdges;
     NodeSet lcdCandidates;
 
@@ -504,20 +480,9 @@ class AndersenLCD : virtual public Andersen {
     /// Create an singleton instance directly instead of invoking llvm pass
     /// manager
     static AndersenLCD *createAndersenLCD(SVFProject *proj) {
-        if (lcdAndersen == nullptr) {
-            lcdAndersen = new AndersenLCD(proj);
-            lcdAndersen->analyze();
-            return lcdAndersen;
-        }
+        AndersenLCD *lcdAndersen = new AndersenLCD(proj);
+        lcdAndersen->analyze();
         return lcdAndersen;
-    }
-
-    static void releaseAndersenLCD() {
-        if (lcdAndersen) {
-            delete lcdAndersen;
-        }
-
-        lcdAndersen = nullptr;
     }
 
   protected:
@@ -564,7 +529,6 @@ class AndersenHCD : virtual public Andersen {
     using OSCC = SCCDetection<OfflineConsG *>;
 
   private:
-    static AndersenHCD *hcdAndersen;
     NodeSet mergedNodes;
     OfflineConsG *oCG;
 
@@ -575,20 +539,9 @@ class AndersenHCD : virtual public Andersen {
     /// Create an singleton instance directly instead of invoking llvm pass
     /// manager
     static AndersenHCD *createAndersenHCD(SVFProject *proj) {
-        if (hcdAndersen == nullptr) {
-            hcdAndersen = new AndersenHCD(proj);
-            hcdAndersen->analyze();
-            return hcdAndersen;
-        }
+        AndersenHCD *hcdAndersen = new AndersenHCD(proj);
+        hcdAndersen->analyze();
         return hcdAndersen;
-    }
-
-    static void releaseAndersenHCD() {
-        if (hcdAndersen != nullptr) {
-            delete hcdAndersen;
-        }
-
-        hcdAndersen = nullptr;
     }
 
   protected:
@@ -628,9 +581,6 @@ class AndersenHCD : virtual public Andersen {
  */
 class AndersenHLCD : public AndersenHCD, public AndersenLCD {
 
-  private:
-    static AndersenHLCD *hlcdAndersen;
-
   public:
     explicit AndersenHLCD(SVFProject *proj, PTATY type = AndersenHLCD_WPA)
         : Andersen(proj, type), AndersenHCD(proj, type),
@@ -639,20 +589,9 @@ class AndersenHLCD : public AndersenHCD, public AndersenLCD {
     /// Create an singleton instance directly instead of invoking llvm pass
     /// manager
     static AndersenHLCD *createAndersenHLCD(SVFProject *proj) {
-        if (hlcdAndersen == nullptr) {
-            hlcdAndersen = new AndersenHLCD(proj);
-            hlcdAndersen->analyze();
-            return hlcdAndersen;
-        }
+        AndersenHLCD *hlcdAndersen = new AndersenHLCD(proj);
+        hlcdAndersen->analyze();
         return hlcdAndersen;
-    }
-
-    static void releaseAndersenHLCD() {
-        if (hlcdAndersen != nullptr) {
-            delete hlcdAndersen;
-        }
-
-        hlcdAndersen = nullptr;
     }
 
   protected:

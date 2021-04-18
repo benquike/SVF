@@ -32,8 +32,6 @@
 using namespace SVF;
 using namespace SVFUtil;
 
-AndersenLCD *AndersenLCD::lcdAndersen = nullptr;
-
 void AndersenLCD::solveWorklist() {
     while (!isWorklistEmpty()) {
         // Merge detected SCC cycles
