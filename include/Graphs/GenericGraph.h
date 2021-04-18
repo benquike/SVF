@@ -61,8 +61,8 @@ template <class NodeTy> class GenericEdge {
     using GEdgeKind = s32_t;
 
   private:
-    NodeTy *src;        ///< source node
-    NodeTy *dst;        ///< destination node
+    NodeTy *src = nullptr; ///< source node
+    NodeTy *dst = nullptr; ///< destination node
     GEdgeFlag edgeFlag; ///< edge kind
 
   public:
