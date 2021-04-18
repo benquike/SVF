@@ -253,9 +253,14 @@ void load_map(Archive &ar, Map<const SVFFunction *, ValueType> &map) {
 
 template <typename FirstType, typename SecondType, typename Archive>
 void save_pair(Archive &ar, const std::pair<FirstType, SecondType> &pair) {
-    SymID id = getIdByValueFromCurrentProject(pair.first);
-    std::pair p(id, pair.second);
-    ar &p;
+    if (pair.first != nullptr) {
+        SymID id = getIdByValueFromCurrentProject(pair.first);
+        std::pair p(id, pair.second);
+        ar &p;
+    } else {
+        std::pair p(numeric_limits<SymID>::max(), pair.second);
+        ar &p;
+    }
 }
 
 template <typename FirstType, typename SecondType, typename Archive>
@@ -263,7 +268,12 @@ void load_pair(Archive &ar, std::pair<FirstType, SecondType> &pair) {
     std::pair<SymID, SecondType> p;
     ar &p;
 
-    pair.first = getValueByIdFromCurrentProject(p.first);
+    if (p.first < numeric_limits<SymID>::max()) {
+        pair.first = getValueByIdFromCurrentProject(p.first);
+    } else {
+        pair.first = nullptr;
+    }
+
     pair.second = p.second;
 }
 
