@@ -64,6 +64,17 @@ class ConstraintEdge : public GenericConsEdgeTy {
     ~ConstraintEdge() {}
     /// Return edge ID
     inline EdgeID getEdgeID() const { return edgeId; }
+
+    /// Overloading operator << for dumping ICFG node ID
+    //@{
+    friend raw_ostream &operator<<(raw_ostream &o, const ConstraintEdge &edge) {
+        o << edge.toString();
+        return o;
+    }
+    //@}
+
+    virtual const std::string toString() const;
+
     /// ClassOf
     static inline bool classof(const GenericConsEdgeTy *edge) {
         return edge->getEdgeKind() == Addr || edge->getEdgeKind() == Copy ||

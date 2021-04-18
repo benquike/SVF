@@ -37,6 +37,21 @@ using namespace SVFUtil;
 ConstraintNode::SCCEdgeFlag ConstraintNode::sccEdgeFlag =
     ConstraintNode::Direct;
 
+const std::string ConstraintNode::toString() const {
+    std::string str;
+    raw_string_ostream rawstr(str);
+    rawstr << "ConstraintNode ID: " << getId();
+    return rawstr.str();
+}
+
+const std::string ConstraintEdge::toString() const {
+    std::string str;
+    raw_string_ostream rawstr(str);
+    rawstr << "ConstraintEdge ID: " << edgeId << ",";
+    rawstr << "[" << getSrcID() << " -> " << getDstID() << "]";
+    return rawstr.str();
+}
+
 /*!
  * Start building constraint graph
  */

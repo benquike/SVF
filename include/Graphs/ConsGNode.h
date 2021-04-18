@@ -91,6 +91,16 @@ class ConstraintNode : public GenericConsNodeTy {
         : GenericConsNodeTy(i, 0), _isPWCNode(false), pag(pag),
           newExpand(false) {}
 
+    virtual const std::string toString() const;
+
+    /// Overloading operator << for dumping ICFG node ID
+    //@{
+    friend raw_ostream &operator<<(raw_ostream &o, const ConstraintNode &node) {
+        o << node.toString();
+        return o;
+    }
+    //@}
+
     /// Whether a node involves in PWC, if so, all its points-to elements should
     /// become field-insensitive.
     //@{
