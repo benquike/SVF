@@ -172,13 +172,10 @@ class PAGEdge : public GenericPAGEdgeTy {
     template <typename Archive>
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<GenericPAGEdgeTy>(*this);
-
         SAVE_Value(ar, value);
         SAVE_Value(ar, basicBlock);
-
         ar &icfgNode;
         ar &edgeId;
-
         if (!static_members_serialized) {
             ar &totalEdgeNum;
             ar &inst2LabelMap;
