@@ -86,6 +86,8 @@ void graph_eq_extra_test(const Graph *g1, const Graph *g2) {}
 
 template <typename Graph> void graph_eq_test(const Graph *g1, const Graph *g2) {
     ASSERT_NE(g1, g2);
+    ASSERT_EQ(g1->edgeNum, g2->edgeNum);
+    ASSERT_EQ(g1->nodeNum, g2->nodeNum);
 
     auto it1 = g1->begin();
     auto it2 = g2->begin();
