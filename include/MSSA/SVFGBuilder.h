@@ -66,19 +66,11 @@ class SVFGBuilder {
     /// Destructor
     virtual ~SVFGBuilder() {}
 
-    static SVFG *globalSvfg;
-
     SVFG *buildPTROnlySVFG(BVDataPTAImpl *pta);
     SVFG *buildPTROnlySVFGWithoutOPT(BVDataPTAImpl *pta);
     SVFG *buildFullSVFG(BVDataPTAImpl *pta);
     SVFG *buildFullSVFGWithoutOPT(BVDataPTAImpl *pta);
 
-    /// Clean up
-    static void releaseSVFG() {
-        if (globalSvfg)
-            delete globalSvfg;
-        globalSvfg = nullptr;
-    }
     /// Get SVFG instance
     inline SVFG *getSVFG() const { return svfg; }
 

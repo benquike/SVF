@@ -39,8 +39,6 @@
 using namespace SVF;
 using namespace SVFUtil;
 
-SVFG *SVFGBuilder::globalSvfg = nullptr;
-
 SVFG *SVFGBuilder::buildPTROnlySVFG(BVDataPTAImpl *pta) {
     return build(pta, VFG::PTRONLYSVFG_OPT);
 }
@@ -74,22 +72,12 @@ SVFG *SVFGBuilder::build(BVDataPTAImpl *pta, VFG::VFGK kind) {
         pta, (VFG::PTRONLYSVFG == kind || VFG::PTRONLYSVFG_OPT == kind));
 
     DBOUT(DGENERAL, outs() << pasMsg("Build Sparse Value-Flow Graph \n"));
-    if (Options::SingleVFG) {
-        if (globalSvfg == nullptr) {
-            /// Note that we use callgraph from andersen analysis here
-            if (kind == VFG::FULLSVFG_OPT || kind == VFG::PTRONLYSVFG_OPT)
-                svfg = globalSvfg = new SVFGOPT(mssa, pta->getPAG(), kind);
-            else
-                svfg = globalSvfg = new SVFG(mssa, pta->getPAG(), kind);
-            buildSVFG();
-        }
-    } else {
-        if (kind == VFG::FULLSVFG_OPT || kind == VFG::PTRONLYSVFG_OPT)
-            svfg = new SVFGOPT(mssa, pta->getPAG(), kind);
-        else
-            svfg = new SVFG(mssa, pta->getPAG(), kind);
-        buildSVFG();
-    }
+    /// Note that we use callgraph from andersen analysis here
+    if (kind == VFG::FULLSVFG_OPT || kind == VFG::PTRONLYSVFG_OPT)
+        svfg = new SVFGOPT(mssa, pta->getPAG(), kind);
+    else
+        svfg = new SVFG(mssa, pta->getPAG(), kind);
+    buildSVFG();
 
     /// Update call graph using pre-analysis results
     if (Options::SVFGWithIndirectCall || SVFGWithIndCall)
