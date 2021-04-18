@@ -708,7 +708,7 @@ void SymbolTableInfo::collectRet(const Function *val) {
 void SymbolTableInfo::collectVararg(const Function *val) {
     auto iter = varargSymMap.find(val);
     if (iter == varargSymMap.end()) {
-        SymID id = getNodeIDAllocator().allocateValueId();
+        SymID id = nodeIDAllocator.allocateValueId();
         varargSymMap.insert(std::make_pair(val, id));
         symTyMap.insert(std::make_pair(id, VarargSym));
         DBOUT(DMemModel, outs() << "create a vararg sym " << id << "\n");
