@@ -186,7 +186,7 @@ class BVDataPTAImpl : public PointerAnalysis {
 
   private:
     /// Points-to data
-    PTDataTy *ptD;
+    PTDataTy *ptD = nullptr;
 
   public:
     /// Interface expose to users of our pointer analysis, given Location infos
@@ -422,7 +422,7 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
         }
     }
     /// Points-to data
-    PTDataTy *ptD;
+    PTDataTy *ptD = nullptr;
     /// Normalized flag
     bool normalized;
     /// Normal points-to representation (without conditions)

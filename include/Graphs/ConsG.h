@@ -50,7 +50,7 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
     using WorkList = FIFOWorkList<NodeID>;
 
   protected:
-    PAG *pag;
+    PAG *pag = nullptr;
     NodeToRepMap nodeToRepMap;
     NodeToSubsMap nodeToSubsMap;
     WorkList nodesToBeCollapsed;

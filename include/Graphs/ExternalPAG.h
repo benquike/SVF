@@ -24,7 +24,7 @@ class ExternalPAG {
     /// Name of the function this external PAG represents.
     std::string functionName;
 
-    PAG *pag;
+    PAG *pag = nullptr;
 
     /// Value nodes in this external PAG, represented by NodeIDs
     /// because we will rebuild these nodes in the main PAG.

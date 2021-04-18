@@ -107,7 +107,7 @@ class SVFGBuilder {
 
     /// SVFG Edges connected at indirect call/ret sites
     SVFGEdgeSet vfEdgesAtIndCallSite;
-    SVFG *svfg;
+    SVFG *svfg = nullptr;
     /// SVFG with precomputed indirect call edges
     bool SVFGWithIndCall;
 };

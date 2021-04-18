@@ -76,7 +76,7 @@ class ConstraintNode : public GenericConsNodeTy {
     ConstraintEdge::ConstraintEdgeSetTy
         addressOutEdges; ///< all outgoing address edge of this node
 
-    PAG *pag;
+    PAG *pag = nullptr;
 
   public:
     static SCCEdgeFlag sccEdgeFlag;

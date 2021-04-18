@@ -138,30 +138,30 @@ class PointerAnalysis {
     bool vcall_cha;
 
     /// PAG
-    PAG *pag;
+    PAG *pag = nullptr;
     /// Module
-    SVFModule *svfMod;
+    SVFModule *svfMod = nullptr;
     /// Pointer analysis Type
 
     PTATY ptaTy;
     /// PTA implementation type.
     PTAImplTy ptaImplTy;
     /// Statistics
-    PTAStat *stat;
+    PTAStat *stat = nullptr;
     /// Call graph used for pointer analysis
-    PTACallGraph *ptaCallGraph;
+    PTACallGraph *ptaCallGraph = nullptr;
     /// SCC for CallGraph
-    CallGraphSCC *callGraphSCC;
+    CallGraphSCC *callGraphSCC = nullptr;
     /// Interprocedural control-flow graph
 
-    ICFG *icfg;
+    ICFG *icfg = nullptr;
 
     /// CHGraph
-    CommonCHGraph *chgraph;
+    CommonCHGraph *chgraph = nullptr;
     /// TypeSystem
-    TypeSystem *typeSystem;
+    TypeSystem *typeSystem = nullptr;
 
-    SVFProject *proj;
+    SVFProject *proj = nullptr;
 
   public:
     /// Return number of resolved indirect call edges

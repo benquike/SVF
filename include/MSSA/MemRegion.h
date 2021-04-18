@@ -186,9 +186,9 @@ class MRGenerator {
     const MemRegion *getMR(const PointsTo &cpts) const;
 
   private:
-    BVDataPTAImpl *pta;
-    SCC *callGraphSCC;
-    PTACallGraph *callGraph;
+    BVDataPTAImpl *pta = nullptr;
+    SCC *callGraphSCC = nullptr;
+    PTACallGraph *callGraph = nullptr;
     bool ptrOnlyMSSA;
 
     /// Map a function to all its memory regions

@@ -103,11 +103,11 @@ class MemSSA {
                                       //@}
 
   protected:
-    BVDataPTAImpl *pta;
-    MRGenerator *mrGen;
-    DominanceFrontier *df;
-    DominatorTree *dt;
-    MemSSAStat *stat;
+    BVDataPTAImpl *pta = nullptr;
+    MRGenerator *mrGen = nullptr;
+    DominanceFrontier *df = nullptr;
+    DominatorTree *dt = nullptr;
+    MemSSAStat *stat = nullptr;
 
     /// Create mu chi for candidate regions in a function
     virtual void createMUCHI(const SVFFunction &fun);

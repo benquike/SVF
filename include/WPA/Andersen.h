@@ -126,7 +126,7 @@ class AndersenBase : public WPAConstraintSolver, public BVDataPTAImpl {
 
   protected:
     /// Constraint Graph
-    ConstraintGraph *consCG;
+    ConstraintGraph *consCG = nullptr;
 };
 
 /*!
@@ -530,7 +530,7 @@ class AndersenHCD : virtual public Andersen {
 
   private:
     NodeSet mergedNodes;
-    OfflineConsG *oCG;
+    OfflineConsG *oCG = nullptr;
 
   public:
     explicit AndersenHCD(SVFProject *proj, PTATY type = AndersenHCD_WPA)

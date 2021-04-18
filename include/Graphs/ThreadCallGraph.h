@@ -367,7 +367,7 @@ class ThreadCallGraph : public PTACallGraph {
     }
 
   private:
-    ThreadAPI *tdAPI;        ///< Thread API
+    ThreadAPI *tdAPI = nullptr; ///< Thread API
     CallSiteSet forksites;   ///< all thread fork sites
     CallSiteSet joinsites;   ///< all thread fork sites
     CallSiteSet parForSites; ///< all parallel for sites

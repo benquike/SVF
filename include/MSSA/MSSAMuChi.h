@@ -50,10 +50,10 @@ class MRVer {
     static Size_t totalVERNum;
     static bool static_members_serialized;
 
-    const MemRegion *mr;
+    const MemRegion *mr = nullptr;
     MRVERSION version;
     MRVERID vid;
-    MSSADef *def;
+    MSSADef *def = nullptr;
 
   public:
     /// Constructor
@@ -104,8 +104,8 @@ template <class Cond> class MSSAMU {
 
   protected:
     MUTYPE type;
-    const MemRegion *mr;
-    MRVer *ver;
+    const MemRegion *mr = nullptr;
+    MRVer *ver = nullptr;
     Cond cond;
 
   public:
@@ -150,8 +150,8 @@ template <class Cond> class MSSAMU {
 template <class Cond> class LoadMU : public MSSAMU<Cond> {
 
   private:
-    const LoadPE *inst;
-    const BasicBlock *bb;
+    const LoadPE *inst = nullptr;
+    const BasicBlock *bb = nullptr;
 
   public:
     /// Constructor/Destructor for MU
@@ -191,7 +191,7 @@ template <class Cond> class LoadMU : public MSSAMU<Cond> {
 template <class Cond> class CallMU : public MSSAMU<Cond> {
 
   private:
-    const CallBlockNode *callsite;
+    const CallBlockNode *callsite = nullptr;
 
   public:
     /// Constructor/Destructor for MU
@@ -232,7 +232,7 @@ template <class Cond> class CallMU : public MSSAMU<Cond> {
  */
 template <class Cond> class RetMU : public MSSAMU<Cond> {
   private:
-    const SVFFunction *fun;
+    const SVFFunction *fun = nullptr;
 
   public:
     /// Constructor/Destructor for MU
@@ -276,8 +276,8 @@ class MSSADEF {
 
   protected:
     DEFTYPE type;
-    const MemRegion *mr;
-    MRVer *resVer;
+    const MemRegion *mr = nullptr;
+    MRVer *resVer = nullptr;
 
   public:
     /// Constructor/Destructer for MSSADEF
@@ -335,7 +335,7 @@ class MSSADEF {
 template <class Cond> class MSSACHI : public MSSADEF {
 
   private:
-    MRVer *opVer;
+    MRVer *opVer = nullptr;
     Cond cond;
 
   public:
@@ -390,8 +390,8 @@ template <class Cond> class MSSACHI : public MSSADEF {
  */
 template <class Cond> class StoreCHI : public MSSACHI<Cond> {
   private:
-    const BasicBlock *bb;
-    const StorePE *inst;
+    const BasicBlock *bb = nullptr;
+    const StorePE *inst = nullptr;
 
   public:
     /// Constructors for StoreCHI
@@ -437,7 +437,7 @@ template <class Cond> class StoreCHI : public MSSACHI<Cond> {
  */
 template <class Cond> class CallCHI : public MSSACHI<Cond> {
   private:
-    const CallBlockNode *callsite;
+    const CallBlockNode *callsite = nullptr;
 
   public:
     /// Constructors for StoreCHI
@@ -484,7 +484,7 @@ template <class Cond> class CallCHI : public MSSACHI<Cond> {
  */
 template <class Cond> class EntryCHI : public MSSACHI<Cond> {
   private:
-    const SVFFunction *fun;
+    const SVFFunction *fun = nullptr;
 
   public:
     /// Constructors for EntryCHI
@@ -528,7 +528,7 @@ template <class Cond> class MSSAPHI : public MSSADEF {
     using OPVers = Map<u32_t, const MRVer *>;
 
   private:
-    const BasicBlock *bb;
+    const BasicBlock *bb = nullptr;
     OPVers opVers;
     Cond cond;
 
