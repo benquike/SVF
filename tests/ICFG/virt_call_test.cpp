@@ -1,18 +1,15 @@
 
 class Base {
-    public:
-        virtual int test(int a, int b) { return a + b; }
+  public:
+    virtual int test(int a, int b) { return a + b; }
 };
 
-class Child: public Base {
-    public:
-        int test(int a, int b) override { return a + b + 1; }
+class Child : public Base {
+  public:
+    int test(int a, int b) override { return a + b + 1; }
 };
 
-
-void dispatch(Base *b) {
-    b->test(1, 2);
-}
+void dispatch(Base *b) { b->test(1, 2); }
 
 int main() {
     Base b;
