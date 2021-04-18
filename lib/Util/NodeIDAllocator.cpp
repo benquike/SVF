@@ -12,9 +12,28 @@ const NodeID NodeIDAllocator::nullPointerId = 3;
 
 // Initialise counts to 4 because that's how many special nodes we have.
 
-NodeIDAllocator::NodeIDAllocator(void)
+NodeIDAllocator::NodeIDAllocator()
     : numObjects(4), numValues(4), numSymbols(4), numNodes(4), numTypes(0),
       strategy(Options::NodeAllocStrat) {}
+
+NodeIDAllocator::NodeIDAllocator(const NodeIDAllocator &nia)
+    : numObjects(nia.numObjects), numValues(nia.numValues),
+      numSymbols(nia.numSymbols), numNodes(nia.numNodes),
+      numTypes(nia.numTypes), strategy(nia.strategy) {}
+
+NodeIDAllocator &NodeIDAllocator::operator=(const NodeIDAllocator &nia) {
+
+    if (this != &nia) {
+        numObjects = nia.numObjects;
+        numValues = nia.numValues;
+        numSymbols = nia.numSymbols;
+        numNodes = nia.numNodes;
+        numTypes = nia.numTypes;
+        strategy = nia.strategy;
+    }
+
+    return *this;
+}
 
 NodeID NodeIDAllocator::allocateObjectId() {
     NodeID id = 0;

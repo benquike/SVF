@@ -45,6 +45,8 @@ class NodeIDAllocator {
     /// Builds a node ID allocator with the strategy specified on the command
     /// line.
     NodeIDAllocator();
+    NodeIDAllocator(const NodeIDAllocator &nia);
+    NodeIDAllocator &operator=(const NodeIDAllocator &nia);
 
     /// Allocate an object ID as determined by the strategy.
     NodeID allocateObjectId();
