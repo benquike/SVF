@@ -17,7 +17,8 @@ RUN apt-get update && apt-get install -y software-properties-common apt-utils \
     clang-tidy-10 llvm-10-dev clang-format-10 clang-tools-10 \
     cmake libz3-dev git curl unzip \
     apt-transport-https ca-certificates gnupg \
-    python3-pip
+    python3-pip \
+    libboost-all-dev
 
 RUN pip3 install cmakelang
 
