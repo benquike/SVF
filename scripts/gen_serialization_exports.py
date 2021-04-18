@@ -26,28 +26,29 @@ import datetime
 
 Serialization_ClassTypes = {
     'ICFG Nodes': [
-#        'GenericICFGNodeTy',
+        'GenericICFGNodeTy',
         'ICFGNode',
         'GlobalBlockNode',
         'IntraBlockNode',
+        'InterBlockNode',
         'FunEntryBlockNode',
         'FunExitBlockNode',
         'CallBlockNode',
         'RetBlockNode'
     ],
     'ICFG Edges': [
-#        'GenericICFGEdgeTy',
+        'GenericICFGEdgeTy',
         'ICFGEdge',
         'IntraCFGEdge',
         'CallCFGEdge',
         'RetCFGEdge'
     ],
     'ICFG Graphs': [
-#       'GenericICFGTy',
+       'GenericICFGTy',
         'ICFG'
     ],
     'PAG Nodes': [
-#        'GenericPAGNodeTy',
+        'GenericPAGNodeTy',
         'PAGNode',
         'ValPN',
         'ObjPN',
@@ -62,7 +63,7 @@ Serialization_ClassTypes = {
         'CloneFIObjPN'
     ],
     'PAG Edges': [
-#        'GenericPAGEdgeTy',
+        'GenericPAGEdgeTy',
         'PAGEdge',
         'AddrPE',
         'CopyPE',
@@ -80,23 +81,23 @@ Serialization_ClassTypes = {
         'TDJoinPE'
     ],
     'PAG Graphs': [
-#        'GenericPAGTy',
+        'GenericPAGTy',
         'PAG'
     ],
     'PTA Callgraph Nodes': [
-#        'GenericCallGraphNodeTy',
+        'GenericCallGraphNodeTy',
         'PTACallGraphNode',
     ],
     'PTA Callgraph Edges': [
-#        'GenericCallGraphEdgeTy',
+        'GenericCallGraphEdgeTy',
         'PTACallGraphEdge',
     ],
     'PTA Callgraphs': [
-#        'GenericCallGraphTy',
+        'GenericCallGraphTy',
         'PTACallGraph',
     ],
     'VFG Nodes': [
-#        'GenericVFGNodeTy',
+        'GenericVFGNodeTy',
         'VFGNode',
         'StmtVFGNode',
         'LoadVFGNode',
@@ -177,14 +178,12 @@ def gen_export_header(header_filename, export_macro, namespace):
         of.write('#ifndef ' + fguard_macro + '\n')
         of.write('#define ' + fguard_macro + '\n')
 
-        of.write('namespace ' + namespace +  ' {\n')
-        for k in sorted(Serialization_ClassTypes.keys()):
-
-            of.write('// ' + k + '\n')
-            for cls in Serialization_ClassTypes[k]:
-                of.write('class {};\n'.format(cls))
-
-        of.write('} // end of namespace ' + namespace + '\n')
+        # of.write('namespace ' + namespace +  ' {\n')
+        # for k in sorted(Serialization_ClassTypes.keys()):
+        #     of.write('// ' + k + '\n')
+        #     for cls in Serialization_ClassTypes[k]:
+        #         of.write('class {};\n'.format(cls))
+        # of.write('} // end of namespace ' + namespace + '\n')
 
         for k in sorted(Serialization_ClassTypes.keys()):
             of.write('// ' + k + '\n')
@@ -196,11 +195,13 @@ def gen_export_header(header_filename, export_macro, namespace):
 
 def main():
 
-    gen_export_header('../include/Util/boost_classes_export_key.h',
-                      'BOOST_CLASS_EXPORT_KEY', 'SVF')
-    gen_export_header('../include/Util/boost_classes_export_impl.h',
-                      'BOOST_CLASS_EXPORT_IMPLEMENT', 'SVF')
+    # gen_export_header('../include/Util/boost_classes_export_key.h',
+    #                   'BOOST_CLASS_EXPORT_KEY', 'SVF')
+    # gen_export_header('../include/Util/boost_classes_export_impl.h',
+    #                   'BOOST_CLASS_EXPORT_IMPLEMENT', 'SVF')
 
+    gen_export_header('../include/Util/boost_classes_export.h',
+                      'BOOST_CLASS_EXPORT', 'SVF')
 
 if __name__ == '__main__':
     main()
