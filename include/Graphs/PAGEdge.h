@@ -73,7 +73,6 @@ class PAGEdge : public GenericPAGEdgeTy {
     ICFGNode *icfgNode = nullptr;           ///< ICFGNode
     EdgeID edgeId;                          ///< Edge ID
   public:
-    static Size_t totalEdgeNum; ///< Total edge number
 
     /// Constructor
     PAGEdge(PAGNode *s, PAGNode *d, PAG *pag, GEdgeFlag k);
@@ -177,7 +176,6 @@ class PAGEdge : public GenericPAGEdgeTy {
         ar &icfgNode;
         ar &edgeId;
         if (!static_members_serialized) {
-            ar &totalEdgeNum;
             ar &inst2LabelMap;
             ar &callEdgeLabelCounter;
             ar &storeEdgeLabelCounter;
@@ -194,7 +192,6 @@ class PAGEdge : public GenericPAGEdgeTy {
         ar &edgeId;
 
         if (!static_members_serialized) {
-            ar &totalEdgeNum;
             ar &inst2LabelMap;
             ar &callEdgeLabelCounter;
             ar &storeEdgeLabelCounter;

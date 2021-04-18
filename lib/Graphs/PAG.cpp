@@ -49,7 +49,6 @@ llvm::cl::list<std::string> ExternalPAGArgs(
                    "func1@/path/to/graph,func2@/foo,..."),
     llvm::cl::CommaSeparated);
 
-Size_t PAGEdge::totalEdgeNum = 0;
 u64_t PAGEdge::callEdgeLabelCounter = 0;
 u64_t PAGEdge::storeEdgeLabelCounter = 0;
 PAGEdge::Inst2LabelMap PAGEdge::inst2LabelMap;
