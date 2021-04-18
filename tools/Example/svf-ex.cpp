@@ -183,7 +183,6 @@ int main(int argc, char **argv) {
     delete vfg;
     delete ander;
     delete svfg;
-    AndersenWaveDiff::releaseAndersenWaveDiff();
 
     return 0;
 }
