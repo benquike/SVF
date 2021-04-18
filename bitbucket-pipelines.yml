@@ -21,6 +21,6 @@ pipelines:
           - cmake -E make_directory Debug-build
           - cd Debug-build
           - cmake -DSVF_BUILD_UNITTESTS=On -DCMAKE_BUILD_TYPE=Debug ..; cd ..
-          - cmake --build Debug-build --target check-format # check code format
           - cd Debug-build; cmake --build . --config Debug # build the code
           - ctest # run ctest
+          - ../scripts/find_and_execute_unittests.sh
