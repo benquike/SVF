@@ -189,6 +189,8 @@ class TypeBasedHeapCloning {
     unsigned numSGTBSU = 0;
     unsigned numSGReuse = 0;
     unsigned numSGAgg = 0;
+
+    NodeIDAllocator nodeIdAllocator;
 };
 
 } // End namespace SVF
