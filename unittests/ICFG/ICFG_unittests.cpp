@@ -1,44 +1,74 @@
+#include <memory>
 #include <string>
-
-#include "gtest/gtest.h"
-#include "config.h"
 
 #include "SVF-FE/SVFProject.h"
 #include "WPA/FlowSensitive.h"
+#include "config.h"
+#include "gtest/gtest.h"
+
+#include "Tests/Graphs/GenericGraph.hpp"
+#include "Tests/Graphs/ICFG.hpp"
 
 using namespace std;
 using namespace SVF;
 
-TEST(ICFGTestSuite, FPtrTest_0) {
-    // string test_bc = SVF_BUILD_DIR "/tests/CHG/callsite_cpp.ll";
-    string test_bc = SVF_BUILD_DIR "tests/ICFG/fptr_test_cpp.ll";
-    SVFProject proj(test_bc);
+class ICFGTestSuite : public ::testing::Test {
+  protected:
+    unique_ptr<SVFProject> p_proj;
 
-    ICFG *icfg = proj.getICFG();
+    void init(string &bc_file) { p_proj = make_unique<SVFProject>(bc_file); }
+};
+
+TEST_F(ICFGTestSuite, StaticCallTest_0) {
+    string test_bc = SVF_BUILD_DIR "tests/ICFG/static_call_test_cpp.ll";
+    init(test_bc);
+
+    ICFG *icfg = p_proj->getICFG();
 
     ASSERT_TRUE(icfg != nullptr);
     ASSERT_TRUE(icfg->getPAG() != nullptr);
 
-    icfg->view();
+    unique_ptr<ICFG> icfg2 = make_unique<ICFG>(icfg->getPAG());
+    graph_eq_test(icfg, icfg2.get());
+
+    // icfg->view();
 }
 
-
-TEST(ICFGTestSuite, VirtTest_0) {
+TEST_F(ICFGTestSuite, FPtrTest_0) {
     // string test_bc = SVF_BUILD_DIR "/tests/CHG/callsite_cpp.ll";
-    string test_bc = SVF_BUILD_DIR "tests/ICFG/virt_call_test_cpp.ll";
-    SVFProject proj(test_bc);
+    string test_bc = SVF_BUILD_DIR "tests/ICFG/fptr_test_cpp.ll";
+    init(test_bc);
 
-    ICFG *icfg = proj.getICFG();
+    ICFG *icfg = p_proj->getICFG();
 
     ASSERT_TRUE(icfg != nullptr);
     ASSERT_TRUE(icfg->getPAG() != nullptr);
 
-    FlowSensitive *fs_pta = FlowSensitive::createFSWPA(&proj, true);
+    unique_ptr<ICFG> icfg2 = make_unique<ICFG>(icfg->getPAG());
+    graph_eq_test(icfg, icfg2.get());
+
+    // icfg->view();
+}
+
+TEST_F(ICFGTestSuite, VirtTest_0) {
+    // string test_bc = SVF_BUILD_DIR "/tests/CHG/callsite_cpp.ll";
+    string test_bc = SVF_BUILD_DIR "tests/ICFG/virt_call_test_cpp.ll";
+    init(test_bc);
+
+    ICFG *icfg = p_proj->getICFG();
+
+    ASSERT_TRUE(icfg != nullptr);
+    ASSERT_TRUE(icfg->getPAG() != nullptr);
+
+    unique_ptr<ICFG> icfg2 = make_unique<ICFG>(icfg->getPAG());
+    graph_eq_test(icfg, icfg2.get());
+
+    FlowSensitive *fs_pta = FlowSensitive::createFSWPA(p_proj.get(), true);
 
     /// Call Graph
     PTACallGraph *callgraph = fs_pta->getPTACallGraph();
 
-    callgraph->view();
+    // callgraph->view();
 
     SVFGBuilder svfBuilder(true);
     SVFG *svfg = svfBuilder.buildFullSVFGWithoutOPT(fs_pta);
@@ -46,22 +76,25 @@ TEST(ICFGTestSuite, VirtTest_0) {
     // icfg->view();
 }
 
-TEST(ICFGTestSuite, VirtTest_1) {
+TEST_F(ICFGTestSuite, VirtTest_1) {
     // string test_bc = SVF_BUILD_DIR "/tests/CHG/callsite_cpp.ll";
     string test_bc = SVF_BUILD_DIR "/tests/CHG/callsite_cpp.ll";
-    SVFProject proj(test_bc);
+    init(test_bc);
 
-    ICFG *icfg = proj.getICFG();
+    ICFG *icfg = p_proj->getICFG();
 
     ASSERT_TRUE(icfg != nullptr);
     ASSERT_TRUE(icfg->getPAG() != nullptr);
 
-    FlowSensitive *fs_pta = FlowSensitive::createFSWPA(&proj, true);
+    unique_ptr<ICFG> icfg2 = make_unique<ICFG>(icfg->getPAG());
+    graph_eq_test(icfg, icfg2.get());
+
+    FlowSensitive *fs_pta = FlowSensitive::createFSWPA(p_proj.get(), true);
 
     /// Call Graph
-    PTACallGraph *callgraph = fs_pta->getPTACallGraph();
+    // PTACallGraph *callgraph = fs_pta->getPTACallGraph();
 
-    callgraph->view();
+    // callgraph->view();
 
     // SVFGBuilder svfBuilder(true);
     // SVFG *svfg = svfBuilder.buildFullSVFGWithoutOPT(fs_pta);
