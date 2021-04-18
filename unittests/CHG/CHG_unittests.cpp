@@ -34,21 +34,20 @@
 using namespace SVF;
 using namespace std;
 
+class CHGTestSuite : public ::testing::Test {
+  protected:
+    unique_ptr<CHGraph> p_chg;
 
-class CHGTestSuite: public ::testing::Test {
-    protected:
-        unique_ptr<CHGraph> p_chg;
-    
-        void test_input_common(string &bc_fname) {
-            SVFProject proj(bc_fname);
+    void test_input_common(string &bc_fname) {
+        SVFProject proj(bc_fname);
 
-            p_chg = make_unique<CHGraph>(proj.getSymbolTableInfo());
-            p_chg->buildCHG();
-            p_chg->view();
-            for (const auto it : *p_chg) {
-                llvm::outs() << it.first << "\n";
-            }
+        p_chg = make_unique<CHGraph>(proj.getSymbolTableInfo());
+        p_chg->buildCHG();
+        p_chg->view();
+        for (const auto it : *p_chg) {
+            llvm::outs() << it.first << "\n";
         }
+    }
 };
 
 TEST_F(CHGTestSuite, BasicTest_0) {

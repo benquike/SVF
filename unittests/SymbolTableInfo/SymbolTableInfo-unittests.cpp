@@ -193,7 +193,19 @@ class SymbolTableInfoTest : public ::testing::Test {
         auto &varargSyms_2 = symInfo2->varargSyms();
         ASSERT_EQ(varargSyms_1.size(), varargSyms_2.size());
 
+        // Test type info
+        //
+        auto &id2TypeMap1 = symInfo->getIdToTypeMap();
+        auto &id2TypeMap2 = symInfo->getIdToTypeMap();
+
+        ASSERT_EQ(id2TypeMap1.size(), id2TypeMap2.size());
+        for (auto it : id2TypeMap1) {
+            ASSERT_TRUE(id2TypeMap2.find(it.first) != id2TypeMap2.end());
+            ASSERT_EQ(id2TypeMap1[it.first], id2TypeMap2[it.first]);
+        }
+
         // TODO: more tests
+        //
     }
 
     void common_symbol_table_tests(string &bc_file) {
