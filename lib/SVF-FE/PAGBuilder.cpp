@@ -1456,7 +1456,7 @@ NodeID PAGBuilder::getGepValNode(const Value *val, const LocationSet &ls,
         setCurrentLocation(curVal, nullptr);
         NodeID gepNode = pag->addGepValNode(
             curVal, val, ls,
-            pag->getSymbolTableInfo()->getNodeIDAllocator().allocateValueId(),
+            pag->getNodeIDAllocator().allocateValueId(),
             type, fieldidx);
         addGepEdge(base, gepNode, ls, true);
         setCurrentLocation(cval, cbb);

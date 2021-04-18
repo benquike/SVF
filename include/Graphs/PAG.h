@@ -136,6 +136,8 @@ class PAG : public GenericPAGTy {
     /// Clean up memory
     void destroy();
 
+    NodeIDAllocator nodeIdAllocator;
+
     /// support for serialization
     /// @ {
     friend class boost::serialization::access;
@@ -265,6 +267,8 @@ class PAG : public GenericPAGTy {
     inline SymbolTableInfo *getSymbolTableInfo() const {
         return symbolTableInfo;
     }
+
+    inline NodeIDAllocator &getNodeIDAllocator() { return nodeIdAllocator; }
 
     /// Get LLVM Module
     inline SVFModule *getModule() { return symbolTableInfo->getModule(); }
@@ -772,8 +776,7 @@ class PAG : public GenericPAGTy {
     ///  Add a dummy value/object node according to node ID (llvm value is null)
     //@{
     inline NodeID addDummyValNode() {
-        auto &nodeIDAllocator = symbolTableInfo->getNodeIDAllocator();
-        return addDummyValNode(nodeIDAllocator.allocateValueId());
+        return addDummyValNode(nodeIdAllocator.allocateValueId());
     }
 
     inline NodeID addDummyValNode(NodeID i) {
@@ -781,8 +784,7 @@ class PAG : public GenericPAGTy {
     }
 
     inline NodeID addDummyObjNode(const Type *type = nullptr) {
-        auto &nodeIDAllocator = symbolTableInfo->getNodeIDAllocator();
-        return addDummyObjNode(nodeIDAllocator.allocateObjectId(), type);
+        return addDummyObjNode(nodeIdAllocator.allocateObjectId(), type);
     }
 
     inline NodeID addDummyObjNode(NodeID i, const Type *type) {

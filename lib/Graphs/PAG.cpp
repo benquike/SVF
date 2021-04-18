@@ -368,6 +368,7 @@ const std::string TDJoinPE::toString() const {
 PAG::PAG(SVFProject *proj, bool buildFromFile)
     : fromFile(buildFromFile), nodeNumAfterPAGBuild(0), icfg(nullptr),
       symbolTableInfo(proj->getSymbolTableInfo()), proj(proj),
+      nodeIdAllocator(symbolTableInfo->getNodeIDAllocator()),
       totalPTAPAGEdge(0) {
     if (icfg == nullptr) {
         icfg = new ICFG(this);
@@ -701,9 +702,8 @@ NodeID PAG::addGepObjNode(const MemObj *obj, const LocationSet &ls) {
     assert(0 == GepObjNodeMap.count(std::make_pair(base, ls)) &&
            "this node should not be created before");
 
-    auto &idAllocator = symbolTableInfo->getNodeIDAllocator();
-    NodeID gepId = idAllocator.allocateGepObjectId(base, ls.getOffset(),
-                                                   StInfo::getMaxFieldLimit());
+    NodeID gepId = nodeIdAllocator.allocateGepObjectId(
+        base, ls.getOffset(), StInfo::getMaxFieldLimit());
     GepObjNodeMap[std::make_pair(base, ls)] = gepId;
     auto *node = new GepObjPN(obj, gepId, ls, symbolTableInfo);
     memToFieldsMap[base].set(gepId);
