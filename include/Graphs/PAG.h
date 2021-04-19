@@ -830,7 +830,7 @@ class PAG : public GenericPAGTy {
     }
 
     inline NodeID addBlackholeObjNode() {
-        auto id = getConstantNodeID();
+        auto id = getBlackHoleNodeID();
         return addObjNode(nullptr, new DummyObjPN(id, getBlackHoleObj()), id);
     }
 
