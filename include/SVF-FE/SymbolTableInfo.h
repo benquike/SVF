@@ -253,7 +253,11 @@ class SymbolTableInfo {
     }
 
     /// switch to this api.
-    SymID getValSymId(const Value *val) { return getValSym(val); }
+    SymID getValSymId(const Value *val) {
+        auto iter = valSymMap.find(val);
+        assert(iter != valSymMap.end() && "value sym not found");
+        return iter->second;
+    }
 
     SymID getMemObjId(const MemObj *memObj) {
         assert(mem2IdMap.find(memObj) != mem2IdMap.end() &&
