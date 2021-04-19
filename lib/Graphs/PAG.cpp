@@ -878,12 +878,14 @@ LocationSet PAG::getLocationSetFromBaseNode(NodeID nodeId) {
  * Clean up memory
  */
 void PAG::destroy() {
+    // do not need to free edges here anymore, cleanup in GenericGraph
+#if 0
     for (auto &I : PAGEdgeKindToSetMap) {
         for (auto *edgeIt : I.second) {
             delete edgeIt;
         }
     }
-
+#endif
     // delete icfg;
     // icfg = nullptr;
 }
