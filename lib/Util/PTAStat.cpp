@@ -212,7 +212,7 @@ void PTAStat::performStat() {
     generalNumMap[TotalNumOfObjects] = pag->getObjectNodeNum();
     generalNumMap[TotalNumOfFieldObjects] = pag->getFieldObjNodeNum();
     generalNumMap[MaxStructSize] = symInfo->getMaxStructSize();
-    generalNumMap[TotalNumOfEdges] = pag->getPAGEdgeNum();
+    generalNumMap[TotalNumOfEdges] = pag->getTotalEdgeNum();
     generalNumMap["TotalPTAPAGEdges"] = pag->totalPTAPAGEdge;
     generalNumMap[NumberOfFieldInsensitiveObj] = fiObjNumber;
     generalNumMap[NumberOfFieldSensitiveObj] = fsObjNumber;

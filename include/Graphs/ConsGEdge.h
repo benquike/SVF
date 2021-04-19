@@ -52,18 +52,15 @@ class ConstraintEdge : public GenericConsEdgeTy {
     /// Gep edge is used for field sensitivity
     enum ConstraintEdgeK { Addr, Copy, Store, Load, NormalGep, VariantGep };
 
-  private:
-    EdgeID edgeId;
+    using GEdgeKind = ConstraintEdgeK;
 
   public:
     /// Constructor
     ConstraintEdge(ConstraintNode *s, ConstraintNode *d, ConstraintEdgeK k,
-                   EdgeID id = 0)
-        : GenericConsEdgeTy(s, d, k), edgeId(id) {}
+                   EdgeID id)
+        : GenericConsEdgeTy(s, d, id, k) {}
     /// Destructor
     virtual ~ConstraintEdge() {}
-    /// Return edge ID
-    inline EdgeID getEdgeID() const { return edgeId; }
 
     /// Overloading operator << for dumping ICFG node ID
     //@{

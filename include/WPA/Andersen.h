@@ -500,12 +500,10 @@ class AndersenLCD : virtual public Andersen {
     // redundant visit
     //@{
     bool isMetEdge(ConstraintEdge *edge) const {
-        auto it = metEdges.find(edge->getEdgeID());
+        auto it = metEdges.find(edge->getId());
         return it != metEdges.end();
     };
-    void addMetEdge(ConstraintEdge *edge) {
-        metEdges.insert(edge->getEdgeID());
-    };
+    void addMetEdge(ConstraintEdge *edge) { metEdges.insert(edge->getId()); };
     //@}
 
     // AndersenLCD worklist processer

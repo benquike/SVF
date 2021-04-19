@@ -462,8 +462,7 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
                 NodeID funPtr = _pag->getFunPtr(cbn);
                 DPIm funPtrDpm(dpm);
                 funPtrDpm.setLocVar(
-                    getSVFG()->getDefSVFGNode(_pag->getPAGNode(funPtr)),
-                    funPtr);
+                    getSVFG()->getDefSVFGNode(_pag->getGNode(funPtr)), funPtr);
                 findPT(funPtrDpm);
             }
         } else if (const SVFFunction *fun =
@@ -477,8 +476,7 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
                 NodeID funPtr = _pag->getFunPtr(it);
                 DPIm funPtrDpm(dpm);
                 funPtrDpm.setLocVar(
-                    getSVFG()->getDefSVFGNode(_pag->getPAGNode(funPtr)),
-                    funPtr);
+                    getSVFG()->getDefSVFGNode(_pag->getGNode(funPtr)), funPtr);
                 findPT(funPtrDpm);
             }
         }

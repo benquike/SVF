@@ -25,6 +25,9 @@
  *
  *  Created on: Jul 12, 2014
  *      Author: Yulei Sui, Peng Di, Ding Ye
+ *  Updated by:
+ *     Hui Peng <peng124@purdue.edu>
+ *     2021-04-19
  */
 
 #include "Graphs/ThreadCallGraph.h"
@@ -64,8 +67,7 @@ void ThreadCallGraph::updateCallGraph(PointerAnalysis *pta) {
             PAG *pag = pta->getPAG();
             const PointsTo &targets = pta->getPts(pag->getValueNode(forkedval));
             for (auto ii : targets) {
-                if (auto *objPN =
-                        SVFUtil::dyn_cast<ObjPN>(pag->getPAGNode(ii))) {
+                if (auto *objPN = SVFUtil::dyn_cast<ObjPN>(pag->getGNode(ii))) {
                     const MemObj *obj = pag->getObject(objPN);
                     if (obj->isFunction()) {
                         const auto *callee =
@@ -90,8 +92,7 @@ void ThreadCallGraph::updateCallGraph(PointerAnalysis *pta) {
             PAG *pag = pta->getPAG();
             const PointsTo &targets = pta->getPts(pag->getValueNode(forkedval));
             for (auto ii : targets) {
-                if (auto *objPN =
-                        SVFUtil::dyn_cast<ObjPN>(pag->getPAGNode(ii))) {
+                if (auto *objPN = SVFUtil::dyn_cast<ObjPN>(pag->getGNode(ii))) {
                     const MemObj *obj = pag->getObject(objPN);
                     if (obj->isFunction()) {
                         const auto *callee =
@@ -148,7 +149,7 @@ void ThreadCallGraph::addDirectForkEdge(const CallBlockNode *cs) {
         assert(cs->getCaller() == caller->getFunction() &&
                "callee instruction not inside caller??");
 
-        auto *edge = new ThreadForkEdge(caller, callee, csId);
+        auto *edge = new ThreadForkEdge(caller, callee, getNextEdgeId(), csId);
         edge->addDirectCallSite(cs);
 
         addEdge(edge);
@@ -170,7 +171,7 @@ void ThreadCallGraph::addIndirectForkEdge(const CallBlockNode *cs,
         assert(cs->getCaller() == caller->getFunction() &&
                "callee instruction not inside caller??");
 
-        auto *edge = new ThreadForkEdge(caller, callee, csId);
+        auto *edge = new ThreadForkEdge(caller, callee, getNextEdgeId(), csId);
         edge->addInDirectCallSite(cs, proj);
 
         addEdge(edge);
@@ -205,8 +206,8 @@ void ThreadCallGraph::addDirectJoinEdge(const CallBlockNode *cs,
         if (!hasThreadJoinEdge(cs, joinFunNode, threadRoutineFunNode, csId)) {
             assert(cs->getCaller() == joinFunNode->getFunction() &&
                    "callee instruction not inside caller??");
-            auto *edge =
-                new ThreadJoinEdge(joinFunNode, threadRoutineFunNode, csId);
+            auto *edge = new ThreadJoinEdge(joinFunNode, threadRoutineFunNode,
+                                            getNextEdgeId(), csId);
             edge->addDirectCallSite(cs);
 
             addThreadJoinEdgeSetMap(cs, edge);
@@ -234,7 +235,7 @@ void ThreadCallGraph::addDirectParForEdge(const CallBlockNode *cs) {
         assert(cs->getCaller() == caller->getFunction() &&
                "callee instruction not inside caller??");
 
-        auto *edge = new HareParForEdge(caller, callee, csId);
+        auto *edge = new HareParForEdge(caller, callee, getNextEdgeId(), csId);
         edge->addDirectCallSite(cs);
 
         addEdge(edge);
@@ -257,7 +258,7 @@ void ThreadCallGraph::addIndirectParForEdge(const CallBlockNode *cs,
         assert(cs->getCaller() == caller->getFunction() &&
                "callee instruction not inside caller??");
 
-        auto *edge = new HareParForEdge(caller, callee, csId);
+        auto *edge = new HareParForEdge(caller, callee, getNextEdgeId(), csId);
         edge->addInDirectCallSite(cs, proj);
 
         addEdge(edge);

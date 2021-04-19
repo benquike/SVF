@@ -128,7 +128,7 @@ void traverseFunctionICFG(ICFG *icfg, SVFModule *mod,
 void traverseOnVFG(const SVFG *vfg, const Value *val) {
     PAG *pag = vfg->getPAG();
 
-    PAGNode *pNode = pag->getPAGNode(pag->getValueNode(val));
+    PAGNode *pNode = pag->getGNode(pag->getValueNode(val));
     const VFGNode *vNode = vfg->getDefSVFGNode(pNode);
     FIFOWorkList<const VFGNode *> worklist;
     Set<const VFGNode *> visited;
@@ -211,7 +211,7 @@ void analyzeArgFlowToCondition(const SVFG *vfg, const Value *val,
                                const Function *function) {
     PAG *pag = vfg->getPAG();
 
-    PAGNode *pNode = pag->getPAGNode(pag->getValueNode(val));
+    PAGNode *pNode = pag->getGNode(pag->getValueNode(val));
     const VFGNode *vNode = vfg->getDefSVFGNode(pNode);
     FIFOWorkList<const VFGNode *> worklist;
     Set<const VFGNode *> visited;
@@ -328,7 +328,7 @@ int main(int argc, char **argv) {
 
     llvm::outs() << "=============================\n";
     for (const auto &[csBlock, valId] : indCsSet) {
-        const auto *dn = pag->getPAGNode(valId);
+        const auto *dn = pag->getGNode(valId);
         llvm::outs() << csBlock->toString() << ":" << dn->toString() << "\n";
     }
 

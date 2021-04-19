@@ -301,7 +301,7 @@ void PointerAnalysis::validateTests() {
 
 void PointerAnalysis::dumpAllTypes() {
     for (auto nIter : this->getAllValidPtrs()) {
-        const PAGNode *node = getPAG()->getPAGNode(nIter);
+        const PAGNode *node = getPAG()->getGNode(nIter);
         if (SVFUtil::isa<DummyObjPN>(node) || SVFUtil::isa<DummyValPN>(node)) {
             continue;
         }
@@ -324,7 +324,7 @@ void PointerAnalysis::dumpAllTypes() {
  */
 void PointerAnalysis::dumpPts(NodeID ptr, const PointsTo &pts) {
 
-    const PAGNode *node = pag->getPAGNode(ptr);
+    const PAGNode *node = pag->getGNode(ptr);
     /// print the points-to set of node which has the maximum pts size.
     if (SVFUtil::isa<DummyObjPN>(node)) {
         outs() << "##<Dummy Obj > id:" << node->getId();
@@ -350,13 +350,13 @@ void PointerAnalysis::dumpPts(NodeID ptr, const PointsTo &pts) {
     outs() << "";
 
     for (auto it : pts) {
-        const PAGNode *node = pag->getPAGNode(it);
+        const PAGNode *node = pag->getGNode(it);
         if (SVFUtil::isa<ObjPN>(node) == false) {
             continue;
         }
         NodeID ptd = node->getId();
         outs() << "!!Target NodeID " << ptd << "\t [";
-        const PAGNode *pagNode = pag->getPAGNode(ptd);
+        const PAGNode *pagNode = pag->getGNode(ptd);
         if (SVFUtil::isa<DummyValPN>(node)) {
             outs() << "DummyVal\n";
         } else if (SVFUtil::isa<DummyObjPN>(node)) {
@@ -439,7 +439,7 @@ void PointerAnalysis::resolveIndCalls(const CallBlockNode *cs,
             return;
         }
 
-        if (auto *objPN = SVFUtil::dyn_cast<ObjPN>(pag->getPAGNode(ii))) {
+        if (auto *objPN = SVFUtil::dyn_cast<ObjPN>(pag->getGNode(ii))) {
             const MemObj *obj = pag->getObject(objPN);
 
             if (obj->isFunction()) {
@@ -509,7 +509,7 @@ void PointerAnalysis::getVFnsFromPts(const CallBlockNode *cs,
         Set<const GlobalValue *> vtbls;
         const VTableSet &chaVtbls = chgraph->getCSVtblsBasedonCHA(llvmCS);
         for (auto it : target) {
-            const PAGNode *ptdnode = pag->getPAGNode(it);
+            const PAGNode *ptdnode = pag->getGNode(it);
             if (ptdnode->hasValue()) {
                 if (const auto *vtbl =
                         SVFUtil::dyn_cast<GlobalValue>(ptdnode->getValue())) {

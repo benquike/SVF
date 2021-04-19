@@ -52,7 +52,8 @@ class IndirectSVFGEdge : public VFGEdge {
 
   public:
     /// Constructor
-    IndirectSVFGEdge(VFGNode *s, VFGNode *d, GEdgeFlag k) : VFGEdge(s, d, k) {}
+    IndirectSVFGEdge(VFGNode *s, VFGNode *d, EdgeID id, GEdgeFlag k)
+        : VFGEdge(s, d, id, k) {}
     IndirectSVFGEdge() = default;
 
     virtual ~IndirectSVFGEdge() {}
@@ -109,8 +110,8 @@ class IndirectSVFGEdge : public VFGEdge {
 class IntraIndSVFGEdge : public IndirectSVFGEdge {
 
   public:
-    IntraIndSVFGEdge(VFGNode *s, VFGNode *d)
-        : IndirectSVFGEdge(s, d, IntraIndirectVF) {}
+    IntraIndSVFGEdge(VFGNode *s, VFGNode *d, EdgeID id)
+        : IndirectSVFGEdge(s, d, id, IntraIndirectVF) {}
     IntraIndSVFGEdge() = default;
 
     virtual ~IntraIndSVFGEdge() {}
@@ -152,8 +153,8 @@ class CallIndSVFGEdge : public IndirectSVFGEdge {
     CallSiteID csId;
 
   public:
-    CallIndSVFGEdge(VFGNode *s, VFGNode *d, CallSiteID id)
-        : IndirectSVFGEdge(s, d, makeEdgeFlagWithInvokeID(CallIndVF, id)),
+    CallIndSVFGEdge(VFGNode *s, VFGNode *d, EdgeID eid, CallSiteID id)
+        : IndirectSVFGEdge(s, d, eid, makeEdgeFlagWithInvokeID(CallIndVF, id)),
           csId(id) {}
     CallIndSVFGEdge() = default;
 
@@ -198,8 +199,8 @@ class RetIndSVFGEdge : public IndirectSVFGEdge {
     CallSiteID csId;
 
   public:
-    RetIndSVFGEdge(VFGNode *s, VFGNode *d, CallSiteID id)
-        : IndirectSVFGEdge(s, d, makeEdgeFlagWithInvokeID(RetIndVF, id)),
+    RetIndSVFGEdge(VFGNode *s, VFGNode *d, EdgeID eid, CallSiteID id)
+        : IndirectSVFGEdge(s, d, eid, makeEdgeFlagWithInvokeID(RetIndVF, id)),
           csId(id) {}
     RetIndSVFGEdge() = default;
 
@@ -241,8 +242,8 @@ class RetIndSVFGEdge : public IndirectSVFGEdge {
 class ThreadMHPIndSVFGEdge : public IndirectSVFGEdge {
 
   public:
-    ThreadMHPIndSVFGEdge(VFGNode *s, VFGNode *d)
-        : IndirectSVFGEdge(s, d, TheadMHPIndirectVF) {}
+    ThreadMHPIndSVFGEdge(VFGNode *s, VFGNode *d, EdgeID id)
+        : IndirectSVFGEdge(s, d, id, TheadMHPIndirectVF) {}
     ThreadMHPIndSVFGEdge() = default;
 
     virtual ~ThreadMHPIndSVFGEdge() {}

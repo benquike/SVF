@@ -63,8 +63,6 @@ class ICFG : public GenericICFGTy {
     using CSToRetNodeMapTy = Map<const Instruction *, RetBlockNode *>;
     using InstToBlockNodeMapTy = Map<const Instruction *, IntraBlockNode *>;
 
-    NodeID totalICFGNode;
-
   private:
     FunToFunEntryNodeMapTy
         FunToFunEntryNodeMap; ///< map a function to its FunExitBlockNode
@@ -152,19 +150,6 @@ class ICFG : public GenericICFGTy {
         }
     }
 
-    /// Add ICFG edge
-    inline bool addICFGEdge(ICFGEdge *edge) {
-        bool added1 = edge->getDstNode()->addIncomingEdge(edge);
-        bool added2 = edge->getSrcNode()->addOutgoingEdge(edge);
-        assert(added1 && added2 && "edge not added??");
-        return true;
-    }
-
-    /// Add a ICFG node
-    virtual inline void addICFGNode(ICFGNode *node) {
-        addGNode(node->getId(), node);
-    }
-
     /// Get a basic block ICFGNode
     /// TODO:: need to fix the assertions
     //@{
@@ -206,8 +191,8 @@ class ICFG : public GenericICFGTy {
     }
 
     inline FunEntryBlockNode *addFunEntryICFGNode(const SVFFunction *fun) {
-        FunEntryBlockNode *sNode = new FunEntryBlockNode(totalICFGNode++, fun);
-        addICFGNode(sNode);
+        FunEntryBlockNode *sNode = new FunEntryBlockNode(getNextNodeId(), fun);
+        addGNode(sNode);
         FunToFunEntryNodeMap[fun] = sNode;
         return sNode;
     }
@@ -223,8 +208,8 @@ class ICFG : public GenericICFGTy {
     }
 
     inline FunExitBlockNode *addFunExitICFGNode(const SVFFunction *fun) {
-        FunExitBlockNode *sNode = new FunExitBlockNode(totalICFGNode++, fun);
-        addICFGNode(sNode);
+        FunExitBlockNode *sNode = new FunExitBlockNode(getNextNodeId(), fun);
+        addGNode(sNode);
         FunToFunExitNodeMap[fun] = sNode;
         return sNode;
     }
@@ -270,7 +255,6 @@ class ICFG : public GenericICFGTy {
         boost::serialization::save_map(ar, InstToBlockNodeMap);
 
         ar &globalBlockNode;
-        ar &totalICFGNode;
         ar &pag;
     }
 
@@ -285,7 +269,6 @@ class ICFG : public GenericICFGTy {
         boost::serialization::load_map(ar, InstToBlockNodeMap);
 
         ar &globalBlockNode;
-        ar &totalICFGNode;
         ar &pag;
     }
     /// @}

@@ -112,7 +112,6 @@ bool PTACallGraphNode::isReachableFromProgEntry() const {
 /// Constructor
 PTACallGraph::PTACallGraph(SVFProject *proj, CGEK k)
     : kind(k), pag(proj->getPAG()), proj(proj) {
-    callGraphNodeNum = 0;
     numOfResolvedIndCallEdge = 0;
 }
 
@@ -125,21 +124,20 @@ void PTACallGraph::destroy() {}
  * Add call graph node
  */
 void PTACallGraph::addCallGraphNode(const SVFFunction *fun) {
-    NodeID id = callGraphNodeNum;
-    auto *callGraphNode = new PTACallGraphNode(id, fun);
-    addGNode(id, callGraphNode);
+    auto *callGraphNode = new PTACallGraphNode(getNextNodeId(), fun);
+    addGNode(callGraphNode);
     funToCallGraphNodeMap[fun] = callGraphNode;
-    callGraphNodeNum++;
 }
 
 /*!
  *  Whether we have already created this call graph edge
+ *  FIXME: remove this, use hasGEdge instead
  */
 PTACallGraphEdge *PTACallGraph::hasGraphEdge(PTACallGraphNode *src,
                                              PTACallGraphNode *dst,
                                              PTACallGraphEdge::CEDGEK kind,
                                              CallSiteID csId) const {
-    PTACallGraphEdge edge(src, dst, kind, csId);
+    PTACallGraphEdge edge(src, dst, getDummyEdgeId(), kind, csId);
     PTACallGraphEdge *outEdge = src->hasOutgoingEdge(&edge);
     PTACallGraphEdge *inEdge = dst->hasIncomingEdge(&edge);
     if (outEdge && inEdge) {
@@ -179,7 +177,7 @@ void PTACallGraph::addDirectCallGraphEdge(const CallBlockNode *cs,
     CallSiteID csId = addCallSite(cs, callee->getFunction());
 
     if (!hasGraphEdge(caller, callee, PTACallGraphEdge::CallRetEdge, csId)) {
-        auto *edge = new PTACallGraphEdge(caller, callee,
+        auto *edge = new PTACallGraphEdge(caller, callee, getNextEdgeId(),
                                           PTACallGraphEdge::CallRetEdge, csId);
         edge->addDirectCallSite(cs);
         addEdge(edge);
@@ -202,7 +200,7 @@ void PTACallGraph::addIndirectCallGraphEdge(const CallBlockNode *cs,
     CallSiteID csId = addCallSite(cs, callee->getFunction());
 
     if (!hasGraphEdge(caller, callee, PTACallGraphEdge::CallRetEdge, csId)) {
-        auto *edge = new PTACallGraphEdge(caller, callee,
+        auto *edge = new PTACallGraphEdge(caller, callee, getNextEdgeId(),
                                           PTACallGraphEdge::CallRetEdge, csId);
         edge->addInDirectCallSite(cs, proj);
         addEdge(edge);

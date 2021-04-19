@@ -56,9 +56,9 @@ void FlowSensitiveTBHC::finalize(void) {
 }
 
 void FlowSensitiveTBHC::backPropagate(NodeID clone) {
-    PAGNode *cloneObj = pag->getPAGNode(clone);
+    PAGNode *cloneObj = pag->getGNode(clone);
     assert(cloneObj && "FSTBHC: clone does not exist in PAG?");
-    PAGNode *originalObj = pag->getPAGNode(getOriginalObj(clone));
+    PAGNode *originalObj = pag->getGNode(getOriginalObj(clone));
     assert(cloneObj && "FSTBHC: original object does not exist in PAG?");
     // Check the original object too because when reuse of a gep occurs, the new
     // object is an FI object.
@@ -123,7 +123,7 @@ bool FlowSensitiveTBHC::propAlongIndirectEdge(const IndirectSVFGEdge *edge) {
             }
         }
 
-        if (auto *gep = SVFUtil::dyn_cast<GepObjPN>(pag->getPAGNode(o))) {
+        if (auto *gep = SVFUtil::dyn_cast<GepObjPN>(pag->getGNode(o))) {
             // Want the geps which are at the same "level" as this one (same mem
             // obj, same offset).
             const NodeBS &geps = getGepObjsFromMemObj(
@@ -594,7 +594,7 @@ void FlowSensitiveTBHC::expandFIObjs(const PointsTo &pts,
     for (NodeID o : pts) {
         expandedPts |= getAllFieldsObjNode(o);
         while (const auto *gepObj =
-                   SVFUtil::dyn_cast<GepObjPN>(pag->getPAGNode(o))) {
+                   SVFUtil::dyn_cast<GepObjPN>(pag->getGNode(o))) {
             expandedPts |= getAllFieldsObjNode(o);
             o = gepObj->getBaseNode();
         }

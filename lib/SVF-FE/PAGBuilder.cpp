@@ -121,7 +121,7 @@ PAG *PAGBuilder::build() {
             if (!fun.getLLVMFun()->doesNotReturn() &&
                 !fun.getLLVMFun()->getReturnType()->isVoidTy()) {
                 /// Set up the mapping between function and its PAG RetPN
-                pag->addFunRet(&fun, pag->getPAGNode(pag->getReturnNode(&fun)));
+                pag->addFunRet(&fun, pag->getGNode(pag->getReturnNode(&fun)));
             }
 
             ///
@@ -146,7 +146,7 @@ PAG *PAGBuilder::build() {
                 //    if(I->getType()->isPointerTy())
                 //        addBlackHoleAddrEdge(argValNodeId);
                 // }
-                pag->addFunArgs(&fun, pag->getPAGNode(argValNodeId));
+                pag->addFunArgs(&fun, pag->getGNode(argValNodeId));
             }
         }
 
@@ -340,8 +340,8 @@ void PAGBuilder::processCE(const Value *val) {
             NodeID nres = pag->getValueNode(selectce);
             const CopyPE *cpy1 = addCopyEdge(nsrc1, nres);
             const CopyPE *cpy2 = addCopyEdge(nsrc2, nres);
-            pag->addPhiNode(pag->getPAGNode(nres), cpy1);
-            pag->addPhiNode(pag->getPAGNode(nres), cpy2);
+            pag->addPhiNode(pag->getGNode(nres), cpy1);
+            pag->addPhiNode(pag->getGNode(nres), cpy2);
             setCurrentLocation(cval, cbb);
         }
         // if we meet a int2ptr, then it points-to black hole
@@ -590,7 +590,7 @@ void PAGBuilder::visitPHINode(PHINode &inst) {
 
         NodeID src = getValueNode(val);
         const CopyPE *copy = addCopyEdge(src, dst);
-        pag->addPhiNode(pag->getPAGNode(dst), copy);
+        pag->addPhiNode(pag->getGNode(dst), copy);
     }
 }
 
@@ -677,7 +677,7 @@ void PAGBuilder::visitBinaryOperator(BinaryOperator &inst) {
         Value *opnd = inst.getOperand(i);
         NodeID src = getValueNode(opnd);
         const BinaryOPPE *binayPE = addBinaryOPEdge(src, dst);
-        pag->addBinaryNode(pag->getPAGNode(dst), binayPE);
+        pag->addBinaryNode(pag->getGNode(dst), binayPE);
     }
 }
 
@@ -690,7 +690,7 @@ void PAGBuilder::visitUnaryOperator(UnaryOperator &inst) {
         Value *opnd = inst.getOperand(i);
         NodeID src = getValueNode(opnd);
         const UnaryOPPE *unaryPE = addUnaryOPEdge(src, dst);
-        pag->addUnaryNode(pag->getPAGNode(dst), unaryPE);
+        pag->addUnaryNode(pag->getGNode(dst), unaryPE);
     }
 }
 
@@ -703,7 +703,7 @@ void PAGBuilder::visitCmpInst(CmpInst &inst) {
         Value *opnd = inst.getOperand(i);
         NodeID src = getValueNode(opnd);
         const CmpPE *cmpPE = addCmpEdge(src, dst);
-        pag->addCmpNode(pag->getPAGNode(dst), cmpPE);
+        pag->addCmpNode(pag->getGNode(dst), cmpPE);
     }
 }
 
@@ -721,8 +721,8 @@ void PAGBuilder::visitSelectInst(SelectInst &inst) {
     const CopyPE *cpy2 = addCopyEdge(src2, dst);
 
     /// Two operands have same incoming basic block, both are the current BB
-    pag->addPhiNode(pag->getPAGNode(dst), cpy1);
-    pag->addPhiNode(pag->getPAGNode(dst), cpy2);
+    pag->addPhiNode(pag->getGNode(dst), cpy1);
+    pag->addPhiNode(pag->getGNode(dst), cpy2);
 }
 
 /*!
@@ -753,7 +753,7 @@ void PAGBuilder::visitCallSite(CallSite cs) {
     for (CallSite::arg_iterator itA = cs.arg_begin(); itA != cs.arg_end();
          ++itA) {
         pag->addCallSiteArgs(icfgCallBlockNode,
-                             pag->getPAGNode(getValueNode(*itA)));
+                             pag->getGNode(getValueNode(*itA)));
     }
 
     if (!cs.getType()->isVoidTy()) {
@@ -764,8 +764,8 @@ void PAGBuilder::visitCallSite(CallSite cs) {
         /// FIXME: where is the PAG node added for the callsite ret?
         /// here, when constructing the symboltable,
         /// a value symbol will be created for the call instruction
-        pag->addCallSiteRets(icfgRetBlockNode, pag->getPAGNode(getValueNode(
-                                                   cs.getInstruction())));
+        pag->addCallSiteRets(icfgRetBlockNode,
+                             pag->getGNode(getValueNode(cs.getInstruction())));
     }
 
     // extract direct callees?
@@ -808,7 +808,7 @@ void PAGBuilder::visitReturnInst(ReturnInst &inst) {
         NodeID vnS = getValueNode(src);
         // vnS may be null if src is a null ptr
         const CopyPE *copy = addCopyEdge(vnS, rnF);
-        pag->addPhiNode(pag->getPAGNode(rnF), copy);
+        pag->addPhiNode(pag->getGNode(rnF), copy);
     }
 }
 
@@ -855,7 +855,7 @@ void PAGBuilder::visitBranchInst(BranchInst &inst) {
     }
 
     const UnaryOPPE *unaryPE = addUnaryOPEdge(src, dst);
-    pag->addUnaryNode(pag->getPAGNode(dst), unaryPE);
+    pag->addUnaryNode(pag->getGNode(dst), unaryPE);
 }
 
 void PAGBuilder::visitSwitchInst(SwitchInst &inst) {
@@ -863,7 +863,7 @@ void PAGBuilder::visitSwitchInst(SwitchInst &inst) {
     Value *opnd = inst.getCondition();
     NodeID src = getValueNode(opnd);
     const UnaryOPPE *unaryPE = addUnaryOPEdge(src, dst);
-    pag->addUnaryNode(pag->getPAGNode(dst), unaryPE);
+    pag->addUnaryNode(pag->getGNode(dst), unaryPE);
 }
 
 /*!
@@ -1403,7 +1403,7 @@ void PAGBuilder::handleIndCall(CallSite cs) {
  */
 void PAGBuilder::sanityCheck() {
     for (auto &nIter : *pag) {
-        (void)pag->getPAGNode(nIter.first);
+        (void)pag->getGNode(nIter.first);
         // TODO::
         // (1)  every source(root) node of a pag tree should be object node
         //       if a node has no incoming edge, but has outgoing edges

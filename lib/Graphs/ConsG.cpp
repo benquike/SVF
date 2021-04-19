@@ -47,7 +47,7 @@ const std::string ConstraintNode::toString() const {
 const std::string ConstraintEdge::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
-    rawstr << "ConstraintEdge ID: " << edgeId << ",";
+    rawstr << "ConstraintEdge ID: " << getId() << ",";
     rawstr << "[" << getSrcID() << " -> " << getDstID() << "]";
     return rawstr.str();
 }
@@ -129,7 +129,7 @@ AddrCGEdge::AddrCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id,
                        PAG *pag)
     : ConstraintEdge(s, d, Addr, id) {
     // Retarget addr edges may lead s to be a dummy node
-    PAGNode *node = pag->getPAGNode(s->getId());
+    PAGNode *node = pag->getGNode(s->getId());
     if (!SVFModule::pagReadFromTXT()) {
         assert(!SVFUtil::isa<DummyValPN>(node) && "a dummy node??");
     }
@@ -141,7 +141,7 @@ AddrCGEdge::AddrCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id,
 AddrCGEdge *ConstraintGraph::addAddrCGEdge(NodeID src, NodeID dst) {
     ConstraintNode *srcNode = getConstraintNode(src);
     ConstraintNode *dstNode = getConstraintNode(dst);
-    if (hasEdge(srcNode, dstNode, ConstraintEdge::Addr)) {
+    if (hasGEdge(srcNode, dstNode, ConstraintEdge::Addr)) {
         return nullptr;
     }
     auto *edge = new AddrCGEdge(srcNode, dstNode, edgeIndex++, pag);
@@ -159,7 +159,8 @@ CopyCGEdge *ConstraintGraph::addCopyCGEdge(NodeID src, NodeID dst) {
 
     ConstraintNode *srcNode = getConstraintNode(src);
     ConstraintNode *dstNode = getConstraintNode(dst);
-    if (hasEdge(srcNode, dstNode, ConstraintEdge::Copy) || srcNode == dstNode) {
+    if (hasGEdge(srcNode, dstNode, ConstraintEdge::Copy) ||
+        srcNode == dstNode) {
         return nullptr;
     }
 
@@ -178,7 +179,7 @@ NormalGepCGEdge *ConstraintGraph::addNormalGepCGEdge(NodeID src, NodeID dst,
                                                      const LocationSet &ls) {
     ConstraintNode *srcNode = getConstraintNode(src);
     ConstraintNode *dstNode = getConstraintNode(dst);
-    if (hasEdge(srcNode, dstNode, ConstraintEdge::NormalGep)) {
+    if (hasGEdge(srcNode, dstNode, ConstraintEdge::NormalGep)) {
         return nullptr;
     }
 
@@ -196,7 +197,7 @@ NormalGepCGEdge *ConstraintGraph::addNormalGepCGEdge(NodeID src, NodeID dst,
 VariantGepCGEdge *ConstraintGraph::addVariantGepCGEdge(NodeID src, NodeID dst) {
     ConstraintNode *srcNode = getConstraintNode(src);
     ConstraintNode *dstNode = getConstraintNode(dst);
-    if (hasEdge(srcNode, dstNode, ConstraintEdge::VariantGep)) {
+    if (hasGEdge(srcNode, dstNode, ConstraintEdge::VariantGep)) {
         return nullptr;
     }
 
@@ -214,7 +215,7 @@ VariantGepCGEdge *ConstraintGraph::addVariantGepCGEdge(NodeID src, NodeID dst) {
 LoadCGEdge *ConstraintGraph::addLoadCGEdge(NodeID src, NodeID dst) {
     ConstraintNode *srcNode = getConstraintNode(src);
     ConstraintNode *dstNode = getConstraintNode(dst);
-    if (hasEdge(srcNode, dstNode, ConstraintEdge::Load)) {
+    if (hasGEdge(srcNode, dstNode, ConstraintEdge::Load)) {
         return nullptr;
     }
 
@@ -232,7 +233,7 @@ LoadCGEdge *ConstraintGraph::addLoadCGEdge(NodeID src, NodeID dst) {
 StoreCGEdge *ConstraintGraph::addStoreCGEdge(NodeID src, NodeID dst) {
     ConstraintNode *srcNode = getConstraintNode(src);
     ConstraintNode *dstNode = getConstraintNode(dst);
-    if (hasEdge(srcNode, dstNode, ConstraintEdge::Store)) {
+    if (hasGEdge(srcNode, dstNode, ConstraintEdge::Store)) {
         return nullptr;
     }
 
@@ -535,7 +536,7 @@ struct DOTGraphTraits<ConstraintGraph *> : public DOTGraphTraits<PAG *> {
     }
 
     static bool isNodeHidden(NodeType *n) {
-        PAGNode *node = n->getPAG()->getPAGNode(n->getId());
+        PAGNode *node = n->getPAG()->getGNode(n->getId());
         return node->isIsolatedNode();
     }
 
@@ -543,7 +544,7 @@ struct DOTGraphTraits<ConstraintGraph *> : public DOTGraphTraits<PAG *> {
     /// Either you can choose to display the name of the value or the whole
     /// instruction
     static std::string getNodeLabel(NodeType *n, ConstraintGraph *g) {
-        PAGNode *node = g->getPAG()->getPAGNode(n->getId());
+        PAGNode *node = g->getPAG()->getGNode(n->getId());
         bool briefDisplay = Options::BriefConsCGDotGraph;
         bool nameDisplay = true;
         std::string str;
@@ -574,7 +575,7 @@ struct DOTGraphTraits<ConstraintGraph *> : public DOTGraphTraits<PAG *> {
     }
 
     static std::string getNodeAttributes(NodeType *n, ConstraintGraph *g) {
-        PAGNode *node = g->getPAG()->getPAGNode(n->getId());
+        PAGNode *node = g->getPAG()->getGNode(n->getId());
         return node->getNodeAttrForDotDisplay();
     }
 

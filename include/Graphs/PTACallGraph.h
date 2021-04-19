@@ -74,9 +74,9 @@ class PTACallGraphEdge : public GenericCallGraphEdgeTy {
     /// @}
   public:
     /// Constructor
-    PTACallGraphEdge(PTACallGraphNode *s, PTACallGraphNode *d, CEDGEK kind,
-                     CallSiteID cs)
-        : GenericCallGraphEdgeTy(s, d, makeEdgeFlagWithInvokeID(kind, cs)),
+    PTACallGraphEdge(PTACallGraphNode *s, PTACallGraphNode *d, EdgeID id,
+                     CEDGEK kind, CallSiteID cs)
+        : GenericCallGraphEdgeTy(s, d, id, makeEdgeFlagWithInvokeID(kind, cs)),
           csId(cs) {}
     PTACallGraphEdge() = default;
 
@@ -250,7 +250,6 @@ class PTACallGraph : public GenericCallGraphTy {
         callinstToCallGraphEdgesMap; ///< Map a call instruction to its
                                      ///< corresponding call edges
 
-    NodeID callGraphNodeNum;
     Size_t numOfResolvedIndCallEdge;
 
     SVFProject *proj = nullptr;
@@ -276,7 +275,6 @@ class PTACallGraph : public GenericCallGraphTy {
         boost::serialization::save_map(ar, funToCallGraphNodeMap);
 
         ar &callinstToCallGraphEdgesMap;
-        ar &callGraphNodeNum;
         ar &numOfResolvedIndCallEdge;
         ar &pag;
     }
@@ -293,7 +291,6 @@ class PTACallGraph : public GenericCallGraphTy {
         boost::serialization::load_map(ar, funToCallGraphNodeMap);
 
         ar &callinstToCallGraphEdgesMap;
-        ar &callGraphNodeNum;
         ar &numOfResolvedIndCallEdge;
         ar &pag;
 
@@ -445,10 +442,7 @@ class PTACallGraph : public GenericCallGraphTy {
     }
     //@}
     /// Add call graph edge
-    inline void addEdge(PTACallGraphEdge *edge) {
-        edge->getDstNode()->addIncomingEdge(edge);
-        edge->getSrcNode()->addOutgoingEdge(edge);
-    }
+    inline void addEdge(PTACallGraphEdge *edge) { addGEdge(edge); }
 
     /// Add direct/indirect call edges
     //@{

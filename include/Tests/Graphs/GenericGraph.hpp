@@ -30,9 +30,30 @@ namespace SVF {
 template <typename GEdge>
 void edge_eq_extra_test(const GEdge *e1, const GEdge *e2) {}
 
+template <typename GEdge>
+void dump_edge_pair(const GEdge *e1, const GEdge *e2) {
+    llvm::outs() << "--------- start of e1 --------\n";
+    llvm::outs() << *e1 << "\n";
+    llvm::outs() << "--------- end of e1 --------\n";
+
+    llvm::outs() << "--------- start of e2 --------\n";
+    llvm::outs() << *e2 << "\n";
+    llvm::outs() << "--------- end of e2 --------\n";
+}
+
 template <typename GEdge> void edge_eq_test(const GEdge *e1, const GEdge *e2) {
     ASSERT_NE(e1, e2);
+
+    if (e1->getEdgeKind() != e2->getEdgeKind()) {
+        dump_edge_pair(e1, e2);
+    }
+
     ASSERT_EQ(e1->getEdgeKind(), e2->getEdgeKind());
+
+    if (e1->getSrcID() != e2->getSrcID() || e1->getDstID() != e2->getDstID()) {
+        dump_edge_pair(e1, e2);
+    }
+
     ASSERT_EQ(e1->getSrcID(), e2->getSrcID());
     ASSERT_EQ(e1->getDstID(), e2->getDstID());
     edge_eq_extra_test(e1, e2);
@@ -86,21 +107,31 @@ void graph_eq_extra_test(const Graph *g1, const Graph *g2) {}
 
 template <typename Graph> void graph_eq_test(const Graph *g1, const Graph *g2) {
     ASSERT_NE(g1, g2);
-    ASSERT_EQ(g1->edgeNum, g2->edgeNum);
-    ASSERT_EQ(g1->nodeNum, g2->nodeNum);
 
-    auto it1 = g1->begin();
-    auto it2 = g2->begin();
-    for (; it1 != g1->end() && it2 != g2->end(); it1++, it2++) {
-        ASSERT_EQ(it1->first, it2->first);
+    auto g1_en = g1->getTotalEdgeNum();
+    auto g2_en = g2->getTotalEdgeNum();
+    auto g1_nn = g1->getTotalNodeNum();
+    auto g2_nn = g2->getTotalNodeNum();
+    llvm::outs() << "Edge #, g1: " << g1_en << ", g2: " << g2_en << "\n";
+    llvm::outs() << "Node #, g1: " << g1_nn << ", g2: " << g2_nn << "\n";
 
-        auto *n1 = it1->second;
-        auto *n2 = it2->second;
+    ASSERT_EQ(g1_en, g2_en);
+    ASSERT_EQ(g1_nn, g2_nn);
+
+    for (auto it = g1->begin(); it != g1->end(); it++) {
+
+        if (!g2->hasGNode(it->first)) {
+            llvm::outs() << "~~~~~~~~~~~~~~~~~~~~~~~\n";
+            llvm::outs() << *(it->second) << "\n";
+            llvm::outs() << "------------------------\n";
+        }
+
+        ASSERT_TRUE(g2->hasGNode(it->first));
+
+        auto *n1 = it->second;
+        auto *n2 = g2->getGNode(it->first);
         node_eq_test(n1, n2);
     }
-
-    ASSERT_EQ(it1, g1->end());
-    ASSERT_EQ(it2, g2->end());
 
     graph_eq_extra_test(g1, g2);
 }

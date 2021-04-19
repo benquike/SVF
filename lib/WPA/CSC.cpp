@@ -97,17 +97,17 @@ void CSC::visit(NodeID nodeId, Size_t _w) {
         _S.pop();
         _revS.push(backNodeId);
         ConstraintNode *backNode = _consG->getConstraintNode(backNodeId);
-        if (_consG->hasEdge(node, backNode, ConstraintEdge::NormalGep)) {
+        if (_consG->hasGEdge(node, backNode, ConstraintEdge::NormalGep)) {
             auto *normalGep = SVFUtil::dyn_cast<NormalGepCGEdge>(
-                _consG->getEdge(node, backNode, ConstraintEdge::NormalGep));
+                _consG->getGEdge(node, backNode, ConstraintEdge::NormalGep));
             Size_t _w = normalGep->getLocationSet().getOffset();
             Size_t _l = _D[nodeId] + _w - _D[backNodeId];
             backNode->strides.set(_l);
             for (auto cNodeId : _C)
                 _consG->getConstraintNode(cNodeId)->strides.set(_l);
-        } else if (_consG->hasEdge(node, backNode,
-                                   ConstraintEdge::VariantGep) ||
-                   _consG->hasEdge(node, backNode, ConstraintEdge::Copy)) {
+        } else if (_consG->hasGEdge(node, backNode,
+                                    ConstraintEdge::VariantGep) ||
+                   _consG->hasGEdge(node, backNode, ConstraintEdge::Copy)) {
             Size_t _l = _D[nodeId] - _D[backNodeId];
             backNode->strides.set(_l);
             for (auto cNodeId : _C)

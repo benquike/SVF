@@ -55,6 +55,7 @@ const string pureVirtualFunName = "__cxa_pure_virtual";
 
 const string ztiLabel = "_ZTI";
 
+//// FIXME: remove this and use hasGEdge in GenericGraph.h
 static bool hasEdge(const CHNode *src, const CHNode *dst,
                     CHEdge::CHEDGETYPE et) {
     for (auto *it : src->getOutEdges()) {
@@ -316,9 +317,8 @@ void CHGraph::addEdge(const string &className, const string &baseClassName,
     assert(srcNode && dstNode && "node not found?");
 
     if (!hasEdge(srcNode, dstNode, edgeType)) {
-        auto *edge = new CHEdge(srcNode, dstNode, edgeType);
-        srcNode->addOutgoingEdge(edge);
-        dstNode->addIncomingEdge(edge);
+        auto *edge = new CHEdge(srcNode, dstNode, getNextEdgeId(), edgeType);
+        addGEdge(edge);
     }
 }
 

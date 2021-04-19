@@ -107,6 +107,7 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
     }
     //@}
 
+#if 0
     //// Return true if this edge exits
     inline bool hasEdge(ConstraintNode *src, ConstraintNode *dst,
                         ConstraintEdge::ConstraintEdgeK kind) {
@@ -148,6 +149,7 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
             return nullptr;
         }
     }
+#endif
 
     /// Add a PAG edge into Edge map
     //@{

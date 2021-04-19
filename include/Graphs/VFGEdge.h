@@ -63,7 +63,8 @@ class VFGEdge : public GenericVFGEdgeTy {
 
   public:
     /// Constructor
-    VFGEdge(VFGNode *s, VFGNode *d, GEdgeFlag k) : GenericVFGEdgeTy(s, d, k) {}
+    VFGEdge(VFGNode *s, VFGNode *d, EdgeID id, GEdgeFlag k)
+        : GenericVFGEdgeTy(s, d, id, k) {}
     VFGEdge() = default;
 
     /// Destructor
@@ -140,7 +141,8 @@ class DirectSVFGEdge : public VFGEdge {
 
   public:
     /// Constructor
-    DirectSVFGEdge(VFGNode *s, VFGNode *d, GEdgeFlag k) : VFGEdge(s, d, k) {}
+    DirectSVFGEdge(VFGNode *s, VFGNode *d, EdgeID id, GEdgeFlag k)
+        : VFGEdge(s, d, id, k) {}
     DirectSVFGEdge() = default;
 
     virtual ~DirectSVFGEdge() {}
@@ -181,8 +183,8 @@ class IntraDirSVFGEdge : public DirectSVFGEdge {
 
   public:
     /// Constructor
-    IntraDirSVFGEdge(VFGNode *s, VFGNode *d)
-        : DirectSVFGEdge(s, d, IntraDirectVF) {}
+    IntraDirSVFGEdge(VFGNode *s, VFGNode *d, EdgeID id)
+        : DirectSVFGEdge(s, d, id, IntraDirectVF) {}
     IntraDirSVFGEdge() = default;
 
     virtual ~IntraDirSVFGEdge() {}
@@ -226,8 +228,8 @@ class CallDirSVFGEdge : public DirectSVFGEdge {
 
   public:
     /// Constructor
-    CallDirSVFGEdge(VFGNode *s, VFGNode *d, CallSiteID id)
-        : DirectSVFGEdge(s, d, makeEdgeFlagWithInvokeID(CallDirVF, id)),
+    CallDirSVFGEdge(VFGNode *s, VFGNode *d, EdgeID eid, CallSiteID id)
+        : DirectSVFGEdge(s, d, eid, makeEdgeFlagWithInvokeID(CallDirVF, id)),
           csId(id) {}
     CallDirSVFGEdge() = default;
     virtual ~CallDirSVFGEdge() {}
@@ -275,8 +277,8 @@ class RetDirSVFGEdge : public DirectSVFGEdge {
 
   public:
     /// Constructor
-    RetDirSVFGEdge(VFGNode *s, VFGNode *d, CallSiteID id)
-        : DirectSVFGEdge(s, d, makeEdgeFlagWithInvokeID(RetDirVF, id)),
+    RetDirSVFGEdge(VFGNode *s, VFGNode *d, EdgeID eid, CallSiteID id)
+        : DirectSVFGEdge(s, d, eid, makeEdgeFlagWithInvokeID(RetDirVF, id)),
           csId(id) {}
     RetDirSVFGEdge() = default;
 

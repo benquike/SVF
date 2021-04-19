@@ -365,12 +365,7 @@ class VFG : public GenericVFGTy {
     //@}
 
     /// Add VFG edge
-    inline bool addVFGEdge(VFGEdge *edge) {
-        bool added1 = edge->getDstNode()->addIncomingEdge(edge);
-        bool added2 = edge->getSrcNode()->addOutgoingEdge(edge);
-        assert(added1 && added2 && "edge not added??");
-        return true;
-    }
+    inline bool addVFGEdge(VFGEdge *edge) { return addGEdge(edge); }
 
   protected:
     /// sanitize Intra edges, verify that both nodes belong to the same

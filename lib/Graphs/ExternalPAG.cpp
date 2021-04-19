@@ -52,14 +52,14 @@ bool ExternalPAG::addExternalPAG(const SVFFunction *function) {
     // Add the value nodes.
     for (auto extNodeIt : this->getValueNodes()) {
         NodeID newNodeId = pag->addDummyValNode();
-        extToNewNodes[extNodeIt] = pag->getPAGNode(newNodeId);
+        extToNewNodes[extNodeIt] = pag->getGNode(newNodeId);
     }
 
     // Add the object nodes.
     for (auto extNodeIt : this->getObjectNodes()) {
         // TODO: fix obj node - there's more to it?
         NodeID newNodeId = pag->addDummyObjNode();
-        extToNewNodes[extNodeIt] = pag->getPAGNode(newNodeId);
+        extToNewNodes[extNodeIt] = pag->getGNode(newNodeId);
     }
 
     // Add the edges.
@@ -88,10 +88,12 @@ bool ExternalPAG::addExternalPAG(const SVFFunction *function) {
             pag->addVariantGepPE(srcId, dstId);
         } else if (extEdgeType == "call") {
             pag->addEdge(srcNode, dstNode,
-                         new CallPE(srcNode, dstNode, pag, nullptr));
+                         new CallPE(srcNode, dstNode, pag->getNextEdgeId(), pag,
+                                    nullptr));
         } else if (extEdgeType == "ret") {
             pag->addEdge(srcNode, dstNode,
-                         new RetPE(srcNode, dstNode, pag, nullptr));
+                         new RetPE(srcNode, dstNode, pag->getNextEdgeId(), pag,
+                                   nullptr));
         } else if (extEdgeType == "cmp") {
             pag->addCmpPE(srcId, dstId);
         } else if (extEdgeType == "binary-op") {

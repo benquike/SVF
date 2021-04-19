@@ -25,6 +25,9 @@
  *
  *  Created on: Oct 28, 2013
  *      Author: Yulei Sui
+ *  Updated by:
+ *     Hui Peng <peng124@purdue.edu>
+ *     2021-04-19
  */
 
 #include "Graphs/SVFG.h"
@@ -422,7 +425,8 @@ SVFGEdge *SVFG::addIntraIndirectVFEdge(NodeID srcId, NodeID dstId,
                     : nullptr);
     }
 
-    auto *indirectEdge = new IntraIndSVFGEdge(srcNode, dstNode);
+    auto *indirectEdge =
+        new IntraIndSVFGEdge(srcNode, dstNode, getNextEdgeId());
     indirectEdge->addPointsTo(cpts);
     return (addSVFGEdge(indirectEdge) ? indirectEdge : nullptr);
 }
@@ -444,7 +448,8 @@ SVFGEdge *SVFG::addThreadMHPIndirectVFEdge(NodeID srcId, NodeID dstId,
                     : nullptr);
     }
 
-    auto *indirectEdge = new ThreadMHPIndSVFGEdge(srcNode, dstNode);
+    auto *indirectEdge =
+        new ThreadMHPIndSVFGEdge(srcNode, dstNode, getNextEdgeId());
     indirectEdge->addPointsTo(cpts);
     return (addSVFGEdge(indirectEdge) ? indirectEdge : nullptr);
 }
@@ -465,7 +470,8 @@ SVFGEdge *SVFG::addCallIndirectVFEdge(NodeID srcId, NodeID dstId,
                     : nullptr);
     }
 
-    auto *callEdge = new CallIndSVFGEdge(srcNode, dstNode, csId);
+    auto *callEdge =
+        new CallIndSVFGEdge(srcNode, dstNode, getNextEdgeId(), csId);
     callEdge->addPointsTo(cpts);
     return (addSVFGEdge(callEdge) ? callEdge : nullptr);
 }
@@ -486,7 +492,7 @@ SVFGEdge *SVFG::addRetIndirectVFEdge(NodeID srcId, NodeID dstId,
                     : nullptr);
     }
 
-    auto *retEdge = new RetIndSVFGEdge(srcNode, dstNode, csId);
+    auto *retEdge = new RetIndSVFGEdge(srcNode, dstNode, getNextEdgeId(), csId);
     retEdge->addPointsTo(cpts);
     return (addSVFGEdge(retEdge) ? retEdge : nullptr);
 }
@@ -562,7 +568,7 @@ void SVFG::getInterVFEdgesForIndirectCallSite(
                "function has more arguments than call site");
         if (callee->getLLVMFun()->isVarArg()) {
             NodeID varFunArg = pag->getVarargNode(callee);
-            const PAGNode *varFunArgNode = pag->getPAGNode(varFunArg);
+            const PAGNode *varFunArgNode = pag->getGNode(varFunArg);
             if (varFunArgNode->isPointer()) {
                 for (; csArgIt != csArgEit; csArgIt++) {
                     const PAGNode *cs_arg = *csArgIt;

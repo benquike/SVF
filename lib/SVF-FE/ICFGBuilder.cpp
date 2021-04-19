@@ -181,6 +181,7 @@ void ICFGBuilder::connectGlobalToProgEntry() {
 
     FunEntryBlockNode *entryNode = icfg->getFunEntryBlockNode(mainFunc);
     GlobalBlockNode *globalNode = icfg->getGlobalBlockNode();
-    auto *intraEdge = new IntraCFGEdge(entryNode, globalNode);
-    icfg->addICFGEdge(intraEdge);
+    auto *intraEdge =
+        new IntraCFGEdge(entryNode, globalNode, icfg->getNextEdgeId());
+    icfg->addGEdge(intraEdge);
 }

@@ -51,8 +51,8 @@ class CHEdge : public GenericCHEdgeTy {
 
     using CHEdgeSetTy = GenericNode<CHNode, CHEdge>::GEdgeSetTy;
 
-    CHEdge(CHNode *s, CHNode *d, CHEDGETYPE et, GEdgeFlag k = 0)
-        : GenericCHEdgeTy(s, d, k) {
+    CHEdge(CHNode *s, CHNode *d, EdgeID id, CHEDGETYPE et, GEdgeFlag k = 0)
+        : GenericCHEdgeTy(s, d, id, k) {
         edgeType = et;
     }
 

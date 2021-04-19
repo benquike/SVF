@@ -185,10 +185,10 @@ const std::string RetCFGEdge::toString() const {
  * 2) connect ICFG edges
  *    between two statements (PAGEdges)
  */
-ICFG::ICFG(PAG *pag) : totalICFGNode(0), pag(pag) {
+ICFG::ICFG(PAG *pag) : pag(pag) {
     DBOUT(DGENERAL, outs() << pasMsg("\tCreate ICFG ...\n"));
-    globalBlockNode = new GlobalBlockNode(totalICFGNode++);
-    addICFGNode(globalBlockNode);
+    globalBlockNode = new GlobalBlockNode(getNextNodeId());
+    addGNode(globalBlockNode);
     buildICFG();
 }
 
@@ -271,10 +271,12 @@ FunExitBlockNode *ICFG::getFunExitBlockNode(const SVFFunction *fun) {
 
 /*!
  * Whether we has an intra ICFG edge
+ *
+ * FIXME: cleanup this code
  */
 ICFGEdge *ICFG::hasIntraICFGEdge(ICFGNode *src, ICFGNode *dst,
                                  ICFGEdge::ICFGEdgeK kind) {
-    ICFGEdge edge(src, dst, kind);
+    ICFGEdge edge(src, dst, getDummyEdgeId(), kind);
     ICFGEdge *outEdge = src->hasOutgoingEdge(&edge);
     ICFGEdge *inEdge = dst->hasIncomingEdge(&edge);
     if (outEdge && inEdge) {
@@ -287,10 +289,11 @@ ICFGEdge *ICFG::hasIntraICFGEdge(ICFGNode *src, ICFGNode *dst,
 
 /*!
  * Whether we has an inter ICFG edge
+ * FIXME: cleanup this code
  */
 ICFGEdge *ICFG::hasInterICFGEdge(ICFGNode *src, ICFGNode *dst,
                                  ICFGEdge::ICFGEdgeK kind) {
-    ICFGEdge edge(src, dst, kind);
+    ICFGEdge edge(src, dst, getDummyEdgeId(), kind);
     ICFGEdge *outEdge = src->hasOutgoingEdge(&edge);
     ICFGEdge *inEdge = dst->hasIncomingEdge(&edge);
     if (outEdge && inEdge) {
@@ -306,7 +309,7 @@ ICFGEdge *ICFG::hasInterICFGEdge(ICFGNode *src, ICFGNode *dst,
  */
 ICFGEdge *ICFG::hasThreadICFGEdge(ICFGNode *src, ICFGNode *dst,
                                   ICFGEdge::ICFGEdgeK kind) {
-    ICFGEdge edge(src, dst, kind);
+    ICFGEdge edge(src, dst, getDummyEdgeId(), kind);
     ICFGEdge *outEdge = src->hasOutgoingEdge(&edge);
     ICFGEdge *inEdge = dst->hasIncomingEdge(&edge);
     if (outEdge && inEdge) {
@@ -347,8 +350,8 @@ ICFGEdge *ICFG::addIntraEdge(ICFGNode *srcNode, ICFGNode *dstNode) {
         return nullptr;
     }
 
-    auto *intraEdge = new IntraCFGEdge(srcNode, dstNode);
-    return (addICFGEdge(intraEdge) ? intraEdge : nullptr);
+    auto *intraEdge = new IntraCFGEdge(srcNode, dstNode, getNextEdgeId());
+    return (addGEdge(intraEdge) ? intraEdge : nullptr);
 }
 
 /*!
@@ -365,9 +368,9 @@ ICFGEdge *ICFG::addConditionalIntraEdge(ICFGNode *srcNode, ICFGNode *dstNode,
         return nullptr;
     }
 
-    auto *intraEdge = new IntraCFGEdge(srcNode, dstNode);
+    auto *intraEdge = new IntraCFGEdge(srcNode, dstNode, getNextEdgeId());
     intraEdge->setBranchCondtion(condition, branchID);
-    return (addICFGEdge(intraEdge) ? intraEdge : nullptr);
+    return (addGEdge(intraEdge) ? intraEdge : nullptr);
 }
 
 /*!
@@ -380,8 +383,8 @@ ICFGEdge *ICFG::addCallEdge(ICFGNode *srcNode, ICFGNode *dstNode,
         return nullptr;
     }
 
-    auto *callEdge = new CallCFGEdge(srcNode, dstNode, cs);
-    return (addICFGEdge(callEdge) ? callEdge : nullptr);
+    auto *callEdge = new CallCFGEdge(srcNode, dstNode, getNextEdgeId(), cs);
+    return (addGEdge(callEdge) ? callEdge : nullptr);
 }
 
 /*!
@@ -394,8 +397,8 @@ ICFGEdge *ICFG::addRetEdge(ICFGNode *srcNode, ICFGNode *dstNode,
         return nullptr;
     }
 
-    auto *retEdge = new RetCFGEdge(srcNode, dstNode, cs);
-    return (addICFGEdge(retEdge) ? retEdge : nullptr);
+    auto *retEdge = new RetCFGEdge(srcNode, dstNode, getNextEdgeId(), cs);
+    return (addGEdge(retEdge) ? retEdge : nullptr);
 }
 
 /*!
@@ -440,16 +443,16 @@ void ICFG::updateCallGraph(PTACallGraph *callgraph) {
 
 IntraBlockNode *ICFG::addIntraBlockICFGNode(const Instruction *inst) {
     IntraBlockNode *sNode =
-        new IntraBlockNode(totalICFGNode++, inst, pag->getModule());
-    addICFGNode(sNode);
+        new IntraBlockNode(getNextNodeId(), inst, pag->getModule());
+    addGNode(sNode);
     InstToBlockNodeMap[inst] = sNode;
     return sNode;
 }
 
 CallBlockNode *ICFG::addCallICFGNode(const Instruction *cs) {
     CallBlockNode *sNode =
-        new CallBlockNode(totalICFGNode++, cs, pag->getModule());
-    addICFGNode(sNode);
+        new CallBlockNode(getNextNodeId(), cs, pag->getModule());
+    addGNode(sNode);
     CSToCallNodeMap[cs] = sNode;
     return sNode;
 }
@@ -457,10 +460,10 @@ CallBlockNode *ICFG::addCallICFGNode(const Instruction *cs) {
 RetBlockNode *ICFG::addRetICFGNode(const Instruction *cs) {
     CallBlockNode *callBlockNode = getCallBlockNode(cs);
     RetBlockNode *sNode =
-        new RetBlockNode(totalICFGNode++, cs, callBlockNode, pag->getModule());
+        new RetBlockNode(getNextNodeId(), cs, callBlockNode, pag->getModule());
 
     callBlockNode->setRetBlockNode(sNode);
-    addICFGNode(sNode);
+    addGNode(sNode);
     CSToRetNodeMap[cs] = sNode;
     return sNode;
 }

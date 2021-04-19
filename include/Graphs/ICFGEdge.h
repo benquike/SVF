@@ -58,8 +58,8 @@ class ICFGEdge : public GenericICFGEdgeTy {
 
   public:
     /// Constructor
-    ICFGEdge(ICFGNode *s, ICFGNode *d, GEdgeFlag k)
-        : GenericICFGEdgeTy(s, d, k) {}
+    ICFGEdge(ICFGNode *s, ICFGNode *d, EdgeID id, GEdgeFlag k)
+        : GenericICFGEdgeTy(s, d, id, k) {}
 
     ICFGEdge() = default;
 
@@ -122,7 +122,9 @@ class IntraCFGEdge : public ICFGEdge {
     using BranchCondition = std::pair<const Value *, NodeID>;
 
     /// Constructor
-    IntraCFGEdge(ICFGNode *s, ICFGNode *d) : ICFGEdge(s, d, IntraCF) {}
+    IntraCFGEdge(ICFGNode *s, ICFGNode *d, EdgeID id)
+        : ICFGEdge(s, d, id, IntraCF) {}
+
     IntraCFGEdge() = default;
     virtual ~IntraCFGEdge() {}
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
@@ -179,8 +181,8 @@ class CallCFGEdge : public ICFGEdge {
 
   public:
     /// Constructor
-    CallCFGEdge(ICFGNode *s, ICFGNode *d, const Instruction *c)
-        : ICFGEdge(s, d, CallCF), cs(c) {}
+    CallCFGEdge(ICFGNode *s, ICFGNode *d, EdgeID id, const Instruction *c)
+        : ICFGEdge(s, d, id, CallCF), cs(c) {}
     CallCFGEdge() = default;
 
     virtual ~CallCFGEdge() {}
@@ -230,8 +232,8 @@ class RetCFGEdge : public ICFGEdge {
 
   public:
     /// Constructor
-    RetCFGEdge(ICFGNode *s, ICFGNode *d, const Instruction *c)
-        : ICFGEdge(s, d, RetCF), cs(c) {}
+    RetCFGEdge(ICFGNode *s, ICFGNode *d, EdgeID id, const Instruction *c)
+        : ICFGEdge(s, d, id, RetCF), cs(c) {}
     RetCFGEdge() = default;
 
     virtual ~RetCFGEdge() {}

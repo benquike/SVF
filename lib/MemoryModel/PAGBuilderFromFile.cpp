@@ -126,7 +126,7 @@ PAG *PAGBuilderFromFile::build() {
     /// nodes.
     u32_t lower_bound = gepNodeNumIndex;
     for (u32_t i = 0; i < lower_bound; i++) {
-        pag->incNodeNum();
+        pag->getNextNodeId();
     }
 
     pag->setNodeNumAfterPAGBuild(pag->getTotalNodeNum());
@@ -141,8 +141,8 @@ void PAGBuilderFromFile::addEdge(NodeID srcID, NodeID dstID,
                                  Size_t offsetOrCSId, std::string edge) {
 
     // check whether these two nodes available
-    PAGNode *srcNode = pag->getPAGNode(srcID);
-    PAGNode *dstNode = pag->getPAGNode(dstID);
+    PAGNode *srcNode = pag->getGNode(srcID);
+    PAGNode *dstNode = pag->getGNode(dstID);
 
     /// sanity check for PAG from txt
     assert(SVFUtil::isa<ValPN>(dstNode) && "dst not an value node?");
@@ -165,11 +165,13 @@ void PAGBuilderFromFile::addEdge(NodeID srcID, NodeID dstID,
     } else if (edge == "variant-gep") {
         pag->addVariantGepPE(srcID, dstID);
     } else if (edge == "call") {
-        pag->addEdge(srcNode, dstNode,
-                     new CallPE(srcNode, dstNode, pag, nullptr));
+        pag->addEdge(
+            srcNode, dstNode,
+            new CallPE(srcNode, dstNode, pag->getNextEdgeId(), pag, nullptr));
     } else if (edge == "ret") {
-        pag->addEdge(srcNode, dstNode,
-                     new RetPE(srcNode, dstNode, pag, nullptr));
+        pag->addEdge(
+            srcNode, dstNode,
+            new RetPE(srcNode, dstNode, pag->getNextEdgeId(), pag, nullptr));
     } else if (edge == "cmp") {
         pag->addCmpPE(srcID, dstID);
     } else if (edge == "binary-op") {
