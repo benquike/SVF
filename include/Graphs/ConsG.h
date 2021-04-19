@@ -54,7 +54,6 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
     NodeToRepMap nodeToRepMap;
     NodeToSubsMap nodeToSubsMap;
     WorkList nodesToBeCollapsed;
-    EdgeID edgeIndex;
 
     ConstraintEdge::ConstraintEdgeSetTy AddrCGEdgeSet;
     ConstraintEdge::ConstraintEdgeSetTy directEdgeSet;
@@ -86,7 +85,7 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
 
   public:
     /// Constructor
-    ConstraintGraph(PAG *p) : pag(p), edgeIndex(0) { buildCG(); }
+    ConstraintGraph(PAG *p) : pag(p) { buildCG(); }
     /// Destructor
     virtual ~ConstraintGraph() { destroy(); }
 
