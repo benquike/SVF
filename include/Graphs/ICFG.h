@@ -120,8 +120,7 @@ class ICFG : public GenericICFGTy {
   public:
     /// Remove a SVFG edge
     inline void removeICFGEdge(ICFGEdge *edge) {
-        edge->getDstNode()->removeIncomingEdge(edge);
-        edge->getSrcNode()->removeOutgoingEdge(edge);
+        removeGEdge(edge);
         delete edge;
     }
     /// Remove a ICFGNode

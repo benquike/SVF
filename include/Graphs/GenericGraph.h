@@ -440,6 +440,32 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
         NodeToIDMap.erase(it2);
     }
 
+    /// Delete an edge
+    inline void removeGEdge(EdgeType *edge) {
+        // sanity checls
+        assert(edge != nullptr && "edge is null");
+        NodeType *srcNode = edge->getSrcNode();
+        NodeType *dstNode = edge->getDstNode();
+        assert((srcNode != nullptr && dstNode != nullptr) &&
+               "Either src or dst node is nullptr");
+
+        assert((NodeToIDMap.find(srcNode) != NodeToIDMap.end() &&
+                NodeToIDMap.find(dstNode) != NodeToIDMap.end()) &&
+               "Either src or dst node not in the graph");
+
+        // remove the edge from the maps
+        auto it = IDToEdgeMap.find(edge->getId());
+        assert(it != IDToEdgeMap.end() && "can not find the edge by ID");
+        IDToEdgeMap.erase(it);
+        auto it2 = EdgeToIDMap.find(edge);
+        assert(it2 != EdgeToIDMap.end() && "can not find the edge by addr");
+        EdgeToIDMap.erase(it2);
+
+        // remove the edge from src and dst node's edges
+        srcNode->removeOutgoingEdge(edge);
+        dstNode->removeIncomingEdge(edge);
+    }
+
     /// Get total number of node/edge
     inline NodeID getTotalNodeNum() const { return IDToNodeMap.size(); }
     inline EdgeID getTotalEdgeNum() const { return IDToEdgeMap.size(); }

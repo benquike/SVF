@@ -347,8 +347,7 @@ class VFG : public GenericVFGTy {
 
     /// Remove a SVFG edge
     inline void removeVFGEdge(VFGEdge *edge) {
-        edge->getDstNode()->removeIncomingEdge(edge);
-        edge->getSrcNode()->removeOutgoingEdge(edge);
+        removeGEdge(edge);
         delete edge;
     }
     /// Remove a VFGNode
