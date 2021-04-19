@@ -271,6 +271,7 @@ class ICFG : public GenericICFGTy {
 
         ar &globalBlockNode;
         ar &totalICFGNode;
+        ar &pag;
     }
 
     template <typename Archive>
@@ -285,7 +286,7 @@ class ICFG : public GenericICFGTy {
 
         ar &globalBlockNode;
         ar &totalICFGNode;
-        pag = SVFProject::getCurrentProject()->getPAG();
+        ar &pag;
     }
     /// @}
 };
