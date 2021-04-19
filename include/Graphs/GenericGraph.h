@@ -426,12 +426,18 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
 
     /// Delete a node
     inline void removeGNode(NodeType *node) {
-        assert(node->hasIncomingEdge() == false &&
-               node->hasOutgoingEdge() == false &&
+        // sanity checks
+        assert(node != nullptr && "node is null");
+        assert(!node->hasIncomingEdge() && !node->hasOutgoingEdge() &&
                "node which have edges can't be deleted");
-        iterator it = IDToNodeMap.find(node->getId());
-        assert(it != IDToNodeMap.end() && "can not find the node");
+
+        // remove the node from the maps
+        auto it = IDToNodeMap.find(node->getId());
+        assert(it != IDToNodeMap.end() && "can not find the node by ID");
         IDToNodeMap.erase(it);
+        auto it2 = NodeToIDMap.find(node);
+        assert(it2 != NodeToIDMap.end() && "can not find the node by addr");
+        NodeToIDMap.erase(it2);
     }
 
     /// Get total number of node/edge
