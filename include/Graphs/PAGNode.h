@@ -233,20 +233,6 @@ class PAGNode : public GenericPAGNodeTy {
     }
     //@}
 
-    ///  add methods of the components
-    //@{
-    inline void addInEdge(PAGEdge *inEdge) {
-        GNodeK kind = inEdge->getEdgeKind();
-        InEdgeKindToSetMap[kind].insert(inEdge);
-        addIncomingEdge(inEdge);
-    }
-
-    inline void addOutEdge(PAGEdge *outEdge) {
-        GNodeK kind = outEdge->getEdgeKind();
-        OutEdgeKindToSetMap[kind].insert(outEdge);
-        addOutgoingEdge(outEdge);
-    }
-
     virtual const std::string toString() const;
 
     /// Get shape and/or color of node for .dot display.
