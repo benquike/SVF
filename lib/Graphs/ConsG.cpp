@@ -146,9 +146,8 @@ AddrCGEdge *ConstraintGraph::addAddrCGEdge(NodeID src, NodeID dst) {
     }
     auto *edge = new AddrCGEdge(srcNode, dstNode, getNextEdgeId(), pag);
     bool added = AddrCGEdgeSet.insert(edge).second;
-    assert(added && "not added??");
-    srcNode->addOutgoingAddrEdge(edge);
-    dstNode->addIncomingAddrEdge(edge);
+    bool gadded = addGEdge(edge);
+    assert(gadded && added && "not added??");
     return edge;
 }
 
@@ -166,9 +165,8 @@ CopyCGEdge *ConstraintGraph::addCopyCGEdge(NodeID src, NodeID dst) {
 
     auto *edge = new CopyCGEdge(srcNode, dstNode, getNextEdgeId());
     bool added = directEdgeSet.insert(edge).second;
-    assert(added && "not added??");
-    srcNode->addOutgoingCopyEdge(edge);
-    dstNode->addIncomingCopyEdge(edge);
+    bool gadded = addGEdge(edge);
+    assert(gadded && added && "not added??");
     return edge;
 }
 
@@ -185,9 +183,8 @@ NormalGepCGEdge *ConstraintGraph::addNormalGepCGEdge(NodeID src, NodeID dst,
 
     auto *edge = new NormalGepCGEdge(srcNode, dstNode, ls, getNextEdgeId());
     bool added = directEdgeSet.insert(edge).second;
-    assert(added && "not added??");
-    srcNode->addOutgoingGepEdge(edge);
-    dstNode->addIncomingGepEdge(edge);
+    bool gadded = addGEdge(edge);
+    assert(gadded && added && "not added??");
     return edge;
 }
 
@@ -203,9 +200,8 @@ VariantGepCGEdge *ConstraintGraph::addVariantGepCGEdge(NodeID src, NodeID dst) {
 
     auto *edge = new VariantGepCGEdge(srcNode, dstNode, getNextEdgeId());
     bool added = directEdgeSet.insert(edge).second;
-    assert(added && "not added??");
-    srcNode->addOutgoingGepEdge(edge);
-    dstNode->addIncomingGepEdge(edge);
+    bool gadded = addGEdge(edge);
+    assert(gadded && added && "not added??");
     return edge;
 }
 
@@ -221,9 +217,8 @@ LoadCGEdge *ConstraintGraph::addLoadCGEdge(NodeID src, NodeID dst) {
 
     auto *edge = new LoadCGEdge(srcNode, dstNode, getNextEdgeId());
     bool added = LoadCGEdgeSet.insert(edge).second;
-    assert(added && "not added??");
-    srcNode->addOutgoingLoadEdge(edge);
-    dstNode->addIncomingLoadEdge(edge);
+    bool gadded = addGEdge(edge);
+    assert(gadded && added && "not added??");
     return edge;
 }
 
@@ -239,9 +234,8 @@ StoreCGEdge *ConstraintGraph::addStoreCGEdge(NodeID src, NodeID dst) {
 
     auto *edge = new StoreCGEdge(srcNode, dstNode, getNextEdgeId());
     bool added = StoreCGEdgeSet.insert(edge).second;
-    assert(added && "not added??");
-    srcNode->addOutgoingStoreEdge(edge);
-    dstNode->addIncomingStoreEdge(edge);
+    bool gadded = addGEdge(edge);
+    assert(gadded && added && "not added??");
     return edge;
 }
 

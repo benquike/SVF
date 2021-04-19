@@ -305,42 +305,34 @@ class ConstraintNode : public GenericConsNodeTy {
     }
     inline void addIncomingAddrEdge(AddrCGEdge *inEdge) {
         addressInEdges.insert(inEdge);
-        addIncomingEdge(inEdge);
     }
     inline void addIncomingLoadEdge(LoadCGEdge *inEdge) {
         loadInEdges.insert(inEdge);
-        addIncomingEdge(inEdge);
     }
     inline void addIncomingStoreEdge(StoreCGEdge *inEdge) {
         storeInEdges.insert(inEdge);
-        addIncomingEdge(inEdge);
     }
     inline void addIncomingDirectEdge(ConstraintEdge *inEdge) {
         assert(inEdge->getDstID() == this->getId());
         bool added1 = directInEdges.insert(inEdge).second;
-        bool added2 = addIncomingEdge(inEdge);
-        assert(added1 && added2 && "edge not added, duplicated adding!!");
+        assert(added1 && "edge not added, duplicated adding!!");
     }
 
     inline void addOutgoingAddrEdge(AddrCGEdge *outEdge) {
         addressOutEdges.insert(outEdge);
-        addOutgoingEdge(outEdge);
     }
     inline void addOutgoingLoadEdge(LoadCGEdge *outEdge) {
         bool added1 = loadOutEdges.insert(outEdge).second;
-        bool added2 = addOutgoingEdge(outEdge);
-        assert(added1 && added2 && "edge not added, duplicated adding!!");
+        assert(added1 && "edge not added, duplicated adding!!");
     }
     inline void addOutgoingStoreEdge(StoreCGEdge *outEdge) {
         bool added1 = storeOutEdges.insert(outEdge).second;
-        bool added2 = addOutgoingEdge(outEdge);
-        assert(added1 && added2 && "edge not added, duplicated adding!!");
+        assert(added1 && "edge not added, duplicated adding!!");
     }
     inline void addOutgoingDirectEdge(ConstraintEdge *outEdge) {
         assert(outEdge->getSrcID() == this->getId());
         bool added1 = directOutEdges.insert(outEdge).second;
-        bool added2 = addOutgoingEdge(outEdge);
-        assert(added1 && added2 && "edge not added, duplicated adding!!");
+        assert(added1 && "edge not added, duplicated adding!!");
     }
     //@}
 
