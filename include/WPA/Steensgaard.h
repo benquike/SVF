@@ -25,6 +25,8 @@ class Steensgaard : public AndersenBase {
     /// Constructor
     Steensgaard(SVFProject *proj) : AndersenBase(proj, Steensgaard_WPA, true) {}
 
+    virtual ~Steensgaard() {}
+
     /// Create an singleton instance
     static Steensgaard *createSteensgaard(SVFProject *proj) {
         if (steens == nullptr) {

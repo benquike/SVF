@@ -63,7 +63,7 @@ class AndersenStat : public PTAStat {
 
     explicit AndersenStat(AndersenBase *p);
 
-    ~AndersenStat() override {}
+    virtual ~AndersenStat() {}
 
     void performStat() override;
 

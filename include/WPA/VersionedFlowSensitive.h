@@ -54,6 +54,8 @@ class VersionedFlowSensitive : public FlowSensitive {
     /// Constructor
     explicit VersionedFlowSensitive(SVFProject *proj, PTATY type = VFS_WPA);
 
+    virtual ~VersionedFlowSensitive() {}
+
     /// Initialize analysis
     void initialize() override;
 

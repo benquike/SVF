@@ -60,7 +60,7 @@ class AndersenBase : public WPAConstraintSolver, public BVDataPTAImpl {
     }
 
     /// Destructor
-    ~AndersenBase() override {
+    virtual ~AndersenBase() {
         delete consCG;
         consCG = nullptr;
     }
@@ -144,7 +144,7 @@ class Andersen : public AndersenBase {
         : AndersenBase(proj, type, alias_check), pwcOpt(false), diffOpt(true) {}
 
     /// Destructor
-    ~Andersen() override {}
+    virtual ~Andersen() {}
 
     /// Initialize analysis
     void initialize() override;
@@ -377,6 +377,7 @@ class AndersenWaveDiff : public Andersen {
         diffWave->analyze();
         return diffWave;
     }
+    virtual ~AndersenWaveDiff() {}
 
     void solveWorklist() override;
     void processNode(NodeID nodeId) override;
@@ -435,6 +436,8 @@ class AndersenWaveDiffWithType : public AndersenWaveDiff {
                "a type system is required for this pointer analysis");
     }
 
+    virtual ~AndersenWaveDiffWithType() {}
+
     /// Create an singleton instance directly instead of invoking llvm pass
     /// manager
     static AndersenWaveDiffWithType *
@@ -484,6 +487,8 @@ class AndersenLCD : virtual public Andersen {
         lcdAndersen->analyze();
         return lcdAndersen;
     }
+
+    virtual ~AndersenLCD() {}
 
   protected:
     // 'lcdCandidates' is used to collect nodes need to be visited by SCC
@@ -542,6 +547,8 @@ class AndersenHCD : virtual public Andersen {
         return hcdAndersen;
     }
 
+    virtual ~AndersenHCD() {}
+
   protected:
     void initialize() override;
 
@@ -591,6 +598,8 @@ class AndersenHLCD : public AndersenHCD, public AndersenLCD {
         hlcdAndersen->analyze();
         return hlcdAndersen;
     }
+
+    virtual ~AndersenHLCD() {}
 
   protected:
     void initialize() override { AndersenHCD::initialize(); }
