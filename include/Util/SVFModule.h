@@ -79,6 +79,8 @@ class SVFModule {
     explicit SVFModule(vector<string> &modVec);
     explicit SVFModule(Module &module);
 
+    virtual ~SVFModule();
+
     static inline void setPagFromTXT(std::string txt) { pagReadFromTxt = txt; }
 
     static inline std::string pagFileName() { return pagReadFromTxt; }

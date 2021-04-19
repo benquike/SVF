@@ -50,4 +50,12 @@ SVFModule::SVFModule(Module &module)
     llvmModSet->buildSVFModule(module);
 }
 
+SVFModule::~SVFModule() {
+    delete llvmModSet;
+
+    for (const auto *svfFunc : FunctionSet) {
+        delete svfFunc;
+    }
+}
+
 } // End namespace SVF
