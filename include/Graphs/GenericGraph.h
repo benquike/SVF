@@ -304,6 +304,7 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
 
     /// Release memory
     void destroy() {
+#if 0
         for (iterator I = IDToNodeMap.begin(), E = IDToNodeMap.end(); I != E;
              ++I) {
             // NodeType* node = I->second;
@@ -311,9 +312,15 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
             // node->InEdgeEnd(); it!=eit; ++it)
             //         delete *it;
         }
-        for (iterator I = IDToNodeMap.begin(), E = IDToNodeMap.end(); I != E;
-             ++I) {
-            delete I->second;
+#endif
+        for (auto I : IDToNodeMap) {
+            // delete a node
+            delete I.second;
+        }
+
+        for (auto &I : IDToEdgeMap) {
+            // delete an edge
+            delete (I.second);
         }
     }
     /// Iterators
