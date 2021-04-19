@@ -143,7 +143,7 @@ TEST_F(VTblParseTesting, PureVirtual) {
 
 TEST_F(VTblParseTesting, VirtualInheritance) {
     string ll_file =
-        SVF_BUILD_DIR "tests/CPPUtils/Vtable/VirtualInheritance_cpp_dbg.ll";
+        SVF_BUILD_DIR "tests/CPPUtils/Vtable/VirtualInheritance_cpp.ll";
     init(ll_file);
     // dump_vtbls_from_globalvariable();
     check_chgraph();

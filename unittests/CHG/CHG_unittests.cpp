@@ -43,7 +43,7 @@ class CHGTestSuite : public ::testing::Test {
 
         p_chg = make_unique<CHGraph>(proj.getSymbolTableInfo());
         p_chg->buildCHG();
-        p_chg->view();
+        // p_chg->view();
         for (const auto it : *p_chg) {
             llvm::outs() << it.first << "\n";
         }
