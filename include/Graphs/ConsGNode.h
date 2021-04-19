@@ -91,6 +91,8 @@ class ConstraintNode : public GenericConsNodeTy {
         : GenericConsNodeTy(i, 0), _isPWCNode(false), pag(pag),
           newExpand(false) {}
 
+    virtual ~ConstraintNode() {}
+
     virtual const std::string toString() const;
 
     /// Overloading operator << for dumping ICFG node ID

@@ -43,6 +43,9 @@ class DCHEdge : public GenericEdge<DCHNode> {
 
     unsigned int getOffset(void) const { return offset; }
 
+    DCHEdge() = default;
+    virtual ~DCHEdge() {}
+
     void setOffset(unsigned int offset) { this->offset = offset; }
 
   private:
@@ -72,7 +75,9 @@ class DCHNode : public GenericNode<DCHNode, DCHEdge> {
         }
     }
 
-    ~DCHNode() {}
+    DCHNode() = default;
+
+    virtual ~DCHNode() {}
 
     const DIType *getType(void) const { return diType; }
 

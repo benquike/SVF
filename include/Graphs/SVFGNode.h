@@ -48,6 +48,9 @@ class MRSVFGNode : public VFGNode {
     MRSVFGNode() = default;
 
   public:
+    virtual ~MRSVFGNode() {}
+
+  public:
     /// Return points-to of the MR
     inline const PointsTo &getPointsTo() const { return cpts; }
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
@@ -100,6 +103,8 @@ class FormalINSVFGNode : public MRSVFGNode {
 
     FormalINSVFGNode() = default;
 
+    virtual ~FormalINSVFGNode() {}
+
     /// EntryCHI
     inline const MemSSA::ENTRYCHI *getEntryChi() const { return chi; }
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
@@ -141,6 +146,8 @@ class FormalOUTSVFGNode : public MRSVFGNode {
     /// Constructor
     FormalOUTSVFGNode(NodeID id, const MemSSA::RETMU *exit);
     FormalOUTSVFGNode() = default;
+    virtual ~FormalOUTSVFGNode() {}
+
     /// RetMU
     inline const MemSSA::RETMU *getRetMU() const { return mu; }
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
@@ -185,6 +192,8 @@ class ActualINSVFGNode : public MRSVFGNode {
         cpts = m->getMR()->getPointsTo();
     }
     ActualINSVFGNode() = default;
+
+    virtual ~ActualINSVFGNode() {}
 
     /// Callsite
     inline const CallBlockNode *getCallSite() const { return cs; }
@@ -237,6 +246,9 @@ class ActualOUTSVFGNode : public MRSVFGNode {
         cpts = c->getMR()->getPointsTo();
     }
     ActualOUTSVFGNode() = default;
+
+    virtual ~ActualOUTSVFGNode() {}
+
     /// Callsite
     inline const CallBlockNode *getCallSite() const { return cs; }
     /// CallCHI
@@ -290,6 +302,8 @@ class MSSAPHISVFGNode : public MRSVFGNode {
         cpts = def->getMR()->getPointsTo();
     }
     MSSAPHISVFGNode() = default;
+
+    virtual ~MSSAPHISVFGNode() {}
 
     /// MSSA phi operands
     //@{
@@ -353,6 +367,8 @@ class IntraMSSAPHISVFGNode : public MSSAPHISVFGNode {
         : MSSAPHISVFGNode(id, phi, MIntraPhi) {}
     IntraMSSAPHISVFGNode() = default;
 
+    virtual ~IntraMSSAPHISVFGNode() {}
+
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const IntraMSSAPHISVFGNode *) { return true; }
@@ -401,6 +417,8 @@ class InterMSSAPHISVFGNode : public MSSAPHISVFGNode {
           callInst(ao->getCallSite()) {}
 
     InterMSSAPHISVFGNode() = default;
+
+    virtual ~InterMSSAPHISVFGNode() {}
 
     inline bool isFormalINPHI() const {
         return (fun != nullptr) && (callInst == nullptr);

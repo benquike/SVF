@@ -56,6 +56,8 @@ class CHEdge : public GenericCHEdgeTy {
         edgeType = et;
     }
 
+    virtual ~CHEdge() {}
+
     CHEDGETYPE getEdgeType() const { return edgeType; }
 
   private:
@@ -75,7 +77,7 @@ class CHNode : public GenericCHNodeTy {
 
     CHNode(const std::string name, NodeID i = 0, GNodeK k = 0)
         : GenericCHNodeTy(i, k), vtable(nullptr), className(name), flags(0) {}
-    ~CHNode() override {}
+    virtual ~CHNode() {}
     std::string getName() const { return className; }
     /// Flags
     //@{
@@ -148,7 +150,7 @@ class CHGraph : public CommonCHGraph, public GenericCHGraphTy {
         : CommonCHGraph(symInfo), classNum(0), vfID(0), buildingCHGTime(0) {
         this->kind = Standard;
     }
-    ~CHGraph() override;
+    virtual ~CHGraph();
 
     void buildCHG();
     void buildInternalMaps();

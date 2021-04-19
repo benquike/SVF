@@ -91,6 +91,9 @@ class VFGNode : public GenericVFGNodeTy {
     /// Constructor
     VFGNode(NodeID i, VFGNodeK k) : GenericVFGNodeTy(i, k), icfgNode(nullptr) {}
     VFGNode() = default;
+
+    virtual ~VFGNode() {}
+
     /// Return corresponding ICFG node
     virtual const ICFGNode *getICFGNode() const { return icfgNode; }
 
@@ -139,6 +142,8 @@ class StmtVFGNode : public VFGNode {
     StmtVFGNode(NodeID id, const PAGEdge *e, VFGNodeK k)
         : VFGNode(id, k), pagEdge(e) {}
     StmtVFGNode() = default;
+
+    virtual ~StmtVFGNode() {}
 
     /// Whether this node is used for pointer analysis. Both src and dst
     /// PAGNodes are of ptr type.
@@ -205,6 +210,8 @@ class LoadVFGNode : public StmtVFGNode {
     LoadVFGNode(NodeID id, const LoadPE *edge) : StmtVFGNode(id, edge, Load) {}
     LoadVFGNode() = default;
 
+    virtual ~LoadVFGNode() {}
+
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const LoadVFGNode *) { return true; }
@@ -247,6 +254,8 @@ class StoreVFGNode : public StmtVFGNode {
         : StmtVFGNode(id, edge, Store) {}
     StoreVFGNode() = default;
 
+    virtual ~StoreVFGNode() {}
+
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const StoreVFGNode *) { return true; }
@@ -287,6 +296,9 @@ class CopyVFGNode : public StmtVFGNode {
     /// Constructor
     CopyVFGNode(NodeID id, const CopyPE *copy) : StmtVFGNode(id, copy, Copy) {}
     CopyVFGNode() = default;
+
+    virtual ~CopyVFGNode() {}
+
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const CopyVFGNode *) { return true; }
@@ -338,6 +350,8 @@ class CmpVFGNode : public VFGNode {
         assert(cmp && "not a binary operator?");
     }
     CmpVFGNode() = default;
+
+    virtual ~CmpVFGNode() {}
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
@@ -401,6 +415,7 @@ class BinaryOPVFGNode : public VFGNode {
         assert(binary && "not a binary operator?");
     }
     BinaryOPVFGNode() = default;
+    virtual ~BinaryOPVFGNode() {}
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
@@ -468,6 +483,8 @@ class UnaryOPVFGNode : public VFGNode {
     }
     UnaryOPVFGNode() = default;
 
+    virtual ~UnaryOPVFGNode() {}
+
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const UnaryOPVFGNode *) { return true; }
@@ -520,6 +537,7 @@ class GepVFGNode : public StmtVFGNode {
     /// Constructor
     GepVFGNode(NodeID id, const GepPE *edge) : StmtVFGNode(id, edge, Gep) {}
     GepVFGNode() = default;
+    virtual ~GepVFGNode() {}
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
@@ -566,6 +584,8 @@ class PHIVFGNode : public VFGNode {
     /// Constructor
     PHIVFGNode(NodeID id, const PAGNode *r, VFGNodeK k = TPhi);
     PHIVFGNode() = default;
+
+    virtual ~PHIVFGNode() {}
 
     /// Whether this phi node is of pointer type (used for pointer analysis).
     inline bool isPTANode() const { return res->isPointer(); }
@@ -632,6 +652,7 @@ class IntraPHIVFGNode : public PHIVFGNode {
         : PHIVFGNode(id, r, TIntraPhi) {}
 
     IntraPHIVFGNode() = default;
+    virtual ~IntraPHIVFGNode() {}
 
     inline const ICFGNode *getOpIncomingBB(u32_t pos) const {
         auto it = opIncomingBBs.find(pos);
@@ -683,6 +704,9 @@ class AddrVFGNode : public StmtVFGNode {
   public:
     /// Constructor
     AddrVFGNode(NodeID id, const AddrPE *edge) : StmtVFGNode(id, edge, Addr) {}
+
+    virtual ~AddrVFGNode() {}
+
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const AddrVFGNode *) { return true; }
@@ -722,6 +746,7 @@ class ArgumentVFGNode : public VFGNode {
         : VFGNode(id, k), param(p) {}
 
     ArgumentVFGNode() = default;
+    virtual ~ArgumentVFGNode() {}
 
     /// Whether this argument node is of pointer type (used for pointer
     /// analysis).
@@ -767,6 +792,7 @@ class ActualParmVFGNode : public ArgumentVFGNode {
     ActualParmVFGNode(NodeID id, const PAGNode *n, const CallBlockNode *c)
         : ArgumentVFGNode(id, n, AParm), cs(c) {}
     ActualParmVFGNode() = default;
+    virtual ~ActualParmVFGNode() {}
 
     /// Return callsite
     inline const CallBlockNode *getCallSite() const { return cs; }
@@ -816,6 +842,8 @@ class FormalParmVFGNode : public ArgumentVFGNode {
     FormalParmVFGNode(NodeID id, const PAGNode *n, const SVFFunction *f)
         : ArgumentVFGNode(id, n, FParm), fun(f) {}
     FormalParmVFGNode() = default;
+
+    virtual ~FormalParmVFGNode() {}
 
     /// Return parameter
     inline const PAGNode *getParam() const { return param; }
@@ -886,6 +914,8 @@ class ActualRetVFGNode : public ArgumentVFGNode {
         : ArgumentVFGNode(id, n, ARet), cs(c) {}
     ActualRetVFGNode() = default;
 
+    virtual ~ActualRetVFGNode() {}
+
     /// Return callsite
     inline const CallBlockNode *getCallSite() const { return cs; }
     /// Receive parameter at callsite
@@ -936,6 +966,7 @@ class FormalRetVFGNode : public ArgumentVFGNode {
     /// Constructor
     FormalRetVFGNode(NodeID id, const PAGNode *n, const SVFFunction *f);
     FormalRetVFGNode() = default;
+    virtual ~FormalRetVFGNode() {}
 
     /// Return value at callee
     inline const PAGNode *getRet() const { return param; }
@@ -1002,6 +1033,8 @@ class InterPHIVFGNode : public PHIVFGNode {
           callInst(ar->getCallSite()) {}
 
     InterPHIVFGNode() = default;
+
+    virtual ~InterPHIVFGNode() {}
 
     inline bool isFormalParmPHI() const {
         return (fun != nullptr) && (callInst == nullptr);
@@ -1074,6 +1107,8 @@ class NullPtrVFGNode : public VFGNode {
     /// Constructor
     NullPtrVFGNode(NodeID id, const PAGNode *n) : VFGNode(id, NPtr), node(n) {}
     NullPtrVFGNode() = default;
+
+    virtual ~NullPtrVFGNode() {}
 
     /// Whether this node is of pointer type (used for pointer analysis).
     inline bool isPTANode() const { return node->isPointer(); }

@@ -67,7 +67,7 @@ class VFGEdge : public GenericVFGEdgeTy {
     VFGEdge() = default;
 
     /// Destructor
-    ~VFGEdge() {}
+    virtual ~VFGEdge() {}
 
     /// Get methods of the components
     //@{
@@ -143,6 +143,8 @@ class DirectSVFGEdge : public VFGEdge {
     DirectSVFGEdge(VFGNode *s, VFGNode *d, GEdgeFlag k) : VFGEdge(s, d, k) {}
     DirectSVFGEdge() = default;
 
+    virtual ~DirectSVFGEdge() {}
+
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const DirectSVFGEdge *) { return true; }
@@ -182,6 +184,8 @@ class IntraDirSVFGEdge : public DirectSVFGEdge {
     IntraDirSVFGEdge(VFGNode *s, VFGNode *d)
         : DirectSVFGEdge(s, d, IntraDirectVF) {}
     IntraDirSVFGEdge() = default;
+
+    virtual ~IntraDirSVFGEdge() {}
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
@@ -226,6 +230,7 @@ class CallDirSVFGEdge : public DirectSVFGEdge {
         : DirectSVFGEdge(s, d, makeEdgeFlagWithInvokeID(CallDirVF, id)),
           csId(id) {}
     CallDirSVFGEdge() = default;
+    virtual ~CallDirSVFGEdge() {}
 
     /// Return callsite ID
     inline CallSiteID getCallSiteId() const { return csId; }
@@ -274,6 +279,8 @@ class RetDirSVFGEdge : public DirectSVFGEdge {
         : DirectSVFGEdge(s, d, makeEdgeFlagWithInvokeID(RetDirVF, id)),
           csId(id) {}
     RetDirSVFGEdge() = default;
+
+    virtual ~RetDirSVFGEdge() {}
 
     /// Return callsite ID
     inline CallSiteID getCallSiteId() const { return csId; }

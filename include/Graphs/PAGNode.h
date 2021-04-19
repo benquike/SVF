@@ -319,6 +319,8 @@ class ValPN : public PAGNode {
         : PAGNode(val, i, ty) {}
     ValPN() = default;
 
+    virtual ~ValPN() {}
+
     /// Return name of a LLVM value
     inline const std::string getValueName() const override {
         if (value && value->hasName()) {
@@ -352,6 +354,9 @@ class ObjPN : public PAGNode {
     ObjPN(const Value *val, NodeID i, const MemObj *m, PNODEK ty = ObjNode)
         : PAGNode(val, i, ty), mem(m) {}
     ObjPN() = default;
+
+  public:
+    virtual ~ObjPN() {}
 
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
@@ -445,6 +450,8 @@ class GepValPN : public ValPN {
         : ValPN(val, i, GepValNode), ls(l), gepValType(ty), fieldIdx(idx) {}
     GepValPN() = default;
 
+    virtual ~GepValPN() {}
+
     /// offset of the base value node
     inline u32_t getOffset() const { return ls.getOffset(); }
 
@@ -522,6 +529,8 @@ class GepObjPN : public ObjPN {
     }
 
     GepObjPN() = default;
+
+    virtual ~GepObjPN() {}
 
     /// offset of the mem object
     inline const LocationSet &getLocationSet() const { return ls; }
@@ -602,6 +611,8 @@ class FIObjPN : public ObjPN {
         : ObjPN(val, i, mem, ty) {}
     FIObjPN() = default;
 
+    virtual ~FIObjPN() {}
+
     /// Return name of a LLVM value
     inline const std::string getValueName() const override {
         if (value && value->hasName()) {
@@ -645,6 +656,8 @@ class RetPN : public PAGNode {
         : PAGNode(val->getLLVMFun(), i, RetNode) {}
     RetPN() = default;
 
+    virtual ~RetPN() {}
+
     /// Return name of a LLVM value
     const std::string getValueName() const override {
         return value->getName().str() + "_ret";
@@ -685,6 +698,8 @@ class VarArgPN : public PAGNode {
         : PAGNode(val->getLLVMFun(), i, VarargNode) {}
     VarArgPN() = default;
 
+    virtual ~VarArgPN() {}
+
     /// Return name of a LLVM value
     inline const std::string getValueName() const override {
         return value->getName().str() + "_vararg";
@@ -723,6 +738,8 @@ class DummyValPN : public ValPN {
     /// Constructor
     DummyValPN(NodeID i) : ValPN(nullptr, i, DummyValNode) {}
     DummyValPN() = default;
+
+    virtual ~DummyValPN() {}
 
     /// Return name of this node
     inline const std::string getValueName() const override {
@@ -766,6 +783,8 @@ class DummyObjPN : public ObjPN {
         : ObjPN(nullptr, i, m, ty) {}
     DummyObjPN() = default;
 
+    virtual ~DummyObjPN() {}
+
     /// Return name of this node
     inline const std::string getValueName() const override {
         return "dummyObj";
@@ -804,6 +823,8 @@ class CloneDummyObjPN : public DummyObjPN {
     CloneDummyObjPN(NodeID i, const MemObj *m, PNODEK ty = CloneDummyObjNode)
         : DummyObjPN(i, m, ty) {}
     CloneDummyObjPN() = default;
+
+    virtual ~CloneDummyObjPN() {}
 
     /// Return name of this node
     inline const std::string getValueName() const override {
@@ -845,6 +866,8 @@ class CloneGepObjPN : public GepObjPN {
         : GepObjPN(mem, i, l, symInfo, ty) {}
     CloneGepObjPN() = default;
 
+    virtual ~CloneGepObjPN() {}
+
     /// Return name of this node
     inline const std::string getValueName() const override {
         return "clone (gep) of " + GepObjPN::getValueName();
@@ -885,6 +908,8 @@ class CloneFIObjPN : public FIObjPN {
         : FIObjPN(val, i, mem, ty) {}
 
     CloneFIObjPN() = default;
+
+    virtual ~CloneFIObjPN() {}
 
     /// Return name of this node
     inline const std::string getValueName() const override {
