@@ -172,9 +172,7 @@ class DCHGraph : public CommonCHGraph, public GenericGraph<DCHNode, DCHEdge> {
     static bool isAgg(const DIType *t);
 
   public:
-    DCHGraph(SymbolTableInfo *symInfo)
-        : CommonCHGraph(symInfo), numTypes(0) // vfID(0), buildingCHGTime(0) {
-    {
+    DCHGraph(SymbolTableInfo *symInfo) : CommonCHGraph(symInfo) {
         this->kind = DI;
     }
 
@@ -370,9 +368,6 @@ class DCHGraph : public CommonCHGraph, public GenericGraph<DCHNode, DCHEdge> {
     /// Returns the edge between t1 and t2 if it exists, returns nullptr
     /// otherwise.
     DCHEdge *hasEdge(const DIType *t1, const DIType *t2, DCHEdge::GEdgeKind et);
-
-    /// Number of types (nodes) in the graph.
-    NodeID numTypes;
 };
 
 } // End namespace SVF
