@@ -80,6 +80,8 @@ class ICFGNode : public GenericICFGNodeTy {
 
     ICFGNode() = default;
 
+    virtual ~ICFGNode(){};
+
     /// Return the function of this ICFGNode
     virtual const SVFFunction *getFun() const { return fun; }
 
@@ -161,6 +163,9 @@ class GlobalBlockNode : public ICFGNode {
   public:
     GlobalBlockNode(NodeID id) : ICFGNode(id, GlobalBlock) { bb = nullptr; }
     GlobalBlockNode() = default;
+
+    virtual ~GlobalBlockNode() {}
+
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const GlobalBlockNode *) { return true; }
@@ -200,6 +205,8 @@ class IntraBlockNode : public ICFGNode {
     }
 
     IntraBlockNode() = default;
+
+    virtual ~IntraBlockNode() {}
 
     inline const Instruction *getInst() const { return inst; }
 
@@ -242,6 +249,8 @@ class InterBlockNode : public ICFGNode {
     /// Constructor
     InterBlockNode(NodeID id, ICFGNodeK k) : ICFGNode(id, k) {}
     InterBlockNode() = default;
+
+    virtual ~InterBlockNode() {}
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
@@ -286,6 +295,8 @@ class FunEntryBlockNode : public InterBlockNode {
   public:
     FunEntryBlockNode(NodeID id, const SVFFunction *f);
     FunEntryBlockNode() = default;
+
+    virtual ~FunEntryBlockNode() {}
 
     /// Return function
     inline const SVFFunction *getFun() const { return fun; }
@@ -338,6 +349,8 @@ class FunExitBlockNode : public InterBlockNode {
   public:
     FunExitBlockNode(NodeID id, const SVFFunction *f);
     FunExitBlockNode() = default;
+
+    virtual ~FunExitBlockNode() {}
 
     /// Return function
     inline const SVFFunction *getFun() const { return fun; }
@@ -410,6 +423,8 @@ class CallBlockNode : public InterBlockNode {
     }
 
     CallBlockNode() = default;
+    virtual ~CallBlockNode() {}
+
     /// Return callsite
     inline const Instruction *getCallSite() const { return cs; }
 
@@ -506,6 +521,9 @@ class RetBlockNode : public InterBlockNode {
     }
 
     RetBlockNode() = default;
+
+    virtual ~RetBlockNode() {}
+
     /// Return callsite
     inline const Instruction *getCallSite() const { return cs; }
 

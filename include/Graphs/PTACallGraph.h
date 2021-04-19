@@ -189,6 +189,8 @@ class PTACallGraphNode : public GenericCallGraphNodeTy {
         : GenericCallGraphNodeTy(i, 0), fun(f) {}
     PTACallGraphNode() = default;
 
+    virtual ~PTACallGraphNode() {}
+
     /// Get function of this call node
     inline const SVFFunction *getFunction() const { return fun; }
 
@@ -307,7 +309,7 @@ class PTACallGraph : public GenericCallGraphTy {
     void addCallGraphNode(const SVFFunction *fun);
 
     /// Destructor
-    ~PTACallGraph() override { destroy(); }
+    virtual ~PTACallGraph() { destroy(); }
 
     /// Return type of this callgraph
     inline CGEK getKind() const { return kind; }

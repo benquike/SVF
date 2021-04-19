@@ -64,7 +64,7 @@ class ICFGEdge : public GenericICFGEdgeTy {
     ICFGEdge() = default;
 
     /// Destructor
-    ~ICFGEdge() {}
+    virtual ~ICFGEdge() {}
 
     /// Get methods of the components
     //@{
@@ -124,6 +124,7 @@ class IntraCFGEdge : public ICFGEdge {
     /// Constructor
     IntraCFGEdge(ICFGNode *s, ICFGNode *d) : ICFGEdge(s, d, IntraCF) {}
     IntraCFGEdge() = default;
+    virtual ~IntraCFGEdge() {}
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const IntraCFGEdge *) { return true; }
@@ -182,6 +183,8 @@ class CallCFGEdge : public ICFGEdge {
         : ICFGEdge(s, d, CallCF), cs(c) {}
     CallCFGEdge() = default;
 
+    virtual ~CallCFGEdge() {}
+
     /// Return callsite ID
     inline const Instruction *getCallSite() const { return cs; }
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
@@ -230,6 +233,8 @@ class RetCFGEdge : public ICFGEdge {
     RetCFGEdge(ICFGNode *s, ICFGNode *d, const Instruction *c)
         : ICFGEdge(s, d, RetCF), cs(c) {}
     RetCFGEdge() = default;
+
+    virtual ~RetCFGEdge() {}
 
     /// Return callsite ID
     inline const Instruction *getCallSite() const { return cs; }

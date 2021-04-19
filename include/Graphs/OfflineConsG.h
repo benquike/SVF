@@ -61,6 +61,8 @@ class OfflineConsG : public ConstraintGraph {
         buildOfflineCG();
     }
 
+    virtual ~OfflineConsG() {}
+
     // Determine whether a node has a OCG rep node
     inline bool hasOCGRep(NodeID node) const { return hasNorRep(node); }
     // Get a node's OCG rep node

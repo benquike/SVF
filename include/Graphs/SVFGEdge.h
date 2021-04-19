@@ -55,6 +55,8 @@ class IndirectSVFGEdge : public VFGEdge {
     IndirectSVFGEdge(VFGNode *s, VFGNode *d, GEdgeFlag k) : VFGEdge(s, d, k) {}
     IndirectSVFGEdge() = default;
 
+    virtual ~IndirectSVFGEdge() {}
+
     /// Handle memory region
     //@{
     inline bool addPointsTo(const PointsTo &c) { return (cpts |= c); }
@@ -111,6 +113,8 @@ class IntraIndSVFGEdge : public IndirectSVFGEdge {
         : IndirectSVFGEdge(s, d, IntraIndirectVF) {}
     IntraIndSVFGEdge() = default;
 
+    virtual ~IntraIndSVFGEdge() {}
+
     //@{ Methods for support type inquiry through isa, cast, and dyn_cast:
     static inline bool classof(const IntraIndSVFGEdge *) { return true; }
     static inline bool classof(const IndirectSVFGEdge *edge) {
@@ -152,6 +156,8 @@ class CallIndSVFGEdge : public IndirectSVFGEdge {
         : IndirectSVFGEdge(s, d, makeEdgeFlagWithInvokeID(CallIndVF, id)),
           csId(id) {}
     CallIndSVFGEdge() = default;
+
+    virtual ~CallIndSVFGEdge() {}
 
     inline CallSiteID getCallSiteId() const { return csId; }
     //@{ Methods for support type inquiry through isa, cast, and dyn_cast:
@@ -197,6 +203,8 @@ class RetIndSVFGEdge : public IndirectSVFGEdge {
           csId(id) {}
     RetIndSVFGEdge() = default;
 
+    virtual ~RetIndSVFGEdge() {}
+
     inline CallSiteID getCallSiteId() const { return csId; }
     //@{ Methods for support type inquiry through isa, cast, and dyn_cast:
     static inline bool classof(const RetIndSVFGEdge *) { return true; }
@@ -236,6 +244,8 @@ class ThreadMHPIndSVFGEdge : public IndirectSVFGEdge {
     ThreadMHPIndSVFGEdge(VFGNode *s, VFGNode *d)
         : IndirectSVFGEdge(s, d, TheadMHPIndirectVF) {}
     ThreadMHPIndSVFGEdge() = default;
+
+    virtual ~ThreadMHPIndSVFGEdge() {}
 
     //@{ Methods for support type inquiry through isa, cast, and dyn_cast:
     static inline bool classof(const ThreadMHPIndSVFGEdge *) { return true; }

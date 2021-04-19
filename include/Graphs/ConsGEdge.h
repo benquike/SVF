@@ -61,7 +61,7 @@ class ConstraintEdge : public GenericConsEdgeTy {
                    EdgeID id = 0)
         : GenericConsEdgeTy(s, d, k), edgeId(id) {}
     /// Destructor
-    ~ConstraintEdge() {}
+    virtual ~ConstraintEdge() {}
     /// Return edge ID
     inline EdgeID getEdgeID() const { return edgeId; }
 
@@ -109,6 +109,8 @@ class AddrCGEdge : public ConstraintEdge {
 
     /// constructor
     AddrCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id, PAG *pag);
+
+    virtual ~AddrCGEdge() {}
 };
 
 /*!
@@ -134,6 +136,8 @@ class CopyCGEdge : public ConstraintEdge {
     /// constructor
     CopyCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id)
         : ConstraintEdge(s, d, Copy, id) {}
+
+    virtual ~CopyCGEdge(){}
 };
 
 /*!
@@ -160,6 +164,8 @@ class StoreCGEdge : public ConstraintEdge {
     /// constructor
     StoreCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id)
         : ConstraintEdge(s, d, Store, id) {}
+
+    virtual ~StoreCGEdge() {}
 };
 
 /*!
@@ -186,6 +192,8 @@ class LoadCGEdge : public ConstraintEdge {
     /// Constructor
     LoadCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id)
         : ConstraintEdge(s, d, Load, id) {}
+
+    virtual ~LoadCGEdge() {}
 };
 
 /*!
@@ -216,6 +224,8 @@ class GepCGEdge : public ConstraintEdge {
                edge->getEdgeKind() == VariantGep;
     }
     //@}
+
+    virtual ~GepCGEdge() {}
 };
 
 /*!
@@ -248,6 +258,9 @@ class NormalGepCGEdge : public GepCGEdge {
     NormalGepCGEdge(ConstraintNode *s, ConstraintNode *d, const LocationSet &l,
                     EdgeID id)
         : GepCGEdge(s, d, NormalGep, id), ls(l) {}
+
+
+    virtual ~NormalGepCGEdge() {}
 
     /// Get location set of the gep edge
     inline const LocationSet &getLocationSet() const { return ls; }
@@ -283,6 +296,8 @@ class VariantGepCGEdge : public GepCGEdge {
     /// Constructor
     VariantGepCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id)
         : GepCGEdge(s, d, VariantGep, id) {}
+
+    virtual ~VariantGepCGEdge(){}
 };
 
 } // End namespace SVF
