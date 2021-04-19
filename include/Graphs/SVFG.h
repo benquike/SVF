@@ -246,9 +246,6 @@ class SVFG : public VFG {
     /// Add SVFG edge
     inline bool addSVFGEdge(SVFGEdge *edge) { return addVFGEdge(edge); }
 
-    /// Return total SVFG node number
-    inline u32_t getSVFGNodeNum() const { return nodeNum; }
-
   protected:
     /// Add indirect def-use edges of a memory region between two statements,
     //@{
