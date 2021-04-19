@@ -63,7 +63,7 @@ template <class NodeTy> class GenericEdge {
   private:
     NodeTy *src = nullptr; ///< source node
     NodeTy *dst = nullptr; ///< destination node
-    GEdgeFlag edgeFlag; ///< edge kind
+    GEdgeFlag edgeFlag = 0; ///< edge kind
 
   public:
     /// Constructor
@@ -95,18 +95,29 @@ template <class NodeTy> class GenericEdge {
                         const GenericEdge<NodeType> *rhs) const {
             if (lhs->edgeFlag != rhs->edgeFlag) {
                 return lhs->edgeFlag < rhs->edgeFlag;
-            } else if (lhs->getSrcID() != rhs->getSrcID()) {
-                return lhs->getSrcID() < rhs->getSrcID();
             } else {
-                return lhs->getDstID() < rhs->getDstID();
+                NodeType *lsrc = lhs->getSrcNode();
+                NodeID lsrcId = lsrc == nullptr ? 0 : lsrc->getId();
+                NodeType *ldst = lhs->getDstNode();
+                NodeID ldstId = ldst == nullptr ? 0 : ldst->getId();
+                NodeType *rsrc = rhs->getSrcNode();
+                NodeID rsrcId = rsrc == nullptr ? 0 : rsrc->getId();
+                NodeType *rdst = rhs->getDstNode();
+                NodeID rdstId = rdst == nullptr ? 0 : rdst->getId();
+
+                if (lsrcId != rsrcId) {
+                    return lsrcId < rsrcId;
+                } else {
+                    return ldstId < rdstId;
+                }
             }
         }
     } equalGEdge;
 
     inline bool operator==(const GenericEdge<NodeType> *rhs) const {
-        return (rhs->edgeFlag == this->edgeFlag &&
-                rhs->getSrcID() == this->getSrcID() &&
-                rhs->getDstID() == this->getDstID());
+        return rhs != nullptr && (rhs->edgeFlag == this->edgeFlag &&
+                                  rhs->getSrcID() == this->getSrcID() &&
+                                  rhs->getDstID() == this->getDstID());
     }
     //@}
 
@@ -145,8 +156,8 @@ template <class NodeTy, class EdgeTy> class GenericNode {
     }
 
   private:
-    NodeID id;       ///< Node ID
-    GNodeK nodeKind; ///< Node kind
+    NodeID id = numeric_limits<NodeID>::max();       ///< Node ID
+    GNodeK nodeKind = numeric_limits<GNodeK>::max(); ///< Node kind
 
     GEdgeSetTy InEdges;  ///< all incoming edge of this node
     GEdgeSetTy OutEdges; ///< all outgoing edge of this node
