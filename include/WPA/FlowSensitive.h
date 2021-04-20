@@ -265,7 +265,7 @@ class FlowSensitive : public WPASVFGFSSolver, public BVDataPTAImpl {
     ///@}
 
     SVFGBuilder svfgBuilder;
-    AndersenWaveDiff *ander;
+    AndersenWaveDiff *ander = nullptr;
 
     /// Statistics.
     //@{
