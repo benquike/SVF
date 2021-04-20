@@ -109,6 +109,9 @@ void PointerAnalysis::destroy() {
 
     delete typeSystem;
     typeSystem = nullptr;
+
+    delete chgraph;
+    chgraph = nullptr;
 }
 
 /*!
