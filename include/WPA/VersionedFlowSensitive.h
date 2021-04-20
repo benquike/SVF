@@ -77,22 +77,11 @@ class VersionedFlowSensitive : public FlowSensitive {
 
     /// Create single instance of versioned flow-sensitive points-to analysis.
     static VersionedFlowSensitive *createVFSWPA(SVFProject *proj) {
-        if (vfspta == nullptr) {
-            vfspta = new VersionedFlowSensitive(proj);
-            vfspta->analyze();
-        }
-
+        VersionedFlowSensitive *vfspta = new VersionedFlowSensitive(proj);
+        vfspta->analyze();
         return vfspta;
     }
 
-    /// Release flow-sensitive pointer analysis
-    static void releaseVFSWPA() {
-        if (vfspta != nullptr) {
-            delete vfspta;
-        }
-
-        vfspta = nullptr;
-    }
 
   protected:
     bool processLoad(const LoadSVFGNode *load) override;
@@ -192,7 +181,6 @@ class VersionedFlowSensitive : public FlowSensitive {
                              ///< rely on them.
     //@}
 
-    static VersionedFlowSensitive *vfspta;
 };
 
 } // End namespace SVF
