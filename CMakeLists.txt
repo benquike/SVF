@@ -57,12 +57,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # add -std=gnu++17
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
+# set(Boost_USE_STATIC_RUNTIME ON)
+
+# find_package(Boost 1.50.0 REQUIRED
+#     COMPONENTS program_options system filesystem serialization)
 
 find_package(Boost 1.50.0 REQUIRED
-    COMPONENTS program_options system filesystem serialization)
+    COMPONENTS serialization system filesystem)
 
 message(STATUS "Found Boost version: ${Boost_VERSION}")
 message(STATUS "Boost include dir: ${Boost_INCLUDE_DIR}")

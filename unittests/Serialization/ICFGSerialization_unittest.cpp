@@ -19,6 +19,10 @@
  *     2021-04-17
  *****************************************************************************/
 
+#include <boost/filesystem.hpp>
+#include <fstream>
+#include <iostream>
+
 #include "Graphs/ICFG.h"
 #include "Graphs/PAG.h"
 #include "Graphs/SVFG.h"
@@ -27,6 +31,7 @@
 #include "Util/Serialization.h"
 #include "config.h"
 #include "gtest/gtest.h"
+#include <memory>
 #include <sstream>
 
 #include "SVF-FE/SVFProject.h"
@@ -35,10 +40,50 @@ using namespace SVF;
 using namespace std;
 
 using namespace boost::archive;
+// using namespace boost::filesystem;
 
 #include "Util/boost_classes_export.h"
 
-TEST(ICFGSerializationTestSuite, ICFGNodeTest_0) {
+class ICFGSerializationTestSuite : public ::testing::Test {
+  protected:
+    unique_ptr<SVFProject> p_proj;
+    string test_file;
+    string bin_archive_file;
+
+    void init(string &bc_file) {
+        test_file = bc_file;
+        bin_archive_file = test_file + ".bin.archive";
+        p_proj = make_unique<SVFProject>(bc_file);
+    }
+
+    void test_save() {
+        string bin_archive_file = test_file + ".bin.archive";
+        ofstream ofs(bin_archive_file);
+
+        {
+            ICFG *icfg = p_proj->getICFG();
+            binary_oarchive oa{ofs};
+            oa << icfg;
+        }
+    }
+
+    void test_load() {
+        if (!boost::filesystem::exists(bin_archive_file)) {
+            llvm::outs() << "bin archive: " << bin_archive_file
+                         << " dose not exist\n";
+            return;
+        }
+
+        ifstream ifs(bin_archive_file);
+        {
+            ICFG *icfg = nullptr;
+            binary_iarchive ia{ifs};
+            ia >> icfg;
+        }
+    }
+};
+
+TEST_F(ICFGSerializationTestSuite, ICFGNodeTest_0) {
     stringstream ss;
     ICFGNode icfgnode;
     ICFGNode *picfgnode = &icfgnode;
@@ -47,7 +92,7 @@ TEST(ICFGSerializationTestSuite, ICFGNodeTest_0) {
     oa << picfgnode;
 }
 
-TEST(ICFGSerializationTestSuite, PairDefVal_test) {
+TEST_F(ICFGSerializationTestSuite, PairDefVal_test) {
     IntraCFGEdge::BranchCondition br;
 
     if (br.first == nullptr) {
@@ -60,7 +105,7 @@ TEST(ICFGSerializationTestSuite, PairDefVal_test) {
     ASSERT_EQ(br.first, nullptr);
 }
 
-TEST(ICFGSerializationTestSuite, ICFGNodeTest_1) {
+TEST_F(ICFGSerializationTestSuite, ICFGNodeTest_1) {
     stringstream ss;
     ICFGNode icfgnode;
 
@@ -69,7 +114,7 @@ TEST(ICFGSerializationTestSuite, ICFGNodeTest_1) {
     oa << icfgnode;
 }
 
-TEST(ICFGSerializationTestSuite, GlobalBlockNodeTest_0) {
+TEST_F(ICFGSerializationTestSuite, GlobalBlockNodeTest_0) {
     stringstream ss;
     GlobalBlockNode gn;
     ICFGNode *picfgnode = &gn;
@@ -83,7 +128,7 @@ TEST(ICFGSerializationTestSuite, GlobalBlockNodeTest_0) {
     }
 }
 
-TEST(ICFGSerializationTestSuite, AllNodes_0) {
+TEST_F(ICFGSerializationTestSuite, AllNodes_0) {
     string test_bc = SVF_BUILD_DIR "tests/ICFG/static_call_test_cpp.ll";
     SVFProject proj(test_bc);
 
@@ -118,17 +163,18 @@ TEST(ICFGSerializationTestSuite, AllNodes_0) {
     //     ASSERT_NE(loaded_icfg, nullptr);
     // }
 }
-
-TEST(ICFGSerializationTestSuite, Test_0) {
+#if 0
+TEST_F(ICFGSerializationTestSuite, StaticCallTest_0_save) {
     string test_bc = SVF_BUILD_DIR "tests/ICFG/static_call_test_cpp.ll";
-    SVFProject proj(test_bc);
+    init(test_bc);
 
+    // SVFProject proj(test_bc);
     // ICFG ic;
-    ICFG *icfg = proj.getICFG();
-
-    stringstream ss;
+    // ICFG *icfg = proj.getICFG();
+    // stringstream ss;
 
     llvm::outs() << "=============  SAVE  ===============\n";
+    test_save();
     // save
     {
         text_oarchive oa{ss};
@@ -137,12 +183,10 @@ TEST(ICFGSerializationTestSuite, Test_0) {
         try {
             oa << icfg;
         }
-
         catch (exception &e) {
             llvm::outs() << e.what() << "\n";
         }
     }
-
     llvm::outs() << "=============  LOAD  ===============\n";
 
     // load
@@ -156,6 +200,26 @@ TEST(ICFGSerializationTestSuite, Test_0) {
         ASSERT_NE(loaded_icfg, nullptr);
     }
 }
+#endif
+
+#define DEF_TESTS(NAME, test_path)                                             \
+    TEST_F(ICFGSerializationTestSuite, NAME##_save) {                          \
+        string test_bc = SVF_BUILD_DIR test_path;                              \
+        init(test_bc);                                                         \
+        llvm::outs() << "=============  SAVE  ===============\n";              \
+        test_save();                                                           \
+    }                                                                          \
+    TEST_F(ICFGSerializationTestSuite, NAME##_load) {                          \
+        string test_bc = SVF_BUILD_DIR test_path;                              \
+        init(test_bc);                                                         \
+        llvm::outs() << "=============  LOAD  ===============\n";              \
+        test_load();                                                           \
+    }
+
+DEF_TESTS(StaticCallTest_0, "tests/ICFG/static_call_test_cpp.ll")
+DEF_TESTS(FPtrTest_0, "tests/ICFG/fptr_test_cpp.ll")
+DEF_TESTS(VirtTest_0, "tests/ICFG/virt_call_test_cpp.ll")
+DEF_TESTS(VirtTest_1, "tests/CHG/callsite_cpp.ll")
 
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);

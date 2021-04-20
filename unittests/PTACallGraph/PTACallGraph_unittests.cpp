@@ -21,6 +21,7 @@
 
 #include "Graphs/PTACallGraph.h"
 #include "SVF-FE/SVFProject.h"
+#include "WPA/Andersen.h"
 #include "WPA/FlowSensitive.h"
 
 #include "config.h"
@@ -35,62 +36,58 @@ using namespace SVF;
 class PTACGTestSuite : public ::testing::Test {
   protected:
     unique_ptr<SVFProject> p_proj;
+    string test_bc;
+    void init(string &bc_file) {
+        test_bc = bc_file;
+        p_proj = make_unique<SVFProject>(bc_file);
+    }
 
-    void init(string &bc_file) { p_proj = make_unique<SVFProject>(bc_file); }
+    void fspta_test() {
+        FlowSensitive *fs_pta1 = FlowSensitive::createFSWPA(p_proj.get(), true);
+        PTACallGraph *callgraph1 = fs_pta1->getPTACallGraph();
+        SVFProject proj2(test_bc);
+        FlowSensitive *fs_pta2 = FlowSensitive::createFSWPA(&proj2, true);
+        PTACallGraph *callgraph2 = fs_pta2->getPTACallGraph();
+        graph_eq_test(callgraph1, callgraph2);
+    }
+
+    void anderson_test() {
+        Andersen *ander =
+            AndersenWaveDiff::createAndersenWaveDiff(p_proj.get());
+        PTACallGraph *pta1 = ander->getPTACallGraph();
+        SVFProject proj2(test_bc);
+        Andersen *ander2 = AndersenWaveDiff::createAndersenWaveDiff(&proj2);
+        PTACallGraph *pta2 = ander2->getPTACallGraph();
+        graph_eq_test(pta1, pta2);
+    }
 };
 
 TEST_F(PTACGTestSuite, StaticCallTest_0) {
     string test_bc = SVF_BUILD_DIR "tests/ICFG/static_call_test_cpp.ll";
     init(test_bc);
-    FlowSensitive *fs_pta1 = FlowSensitive::createFSWPA(p_proj.get(), true);
-    PTACallGraph *callgraph1 = fs_pta1->getPTACallGraph();
-
-    SVFProject proj2(test_bc);
-    FlowSensitive *fs_pta2 = FlowSensitive::createFSWPA(&proj2, true);
-    PTACallGraph *callgraph2 = fs_pta2->getPTACallGraph();
-
-    graph_eq_test(callgraph1, callgraph2);
+    anderson_test();
+    fspta_test();
 }
 
 TEST_F(PTACGTestSuite, FPtrTest_0) {
     string test_bc = SVF_BUILD_DIR "tests/ICFG/fptr_test_cpp.ll";
-
     init(test_bc);
-    FlowSensitive *fs_pta1 = FlowSensitive::createFSWPA(p_proj.get(), true);
-    PTACallGraph *callgraph1 = fs_pta1->getPTACallGraph();
-
-    SVFProject proj2(test_bc);
-    FlowSensitive *fs_pta2 = FlowSensitive::createFSWPA(&proj2, true);
-    PTACallGraph *callgraph2 = fs_pta2->getPTACallGraph();
-
-    graph_eq_test(callgraph1, callgraph2);
+    anderson_test();
+    fspta_test();
 }
 
 TEST_F(PTACGTestSuite, VirtTest_0) {
     string test_bc = SVF_BUILD_DIR "tests/ICFG/virt_call_test_cpp.ll";
-
     init(test_bc);
-    FlowSensitive *fs_pta1 = FlowSensitive::createFSWPA(p_proj.get(), true);
-    PTACallGraph *callgraph1 = fs_pta1->getPTACallGraph();
-
-    SVFProject proj2(test_bc);
-    FlowSensitive *fs_pta2 = FlowSensitive::createFSWPA(&proj2, true);
-    PTACallGraph *callgraph2 = fs_pta2->getPTACallGraph();
-
-    graph_eq_test(callgraph1, callgraph2);
+    anderson_test();
+    fspta_test();
 }
 
 TEST_F(PTACGTestSuite, VirtTest_1) {
     string test_bc = SVF_BUILD_DIR "/tests/CHG/callsite_cpp.ll";
     init(test_bc);
-    FlowSensitive *fs_pta1 = FlowSensitive::createFSWPA(p_proj.get(), true);
-    PTACallGraph *callgraph1 = fs_pta1->getPTACallGraph();
-
-    SVFProject proj2(test_bc);
-    FlowSensitive *fs_pta2 = FlowSensitive::createFSWPA(&proj2, true);
-    PTACallGraph *callgraph2 = fs_pta2->getPTACallGraph();
-
-    graph_eq_test(callgraph1, callgraph2);
+    anderson_test();
+    fspta_test();
 }
 
 int main(int argc, char *argv[]) {

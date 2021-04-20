@@ -86,7 +86,7 @@ class VTblParseTesting : public ::testing::Test {
 
     void check_chgraph() {
         SymbolTableInfo *symbolTableInfo = proj->getSymbolTableInfo();
-        CHGraph *chg = new CHGraph(symbolTableInfo);
+        shared_ptr<CHGraph> chg = make_shared<CHGraph>(symbolTableInfo);
         chg->buildCHG();
         // DCHGraph *dchg = new DCHGraph(svfMod);
         // dchg->buildCHG(true);
@@ -110,7 +110,7 @@ class VTblParseTesting : public ::testing::Test {
                             llvm::outs()
                                 << "+++++++++ CallInst: " << inst << "\n";
                             static string chg_name("CHG");
-                            dump_targets_for_cs(chg, cs, 1, chg_name);
+                            dump_targets_for_cs(chg.get(), cs, 1, chg_name);
                             // static string dchg_name("DCHG");
                             // dump_targets_for_cs(dchg, cs, 1, dchg_name);
                         }

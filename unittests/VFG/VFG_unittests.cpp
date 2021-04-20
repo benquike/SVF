@@ -56,12 +56,16 @@ class VFGTestSuite : public ::testing::Test {
 
         // #if 0
         {
-            unique_ptr<VFG> vfg1 = make_unique<VFG>(callgraph, pag);
-            unique_ptr<VFG> vfg2 = make_unique<VFG>(callgraph, pag);
 
-            llvm::outs() << "test VFG\n";
-            graph_eq_test(vfg1.get(), vfg2.get());
+            for (int i = 0; i < 30; i++) {
+                unique_ptr<VFG> vfg1 = make_unique<VFG>(callgraph, pag);
+                unique_ptr<VFG> vfg2 = make_unique<VFG>(callgraph, pag);
+
+                llvm::outs() << "test VFG\n";
+                graph_eq_test(vfg1.get(), vfg2.get());
+            }
         }
+
         // #endif
 
         {
