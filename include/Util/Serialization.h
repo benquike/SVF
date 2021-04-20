@@ -89,6 +89,8 @@ BOOST_SERIALIZATION_SPLIT_FREE(Set<const SVFFunction *>)
             auto *val = getValueByIdFromCurrentProject(id);                    \
             assert(llvm::isa<Function>(val) && "id not a Function");           \
             fun = m->getSVFFunction(llvm::dyn_cast<Function>(val));            \
+        } else {                                                               \
+            fun = nullptr;                                                     \
         }                                                                      \
     } while (0)
 
@@ -109,6 +111,8 @@ BOOST_SERIALIZATION_SPLIT_FREE(Set<const SVFFunction *>)
         ar &id;                                                                \
         if (id < numeric_limits<SymID>::max()) {                               \
             mem = getMemObjByIdFromCurrentProject(id);                         \
+        } else {                                                               \
+            mem = nullptr;                                                     \
         }                                                                      \
     } while (0)
 
@@ -129,6 +133,8 @@ BOOST_SERIALIZATION_SPLIT_FREE(Set<const SVFFunction *>)
         ar &id;                                                                \
         if (id < numeric_limits<SymID>::max()) {                               \
             type = getTypeByIdFromCurrentProject(id);                          \
+        } else {                                                               \
+            type = nullptr;                                                    \
         }                                                                      \
     } while (0)
 
