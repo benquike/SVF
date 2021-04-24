@@ -138,6 +138,11 @@ class PAG : public GenericPAGTy {
 
     NodeIDAllocator nodeIdAllocator;
 
+    using Inst2LabelMap = Map<const ICFGNode *, u32_t>;
+    Inst2LabelMap inst2LabelMap;     ///< Call site Instruction to label map
+    u64_t callEdgeLabelCounter = 0;  ///< Call site Instruction counter
+    u64_t storeEdgeLabelCounter = 0; ///< Store Instruction counter
+
     /// support for serialization
     /// @ {
     friend class boost::serialization::access;
@@ -176,6 +181,10 @@ class PAG : public GenericPAGTy {
         ar &callSiteSet;
 
         ar &icfg;
+
+        ar &inst2LabelMap;
+        ar &callEdgeLabelCounter;
+        ar &storeEdgeLabelCounter;
     }
 
     template <typename Archive>
@@ -212,6 +221,10 @@ class PAG : public GenericPAGTy {
         ar &callSiteSet;
 
         ar &icfg;
+
+        ar &inst2LabelMap;
+        ar &callEdgeLabelCounter;
+        ar &storeEdgeLabelCounter;
 
         proj = SVFProject::getCurrentProject();
         // icfg = proj->getICFG();
@@ -269,6 +282,26 @@ class PAG : public GenericPAGTy {
     }
 
     inline NodeIDAllocator &getNodeIDAllocator() { return nodeIdAllocator; }
+
+    /// Compute the unique edgeFlag value from edge kind and call site
+    /// Instruction.
+    inline PAGEdge::GEdgeFlag makeEdgeFlagWithCallInst(PAGEdge::GEdgeKind k,
+                                                       const ICFGNode *cs) {
+        auto iter = inst2LabelMap.find(cs);
+        u64_t label = (iter != inst2LabelMap.end()) ? iter->second
+                                                    : callEdgeLabelCounter++;
+        return (label << PAGEdge::EdgeKindMaskBits) | k;
+    }
+
+    /// Compute the unique edgeFlag value from edge kind and store Instruction.
+    /// Two store instructions may share the same StorePAGEdge
+    inline PAGEdge::GEdgeFlag makeEdgeFlagWithStoreInst(PAGEdge::GEdgeKind k,
+                                                        const ICFGNode *store) {
+        auto iter = inst2LabelMap.find(store);
+        u64_t label = (iter != inst2LabelMap.end()) ? iter->second
+                                                    : storeEdgeLabelCounter++;
+        return (label << PAGEdge::EdgeKindMaskBits) | k;
+    }
 
     /// Get LLVM Module
     inline SVFModule *getModule() { return symbolTableInfo->getModule(); }

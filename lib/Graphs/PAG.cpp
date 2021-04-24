@@ -49,11 +49,6 @@ llvm::cl::list<std::string> ExternalPAGArgs(
                    "func1@/path/to/graph,func2@/foo,..."),
     llvm::cl::CommaSeparated);
 
-u64_t PAGEdge::callEdgeLabelCounter = 0;
-u64_t PAGEdge::storeEdgeLabelCounter = 0;
-PAGEdge::Inst2LabelMap PAGEdge::inst2LabelMap;
-bool PAGEdge::static_members_serialized = false;
-
 const std::string PAGNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
@@ -277,6 +272,9 @@ const std::string LoadPE::toString() const {
     return rawstr.str();
 }
 
+StorePE::StorePE(PAGNode *s, PAGNode *d, PAG *pag, const IntraBlockNode *st)
+    : PAGEdge(s, d, pag, pag->makeEdgeFlagWithStoreInst(PAGEdge::Store, st)) {}
+
 const std::string StorePE::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
@@ -321,6 +319,10 @@ const std::string VariantGepPE::toString() const {
     return rawstr.str();
 }
 
+CallPE::CallPE(PAGNode *s, PAGNode *d, PAG *pag, const CallBlockNode *i,
+               GEdgeKind k)
+    : PAGEdge(s, d, pag, pag->makeEdgeFlagWithCallInst(k, i)), inst(i) {}
+
 const std::string CallPE::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
@@ -331,6 +333,10 @@ const std::string CallPE::toString() const {
     rawstr << value2String(getValue());
     return rawstr.str();
 }
+
+RetPE::RetPE(PAGNode *s, PAGNode *d, PAG *pag, const CallBlockNode *i,
+             GEdgeKind k)
+    : PAGEdge(s, d, pag, pag->makeEdgeFlagWithCallInst(k, i)), inst(i) {}
 
 const std::string RetPE::toString() const {
     std::string str;
@@ -742,8 +748,7 @@ PAGEdge *PAG::hasNonlabeledEdge(PAGNode *src, PAGNode *dst,
  */
 PAGEdge *PAG::hasLabeledEdge(PAGNode *src, PAGNode *dst, PAGEdge::PEDGEK kind,
                              const ICFGNode *callInst) {
-    PAGEdge edge(src, dst, this,
-                 PAGEdge::makeEdgeFlagWithCallInst(kind, callInst));
+    PAGEdge edge(src, dst, this, makeEdgeFlagWithCallInst(kind, callInst));
     auto it = PAGEdgeKindToSetMap[kind].find(&edge);
     if (it != PAGEdgeKindToSetMap[kind].end()) {
         return *it;

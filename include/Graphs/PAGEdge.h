@@ -119,26 +119,6 @@ class PAGEdge : public GenericPAGEdgeTy {
     inline ICFGNode *getICFGNode() const { return icfgNode; }
     //@}
 
-    /// Compute the unique edgeFlag value from edge kind and call site
-    /// Instruction.
-    static inline GEdgeFlag makeEdgeFlagWithCallInst(GEdgeKind k,
-                                                     const ICFGNode *cs) {
-        auto iter = inst2LabelMap.find(cs);
-        u64_t label = (iter != inst2LabelMap.end()) ? iter->second
-                                                    : callEdgeLabelCounter++;
-        return (label << EdgeKindMaskBits) | k;
-    }
-
-    /// Compute the unique edgeFlag value from edge kind and store Instruction.
-    /// Two store instructions may share the same StorePAGEdge
-    static inline GEdgeFlag makeEdgeFlagWithStoreInst(GEdgeKind k,
-                                                      const ICFGNode *store) {
-        auto iter = inst2LabelMap.find(store);
-        u64_t label = (iter != inst2LabelMap.end()) ? iter->second
-                                                    : storeEdgeLabelCounter++;
-        return (label << EdgeKindMaskBits) | k;
-    }
-
     virtual const std::string toString() const;
 
     //@}
@@ -155,14 +135,6 @@ class PAGEdge : public GenericPAGEdgeTy {
     using PAGKindToEdgeSetMapTy = PAGEdgeToSetMapTy;
 
   private:
-    using Inst2LabelMap = Map<const ICFGNode *, u32_t>;
-    static Inst2LabelMap inst2LabelMap; ///< Call site Instruction to label map
-    static u64_t callEdgeLabelCounter;  ///< Call site Instruction counter
-    static u64_t storeEdgeLabelCounter; ///< Store Instruction counter
-
-    static bool static_members_serialized;
-
-  private:
     /// support for serialization
     /// @{
     friend class boost::serialization::access;
@@ -175,12 +147,6 @@ class PAGEdge : public GenericPAGEdgeTy {
         SAVE_Value(ar, basicBlock);
         ar &icfgNode;
         ar &edgeId;
-        if (!static_members_serialized) {
-            ar &inst2LabelMap;
-            ar &callEdgeLabelCounter;
-            ar &storeEdgeLabelCounter;
-            static_members_serialized = true;
-        }
     }
 
     template <typename Archive>
@@ -190,13 +156,6 @@ class PAGEdge : public GenericPAGEdgeTy {
         LOAD_Value(ar, BasicBlock, basicBlock);
         ar &icfgNode;
         ar &edgeId;
-
-        if (!static_members_serialized) {
-            ar &inst2LabelMap;
-            ar &callEdgeLabelCounter;
-            ar &storeEdgeLabelCounter;
-            static_members_serialized = true;
-        }
     }
     /// @}
 };
@@ -412,9 +371,7 @@ class StorePE : public PAGEdge {
     //@}
 
     /// constructor
-    StorePE(PAGNode *s, PAGNode *d, PAG *pag, const IntraBlockNode *st)
-        : PAGEdge(s, d, pag, makeEdgeFlagWithStoreInst(PAGEdge::Store, st)) {}
-
+    StorePE(PAGNode *s, PAGNode *d, PAG *pag, const IntraBlockNode *st);
     StorePE() = default;
 
     virtual const std::string toString() const;
@@ -626,8 +583,7 @@ class CallPE : public PAGEdge {
     /// constructor
     CallPE() = default;
     CallPE(PAGNode *s, PAGNode *d, PAG *pag, const CallBlockNode *i,
-           GEdgeKind k = PAGEdge::Call)
-        : PAGEdge(s, d, pag, makeEdgeFlagWithCallInst(k, i)), inst(i) {}
+           GEdgeKind k = PAGEdge::Call);
 
     /// Get method for the call instruction
     //@{
@@ -676,8 +632,7 @@ class RetPE : public PAGEdge {
     /// constructor
     RetPE() = default;
     RetPE(PAGNode *s, PAGNode *d, PAG *pag, const CallBlockNode *i,
-          GEdgeKind k = PAGEdge::Ret)
-        : PAGEdge(s, d, pag, makeEdgeFlagWithCallInst(k, i)), inst(i) {}
+          GEdgeKind k = PAGEdge::Ret);
 
     /// Get method for call instruction at caller
     //@{
