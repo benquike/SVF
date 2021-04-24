@@ -63,8 +63,6 @@ class ICFG : public GenericICFGTy {
     using CSToRetNodeMapTy = Map<const Instruction *, RetBlockNode *>;
     using InstToBlockNodeMapTy = Map<const Instruction *, IntraBlockNode *>;
 
-    NodeID totalICFGNode;
-
   private:
     FunToFunEntryNodeMapTy
         FunToFunEntryNodeMap; ///< map a function to its FunExitBlockNode
@@ -206,7 +204,7 @@ class ICFG : public GenericICFGTy {
     }
 
     inline FunEntryBlockNode *addFunEntryICFGNode(const SVFFunction *fun) {
-        FunEntryBlockNode *sNode = new FunEntryBlockNode(totalICFGNode++, fun);
+        FunEntryBlockNode *sNode = new FunEntryBlockNode(getNextNodeId(), fun);
         addICFGNode(sNode);
         FunToFunEntryNodeMap[fun] = sNode;
         return sNode;
@@ -223,7 +221,7 @@ class ICFG : public GenericICFGTy {
     }
 
     inline FunExitBlockNode *addFunExitICFGNode(const SVFFunction *fun) {
-        FunExitBlockNode *sNode = new FunExitBlockNode(totalICFGNode++, fun);
+        FunExitBlockNode *sNode = new FunExitBlockNode(getNextNodeId(), fun);
         addICFGNode(sNode);
         FunToFunExitNodeMap[fun] = sNode;
         return sNode;
@@ -270,7 +268,6 @@ class ICFG : public GenericICFGTy {
         boost::serialization::save_map(ar, InstToBlockNodeMap);
 
         ar &globalBlockNode;
-        ar &totalICFGNode;
         ar &pag;
     }
 
@@ -285,7 +282,6 @@ class ICFG : public GenericICFGTy {
         boost::serialization::load_map(ar, InstToBlockNodeMap);
 
         ar &globalBlockNode;
-        ar &totalICFGNode;
         ar &pag;
     }
     /// @}

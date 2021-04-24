@@ -44,8 +44,9 @@ class ThreadForkEdge : public PTACallGraphEdge {
 
   public:
     /// Constructor
-    ThreadForkEdge(PTACallGraphNode *s, PTACallGraphNode *d, CallSiteID csId)
-        : PTACallGraphEdge(s, d, PTACallGraphEdge::TDForkEdge, csId) {}
+    ThreadForkEdge(PTACallGraphNode *s, PTACallGraphNode *d, EdgeID id,
+                   CallSiteID csId)
+        : PTACallGraphEdge(s, d, id, PTACallGraphEdge::TDForkEdge, csId) {}
     /// Destructor
     virtual ~ThreadForkEdge() {}
 
@@ -78,11 +79,11 @@ class ThreadForkEdge : public PTACallGraphEdge {
  * point of the thread
  */
 class ThreadJoinEdge : public PTACallGraphEdge {
-
   public:
     /// Constructor
-    ThreadJoinEdge(PTACallGraphNode *s, PTACallGraphNode *d, CallSiteID csId)
-        : PTACallGraphEdge(s, d, PTACallGraphEdge::TDJoinEdge, csId) {}
+    ThreadJoinEdge(PTACallGraphNode *s, PTACallGraphNode *d, EdgeID id,
+                   CallSiteID csId)
+        : PTACallGraphEdge(s, d, id, PTACallGraphEdge::TDJoinEdge, csId) {}
     /// Destructor
     virtual ~ThreadJoinEdge() {}
 
@@ -115,8 +116,9 @@ class HareParForEdge : public PTACallGraphEdge {
 
   public:
     /// Constructor
-    HareParForEdge(PTACallGraphNode *s, PTACallGraphNode *d, CallSiteID csId)
-        : PTACallGraphEdge(s, d, PTACallGraphEdge::HareParForEdge, csId) {}
+    HareParForEdge(PTACallGraphNode *s, PTACallGraphNode *d, EdgeID id,
+                   CallSiteID csId)
+        : PTACallGraphEdge(s, d, id, PTACallGraphEdge::HareParForEdge, csId) {}
     /// Destructor
     virtual ~HareParForEdge() {}
 
@@ -351,11 +353,13 @@ class ThreadCallGraph : public PTACallGraph {
     }
 
     /// has thread join edge
+    /// FIXME: cleanup and remove this, using hasGEdge
     inline ThreadJoinEdge *
     hasThreadJoinEdge(const CallBlockNode *call, PTACallGraphNode *joinFunNode,
                       PTACallGraphNode *threadRoutineFunNode,
                       CallSiteID csId) const {
-        ThreadJoinEdge joinEdge(joinFunNode, threadRoutineFunNode, csId);
+        ThreadJoinEdge joinEdge(joinFunNode, threadRoutineFunNode,
+                                getDummyEdgeId(), csId);
         auto it = callinstToThreadJoinEdgesMap.find(call);
         if (it != callinstToThreadJoinEdgesMap.end()) {
             auto jit = it->second.find(&joinEdge);

@@ -422,7 +422,8 @@ SVFGEdge *SVFG::addIntraIndirectVFEdge(NodeID srcId, NodeID dstId,
                     : nullptr);
     }
 
-    auto *indirectEdge = new IntraIndSVFGEdge(srcNode, dstNode);
+    auto *indirectEdge =
+        new IntraIndSVFGEdge(srcNode, dstNode, getNextEdgeId());
     indirectEdge->addPointsTo(cpts);
     return (addSVFGEdge(indirectEdge) ? indirectEdge : nullptr);
 }
@@ -444,7 +445,8 @@ SVFGEdge *SVFG::addThreadMHPIndirectVFEdge(NodeID srcId, NodeID dstId,
                     : nullptr);
     }
 
-    auto *indirectEdge = new ThreadMHPIndSVFGEdge(srcNode, dstNode);
+    auto *indirectEdge =
+        new ThreadMHPIndSVFGEdge(srcNode, dstNode, getNextEdgeId());
     indirectEdge->addPointsTo(cpts);
     return (addSVFGEdge(indirectEdge) ? indirectEdge : nullptr);
 }
@@ -465,7 +467,8 @@ SVFGEdge *SVFG::addCallIndirectVFEdge(NodeID srcId, NodeID dstId,
                     : nullptr);
     }
 
-    auto *callEdge = new CallIndSVFGEdge(srcNode, dstNode, csId);
+    auto *callEdge =
+        new CallIndSVFGEdge(srcNode, dstNode, getNextEdgeId(), csId);
     callEdge->addPointsTo(cpts);
     return (addSVFGEdge(callEdge) ? callEdge : nullptr);
 }
@@ -486,7 +489,7 @@ SVFGEdge *SVFG::addRetIndirectVFEdge(NodeID srcId, NodeID dstId,
                     : nullptr);
     }
 
-    auto *retEdge = new RetIndSVFGEdge(srcNode, dstNode, csId);
+    auto *retEdge = new RetIndSVFGEdge(srcNode, dstNode, getNextEdgeId(), csId);
     retEdge->addPointsTo(cpts);
     return (addSVFGEdge(retEdge) ? retEdge : nullptr);
 }

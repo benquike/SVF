@@ -536,7 +536,8 @@ VFGEdge *VFG::addIntraDirectVFEdge(NodeID srcId, NodeID dstId) {
     }
 
     if (srcNode != dstNode) {
-        auto *directEdge = new IntraDirSVFGEdge(srcNode, dstNode);
+        auto *directEdge =
+            new IntraDirSVFGEdge(srcNode, dstNode, getNextEdgeId());
         return (addVFGEdge(directEdge) ? directEdge : nullptr);
     }
 
@@ -556,7 +557,8 @@ VFGEdge *VFG::addCallEdge(NodeID srcId, NodeID dstId, CallSiteID csId) {
         return nullptr;
     }
 
-    auto *callEdge = new CallDirSVFGEdge(srcNode, dstNode, csId);
+    auto *callEdge =
+        new CallDirSVFGEdge(srcNode, dstNode, getNextEdgeId(), csId);
     return (addVFGEdge(callEdge) ? callEdge : nullptr);
 }
 
@@ -573,7 +575,7 @@ VFGEdge *VFG::addRetEdge(NodeID srcId, NodeID dstId, CallSiteID csId) {
         return nullptr;
     }
 
-    auto *retEdge = new RetDirSVFGEdge(srcNode, dstNode, csId);
+    auto *retEdge = new RetDirSVFGEdge(srcNode, dstNode, getNextEdgeId(), csId);
     return (addVFGEdge(retEdge) ? retEdge : nullptr);
 }
 
@@ -708,10 +710,11 @@ void VFG::connectDirectVFGEdges() {
 
 /*!
  * Whether we has an intra VFG edge
+ * FIXME: remove this and use hasGEdge instead
  */
 VFGEdge *VFG::hasIntraVFGEdge(VFGNode *src, VFGNode *dst,
                               VFGEdge::VFGEdgeK kind) {
-    VFGEdge edge(src, dst, kind);
+    VFGEdge edge(src, dst, getDummyEdgeId(), kind);
     VFGEdge *outEdge = src->hasOutgoingEdge(&edge);
     VFGEdge *inEdge = dst->hasIncomingEdge(&edge);
     if (outEdge && inEdge) {
@@ -727,7 +730,7 @@ VFGEdge *VFG::hasIntraVFGEdge(VFGNode *src, VFGNode *dst,
  */
 VFGEdge *VFG::hasThreadVFGEdge(VFGNode *src, VFGNode *dst,
                                VFGEdge::VFGEdgeK kind) {
-    VFGEdge edge(src, dst, kind);
+    VFGEdge edge(src, dst, getDummyEdgeId(), kind);
     VFGEdge *outEdge = src->hasOutgoingEdge(&edge);
     VFGEdge *inEdge = dst->hasIncomingEdge(&edge);
     if (outEdge && inEdge) {
@@ -743,7 +746,8 @@ VFGEdge *VFG::hasThreadVFGEdge(VFGNode *src, VFGNode *dst,
  */
 VFGEdge *VFG::hasInterVFGEdge(VFGNode *src, VFGNode *dst,
                               VFGEdge::VFGEdgeK kind, CallSiteID csId) {
-    VFGEdge edge(src, dst, VFGEdge::makeEdgeFlagWithInvokeID(kind, csId));
+    VFGEdge edge(src, dst, getDummyEdgeId(),
+                 VFGEdge::makeEdgeFlagWithInvokeID(kind, csId));
     VFGEdge *outEdge = src->hasOutgoingEdge(&edge);
     VFGEdge *inEdge = dst->hasIncomingEdge(&edge);
     if (outEdge && inEdge) {

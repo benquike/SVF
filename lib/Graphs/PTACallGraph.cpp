@@ -139,7 +139,7 @@ PTACallGraphEdge *PTACallGraph::hasGraphEdge(PTACallGraphNode *src,
                                              PTACallGraphNode *dst,
                                              PTACallGraphEdge::CEDGEK kind,
                                              CallSiteID csId) const {
-    PTACallGraphEdge edge(src, dst, kind, csId);
+    PTACallGraphEdge edge(src, dst, getDummyEdgeId(), kind, csId);
     PTACallGraphEdge *outEdge = src->hasOutgoingEdge(&edge);
     PTACallGraphEdge *inEdge = dst->hasIncomingEdge(&edge);
     if (outEdge && inEdge) {
@@ -179,7 +179,7 @@ void PTACallGraph::addDirectCallGraphEdge(const CallBlockNode *cs,
     CallSiteID csId = addCallSite(cs, callee->getFunction());
 
     if (!hasGraphEdge(caller, callee, PTACallGraphEdge::CallRetEdge, csId)) {
-        auto *edge = new PTACallGraphEdge(caller, callee,
+        auto *edge = new PTACallGraphEdge(caller, callee, getNextEdgeId(),
                                           PTACallGraphEdge::CallRetEdge, csId);
         edge->addDirectCallSite(cs);
         addEdge(edge);
@@ -202,7 +202,7 @@ void PTACallGraph::addIndirectCallGraphEdge(const CallBlockNode *cs,
     CallSiteID csId = addCallSite(cs, callee->getFunction());
 
     if (!hasGraphEdge(caller, callee, PTACallGraphEdge::CallRetEdge, csId)) {
-        auto *edge = new PTACallGraphEdge(caller, callee,
+        auto *edge = new PTACallGraphEdge(caller, callee, getNextEdgeId(),
                                           PTACallGraphEdge::CallRetEdge, csId);
         edge->addInDirectCallSite(cs, proj);
         addEdge(edge);

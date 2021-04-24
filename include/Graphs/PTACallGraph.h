@@ -74,9 +74,9 @@ class PTACallGraphEdge : public GenericCallGraphEdgeTy {
     /// @}
   public:
     /// Constructor
-    PTACallGraphEdge(PTACallGraphNode *s, PTACallGraphNode *d, CEDGEK kind,
-                     CallSiteID cs)
-        : GenericCallGraphEdgeTy(s, d, makeEdgeFlagWithInvokeID(kind, cs)),
+    PTACallGraphEdge(PTACallGraphNode *s, PTACallGraphNode *d, EdgeID id,
+                     CEDGEK kind, CallSiteID cs)
+        : GenericCallGraphEdgeTy(s, d, id, makeEdgeFlagWithInvokeID(kind, cs)),
           csId(cs) {}
     PTACallGraphEdge() = default;
 

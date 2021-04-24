@@ -38,8 +38,8 @@ class DCHEdge : public GenericEdge<DCHNode> {
 
     using DCHEdgeSetTy = GenericNode<DCHNode, DCHEdge>::GEdgeSetTy;
 
-    DCHEdge(DCHNode *src, DCHNode *dst, GEdgeFlag k = 0)
-        : GenericEdge<DCHNode>(src, dst, k), offset(0) {}
+    DCHEdge(DCHNode *src, DCHNode *dst, EdgeID id, GEdgeFlag k = 0)
+        : GenericEdge<DCHNode>(src, dst, id, k), offset(0) {}
 
     unsigned int getOffset(void) const { return offset; }
 

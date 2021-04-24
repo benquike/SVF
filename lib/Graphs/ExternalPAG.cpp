@@ -88,10 +88,12 @@ bool ExternalPAG::addExternalPAG(const SVFFunction *function) {
             pag->addVariantGepPE(srcId, dstId);
         } else if (extEdgeType == "call") {
             pag->addEdge(srcNode, dstNode,
-                         new CallPE(srcNode, dstNode, pag, nullptr));
+                         new CallPE(srcNode, dstNode, pag->getNextEdgeId(), pag,
+                                    nullptr));
         } else if (extEdgeType == "ret") {
             pag->addEdge(srcNode, dstNode,
-                         new RetPE(srcNode, dstNode, pag, nullptr));
+                         new RetPE(srcNode, dstNode, pag->getNextEdgeId(), pag,
+                                   nullptr));
         } else if (extEdgeType == "cmp") {
             pag->addCmpPE(srcId, dstId);
         } else if (extEdgeType == "binary-op") {

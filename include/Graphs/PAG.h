@@ -501,8 +501,8 @@ class PAG : public GenericPAGTy {
 
     /// Node and edge statistics
     //@{
-    inline Size_t getPAGNodeNum() const { return nodeNum; }
-    inline Size_t getPAGEdgeNum() const { return edgeNum; }
+    inline Size_t getPAGNodeNum() const { return getTotalNodeNum(); }
+    inline Size_t getPAGEdgeNum() const { return getTotalEdgeNum(); }
     inline Size_t getValueNodeNum() const {
         return symbolTableInfo->valSyms().size();
     }
@@ -580,7 +580,7 @@ class PAG : public GenericPAGTy {
 
     inline PAGEdge *getIntraPAGEdge(PAGNode *src, PAGNode *dst,
                                     PAGEdge::PEDGEK kind) {
-        PAGEdge edge(src, dst, this, kind);
+        PAGEdge edge(src, dst, getDummyEdgeId(), this, kind);
         const PAGEdge::PAGEdgeSetTy &edgeSet = getEdgeSet(kind);
         auto it = edgeSet.find(&edge);
         assert(it != edgeSet.end() && "can not find pag edge");

@@ -75,7 +75,7 @@ class PAGEdge : public GenericPAGEdgeTy {
   public:
 
     /// Constructor
-    PAGEdge(PAGNode *s, PAGNode *d, PAG *pag, GEdgeFlag k);
+    PAGEdge(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag, GEdgeFlag k);
     PAGEdge() = default;
 
     /// Destructor
@@ -180,8 +180,8 @@ class AddrPE : public PAGEdge {
     //@}
 
     /// constructor
-    AddrPE(PAGNode *s, PAGNode *d, PAG *pag)
-        : PAGEdge(s, d, pag, PAGEdge::Addr) {}
+    AddrPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag)
+        : PAGEdge(s, d, id, pag, PAGEdge::Addr) {}
     AddrPE() = default;
 
     virtual ~AddrPE() {}
@@ -220,8 +220,8 @@ class CopyPE : public PAGEdge {
     //@}
 
     /// constructor
-    CopyPE(PAGNode *s, PAGNode *d, PAG *pag)
-        : PAGEdge(s, d, pag, PAGEdge::Copy) {}
+    CopyPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag)
+        : PAGEdge(s, d, id, pag, PAGEdge::Copy) {}
     CopyPE() = default;
 
     virtual ~CopyPE() {}
@@ -260,8 +260,8 @@ class CmpPE : public PAGEdge {
     //@}
 
     /// constructor
-    CmpPE(PAGNode *s, PAGNode *d, PAG *pag)
-        : PAGEdge(s, d, pag, PAGEdge::Cmp) {}
+    CmpPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag)
+        : PAGEdge(s, d, id, pag, PAGEdge::Cmp) {}
     CmpPE() = default;
 
     virtual ~CmpPE() {}
@@ -300,8 +300,8 @@ class BinaryOPPE : public PAGEdge {
     //@}
 
     /// constructor
-    BinaryOPPE(PAGNode *s, PAGNode *d, PAG *pag)
-        : PAGEdge(s, d, pag, PAGEdge::BinaryOp) {}
+    BinaryOPPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag)
+        : PAGEdge(s, d, id, pag, PAGEdge::BinaryOp) {}
     BinaryOPPE() = default;
 
     virtual ~BinaryOPPE() {}
@@ -340,8 +340,8 @@ class UnaryOPPE : public PAGEdge {
     //@}
 
     /// constructor
-    UnaryOPPE(PAGNode *s, PAGNode *d, PAG *pag)
-        : PAGEdge(s, d, pag, PAGEdge::UnaryOp) {}
+    UnaryOPPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag)
+        : PAGEdge(s, d, id, pag, PAGEdge::UnaryOp) {}
     UnaryOPPE() = default;
 
     virtual ~UnaryOPPE() {}
@@ -381,7 +381,8 @@ class StorePE : public PAGEdge {
     //@}
 
     /// constructor
-    StorePE(PAGNode *s, PAGNode *d, PAG *pag, const IntraBlockNode *st);
+    StorePE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag,
+            const IntraBlockNode *st);
     StorePE() = default;
 
     virtual ~StorePE() {}
@@ -421,8 +422,8 @@ class LoadPE : public PAGEdge {
     //@}
 
     /// constructor
-    LoadPE(PAGNode *s, PAGNode *d, PAG *pag)
-        : PAGEdge(s, d, pag, PAGEdge::Load) {}
+    LoadPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag)
+        : PAGEdge(s, d, id, pag, PAGEdge::Load) {}
     LoadPE() = default;
 
     virtual ~LoadPE() {}
@@ -465,7 +466,8 @@ class GepPE : public PAGEdge {
 
   protected:
     /// constructor
-    GepPE(PAGNode *s, PAGNode *d, PAG *pag, PEDGEK k) : PAGEdge(s, d, pag, k) {}
+    GepPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag, PEDGEK k)
+        : PAGEdge(s, d, id, pag, k) {}
     GepPE() = default;
     virtual ~GepPE() {}
     virtual const std::string toString() const;
@@ -512,8 +514,9 @@ class NormalGepPE : public GepPE {
 
     /// constructor
     NormalGepPE() = default;
-    NormalGepPE(PAGNode *s, PAGNode *d, PAG *pag, const LocationSet &l)
-        : GepPE(s, d, pag, PAGEdge::NormalGep), ls(l) {}
+    NormalGepPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag,
+                const LocationSet &l)
+        : GepPE(s, d, id, pag, PAGEdge::NormalGep), ls(l) {}
 
     /// offset of the gep edge
     inline u32_t getOffset() const { return ls.getOffset(); }
@@ -558,8 +561,8 @@ class VariantGepPE : public GepPE {
     //@}
 
     /// constructor
-    VariantGepPE(PAGNode *s, PAGNode *d, PAG *pag)
-        : GepPE(s, d, pag, PAGEdge::VariantGep) {}
+    VariantGepPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag)
+        : GepPE(s, d, id, pag, PAGEdge::VariantGep) {}
     VariantGepPE() = default;
     virtual ~VariantGepPE() {}
 
@@ -602,7 +605,7 @@ class CallPE : public PAGEdge {
 
     /// constructor
     CallPE() = default;
-    CallPE(PAGNode *s, PAGNode *d, PAG *pag, const CallBlockNode *i,
+    CallPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag, const CallBlockNode *i,
            GEdgeKind k = PAGEdge::Call);
 
     virtual ~CallPE() {}
@@ -653,7 +656,7 @@ class RetPE : public PAGEdge {
 
     /// constructor
     RetPE() = default;
-    RetPE(PAGNode *s, PAGNode *d, PAG *pag, const CallBlockNode *i,
+    RetPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag, const CallBlockNode *i,
           GEdgeKind k = PAGEdge::Ret);
 
     virtual ~RetPE() {}
@@ -704,8 +707,9 @@ class TDForkPE : public CallPE {
 
     /// constructor
     TDForkPE() = default;
-    TDForkPE(PAGNode *s, PAGNode *d, PAG *pag, const CallBlockNode *i)
-        : CallPE(s, d, pag, i, PAGEdge::ThreadFork) {}
+    TDForkPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag,
+             const CallBlockNode *i)
+        : CallPE(s, d, id, pag, i, PAGEdge::ThreadFork) {}
 
     virtual const std::string toString() const;
 
@@ -745,8 +749,9 @@ class TDJoinPE : public RetPE {
     virtual ~TDJoinPE() {}
     /// Constructor
     TDJoinPE() = default;
-    TDJoinPE(PAGNode *s, PAGNode *d, PAG *pag, const CallBlockNode *i)
-        : RetPE(s, d, pag, i, PAGEdge::ThreadJoin) {}
+    TDJoinPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag,
+             const CallBlockNode *i)
+        : RetPE(s, d, id, pag, i, PAGEdge::ThreadJoin) {}
 
     virtual const std::string toString() const;
 

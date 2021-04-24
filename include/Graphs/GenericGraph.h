@@ -63,12 +63,13 @@ template <class NodeTy> class GenericEdge {
   private:
     NodeTy *src = nullptr; ///< source node
     NodeTy *dst = nullptr; ///< destination node
+    EdgeID id = numeric_limits<EdgeID>::max();
     GEdgeFlag edgeFlag = 0; ///< edge kind
 
   public:
     /// Constructor
-    GenericEdge(NodeTy *s, NodeTy *d, GEdgeFlag k)
-        : src(s), dst(d), edgeFlag(k) {}
+    GenericEdge(NodeTy *s, NodeTy *d, EdgeID id, GEdgeFlag k)
+        : src(s), dst(d), id(id), edgeFlag(k) {}
 
     // to support serialization
     GenericEdge() = default;
@@ -80,6 +81,7 @@ template <class NodeTy> class GenericEdge {
     //@{
     inline NodeID getSrcID() const { return src->getId(); }
     inline NodeID getDstID() const { return dst->getId(); }
+    inline EdgeID getId() const { return id; }
     inline GEdgeKind getEdgeKind() const { return (EdgeKindMask & edgeFlag); }
     NodeType *getSrcNode() const { return src; }
     NodeType *getDstNode() const { return dst; }
@@ -280,7 +282,9 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
     using EdgeType = EdgeTy;
     /// NodeID to GenericNode map
     using IDToNodeMapTy = Map<NodeID, NodeType *>;
-
+    using NodeToIDMapTy = Map<NodeType *, NodeID>;
+    using IDToEdgeMapTy = Map<EdgeID, EdgeType *>;
+    using EdgeToIDMapTy = Map<EdgeType *, EdgeID>;
     /// Node Iterators
     //@{
     using iterator = typename IDToNodeMapTy::iterator;
@@ -288,7 +292,7 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
     //@}
 
     /// Constructor
-    GenericGraph() : edgeNum(0), nodeNum(0) {}
+    GenericGraph() : currentNodeId(0), currentEdgeId(0) {}
 
     /// Destructor
     virtual ~GenericGraph() { destroy(); }
@@ -317,10 +321,54 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
     inline const_iterator end() const { return IDToNodeMap.end(); }
     //}@
 
-    /// Add a Node
-    inline void addGNode(NodeID id, NodeType *node) {
+    ///@{
+    /// add a node with a specified id
+    inline bool addGNode(NodeID id, NodeType *node) {
+        assert(IDToNodeMap.find(id) == IDToNodeMap.end() && "node exists");
+        assert(NodeToIDMap.find(node) == NodeToIDMap.end() && "node exists");
+
         IDToNodeMap[id] = node;
-        nodeNum++;
+        NodeToIDMap[node] = id;
+
+        return true;
+    }
+
+    /// Add a Node
+    inline bool addGNode(NodeType *node) {
+
+        if (node != nullptr) {
+            auto id = node->getId();
+            return addGNode(id, node);
+        }
+
+        return false;
+    }
+    ///}@
+
+    inline bool addGEdge(EdgeType *edge) {
+
+        assert(edge != nullptr && "edge is null");
+
+        NodeType *srcNode = edge->getSrcNode();
+        assert(srcNode != nullptr && "source node is null");
+        NodeType *dstNode = edge->getDstNode();
+        assert(dstNode != nullptr && "dest node is null");
+        assert(hasGNode(srcNode) && "source node not exists");
+        assert(hasGNode(dstNode) && "dest node not exists");
+
+        auto id = edge->getId();
+        assert(EdgeToIDMap.find(edge) == EdgeToIDMap.end() && "edge exists");
+        assert (IDToEdgeMap.find(id) == IDToEdgeMap.end() && "edge id exists?");
+
+        IDToEdgeMap[id] = edge;
+        EdgeToIDMap[edge] = id;
+
+        bool added1 = dstNode->addIncomingEdge(edge);
+        bool added2 = srcNode->addOutgoingEdge(edge);
+
+        assert(added1 && added2 && "edge not added on both nodes");
+
+        return true;
     }
 
     /// Get a node
@@ -332,8 +380,45 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
 
     /// Has a node
     inline bool hasGNode(NodeID id) const {
-        const_iterator it = IDToNodeMap.find(id);
-        return it != IDToNodeMap.end();
+        return  IDToNodeMap.find(id) != IDToNodeMap.end();
+    }
+
+    inline bool hasGNode(NodeType *node) const {
+        return NodeToIDMap.find(node) != NodeToIDMap.end();
+    }
+
+    inline bool hasGEdge(EdgeType *edge) {
+        return EdgeToIDMap.find(edge) != EdgeToIDMap.end();
+    }
+
+    inline bool hasGEdge(EdgeID id) {
+        return IDToEdgeMap.find(id) != IDToEdgeMap.end();
+    }
+
+    inline bool hasGEdge(NodeType *src, NodeType *dst,
+                         typename EdgeType::GEdgeKind kind) {
+        if (src == nullptr || dst == nullptr) {
+            return false;
+        }
+        for (auto oe : src->getOutEdges()) {
+            if (oe->getDstNode() == dst && oe->getEdgeKind() == kind) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    inline EdgeType *getGEdge(NodeType *src, NodeType *dst,
+                              typename EdgeType::GEdgeKind kind) {
+        if (src == nullptr || dst == nullptr) {
+            return nullptr;
+        }
+        for (auto oe : src->getOutEdges()) {
+            if (oe->getDstNode() == dst && oe->getEdgeKind() == kind) {
+                return oe;
+            }
+        }
+        return nullptr;
     }
 
     /// Delete a node
@@ -347,18 +432,40 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
     }
 
     /// Get total number of node/edge
-    inline u32_t getTotalNodeNum() const { return nodeNum; }
-    inline u32_t getTotalEdgeNum() const { return edgeNum; }
-    /// Increase number of node/edge
-    inline void incNodeNum() { nodeNum++; }
-    inline void incEdgeNum() { edgeNum++; }
+    inline NodeID getTotalNodeNum() const { return IDToNodeMap.size(); }
+    inline EdgeID getTotalEdgeNum() const { return IDToEdgeMap.size(); }
+
+    inline NodeID getDummyNodeId() const {
+        return numeric_limits<NodeID>::max();
+    }
+
+    inline EdgeID getDummyEdgeId() const {
+        return numeric_limits<EdgeID>::max();
+    }
+
+    inline NodeID getNextNodeId() {
+        assert(currentNodeId < numeric_limits<NodeID>::max() &&
+               "node id overflow");
+        return currentNodeId++;
+    }
+    inline EdgeID getNextEdgeId() {
+        assert(currentEdgeId < numeric_limits<EdgeID>::max() &&
+               "edge id overflow");
+        return currentEdgeId++;
+    }
 
   protected:
-    IDToNodeMapTy IDToNodeMap; ///< node map
+    IDToNodeMapTy IDToNodeMap; ///< id - node map
+    NodeToIDMapTy NodeToIDMap; ///< node - id map
+    IDToEdgeMapTy IDToEdgeMap; ///< id - edge map
+    EdgeToIDMapTy EdgeToIDMap; ///< edge - id map
 
-  public:
-    u32_t edgeNum; ///< total num of node
-    u32_t nodeNum; ///< total num of edge
+    void setCurrentNodeId(NodeID id) { currentNodeId = id; }
+    void setCurrentEdgeId(EdgeID id) { currentEdgeId = id; }
+
+  private:
+    NodeID currentNodeId = 0;
+    EdgeID currentEdgeId = 0;
 
   private:
     // Allow serialization to access non-public data members.
@@ -366,9 +473,12 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
 
     template <typename Archive>
     void serialize(Archive &ar, const unsigned int version) {
-        ar &edgeNum;
-        ar &nodeNum;
         ar &IDToNodeMap;
+        ar &NodeToIDMap;
+        ar &IDToEdgeMap;
+        ar &EdgeToIDMap;
+        ar &currentEdgeId;
+        ar &currentNodeId;
     }
 };
 
