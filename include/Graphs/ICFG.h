@@ -112,7 +112,7 @@ class ICFG : public GenericICFGTy {
     void dump(const std::string &file, bool simple = false);
 
     /// View graph from the debugger
-    void view();
+    void view() override;
 
     /// update ICFG for indirect calls
     void updateCallGraph(PTACallGraph *callgraph);

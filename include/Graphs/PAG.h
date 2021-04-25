@@ -951,7 +951,7 @@ class PAG : public GenericPAGTy {
     void dump(std::string name);
 
     /// View graph from the debugger
-    void view();
+    void view() override;
 };
 
 } // End namespace SVF
