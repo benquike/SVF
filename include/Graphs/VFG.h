@@ -82,7 +82,6 @@ class VFG : public GenericVFGTy {
     using PAGNodeSet = Set<const PAGNode *>;
 
   protected:
-    NodeID totalVFGNode;
     PAGNodeToDefMapTy
         PAGNodeToDefMap; ///< map a pag node to its definition SVG node
     PAGNodeToActualParmMapTy
@@ -122,7 +121,7 @@ class VFG : public GenericVFGTy {
     template <typename Archive>
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<GenericVFGTy>(*this);
-        ar &totalVFGNode;
+
         ar &PAGNodeToActualParmMap;
         ar &PAGNodeToActualRetMap;
         ar &PAGNodeToFormalParmMap;
@@ -144,7 +143,6 @@ class VFG : public GenericVFGTy {
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<GenericVFGTy>(*this);
 
-        ar &totalVFGNode;
         ar &PAGNodeToActualParmMap;
         ar &PAGNodeToActualRetMap;
         ar &PAGNodeToFormalParmMap;
@@ -516,31 +514,31 @@ class VFG : public GenericVFGTy {
     /// To be noted for black hole pointer it has already has address edge
     /// connected
     inline void addNullPtrVFGNode(const PAGNode *pagNode) {
-        auto *sNode = new NullPtrVFGNode(totalVFGNode++, pagNode);
+        auto *sNode = new NullPtrVFGNode(getNextNodeId(), pagNode);
         addVFGNode(sNode, pag->getICFG()->getGlobalBlockNode());
         setDef(pagNode, sNode);
     }
     /// Add an Address VFG node
     inline void addAddrVFGNode(const AddrPE *addr) {
-        auto *sNode = new AddrVFGNode(totalVFGNode++, addr);
+        auto *sNode = new AddrVFGNode(getNextNodeId(), addr);
         addStmtVFGNode(sNode, addr);
         setDef(addr->getDstNode(), sNode);
     }
     /// Add a Copy VFG node
     inline void addCopyVFGNode(const CopyPE *copy) {
-        auto *sNode = new CopyVFGNode(totalVFGNode++, copy);
+        auto *sNode = new CopyVFGNode(getNextNodeId(), copy);
         addStmtVFGNode(sNode, copy);
         setDef(copy->getDstNode(), sNode);
     }
     /// Add a Gep VFG node
     inline void addGepVFGNode(const GepPE *gep) {
-        auto *sNode = new GepVFGNode(totalVFGNode++, gep);
+        auto *sNode = new GepVFGNode(getNextNodeId(), gep);
         addStmtVFGNode(sNode, gep);
         setDef(gep->getDstNode(), sNode);
     }
     /// Add a Load VFG node
     void addLoadVFGNode(const LoadPE *load) {
-        auto *sNode = new LoadVFGNode(totalVFGNode++, load);
+        auto *sNode = new LoadVFGNode(getNextNodeId(), load);
         addStmtVFGNode(sNode, load);
         setDef(load->getDstNode(), sNode);
     }
@@ -548,7 +546,7 @@ class VFG : public GenericVFGTy {
     /// To be noted store does not create a new pointer, we do not set def for
     /// any PAG node
     void addStoreVFGNode(const StorePE *store) {
-        auto *sNode = new StoreVFGNode(totalVFGNode++, store);
+        auto *sNode = new StoreVFGNode(getNextNodeId(), store);
         addStmtVFGNode(sNode, store);
     }
 
@@ -558,7 +556,7 @@ class VFG : public GenericVFGTy {
     /// right VFGParmNode
     inline void addActualParmVFGNode(const PAGNode *aparm,
                                      const CallBlockNode *cs) {
-        auto *sNode = new ActualParmVFGNode(totalVFGNode++, aparm, cs);
+        auto *sNode = new ActualParmVFGNode(getNextNodeId(), aparm, cs);
         addVFGNode(sNode, pag->getICFG()->getCallBlockNode(cs->getCallSite()));
         PAGNodeToActualParmMap[std::make_pair(aparm->getId(), cs)] = sNode;
         /// do not set def here, this node is not a variable definition
@@ -568,7 +566,7 @@ class VFG : public GenericVFGTy {
     inline void addFormalParmVFGNode(const PAGNode *fparm,
                                      const SVFFunction *fun,
                                      CallPESet &callPEs) {
-        auto *sNode = new FormalParmVFGNode(totalVFGNode++, fparm, fun);
+        auto *sNode = new FormalParmVFGNode(getNextNodeId(), fparm, fun);
         addVFGNode(sNode, pag->getICFG()->getFunEntryBlockNode(fun));
 
         for (const auto *callPE : callPEs) {
@@ -585,7 +583,7 @@ class VFG : public GenericVFGTy {
     /// actual parameters
     inline void addFormalRetVFGNode(const PAGNode *uniqueFunRet,
                                     const SVFFunction *fun, RetPESet &retPEs) {
-        auto *sNode = new FormalRetVFGNode(totalVFGNode++, uniqueFunRet, fun);
+        auto *sNode = new FormalRetVFGNode(getNextNodeId(), uniqueFunRet, fun);
         addVFGNode(sNode, pag->getICFG()->getFunExitBlockNode(fun));
         for (const auto *retPE : retPEs) {
             sNode->addRetPE(retPE);
@@ -606,7 +604,7 @@ class VFG : public GenericVFGTy {
     /// Add a callsite Receive VFG node
     inline void addActualRetVFGNode(const PAGNode *ret,
                                     const CallBlockNode *cs) {
-        auto *sNode = new ActualRetVFGNode(totalVFGNode++, ret, cs);
+        auto *sNode = new ActualRetVFGNode(getNextNodeId(), ret, cs);
         addVFGNode(sNode, pag->getICFG()->getRetBlockNode(cs->getCallSite()));
         setDef(ret, sNode);
         PAGNodeToActualRetMap[ret] = sNode;
@@ -615,7 +613,7 @@ class VFG : public GenericVFGTy {
     /// Add an llvm PHI VFG node
     inline void addIntraPHIVFGNode(const PAGNode *phiResNode,
                                    PAG::CopyPEList &oplist) {
-        auto *sNode = new IntraPHIVFGNode(totalVFGNode++, phiResNode);
+        auto *sNode = new IntraPHIVFGNode(getNextNodeId(), phiResNode);
         u32_t pos = 0;
         const PAGEdge *edge = nullptr;
         for (auto it = oplist.begin(), eit = oplist.end(); it != eit;
@@ -630,7 +628,7 @@ class VFG : public GenericVFGTy {
     }
     /// Add a Compare VFG node
     inline void addCmpVFGNode(const PAGNode *resNode, PAG::CmpPEList &oplist) {
-        auto *sNode = new CmpVFGNode(totalVFGNode++, resNode);
+        auto *sNode = new CmpVFGNode(getNextNodeId(), resNode);
         u32_t pos = 0;
         const PAGEdge *edge = nullptr;
         for (auto it = oplist.begin(), eit = oplist.end(); it != eit;
@@ -646,7 +644,7 @@ class VFG : public GenericVFGTy {
     /// Add a BinaryOperator VFG node
     inline void addBinaryOPVFGNode(const PAGNode *resNode,
                                    PAG::BinaryOPList &oplist) {
-        auto *sNode = new BinaryOPVFGNode(totalVFGNode++, resNode);
+        auto *sNode = new BinaryOPVFGNode(getNextNodeId(), resNode);
         u32_t pos = 0;
         const PAGEdge *edge = nullptr;
         for (auto it = oplist.begin(), eit = oplist.end(); it != eit;
@@ -663,7 +661,7 @@ class VFG : public GenericVFGTy {
     /// Add a UnaryOperator VFG node
     inline void addUnaryOPVFGNode(const PAGNode *resNode,
                                   PAG::UnaryOPList &oplist) {
-        auto *sNode = new UnaryOPVFGNode(totalVFGNode++, resNode);
+        auto *sNode = new UnaryOPVFGNode(getNextNodeId(), resNode);
         u32_t pos = 0;
         const PAGEdge *edge = nullptr;
         for (auto it = oplist.begin(), eit = oplist.end(); it != eit;

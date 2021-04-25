@@ -299,7 +299,7 @@ PHIVFGNode::PHIVFGNode(NodeID id, const PAGNode *r, VFGNodeK k)
  *    between two statements (PAGEdges)
  */
 VFG::VFG(PTACallGraph *cg, PAG *pag, VFGK k)
-    : totalVFGNode(0), callgraph(cg), pag(pag), kind(k) {
+    : callgraph(cg), pag(pag), kind(k) {
 
     DBOUT(DGENERAL, outs() << pasMsg("\tCreate VFG Top Level Node\n"));
     addVFGNodes();

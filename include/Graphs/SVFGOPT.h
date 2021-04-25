@@ -241,14 +241,14 @@ class SVFGOPT : public SVFG {
 
     /// Add inter PHI SVFG node for formal parameter
     inline InterPHISVFGNode *addInterPHIForFP(const FormalParmSVFGNode *fp) {
-        auto *sNode = new InterPHISVFGNode(totalVFGNode++, fp);
+        auto *sNode = new InterPHISVFGNode(getNextNodeId(), fp);
         addSVFGNode(sNode, pag->getICFG()->getFunEntryBlockNode(fp->getFun()));
         resetDef(fp->getParam(), sNode);
         return sNode;
     }
     /// Add inter PHI SVFG node for actual return
     inline InterPHISVFGNode *addInterPHIForAR(const ActualRetSVFGNode *ar) {
-        auto *sNode = new InterPHISVFGNode(totalVFGNode++, ar);
+        auto *sNode = new InterPHISVFGNode(getNextNodeId(), ar);
         addSVFGNode(sNode, pag->getICFG()->getRetBlockNode(
                                ar->getCallSite()->getCallSite()));
         resetDef(ar->getRev(), sNode);
