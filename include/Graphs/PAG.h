@@ -568,9 +568,6 @@ class PAG : public GenericPAGTy {
     }
     //@}
 
-    /// Get a pag node according to its ID
-    inline bool findPAGNode(NodeID id) const { return hasGNode(id); }
-
     /// Get an edge according to src, dst and kind
     //@{
     inline PAGEdge *getIntraPAGEdge(NodeID src, NodeID dst,

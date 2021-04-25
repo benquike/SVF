@@ -189,7 +189,7 @@ struct DOTGraphTraits<OfflineConsG *> : public DOTGraphTraits<PAG *> {
     static std::string getNodeLabel(NodeType *n, OfflineConsG *g) {
         std::string str;
         raw_string_ostream rawstr(str);
-        if (g->getPAG()->findPAGNode(n->getId())) {
+        if (g->getPAG()->hasGNode(n->getId())) {
             PAGNode *node = g->getPAG()->getPAGNode(n->getId());
             bool briefDisplay = true;
             bool nameDisplay = true;
@@ -224,7 +224,7 @@ struct DOTGraphTraits<OfflineConsG *> : public DOTGraphTraits<PAG *> {
     static std::string getNodeAttributes(NodeType *n, OfflineConsG *g) {
         PAG *pag = g->getPAG();
 
-        if (pag->findPAGNode(n->getId())) {
+        if (pag->hasGNode(n->getId())) {
             PAGNode *node = pag->getPAGNode(n->getId());
             return node->getNodeAttrForDotDisplay();
         }
