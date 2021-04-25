@@ -249,8 +249,6 @@ class PTACallGraph : public GenericCallGraphTy {
     CallInstToCallGraphEdgesMap
         callinstToCallGraphEdgesMap; ///< Map a call instruction to its
                                      ///< corresponding call edges
-
-    NodeID callGraphNodeNum;
     Size_t numOfResolvedIndCallEdge;
 
     SVFProject *proj = nullptr;
@@ -276,7 +274,6 @@ class PTACallGraph : public GenericCallGraphTy {
         boost::serialization::save_map(ar, funToCallGraphNodeMap);
 
         ar &callinstToCallGraphEdgesMap;
-        ar &callGraphNodeNum;
         ar &numOfResolvedIndCallEdge;
         ar &pag;
     }
@@ -293,7 +290,6 @@ class PTACallGraph : public GenericCallGraphTy {
         boost::serialization::load_map(ar, funToCallGraphNodeMap);
 
         ar &callinstToCallGraphEdgesMap;
-        ar &callGraphNodeNum;
         ar &numOfResolvedIndCallEdge;
         ar &pag;
 
@@ -343,9 +339,6 @@ class PTACallGraph : public GenericCallGraphTy {
 
     /// Get call graph node
     //@{
-    inline PTACallGraphNode *getCallGraphNode(NodeID id) const {
-        return getGNode(id);
-    }
     inline PTACallGraphNode *getCallGraphNode(const SVFFunction *fun) const {
         auto it = funToCallGraphNodeMap.find(fun);
         assert(it != funToCallGraphNodeMap.end() &&

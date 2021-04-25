@@ -112,7 +112,6 @@ bool PTACallGraphNode::isReachableFromProgEntry() const {
 /// Constructor
 PTACallGraph::PTACallGraph(SVFProject *proj, CGEK k)
     : kind(k), pag(proj->getPAG()), proj(proj) {
-    callGraphNodeNum = 0;
     numOfResolvedIndCallEdge = 0;
 }
 
@@ -125,11 +124,9 @@ void PTACallGraph::destroy() {}
  * Add call graph node
  */
 void PTACallGraph::addCallGraphNode(const SVFFunction *fun) {
-    NodeID id = callGraphNodeNum;
-    auto *callGraphNode = new PTACallGraphNode(id, fun);
-    addGNode(id, callGraphNode);
+    auto *callGraphNode = new PTACallGraphNode(getNextNodeId(), fun);
+    addGNode(callGraphNode);
     funToCallGraphNodeMap[fun] = callGraphNode;
-    callGraphNodeNum++;
 }
 
 /*!

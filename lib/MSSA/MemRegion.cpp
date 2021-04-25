@@ -198,8 +198,7 @@ void MRGenerator::collectModRefForCall() {
         /// handle all sub scc nodes of this rep node
         const NodeBS &subNodes = callGraphSCC->subNodes(callGraphNodeID);
         for (const auto &subNode : subNodes) {
-            PTACallGraphNode *subCallGraphNode =
-                callGraph->getCallGraphNode(subNode);
+            PTACallGraphNode *subCallGraphNode = callGraph->getGNode(subNode);
             /// Get mod-ref of all callsites calling callGraphNode
             modRefAnalysis(subCallGraphNode, worklist);
         }
