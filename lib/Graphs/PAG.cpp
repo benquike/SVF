@@ -394,8 +394,8 @@ PAG::PAG(SVFProject *proj, bool buildFromFile)
  * Add Address edge
  */
 AddrPE *PAG::addAddrPE(NodeID src, NodeID dst) {
-    PAGNode *srcNode = getPAGNode(src);
-    PAGNode *dstNode = getPAGNode(dst);
+    PAGNode *srcNode = getGNode(src);
+    PAGNode *dstNode = getGNode(dst);
     if (PAGEdge *edge = hasNonlabeledEdge(srcNode, dstNode, PAGEdge::Addr)) {
         return SVFUtil::cast<AddrPE>(edge);
     } else {
@@ -409,8 +409,8 @@ AddrPE *PAG::addAddrPE(NodeID src, NodeID dst) {
  * Add Copy edge
  */
 CopyPE *PAG::addCopyPE(NodeID src, NodeID dst) {
-    PAGNode *srcNode = getPAGNode(src);
-    PAGNode *dstNode = getPAGNode(dst);
+    PAGNode *srcNode = getGNode(src);
+    PAGNode *dstNode = getGNode(dst);
     if (PAGEdge *edge = hasNonlabeledEdge(srcNode, dstNode, PAGEdge::Copy)) {
         return SVFUtil::cast<CopyPE>(edge);
     } else {
@@ -424,8 +424,8 @@ CopyPE *PAG::addCopyPE(NodeID src, NodeID dst) {
  * Add Compare edge
  */
 CmpPE *PAG::addCmpPE(NodeID src, NodeID dst) {
-    PAGNode *srcNode = getPAGNode(src);
-    PAGNode *dstNode = getPAGNode(dst);
+    PAGNode *srcNode = getGNode(src);
+    PAGNode *dstNode = getGNode(dst);
     if (PAGEdge *edge = hasNonlabeledEdge(srcNode, dstNode, PAGEdge::Cmp)) {
         return SVFUtil::cast<CmpPE>(edge);
     } else {
@@ -439,8 +439,8 @@ CmpPE *PAG::addCmpPE(NodeID src, NodeID dst) {
  * Add Compare edge
  */
 BinaryOPPE *PAG::addBinaryOPPE(NodeID src, NodeID dst) {
-    PAGNode *srcNode = getPAGNode(src);
-    PAGNode *dstNode = getPAGNode(dst);
+    PAGNode *srcNode = getGNode(src);
+    PAGNode *dstNode = getGNode(dst);
     if (PAGEdge *edge =
             hasNonlabeledEdge(srcNode, dstNode, PAGEdge::BinaryOp)) {
         return SVFUtil::cast<BinaryOPPE>(edge);
@@ -456,8 +456,8 @@ BinaryOPPE *PAG::addBinaryOPPE(NodeID src, NodeID dst) {
  * Add Unary edge
  */
 UnaryOPPE *PAG::addUnaryOPPE(NodeID src, NodeID dst) {
-    PAGNode *srcNode = getPAGNode(src);
-    PAGNode *dstNode = getPAGNode(dst);
+    PAGNode *srcNode = getGNode(src);
+    PAGNode *dstNode = getGNode(dst);
     if (PAGEdge *edge = hasNonlabeledEdge(srcNode, dstNode, PAGEdge::UnaryOp)) {
         return SVFUtil::cast<UnaryOPPE>(edge);
     }
@@ -471,8 +471,8 @@ UnaryOPPE *PAG::addUnaryOPPE(NodeID src, NodeID dst) {
  * Add Load edge
  */
 LoadPE *PAG::addLoadPE(NodeID src, NodeID dst) {
-    PAGNode *srcNode = getPAGNode(src);
-    PAGNode *dstNode = getPAGNode(dst);
+    PAGNode *srcNode = getGNode(src);
+    PAGNode *dstNode = getGNode(dst);
     if (PAGEdge *edge = hasNonlabeledEdge(srcNode, dstNode, PAGEdge::Load)) {
         return SVFUtil::cast<LoadPE>(edge);
     }
@@ -487,8 +487,8 @@ LoadPE *PAG::addLoadPE(NodeID src, NodeID dst) {
  * Note that two store instructions may share the same Store PAGEdge
  */
 StorePE *PAG::addStorePE(NodeID src, NodeID dst, const IntraBlockNode *curVal) {
-    PAGNode *srcNode = getPAGNode(src);
-    PAGNode *dstNode = getPAGNode(dst);
+    PAGNode *srcNode = getGNode(src);
+    PAGNode *dstNode = getGNode(dst);
     if (PAGEdge *edge =
             hasLabeledEdge(srcNode, dstNode, PAGEdge::Store, curVal)) {
         return SVFUtil::cast<StorePE>(edge);
@@ -504,8 +504,8 @@ StorePE *PAG::addStorePE(NodeID src, NodeID dst, const IntraBlockNode *curVal) {
  * Add Call edge
  */
 CallPE *PAG::addCallPE(NodeID src, NodeID dst, const CallBlockNode *cs) {
-    PAGNode *srcNode = getPAGNode(src);
-    PAGNode *dstNode = getPAGNode(dst);
+    PAGNode *srcNode = getGNode(src);
+    PAGNode *dstNode = getGNode(dst);
     if (PAGEdge *edge = hasLabeledEdge(srcNode, dstNode, PAGEdge::Call, cs)) {
         return SVFUtil::cast<CallPE>(edge);
     }
@@ -519,8 +519,8 @@ CallPE *PAG::addCallPE(NodeID src, NodeID dst, const CallBlockNode *cs) {
  * Add Return edge
  */
 RetPE *PAG::addRetPE(NodeID src, NodeID dst, const CallBlockNode *cs) {
-    PAGNode *srcNode = getPAGNode(src);
-    PAGNode *dstNode = getPAGNode(dst);
+    PAGNode *srcNode = getGNode(src);
+    PAGNode *dstNode = getGNode(dst);
     if (PAGEdge *edge = hasLabeledEdge(srcNode, dstNode, PAGEdge::Ret, cs)) {
         return SVFUtil::cast<RetPE>(edge);
     }
@@ -547,8 +547,8 @@ PAGEdge *PAG::addBlackHoleAddrPE(NodeID node) {
  */
 TDForkPE *PAG::addThreadForkPE(NodeID src, NodeID dst,
                                const CallBlockNode *cs) {
-    PAGNode *srcNode = getPAGNode(src);
-    PAGNode *dstNode = getPAGNode(dst);
+    PAGNode *srcNode = getGNode(src);
+    PAGNode *dstNode = getGNode(dst);
     if (PAGEdge *edge =
             hasLabeledEdge(srcNode, dstNode, PAGEdge::ThreadFork, cs)) {
         return SVFUtil::cast<TDForkPE>(edge);
@@ -565,8 +565,8 @@ TDForkPE *PAG::addThreadForkPE(NodeID src, NodeID dst,
  */
 TDJoinPE *PAG::addThreadJoinPE(NodeID src, NodeID dst,
                                const CallBlockNode *cs) {
-    PAGNode *srcNode = getPAGNode(src);
-    PAGNode *dstNode = getPAGNode(dst);
+    PAGNode *srcNode = getGNode(src);
+    PAGNode *dstNode = getGNode(dst);
     if (PAGEdge *edge =
             hasLabeledEdge(srcNode, dstNode, PAGEdge::ThreadJoin, cs)) {
         return SVFUtil::cast<TDJoinPE>(edge);
@@ -585,7 +585,7 @@ TDJoinPE *PAG::addThreadJoinPE(NodeID src, NodeID dst,
 GepPE *PAG::addGepPE(NodeID src, NodeID dst, const LocationSet &ls,
                      bool constGep) {
 
-    PAGNode *node = getPAGNode(src);
+    PAGNode *node = getGNode(src);
     if (!constGep || node->hasIncomingVariantGepEdge()) {
         /// Since the offset from base to src is variant,
         /// the new gep edge being created is also a VariantGepPE edge.
@@ -601,8 +601,8 @@ GepPE *PAG::addGepPE(NodeID src, NodeID dst, const LocationSet &ls,
 NormalGepPE *PAG::addNormalGepPE(NodeID src, NodeID dst,
                                  const LocationSet &ls) {
     const LocationSet &baseLS = getLocationSetFromBaseNode(src);
-    PAGNode *baseNode = getPAGNode(getBaseValNode(src));
-    PAGNode *dstNode = getPAGNode(dst);
+    PAGNode *baseNode = getGNode(getBaseValNode(src));
+    PAGNode *dstNode = getGNode(dst);
     if (PAGEdge *edge =
             hasNonlabeledEdge(baseNode, dstNode, PAGEdge::NormalGep)) {
         return SVFUtil::cast<NormalGepPE>(edge);
@@ -620,8 +620,8 @@ NormalGepPE *PAG::addNormalGepPE(NodeID src, NodeID dst,
  */
 VariantGepPE *PAG::addVariantGepPE(NodeID src, NodeID dst) {
 
-    PAGNode *baseNode = getPAGNode(getBaseValNode(src));
-    PAGNode *dstNode = getPAGNode(dst);
+    PAGNode *baseNode = getGNode(getBaseValNode(src));
+    PAGNode *dstNode = getGNode(dst);
     if (PAGEdge *edge =
             hasNonlabeledEdge(baseNode, dstNode, PAGEdge::VariantGep)) {
         return SVFUtil::cast<VariantGepPE>(edge);
@@ -654,7 +654,7 @@ NodeID PAG::addGepValNode(const Value *curInst, const Value *gepVal,
  * Given an object node, find its field object node
  */
 NodeID PAG::getGepObjNode(NodeID id, const LocationSet &ls) {
-    PAGNode *node = getPAGNode(id);
+    PAGNode *node = getGNode(id);
     if (auto *gepNode = SVFUtil::dyn_cast<GepObjPN>(node)) {
         return getGepObjNode(gepNode->getMemObj(),
                              gepNode->getLocationSet() + ls);
@@ -793,7 +793,7 @@ NodeBS &PAG::getAllFieldsObjNode(const MemObj *obj) {
  * Get all fields object nodes of an object
  */
 NodeBS &PAG::getAllFieldsObjNode(NodeID id) {
-    const PAGNode *node = getPAGNode(id);
+    const PAGNode *node = getGNode(id);
     assert(SVFUtil::isa<ObjPN>(node) && "need an object node");
     const ObjPN *obj = SVFUtil::cast<ObjPN>(node);
     return getAllFieldsObjNode(obj->getMemObj());
@@ -805,7 +805,7 @@ NodeBS &PAG::getAllFieldsObjNode(NodeID id) {
  * Then only return this field insensitive object
  */
 NodeBS PAG::getFieldsAfterCollapse(NodeID id) {
-    const PAGNode *node = getPAGNode(id);
+    const PAGNode *node = getGNode(id);
     assert(SVFUtil::isa<ObjPN>(node) && "need an object node");
     const MemObj *mem = SVFUtil::cast<ObjPN>(node)->getMemObj();
     if (mem->isFieldInsensitive()) {
@@ -823,7 +823,7 @@ NodeBS PAG::getFieldsAfterCollapse(NodeID id) {
  * Otherwise return the node id itself
  */
 NodeID PAG::getBaseValNode(NodeID nodeId) {
-    PAGNode *node = getPAGNode(nodeId);
+    PAGNode *node = getGNode(nodeId);
     if (node->hasIncomingEdges(PAGEdge::NormalGep) ||
         node->hasIncomingEdges(PAGEdge::VariantGep)) {
         PAGEdge::PAGEdgeSetTy &ngeps =
@@ -855,7 +855,7 @@ NodeID PAG::getBaseValNode(NodeID nodeId) {
  * Size_t offset : gep offset
  */
 LocationSet PAG::getLocationSetFromBaseNode(NodeID nodeId) {
-    PAGNode *node = getPAGNode(nodeId);
+    PAGNode *node = getGNode(nodeId);
     PAGEdge::PAGEdgeSetTy &geps = node->getIncomingEdges(PAGEdge::NormalGep);
     /// if this node is already a base node
     if (geps.empty()) {
@@ -960,7 +960,7 @@ void PAG::print() {
  * not a pointer here
  */
 bool PAG::isValidPointer(NodeID nodeId) const {
-    PAGNode *node = getPAGNode(nodeId);
+    PAGNode *node = getGNode(nodeId);
     if ((node->getInEdges().empty() && node->getOutEdges().empty())) {
         return false;
     }

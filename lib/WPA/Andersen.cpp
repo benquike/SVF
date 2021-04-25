@@ -731,7 +731,7 @@ void Andersen::updateNodeRepAndSubs(NodeID nodeId, NodeID newRepId) {
  */
 void Andersen::dumpTopLevelPtsTo() {
     for (const auto &nIter : this->getAllValidPtrs()) {
-        const PAGNode *node = getPAG()->getPAGNode(nIter);
+        const PAGNode *node = getPAG()->getGNode(nIter);
         if (getPAG()->isValidTopLevelPtr(node)) {
             const PointsTo &pts = this->getPts(node->getId());
             outs() << "\nNodeID " << node->getId() << " ";

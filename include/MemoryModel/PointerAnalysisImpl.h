@@ -537,7 +537,7 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
     void dumpTopLevelPtsTo() override {
         for (OrderedNodeSet::iterator nIter = this->getAllValidPtrs().begin();
              nIter != this->getAllValidPtrs().end(); ++nIter) {
-            const PAGNode *node = this->getPAG()->getPAGNode(*nIter);
+            const PAGNode *node = getPAG()->getGNode(*nIter);
             if (this->getPAG()->isValidTopLevelPtr(node)) {
                 if (SVFUtil::isa<DummyObjPN>(node)) {
                     SVFUtil::outs()

@@ -69,8 +69,7 @@ void SaberSVFGBuilder::collectGlobals(BVDataPTAImpl *pta) {
             continue;
 
         if (auto *gepobj = SVFUtil::dyn_cast<GepObjPN>(pagNode)) {
-            if (SVFUtil::isa<DummyObjPN>(
-                    pag->getPAGNode(gepobj->getBaseNode())))
+            if (SVFUtil::isa<DummyObjPN>(pag->getGNode(gepobj->getBaseNode())))
                 continue;
         }
         if (const Value *val = pagNode->getValue()) {

@@ -141,8 +141,8 @@ void PAGBuilderFromFile::addEdge(NodeID srcID, NodeID dstID,
                                  Size_t offsetOrCSId, std::string edge) {
 
     // check whether these two nodes available
-    PAGNode *srcNode = pag->getPAGNode(srcID);
-    PAGNode *dstNode = pag->getPAGNode(dstID);
+    PAGNode *srcNode = pag->getGNode(srcID);
+    PAGNode *dstNode = pag->getGNode(dstID);
 
     /// sanity check for PAG from txt
     assert(SVFUtil::isa<ValPN>(dstNode) && "dst not an value node?");

@@ -119,7 +119,7 @@ void AndersenSFR::fieldExpand(NodeSet &initials, Size_t offset, NodeBS &strides,
         if (consCG->isBlkObjOrConstantObj(init)) {
             expandPts.set(init);
         } else {
-            PAGNode *initPN = pag->getPAGNode(init);
+            PAGNode *initPN = pag->getGNode(init);
             const MemObj *obj = pag->getBaseObj(init);
             const Size_t maxLimit = obj->getMaxFieldOffsetLimit();
             Size_t initOffset;

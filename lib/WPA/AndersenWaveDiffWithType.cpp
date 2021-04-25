@@ -8,7 +8,7 @@ using namespace SVFUtil;
 void AndersenWaveDiffWithType::processCast(const ConstraintEdge *edge) {
     NodeID srcId = edge->getSrcID();
     NodeID dstId = edge->getDstID();
-    if (pag->hasNonlabeledEdge(pag->getPAGNode(srcId), pag->getPAGNode(dstId),
+    if (pag->hasNonlabeledEdge(pag->getGNode(srcId), pag->getGNode(dstId),
                                PAGEdge::Copy)) {
         const Value *val =
             pag->getIntraPAGEdge(srcId, dstId, PAGEdge::Copy)->getValue();
@@ -87,7 +87,7 @@ void AndersenWaveDiffWithType::addTypeForGepObjNode(
     NodeID id, const NormalGepCGEdge *normalGepEdge) {
     NodeID srcId = normalGepEdge->getSrcID();
     NodeID dstId = normalGepEdge->getDstID();
-    if (pag->hasNonlabeledEdge(pag->getPAGNode(srcId), pag->getPAGNode(dstId),
+    if (pag->hasNonlabeledEdge(pag->getGNode(srcId), pag->getGNode(dstId),
                                PAGEdge::NormalGep)) {
         const Value *val =
             pag->getIntraPAGEdge(srcId, dstId, PAGEdge::NormalGep)->getValue();

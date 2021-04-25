@@ -129,7 +129,7 @@ AddrCGEdge::AddrCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id,
                        PAG *pag)
     : ConstraintEdge(s, d, Addr, id) {
     // Retarget addr edges may lead s to be a dummy node
-    PAGNode *node = pag->getPAGNode(s->getId());
+    PAGNode *node = pag->getGNode(s->getId());
     if (!SVFModule::pagReadFromTXT()) {
         assert(!SVFUtil::isa<DummyValPN>(node) && "a dummy node??");
     }
@@ -535,7 +535,7 @@ struct DOTGraphTraits<ConstraintGraph *> : public DOTGraphTraits<PAG *> {
     }
 
     static bool isNodeHidden(NodeType *n) {
-        PAGNode *node = n->getPAG()->getPAGNode(n->getId());
+        PAGNode *node = n->getPAG()->getGNode(n->getId());
         return node->isIsolatedNode();
     }
 
@@ -543,7 +543,7 @@ struct DOTGraphTraits<ConstraintGraph *> : public DOTGraphTraits<PAG *> {
     /// Either you can choose to display the name of the value or the whole
     /// instruction
     static std::string getNodeLabel(NodeType *n, ConstraintGraph *g) {
-        PAGNode *node = g->getPAG()->getPAGNode(n->getId());
+        PAGNode *node = g->getPAG()->getGNode(n->getId());
         bool briefDisplay = Options::BriefConsCGDotGraph;
         bool nameDisplay = true;
         std::string str;
@@ -574,7 +574,7 @@ struct DOTGraphTraits<ConstraintGraph *> : public DOTGraphTraits<PAG *> {
     }
 
     static std::string getNodeAttributes(NodeType *n, ConstraintGraph *g) {
-        PAGNode *node = g->getPAG()->getPAGNode(n->getId());
+        PAGNode *node = g->getPAG()->getGNode(n->getId());
         return node->getNodeAttrForDotDisplay();
     }
 

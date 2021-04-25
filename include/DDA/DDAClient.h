@@ -67,7 +67,7 @@ class DDAClient {
 
   protected:
     void addCandidate(NodeID id) {
-        if (pag->isValidTopLevelPtr(pag->getPAGNode(id))) {
+        if (pag->isValidTopLevelPtr(pag->getGNode(id))) {
             candidateQueries.insert(id);
         }
     }

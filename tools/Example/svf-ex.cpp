@@ -59,7 +59,7 @@ std::string printPts(PointerAnalysis *pta, Value *val) {
     const NodeBS &pts = pta->getPts(pNodeId);
     for (NodeBS::iterator ii = pts.begin(), ie = pts.end(); ii != ie; ii++) {
         rawstr << " " << *ii << " ";
-        PAGNode *targetObj = pta->getPAG()->getPAGNode(*ii);
+        PAGNode *targetObj = pta->getPAG()->getGNode(*ii);
         if (targetObj->hasValue()) {
             rawstr << "(" << *targetObj->getValue() << ")\t ";
         }
@@ -101,7 +101,7 @@ void traverseOnICFG(ICFG *icfg, const Instruction *inst) {
 void traverseOnVFG(const SVFG *vfg, Value *val) {
     PAG *pag = vfg->getPAG();
 
-    PAGNode *pNode = pag->getPAGNode(pag->getValueNode(val));
+    PAGNode *pNode = pag->getGNode(pag->getValueNode(val));
     const VFGNode *vNode = vfg->getDefSVFGNode(pNode);
     FIFOWorkList<const VFGNode *> worklist;
     Set<const VFGNode *> visited;

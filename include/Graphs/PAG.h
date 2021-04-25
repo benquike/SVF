@@ -572,7 +572,7 @@ class PAG : public GenericPAGTy {
     //@{
     inline PAGEdge *getIntraPAGEdge(NodeID src, NodeID dst,
                                     PAGEdge::PEDGEK kind) {
-        return getIntraPAGEdge(getPAGNode(src), getPAGNode(dst), kind);
+        return getIntraPAGEdge(getGNode(src), getGNode(dst), kind);
     }
 
     inline PAGEdge *getIntraPAGEdge(PAGNode *src, PAGNode *dst,
@@ -584,9 +584,6 @@ class PAG : public GenericPAGTy {
         return (*it);
     }
     //@}
-
-    /// Get PAGNode ID
-    inline PAGNode *getPAGNode(NodeID id) const { return getGNode(id); }
 
     /// Get PAG Node ID according to LLVM value
     //@{
@@ -615,7 +612,7 @@ class PAG : public GenericPAGTy {
     /// return nullptr is this node is not a ObjPN type
     //@{
     inline const MemObj *getObject(NodeID id) const {
-        const PAGNode *node = getPAGNode(id);
+        const PAGNode *node = getGNode(id);
         if (const ObjPN *objPN = SVFUtil::dyn_cast<ObjPN>(node)) {
             return getObject(objPN);
         }
@@ -653,7 +650,7 @@ class PAG : public GenericPAGTy {
     }
 
     inline NodeID getFIObjNode(NodeID id) const {
-        PAGNode *node = getPAGNode(id);
+        PAGNode *node = getGNode(id);
         assert(SVFUtil::isa<ObjPN>(node) && "need an object node");
         auto *obj = SVFUtil::cast<ObjPN>(node);
         return getFIObjNode(obj->getMemObj());
@@ -697,7 +694,7 @@ class PAG : public GenericPAGTy {
     }
 
     inline bool isNonPointerObj(NodeID id) const {
-        PAGNode *node = getPAGNode(id);
+        PAGNode *node = getGNode(id);
         if (FIObjPN *fiNode = SVFUtil::dyn_cast<FIObjPN>(node)) {
             return (fiNode->getMemObj()->hasPtrObj() == false);
         } else if (GepObjPN *gepNode = SVFUtil::dyn_cast<GepObjPN>(node)) {
@@ -739,7 +736,7 @@ class PAG : public GenericPAGTy {
     }
 
     inline const MemObj *getBaseObj(NodeID id) const {
-        const PAGNode *node = getPAGNode(id);
+        const PAGNode *node = getGNode(id);
         assert(SVFUtil::isa<ObjPN>(node) && "need an object node");
         const auto *obj = SVFUtil::cast<ObjPN>(node);
         return obj->getMemObj();

@@ -64,8 +64,7 @@ void ThreadCallGraph::updateCallGraph(PointerAnalysis *pta) {
             PAG *pag = pta->getPAG();
             const PointsTo &targets = pta->getPts(pag->getValueNode(forkedval));
             for (auto ii : targets) {
-                if (auto *objPN =
-                        SVFUtil::dyn_cast<ObjPN>(pag->getPAGNode(ii))) {
+                if (auto *objPN = SVFUtil::dyn_cast<ObjPN>(pag->getGNode(ii))) {
                     const MemObj *obj = pag->getObject(objPN);
                     if (obj->isFunction()) {
                         const auto *callee =
@@ -90,8 +89,7 @@ void ThreadCallGraph::updateCallGraph(PointerAnalysis *pta) {
             PAG *pag = pta->getPAG();
             const PointsTo &targets = pta->getPts(pag->getValueNode(forkedval));
             for (auto ii : targets) {
-                if (auto *objPN =
-                        SVFUtil::dyn_cast<ObjPN>(pag->getPAGNode(ii))) {
+                if (auto *objPN = SVFUtil::dyn_cast<ObjPN>(pag->getGNode(ii))) {
                     const MemObj *obj = pag->getObject(objPN);
                     if (obj->isFunction()) {
                         const auto *callee =

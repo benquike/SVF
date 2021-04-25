@@ -189,7 +189,7 @@ bool BVDataPTAImpl::readFromFile(const string &filename) {
  */
 void BVDataPTAImpl::dumpTopLevelPtsTo() {
     for (const auto &nIter : this->getAllValidPtrs()) {
-        const PAGNode *node = getPAG()->getPAGNode(nIter);
+        const PAGNode *node = getPAG()->getGNode(nIter);
         if (getPAG()->isValidTopLevelPtr(node)) {
             const PointsTo &pts = this->getPts(node->getId());
             outs() << "\nNodeID " << node->getId() << " ";

@@ -68,7 +68,7 @@ void AndersenStat::collectCycleInfo(ConstraintGraph *consCG) {
         NodeBS &subNodes = consCG->sccSubNodes(repNode);
         NodeBS clone = subNodes;
         for (const auto &nodeId : subNodes) {
-            PAGNode *pagNode = pta->getPAG()->getPAGNode(nodeId);
+            PAGNode *pagNode = pta->getPAG()->getGNode(nodeId);
             if (SVFUtil::isa<ObjPN>(pagNode) &&
                 pta->isFieldInsensitive(nodeId)) {
                 NodeID baseId = consCG->getBaseObjNode(nodeId);
@@ -132,7 +132,7 @@ void AndersenStat::constraintGraphStat() {
             nodeIt.second->getOutEdges().empty())
             continue;
         cgNodeNumber++;
-        if (SVFUtil::isa<ObjPN>(pta->getPAG()->getPAGNode(nodeIt.first)))
+        if (SVFUtil::isa<ObjPN>(pta->getPAG()->getGNode(nodeIt.first)))
             objNodeNumber++;
 
         u32_t nCopyIn = nodeIt.second->getDirectInEdges().size();
@@ -284,8 +284,7 @@ void AndersenStat::performStat() {
         totalPointers++;
         totalPtsSize += size;
 
-        if (pta->getPAG()->isValidTopLevelPtr(
-                pta->getPAG()->getPAGNode(node))) {
+        if (pta->getPAG()->isValidTopLevelPtr(pta->getPAG()->getGNode(node))) {
             totalTopLevPointers++;
             totalTopLevPtsSize += size;
         }

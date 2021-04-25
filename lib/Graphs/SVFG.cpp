@@ -565,7 +565,7 @@ void SVFG::getInterVFEdgesForIndirectCallSite(
                "function has more arguments than call site");
         if (callee->getLLVMFun()->isVarArg()) {
             NodeID varFunArg = pag->getVarargNode(callee);
-            const PAGNode *varFunArgNode = pag->getPAGNode(varFunArg);
+            const PAGNode *varFunArgNode = pag->getGNode(varFunArg);
             if (varFunArgNode->isPointer()) {
                 for (; csArgIt != csArgEit; csArgIt++) {
                     const PAGNode *cs_arg = *csArgIt;

@@ -324,7 +324,7 @@ void VFG::addVFGNodes() {
     // construction to be noted for black hole pointer it has already has
     // address edge connected, and its definition will be set when processing
     // addr PAG edge.
-    addNullPtrVFGNode(pag->getPAGNode(pag->getNullPtr()));
+    addNullPtrVFGNode(pag->getGNode(pag->getNullPtr()));
 
     ///
     ///  Create am AddrVFGNode for each AddrEdge in PAG
@@ -445,7 +445,7 @@ void VFG::addVFGNodes() {
         }
 
         if (func->getLLVMFun()->getFunctionType()->isVarArg()) {
-            const PAGNode *varParam = pag->getPAGNode(pag->getVarargNode(func));
+            const PAGNode *varParam = pag->getGNode(pag->getVarargNode(func));
             if (isInterestedPAGNode(varParam) == false ||
                 hasBlackHoleConstObjAddrAsDef(varParam)) {
                 continue;
@@ -820,7 +820,7 @@ void VFG::connectCallerAndCallee(const CallBlockNode *callBlockNode,
                "function has more arguments than call site");
         if (callee->getLLVMFun()->isVarArg()) {
             NodeID varFunArg = pag->getVarargNode(callee);
-            const PAGNode *varFunArgNode = pag->getPAGNode(varFunArg);
+            const PAGNode *varFunArgNode = pag->getGNode(varFunArg);
             if (varFunArgNode->isPointer()) {
                 for (; csArgIt != csArgEit; csArgIt++) {
                     const PAGNode *cs_arg = *csArgIt;

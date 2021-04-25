@@ -261,11 +261,11 @@ void DDAPass::collectCxtInsenEdgeForVFCycle(PointerAnalysis *pta,
 AliasResult DDAPass::alias(NodeID node1, NodeID node2) {
     PAG *pag = _pta->getPAG();
 
-    if (pag->isValidTopLevelPtr(pag->getPAGNode(node1))) {
+    if (pag->isValidTopLevelPtr(pag->getGNode(node1))) {
         _pta->computeDDAPts(node1);
     }
 
-    if (pag->isValidTopLevelPtr(pag->getPAGNode(node2))) {
+    if (pag->isValidTopLevelPtr(pag->getGNode(node2))) {
         _pta->computeDDAPts(node2);
     }
 
@@ -285,12 +285,12 @@ AliasResult DDAPass::alias(const Value *V1, const Value *V2) {
     ///       between two Values if they both have PAG nodes. Otherwise,
     ///       MayAlias will be returned.
     if (pag->hasValueNode(V1) && pag->hasValueNode(V2)) {
-        PAGNode *node1 = pag->getPAGNode(pag->getValueNode(V1));
+        PAGNode *node1 = pag->getGNode(pag->getValueNode(V1));
         if (pag->isValidTopLevelPtr(node1)) {
             _pta->computeDDAPts(node1->getId());
         }
 
-        PAGNode *node2 = pag->getPAGNode(pag->getValueNode(V2));
+        PAGNode *node2 = pag->getGNode(pag->getValueNode(V2));
         if (pag->isValidTopLevelPtr(node2)) {
             _pta->computeDDAPts(node2->getId());
         }

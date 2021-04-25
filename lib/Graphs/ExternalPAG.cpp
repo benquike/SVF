@@ -52,14 +52,14 @@ bool ExternalPAG::addExternalPAG(const SVFFunction *function) {
     // Add the value nodes.
     for (auto extNodeIt : this->getValueNodes()) {
         NodeID newNodeId = pag->addDummyValNode();
-        extToNewNodes[extNodeIt] = pag->getPAGNode(newNodeId);
+        extToNewNodes[extNodeIt] = pag->getGNode(newNodeId);
     }
 
     // Add the object nodes.
     for (auto extNodeIt : this->getObjectNodes()) {
         // TODO: fix obj node - there's more to it?
         NodeID newNodeId = pag->addDummyObjNode();
-        extToNewNodes[extNodeIt] = pag->getPAGNode(newNodeId);
+        extToNewNodes[extNodeIt] = pag->getGNode(newNodeId);
     }
 
     // Add the edges.

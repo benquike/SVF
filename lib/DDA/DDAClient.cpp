@@ -34,7 +34,7 @@ void DDAClient::answerQueries(PointerAnalysis *pta) {
     u32_t count = 0;
     for (auto nIter = candidateQueries.begin(); nIter != candidateQueries.end();
          ++nIter, ++count) {
-        PAGNode *node = pta->getPAG()->getPAGNode(*nIter);
+        PAGNode *node = pta->getPAG()->getGNode(*nIter);
         if (pta->getPAG()->isValidTopLevelPtr(node)) {
             DBOUT(DGENERAL, outs() << "\n@@Computing PointsTo for :"
                                    << node->getId() << " [" << count + 1 << "/"
