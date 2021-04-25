@@ -558,10 +558,8 @@ void Andersen::heapAllocatorViaIndCall(CallSite cs, NodePairSet &cpySrcNodes) {
         NodeID objNode = pag->addDummyObjNode(cs.getType());
         addPts(valNode, objNode);
         callsite2DummyValPN.insert(std::make_pair(cs, valNode));
-        consCG->addConstraintNode(new ConstraintNode(valNode, getPAG()),
-                                  valNode);
-        consCG->addConstraintNode(new ConstraintNode(objNode, getPAG()),
-                                  objNode);
+        consCG->addGNode(new ConstraintNode(valNode, getPAG()));
+        consCG->addGNode(new ConstraintNode(objNode, getPAG()));
         srcret = valNode;
     }
 
@@ -688,7 +686,7 @@ bool Andersen::mergeSrcToTgt(NodeID nodeId, NodeID newRepId) {
     /// set rep and sub relations
     updateNodeRepAndSubs(node->getId(), newRepId);
 
-    consCG->removeConstraintNode(node);
+    consCG->removeGNode(node);
 
     return gepInsideScc;
 }

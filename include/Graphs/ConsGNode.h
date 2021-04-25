@@ -288,74 +288,82 @@ class ConstraintNode : public GenericConsNodeTy {
     ///  Add constraint graph edges
     //@{
     inline void addIncomingCopyEdge(CopyCGEdge *inEdge) {
+        assert(inEdge->getDstID() == this->getId());
         addIncomingDirectEdge(inEdge);
-        copyInEdges.insert(inEdge);
+        bool added = copyInEdges.insert(inEdge).second;
+        assert(added && "edge not added, duplicated adding!!");
     }
     inline void addIncomingGepEdge(GepCGEdge *inEdge) {
+        assert(inEdge->getDstID() == this->getId());
         addIncomingDirectEdge(inEdge);
-        gepInEdges.insert(inEdge);
+        bool added = gepInEdges.insert(inEdge).second;
+        assert(added && "edge not added, duplicated adding!!");
     }
     inline void addOutgoingCopyEdge(CopyCGEdge *outEdge) {
+        assert(outEdge->getSrcID() == this->getId());
         addOutgoingDirectEdge(outEdge);
-        copyOutEdges.insert(outEdge);
+        bool added = copyOutEdges.insert(outEdge).second;
+        assert(added && "edge not added, duplicated adding!!");
     }
     inline void addOutgoingGepEdge(GepCGEdge *outEdge) {
+        assert(outEdge->getSrcID() == this->getId());
         addOutgoingDirectEdge(outEdge);
-        gepOutEdges.insert(outEdge);
+        bool added = gepOutEdges.insert(outEdge).second;
+        assert(added && "edge not added, duplicated adding!!");
     }
     inline void addIncomingAddrEdge(AddrCGEdge *inEdge) {
-        addressInEdges.insert(inEdge);
-        addIncomingEdge(inEdge);
+        assert(inEdge->getDstID() == this->getId());
+        bool added = addressInEdges.insert(inEdge).second;
+        assert(added && "edge not added, duplicated adding!!");
     }
     inline void addIncomingLoadEdge(LoadCGEdge *inEdge) {
-        loadInEdges.insert(inEdge);
-        addIncomingEdge(inEdge);
+        assert(inEdge->getDstID() == this->getId());
+        bool added = loadInEdges.insert(inEdge).second;
+        assert(added && "edge not added, duplicated adding!!");
     }
     inline void addIncomingStoreEdge(StoreCGEdge *inEdge) {
-        storeInEdges.insert(inEdge);
-        addIncomingEdge(inEdge);
+        assert(inEdge->getDstID() == this->getId());
+        bool added = storeInEdges.insert(inEdge).second;
+        assert(added && "edge not added, duplicated adding!!");
     }
     inline void addIncomingDirectEdge(ConstraintEdge *inEdge) {
         assert(inEdge->getDstID() == this->getId());
-        bool added1 = directInEdges.insert(inEdge).second;
-        bool added2 = addIncomingEdge(inEdge);
-        assert(added1 && added2 && "edge not added, duplicated adding!!");
+        bool added = directInEdges.insert(inEdge).second;
+        assert(added && "edge not added, duplicated adding!!");
     }
 
     inline void addOutgoingAddrEdge(AddrCGEdge *outEdge) {
-        addressOutEdges.insert(outEdge);
-        addOutgoingEdge(outEdge);
+        assert(outEdge->getSrcID() == this->getId());
+        bool added = addressOutEdges.insert(outEdge).second;
+        assert(added && "edge not added, duplicated adding!!");
     }
     inline void addOutgoingLoadEdge(LoadCGEdge *outEdge) {
-        bool added1 = loadOutEdges.insert(outEdge).second;
-        bool added2 = addOutgoingEdge(outEdge);
-        assert(added1 && added2 && "edge not added, duplicated adding!!");
+        assert(outEdge->getSrcID() == this->getId());
+        bool added = loadOutEdges.insert(outEdge).second;
+        assert(added && "edge not added, duplicated adding!!");
     }
     inline void addOutgoingStoreEdge(StoreCGEdge *outEdge) {
-        bool added1 = storeOutEdges.insert(outEdge).second;
-        bool added2 = addOutgoingEdge(outEdge);
-        assert(added1 && added2 && "edge not added, duplicated adding!!");
+        assert(outEdge->getSrcID() == this->getId());
+        bool added = storeOutEdges.insert(outEdge).second;
+        assert(added && "edge not added, duplicated adding!!");
     }
     inline void addOutgoingDirectEdge(ConstraintEdge *outEdge) {
         assert(outEdge->getSrcID() == this->getId());
-        bool added1 = directOutEdges.insert(outEdge).second;
-        bool added2 = addOutgoingEdge(outEdge);
-        assert(added1 && added2 && "edge not added, duplicated adding!!");
+        bool added = directOutEdges.insert(outEdge).second;
+        assert(added && "edge not added, duplicated adding!!");
     }
     //@}
 
     /// Remove constraint graph edges
     //{@
     inline void removeOutgoingAddrEdge(AddrCGEdge *outEdge) {
-        Size_t num1 = addressOutEdges.erase(outEdge);
-        Size_t num2 = removeOutgoingEdge(outEdge);
-        assert((num1 && num2) && "edge not in the set, can not remove!!!");
+        Size_t num = addressOutEdges.erase(outEdge);
+        assert((num) && "edge not in the set, can not remove!!!");
     }
 
     inline void removeIncomingAddrEdge(AddrCGEdge *inEdge) {
-        Size_t num1 = addressInEdges.erase(inEdge);
-        Size_t num2 = removeIncomingEdge(inEdge);
-        assert((num1 && num2) && "edge not in the set, can not remove!!!");
+        Size_t num = addressInEdges.erase(inEdge);
+        assert((num) && "edge not in the set, can not remove!!!");
     }
 
     inline void removeOutgoingDirectEdge(ConstraintEdge *outEdge) {
@@ -364,9 +372,8 @@ class ConstraintNode : public GenericConsNodeTy {
         } else {
             copyOutEdges.erase(outEdge);
         }
-        Size_t num1 = directOutEdges.erase(outEdge);
-        Size_t num2 = removeOutgoingEdge(outEdge);
-        assert((num1 && num2) && "edge not in the set, can not remove!!!");
+        Size_t num = directOutEdges.erase(outEdge);
+        assert((num) && "edge not in the set, can not remove!!!");
     }
 
     inline void removeIncomingDirectEdge(ConstraintEdge *inEdge) {
@@ -375,33 +382,28 @@ class ConstraintNode : public GenericConsNodeTy {
         } else {
             copyInEdges.erase(inEdge);
         }
-        Size_t num1 = directInEdges.erase(inEdge);
-        Size_t num2 = removeIncomingEdge(inEdge);
-        assert((num1 && num2) && "edge not in the set, can not remove!!!");
+        Size_t num = directInEdges.erase(inEdge);
+        assert((num) && "edge not in the set, can not remove!!!");
     }
 
     inline void removeOutgoingLoadEdge(LoadCGEdge *outEdge) {
-        Size_t num1 = loadOutEdges.erase(outEdge);
-        Size_t num2 = removeOutgoingEdge(outEdge);
-        assert((num1 && num2) && "edge not in the set, can not remove!!!");
+        Size_t num = loadOutEdges.erase(outEdge);
+        assert((num) && "edge not in the set, can not remove!!!");
     }
 
     inline void removeIncomingLoadEdge(LoadCGEdge *inEdge) {
-        Size_t num1 = loadInEdges.erase(inEdge);
-        Size_t num2 = removeIncomingEdge(inEdge);
-        assert((num1 && num2) && "edge not in the set, can not remove!!!");
+        Size_t num = loadInEdges.erase(inEdge);
+        assert((num) && "edge not in the set, can not remove!!!");
     }
 
     inline void removeOutgoingStoreEdge(StoreCGEdge *outEdge) {
-        Size_t num1 = storeOutEdges.erase(outEdge);
-        Size_t num2 = removeOutgoingEdge(outEdge);
-        assert((num1 && num2) && "edge not in the set, can not remove!!!");
+        Size_t num = storeOutEdges.erase(outEdge);
+        assert((num) && "edge not in the set, can not remove!!!");
     }
 
     inline void removeIncomingStoreEdge(StoreCGEdge *inEdge) {
-        Size_t num1 = storeInEdges.erase(inEdge);
-        Size_t num2 = removeIncomingEdge(inEdge);
-        assert((num1 && num2) && "edge not in the set, can not remove!!!");
+        Size_t num = storeInEdges.erase(inEdge);
+        assert((num) && "edge not in the set, can not remove!!!");
     }
     //@}
 };

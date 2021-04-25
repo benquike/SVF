@@ -111,7 +111,7 @@ bool OfflineConsG::createRefNode(NodeID nodeId) {
 
     NodeID refId = pag->addDummyValNode();
     ConstraintNode *node = new ConstraintNode(refId, pag);
-    addConstraintNode(node, refId);
+    addGNode(node);
     refNodes.insert(refId);
     nodeToRefMap[nodeId] = refId;
     return true;

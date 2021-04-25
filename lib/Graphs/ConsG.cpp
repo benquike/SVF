@@ -59,7 +59,7 @@ void ConstraintGraph::buildCG() {
 
     // initialize nodes
     for (auto &it : *pag) {
-        addConstraintNode(new ConstraintNode(it.first, pag), it.first);
+        addGNode(new ConstraintNode(it.first, pag));
     }
 
     // initialize edges
@@ -141,14 +141,20 @@ AddrCGEdge::AddrCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id,
 AddrCGEdge *ConstraintGraph::addAddrCGEdge(NodeID src, NodeID dst) {
     ConstraintNode *srcNode = getConstraintNode(src);
     ConstraintNode *dstNode = getConstraintNode(dst);
-    if (hasEdge(srcNode, dstNode, ConstraintEdge::Addr)) {
+    if (hasGEdge(srcNode, dstNode, ConstraintEdge::Addr)) {
         return nullptr;
     }
     auto *edge = new AddrCGEdge(srcNode, dstNode, getNextEdgeId(), pag);
     bool added = AddrCGEdgeSet.insert(edge).second;
     assert(added && "not added??");
+
+    // add the edge to Addr set
     srcNode->addOutgoingAddrEdge(edge);
     dstNode->addIncomingAddrEdge(edge);
+
+    // add the edge to GenericGraph
+    addGEdge(edge);
+
     return edge;
 }
 
@@ -159,15 +165,22 @@ CopyCGEdge *ConstraintGraph::addCopyCGEdge(NodeID src, NodeID dst) {
 
     ConstraintNode *srcNode = getConstraintNode(src);
     ConstraintNode *dstNode = getConstraintNode(dst);
-    if (hasEdge(srcNode, dstNode, ConstraintEdge::Copy) || srcNode == dstNode) {
+    if (hasGEdge(srcNode, dstNode, ConstraintEdge::Copy) ||
+        srcNode == dstNode) {
         return nullptr;
     }
 
     auto *edge = new CopyCGEdge(srcNode, dstNode, getNextEdgeId());
     bool added = directEdgeSet.insert(edge).second;
     assert(added && "not added??");
+
+    // add the edge to Addr set
     srcNode->addOutgoingCopyEdge(edge);
     dstNode->addIncomingCopyEdge(edge);
+
+    // add the edge to GenericGraph
+    addGEdge(edge);
+
     return edge;
 }
 
@@ -178,15 +191,21 @@ NormalGepCGEdge *ConstraintGraph::addNormalGepCGEdge(NodeID src, NodeID dst,
                                                      const LocationSet &ls) {
     ConstraintNode *srcNode = getConstraintNode(src);
     ConstraintNode *dstNode = getConstraintNode(dst);
-    if (hasEdge(srcNode, dstNode, ConstraintEdge::NormalGep)) {
+    if (hasGEdge(srcNode, dstNode, ConstraintEdge::NormalGep)) {
         return nullptr;
     }
 
     auto *edge = new NormalGepCGEdge(srcNode, dstNode, ls, getNextEdgeId());
     bool added = directEdgeSet.insert(edge).second;
     assert(added && "not added??");
+
+    // add the edge to GEP set
     srcNode->addOutgoingGepEdge(edge);
     dstNode->addIncomingGepEdge(edge);
+
+    // add the edge to GenericGraph
+    addGEdge(edge);
+
     return edge;
 }
 
@@ -196,15 +215,21 @@ NormalGepCGEdge *ConstraintGraph::addNormalGepCGEdge(NodeID src, NodeID dst,
 VariantGepCGEdge *ConstraintGraph::addVariantGepCGEdge(NodeID src, NodeID dst) {
     ConstraintNode *srcNode = getConstraintNode(src);
     ConstraintNode *dstNode = getConstraintNode(dst);
-    if (hasEdge(srcNode, dstNode, ConstraintEdge::VariantGep)) {
+    if (hasGEdge(srcNode, dstNode, ConstraintEdge::VariantGep)) {
         return nullptr;
     }
 
     auto *edge = new VariantGepCGEdge(srcNode, dstNode, getNextEdgeId());
     bool added = directEdgeSet.insert(edge).second;
     assert(added && "not added??");
+
+    // add the edge GEP set
     srcNode->addOutgoingGepEdge(edge);
     dstNode->addIncomingGepEdge(edge);
+
+    // add the edge to GenericGraph
+    addGEdge(edge);
+
     return edge;
 }
 
@@ -214,15 +239,21 @@ VariantGepCGEdge *ConstraintGraph::addVariantGepCGEdge(NodeID src, NodeID dst) {
 LoadCGEdge *ConstraintGraph::addLoadCGEdge(NodeID src, NodeID dst) {
     ConstraintNode *srcNode = getConstraintNode(src);
     ConstraintNode *dstNode = getConstraintNode(dst);
-    if (hasEdge(srcNode, dstNode, ConstraintEdge::Load)) {
+    if (hasGEdge(srcNode, dstNode, ConstraintEdge::Load)) {
         return nullptr;
     }
 
     auto *edge = new LoadCGEdge(srcNode, dstNode, getNextEdgeId());
     bool added = LoadCGEdgeSet.insert(edge).second;
     assert(added && "not added??");
+
+    // add the edge to load set
     srcNode->addOutgoingLoadEdge(edge);
     dstNode->addIncomingLoadEdge(edge);
+
+    // add the edge to GenericGraph
+    addGEdge(edge);
+
     return edge;
 }
 
@@ -232,15 +263,21 @@ LoadCGEdge *ConstraintGraph::addLoadCGEdge(NodeID src, NodeID dst) {
 StoreCGEdge *ConstraintGraph::addStoreCGEdge(NodeID src, NodeID dst) {
     ConstraintNode *srcNode = getConstraintNode(src);
     ConstraintNode *dstNode = getConstraintNode(dst);
-    if (hasEdge(srcNode, dstNode, ConstraintEdge::Store)) {
+    if (hasGEdge(srcNode, dstNode, ConstraintEdge::Store)) {
         return nullptr;
     }
 
     auto *edge = new StoreCGEdge(srcNode, dstNode, getNextEdgeId());
     bool added = StoreCGEdgeSet.insert(edge).second;
     assert(added && "not added??");
+
+    // add the edge to store set
     srcNode->addOutgoingStoreEdge(edge);
     dstNode->addIncomingStoreEdge(edge);
+
+    // add the edge to GenericGraph
+    addGEdge(edge);
+
     return edge;
 }
 
@@ -315,8 +352,13 @@ void ConstraintGraph::reTargetSrcOfEdge(ConstraintEdge *edge,
  * Remove addr edge from their src and dst edge sets
  */
 void ConstraintGraph::removeAddrEdge(AddrCGEdge *edge) {
+    // remove the edge from Addr set
     getConstraintNode(edge->getSrcID())->removeOutgoingAddrEdge(edge);
     getConstraintNode(edge->getDstID())->removeIncomingAddrEdge(edge);
+
+    // remove the edge from GenericGraph
+    removeGEdge(edge);
+
     Size_t num = AddrCGEdgeSet.erase(edge);
     delete edge;
     assert(num && "edge not in the set, can not remove!!!");
@@ -326,8 +368,13 @@ void ConstraintGraph::removeAddrEdge(AddrCGEdge *edge) {
  * Remove load edge from their src and dst edge sets
  */
 void ConstraintGraph::removeLoadEdge(LoadCGEdge *edge) {
+    // remove the edge from Load set
     getConstraintNode(edge->getSrcID())->removeOutgoingLoadEdge(edge);
     getConstraintNode(edge->getDstID())->removeIncomingLoadEdge(edge);
+
+    // remove the edge from GenericGraph
+    removeGEdge(edge);
+
     Size_t num = LoadCGEdgeSet.erase(edge);
     delete edge;
     assert(num && "edge not in the set, can not remove!!!");
@@ -337,8 +384,13 @@ void ConstraintGraph::removeLoadEdge(LoadCGEdge *edge) {
  * Remove store edge from their src and dst edge sets
  */
 void ConstraintGraph::removeStoreEdge(StoreCGEdge *edge) {
+    // remove the edge from Store set
     getConstraintNode(edge->getSrcID())->removeOutgoingStoreEdge(edge);
     getConstraintNode(edge->getDstID())->removeIncomingStoreEdge(edge);
+
+    // remove the edge from GenericGraph
+    removeGEdge(edge);
+
     Size_t num = StoreCGEdgeSet.erase(edge);
     delete edge;
     assert(num && "edge not in the set, can not remove!!!");
@@ -348,9 +400,13 @@ void ConstraintGraph::removeStoreEdge(StoreCGEdge *edge) {
  * Remove edges from their src and dst edge sets
  */
 void ConstraintGraph::removeDirectEdge(ConstraintEdge *edge) {
-
+    // remove the edge from direct set
     getConstraintNode(edge->getSrcID())->removeOutgoingDirectEdge(edge);
     getConstraintNode(edge->getDstID())->removeIncomingDirectEdge(edge);
+
+    // remove the edge from GenericGraph
+    removeGEdge(edge);
+
     Size_t num = directEdgeSet.erase(edge);
 
     assert(num && "edge not in the set, can not remove!!!");

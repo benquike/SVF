@@ -138,7 +138,7 @@ bool AndersenLCD::mergeSrcToTgt(NodeID nodeId, NodeID newRepId) {
     /// set rep and sub relations
     updateNodeRepAndSubs(node->getId(), newRepId);
 
-    consCG->removeConstraintNode(node);
+    consCG->removeGNode(node);
 
     return gepInsideScc;
 }

@@ -93,59 +93,11 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
 
     /// Get/add/remove constraint node
     //@{
+    /// TODO: fix the name of this API.
+    /// This API get the node id of the representative node
     inline ConstraintNode *getConstraintNode(NodeID id) const {
         id = sccRepNode(id);
         return getGNode(id);
-    }
-    inline void addConstraintNode(ConstraintNode *node, NodeID id) {
-        addGNode(id, node);
-    }
-    inline bool hasConstraintNode(NodeID id) const { return hasGNode(id); }
-    inline void removeConstraintNode(ConstraintNode *node) {
-        removeGNode(node);
-    }
-    //@}
-
-    //// Return true if this edge exits
-    inline bool hasEdge(ConstraintNode *src, ConstraintNode *dst,
-                        ConstraintEdge::ConstraintEdgeK kind) {
-        ConstraintEdge edge(src, dst, kind);
-        if (kind == ConstraintEdge::Copy || kind == ConstraintEdge::NormalGep ||
-            kind == ConstraintEdge::VariantGep) {
-            return directEdgeSet.find(&edge) != directEdgeSet.end();
-        } else if (kind == ConstraintEdge::Addr) {
-            return AddrCGEdgeSet.find(&edge) != AddrCGEdgeSet.end();
-        } else if (kind == ConstraintEdge::Store) {
-            return StoreCGEdgeSet.find(&edge) != StoreCGEdgeSet.end();
-        } else if (kind == ConstraintEdge::Load) {
-            return LoadCGEdgeSet.find(&edge) != LoadCGEdgeSet.end();
-        } else {
-            assert(false && "no other kind!");
-        }
-        return false;
-    }
-
-    /// Get an edge via its src and dst nodes and kind
-    inline ConstraintEdge *getEdge(ConstraintNode *src, ConstraintNode *dst,
-                                   ConstraintEdge::ConstraintEdgeK kind) {
-        ConstraintEdge edge(src, dst, kind);
-        if (kind == ConstraintEdge::Copy || kind == ConstraintEdge::NormalGep ||
-            kind == ConstraintEdge::VariantGep) {
-            auto eit = directEdgeSet.find(&edge);
-            return *eit;
-        } else if (kind == ConstraintEdge::Addr) {
-            auto eit = AddrCGEdgeSet.find(&edge);
-            return *eit;
-        } else if (kind == ConstraintEdge::Store) {
-            auto eit = StoreCGEdgeSet.find(&edge);
-            return *eit;
-        } else if (kind == ConstraintEdge::Load) {
-            auto eit = LoadCGEdgeSet.find(&edge);
-            return *eit;
-        } else {
-            assert(false && "no other kind!");
-            return nullptr;
-        }
     }
 
     /// Add a PAG edge into Edge map
@@ -275,8 +227,8 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
     inline NodeID getGepObjNode(NodeID id, const LocationSet &ls) {
         NodeID gep = pag->getGepObjNode(id, ls);
         /// Create a node when it is (1) not exist on graph and (2) not merged
-        if (sccRepNode(gep) == gep && hasConstraintNode(gep) == false) {
-            addConstraintNode(new ConstraintNode(gep, pag), gep);
+        if (sccRepNode(gep) == gep && hasGNode(gep) == false) {
+            addGNode(new ConstraintNode(gep, pag));
         }
         return gep;
     }
@@ -284,8 +236,8 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
     inline NodeID getFIObjNode(NodeID id) {
         NodeID fi = pag->getFIObjNode(id);
         /// Create a node when it is (1) not exist on graph and (2) not merged
-        if (sccRepNode(fi) == fi && hasConstraintNode(fi) == false) {
-            addConstraintNode(new ConstraintNode(fi, pag), fi);
+        if (sccRepNode(fi) == fi && hasGNode(fi) == false) {
+            addGNode(new ConstraintNode(fi, pag));
         }
         return fi;
     }
