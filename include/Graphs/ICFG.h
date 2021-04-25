@@ -150,19 +150,6 @@ class ICFG : public GenericICFGTy {
         }
     }
 
-    /// Add ICFG edge
-    inline bool addICFGEdge(ICFGEdge *edge) {
-        bool added1 = edge->getDstNode()->addIncomingEdge(edge);
-        bool added2 = edge->getSrcNode()->addOutgoingEdge(edge);
-        assert(added1 && added2 && "edge not added??");
-        return true;
-    }
-
-    /// Add a ICFG node
-    virtual inline void addICFGNode(ICFGNode *node) {
-        addGNode(node->getId(), node);
-    }
-
     /// Get a basic block ICFGNode
     /// TODO:: need to fix the assertions
     //@{
@@ -205,7 +192,7 @@ class ICFG : public GenericICFGTy {
 
     inline FunEntryBlockNode *addFunEntryICFGNode(const SVFFunction *fun) {
         FunEntryBlockNode *sNode = new FunEntryBlockNode(getNextNodeId(), fun);
-        addICFGNode(sNode);
+        addGNode(sNode);
         FunToFunEntryNodeMap[fun] = sNode;
         return sNode;
     }
@@ -222,7 +209,7 @@ class ICFG : public GenericICFGTy {
 
     inline FunExitBlockNode *addFunExitICFGNode(const SVFFunction *fun) {
         FunExitBlockNode *sNode = new FunExitBlockNode(getNextNodeId(), fun);
-        addICFGNode(sNode);
+        addGNode(sNode);
         FunToFunExitNodeMap[fun] = sNode;
         return sNode;
     }
