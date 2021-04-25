@@ -321,7 +321,7 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
     inline const_iterator end() const { return IDToNodeMap.end(); }
     //}@
 
-    ///@{
+    /// APIs for handling nodes @{
     /// add a node with a specified id
     inline bool addGNode(NodeID id, NodeType *node) {
         assert(IDToNodeMap.find(id) == IDToNodeMap.end() && "node exists");
@@ -343,8 +343,40 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
 
         return false;
     }
+
+    /// Get a node
+    inline NodeType *getGNode(NodeID id) const {
+        const_iterator it = IDToNodeMap.find(id);
+        assert(it != IDToNodeMap.end() && "Node not found!");
+        return it->second;
+    }
+
+    /// node query by id
+    inline bool hasGNode(NodeID id) const {
+        return IDToNodeMap.find(id) != IDToNodeMap.end();
+    }
+
+    inline bool hasGNode(NodeType *node) const {
+        return NodeToIDMap.find(node) != NodeToIDMap.end();
+    }
+
+    /// Delete a node
+    inline void removeGNode(NodeType *node) {
+        assert(node->hasIncomingEdge() == false &&
+               node->hasOutgoingEdge() == false &&
+               "node which have edges can't be deleted");
+        auto it = IDToNodeMap.find(node->getId());
+        assert(it != IDToNodeMap.end() && "can not find the node Id");
+        IDToNodeMap.erase(it);
+
+        auto it2 = NodeToIDMap.find(node);
+        assert(it2 != NodeToIDMap.end() && "can not find the node");
+        NodeToIDMap.erase(it2);
+    }
     ///}@
 
+    /// APIs for handling nodes @{
+    /// add edge
     inline bool addGEdge(EdgeType *edge) {
 
         assert(edge != nullptr && "edge is null");
@@ -358,33 +390,16 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
 
         auto id = edge->getId();
         assert(EdgeToIDMap.find(edge) == EdgeToIDMap.end() && "edge exists");
-        assert (IDToEdgeMap.find(id) == IDToEdgeMap.end() && "edge id exists?");
+        assert(IDToEdgeMap.find(id) == IDToEdgeMap.end() && "edge id exists?");
 
         IDToEdgeMap[id] = edge;
         EdgeToIDMap[edge] = id;
 
         bool added1 = dstNode->addIncomingEdge(edge);
         bool added2 = srcNode->addOutgoingEdge(edge);
-
         assert(added1 && added2 && "edge not added on both nodes");
 
         return true;
-    }
-
-    /// Get a node
-    inline NodeType *getGNode(NodeID id) const {
-        const_iterator it = IDToNodeMap.find(id);
-        assert(it != IDToNodeMap.end() && "Node not found!");
-        return it->second;
-    }
-
-    /// Has a node
-    inline bool hasGNode(NodeID id) const {
-        return  IDToNodeMap.find(id) != IDToNodeMap.end();
-    }
-
-    inline bool hasGNode(NodeType *node) const {
-        return NodeToIDMap.find(node) != NodeToIDMap.end();
     }
 
     inline bool hasGEdge(EdgeType *edge) {
@@ -421,24 +436,52 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
         return nullptr;
     }
 
-    /// Delete a node
-    inline void removeGNode(NodeType *node) {
-        assert(node->hasIncomingEdge() == false &&
-               node->hasOutgoingEdge() == false &&
-               "node which have edges can't be deleted");
-        iterator it = IDToNodeMap.find(node->getId());
-        assert(it != IDToNodeMap.end() && "can not find the node");
-        IDToNodeMap.erase(it);
+    inline EdgeType *getGEdge(EdgeID id) {
+        assert(IDToEdgeMap.find(id) != IDToEdgeMap.end() &&
+               "edge id not exists");
+        return IDToEdgeMap[id];
     }
+
+    inline void removeGEdge(EdgeID id) { return removeGEdge(getGEdge(id)); }
+
+    inline void removeGEdge(EdgeType *edge) {
+        assert(edge != nullptr && "edge is null");
+
+        NodeType *srcNode = edge->getSrcNode();
+        assert(srcNode != nullptr && "source node is null");
+        NodeType *dstNode = edge->getDstNode();
+        assert(dstNode != nullptr && "dest node is null");
+        assert(hasGNode(srcNode) && "source node not exists");
+        assert(hasGNode(dstNode) && "dest node not exists");
+
+        srcNode->removeOutgoingEdge(edge);
+        dstNode->removeIncomingEdge(edge);
+
+        auto id = edge->getId();
+        auto it = EdgeToIDMap.find(edge);
+        assert(it != EdgeToIDMap.end() && "edge not exists");
+        EdgeToIDMap.erase(it);
+
+        auto it2 = IDToEdgeMap.find(id);
+        assert(it2 != IDToEdgeMap.end() && "edge id not exits");
+        IDToEdgeMap.erase(it2);
+    }
+    ///}@
 
     /// Get total number of node/edge
     inline NodeID getTotalNodeNum() const { return IDToNodeMap.size(); }
     inline EdgeID getTotalEdgeNum() const { return IDToEdgeMap.size(); }
 
+    /// generate an invalid id for query
+    /// some APIs in SVF generates node or
+    /// edge oject  and use it to query
+    /// the exsitence of some edges with c
+    /// ertain source and dest in the graph
+    /// FIXME: we can drop those
+    /// implmentations later on
     inline NodeID getDummyNodeId() const {
         return numeric_limits<NodeID>::max();
     }
-
     inline EdgeID getDummyEdgeId() const {
         return numeric_limits<EdgeID>::max();
     }
