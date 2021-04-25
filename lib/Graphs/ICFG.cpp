@@ -321,25 +321,6 @@ ICFGEdge *ICFG::hasThreadICFGEdge(ICFGNode *src, ICFGNode *dst,
 }
 
 /*!
- * Return the corresponding ICFGEdge
- */
-ICFGEdge *ICFG::getICFGEdge(const ICFGNode *src, const ICFGNode *dst,
-                            ICFGEdge::ICFGEdgeK kind) {
-
-    ICFGEdge *edge = nullptr;
-    Size_t counter = 0;
-    for (auto iter = src->OutEdgeBegin(); iter != src->OutEdgeEnd(); ++iter) {
-        if ((*iter)->getDstID() == dst->getId() &&
-            (*iter)->getEdgeKind() == kind) {
-            counter++;
-            edge = (*iter);
-        }
-    }
-    assert(counter <= 1 && "there's more than one edge between two ICFG nodes");
-    return edge;
-}
-
-/*!
  * Add intraprocedural edges between two nodes
  */
 ICFGEdge *ICFG::addIntraEdge(ICFGNode *srcNode, ICFGNode *dstNode) {

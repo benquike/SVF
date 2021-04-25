@@ -88,12 +88,6 @@ class ICFG : public GenericICFGTy {
 
     PAG *getPAG() { return pag; }
 
-    /// Get a ICFG node
-    inline ICFGNode *getICFGNode(NodeID id) const { return getGNode(id); }
-
-    /// Whether has the ICFGNode
-    inline bool hasICFGNode(NodeID id) const { return hasGNode(id); }
-
     /// Whether we has a SVFG edge
     //@{
     ICFGEdge *hasIntraICFGEdge(ICFGNode *src, ICFGNode *dst,
@@ -103,10 +97,6 @@ class ICFG : public GenericICFGTy {
     ICFGEdge *hasThreadICFGEdge(ICFGNode *src, ICFGNode *dst,
                                 ICFGEdge::ICFGEdgeK kind);
     //@}
-
-    /// Get a SVFG edge according to src and dst
-    ICFGEdge *getICFGEdge(const ICFGNode *src, const ICFGNode *dst,
-                          ICFGEdge::ICFGEdgeK kind);
 
     /// Dump graph into dot file
     void dump(const std::string &file, bool simple = false);
