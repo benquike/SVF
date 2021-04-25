@@ -71,7 +71,6 @@ class PAGEdge : public GenericPAGEdgeTy {
     const Value *value = nullptr;           ///< LLVM value
     const BasicBlock *basicBlock = nullptr; ///< LLVM BasicBlock
     ICFGNode *icfgNode = nullptr;           ///< ICFGNode
-    EdgeID edgeId;                          ///< Edge ID
   public:
 
     /// Constructor
@@ -101,8 +100,6 @@ class PAGEdge : public GenericPAGEdgeTy {
     }
     ///@}
 
-    /// Return Edge ID
-    inline EdgeID getEdgeID() const { return edgeId; }
     /// Whether src and dst nodes are both of pointer type
     bool isPTAEdge() const;
 
@@ -146,7 +143,6 @@ class PAGEdge : public GenericPAGEdgeTy {
         SAVE_Value(ar, value);
         SAVE_Value(ar, basicBlock);
         ar &icfgNode;
-        ar &edgeId;
     }
 
     template <typename Archive>
@@ -155,7 +151,6 @@ class PAGEdge : public GenericPAGEdgeTy {
         LOAD_Value(ar, Value, value);
         LOAD_Value(ar, BasicBlock, basicBlock);
         ar &icfgNode;
-        ar &edgeId;
     }
     /// @}
 };
