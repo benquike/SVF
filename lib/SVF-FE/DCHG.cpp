@@ -394,7 +394,7 @@ DCHNode *DCHGraph::getOrCreateNode(const DIType *type) {
         return diTypeToNodeMap[type];
     }
 
-    DCHNode *node = new DCHNode(type, numTypes++);
+    DCHNode *node = new DCHNode(type, getNextNodeId());
     addGNode(node->getId(), node);
     diTypeToNodeMap[type] = node;
     // TODO: handle templates.
