@@ -428,12 +428,19 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
         if (src == nullptr || dst == nullptr) {
             return nullptr;
         }
+        Size_t n = 0;
+        EdgeType *ret = nullptr;
         for (auto oe : src->getOutEdges()) {
             if (oe->getDstNode() == dst && oe->getEdgeKind() == kind) {
-                return oe;
+                n++;
+                ret = oe;
             }
         }
-        return nullptr;
+
+        assert(n <= 1 && "there are more than 1 edges with the same "
+                         "types between two nodes");
+
+        return ret;
     }
 
     inline EdgeType *getGEdge(EdgeID id) {
