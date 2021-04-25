@@ -334,7 +334,7 @@ CHNode *CHGraph::getNode(const string &name) const {
 
 CHNode *CHGraph::createNode(const std::string &className) {
     assert(!getNode(className) && "this node should never be created before!");
-    auto *node = new CHNode(className, classNum++);
+    auto *node = new CHNode(className, getNextNodeId());
     classNameToNodeMap[className] = node;
     addGNode(node->getId(), node);
     if (!className.empty() && className[className.size() - 1] == '>') {

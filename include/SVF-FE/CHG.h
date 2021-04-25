@@ -147,7 +147,7 @@ class CHGraph : public CommonCHGraph, public GenericCHGraphTy {
     } RELATIONTYPE;
 
     CHGraph(SymbolTableInfo *symInfo)
-        : CommonCHGraph(symInfo), classNum(0), vfID(0), buildingCHGTime(0) {
+        : CommonCHGraph(symInfo), vfID(0), buildingCHGTime(0) {
         this->kind = Standard;
     }
     virtual ~CHGraph();
@@ -241,7 +241,6 @@ class CHGraph : public CommonCHGraph, public GenericCHGraphTy {
     void addFuncToFuncVector(CHNode::FuncVector &v, const SVFFunction *f);
 
   private:
-    u32_t classNum;
     s32_t vfID;
     double buildingCHGTime;
     Map<std::string, CHNode *> classNameToNodeMap;
