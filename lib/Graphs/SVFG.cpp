@@ -234,7 +234,7 @@ void SVFG::addSVFGNodesForAddrTakenVars() {
     // set defs for address-taken vars defined at store statements
     PAGEdge::PAGEdgeSetTy &stores = getPAGEdgeSet(PAGEdge::Store);
     for (auto *iter : stores) {
-        auto *store = SVFUtil::cast<StorePE>(iter);
+        auto *store = llvm::cast<StorePE>(iter);
         const StmtSVFGNode *sNode = getStmtVFGNode(store);
         for (auto *pi : mssa->getCHISet(store)) {
             setDef(pi->getResVer(), sNode);
@@ -252,25 +252,25 @@ void SVFG::addSVFGNodesForAddrTakenVars() {
     /// initialize memory SSA entry chi nodes
     for (auto &it : mssa->getFunToEntryChiSetMap()) {
         for (auto *pi : it.second) {
-            addFormalINSVFGNode(SVFUtil::cast<ENTRYCHI>(pi));
+            addFormalINSVFGNode(llvm::cast<ENTRYCHI>(pi));
         }
     }
     /// initialize memory SSA return mu nodes
     for (auto &it : mssa->getFunToRetMuSetMap()) {
         for (auto *pi : it.second) {
-            addFormalOUTSVFGNode(SVFUtil::cast<RETMU>(pi));
+            addFormalOUTSVFGNode(llvm::cast<RETMU>(pi));
         }
     }
     /// initialize memory SSA callsite mu nodes
     for (auto &it : mssa->getCallSiteToMuSetMap()) {
         for (auto *pi : it.second) {
-            addActualINSVFGNode(SVFUtil::cast<CALLMU>(pi));
+            addActualINSVFGNode(llvm::cast<CALLMU>(pi));
         }
     }
     /// initialize memory SSA callsite chi nodes
     for (auto &it : mssa->getCallSiteToChiSetMap()) {
         for (auto *pi : it.second) {
-            addActualOUTSVFGNode(SVFUtil::cast<CALLCHI>(pi));
+            addActualOUTSVFGNode(llvm::cast<CALLCHI>(pi));
         }
     }
 }
@@ -284,29 +284,29 @@ void SVFG::connectIndirectSVFGEdges() {
     for (auto it = begin(), eit = end(); it != eit; ++it) {
         NodeID nodeId = it->first;
         const SVFGNode *node = it->second;
-        if (const auto *loadNode = SVFUtil::dyn_cast<LoadSVFGNode>(node)) {
+        if (const auto *loadNode = llvm::dyn_cast<LoadSVFGNode>(node)) {
             MUSet &muSet =
-                mssa->getMUSet(SVFUtil::cast<LoadPE>(loadNode->getPAGEdge()));
+                mssa->getMUSet(llvm::cast<LoadPE>(loadNode->getPAGEdge()));
             for (auto *it : muSet) {
-                if (auto *mu = SVFUtil::dyn_cast<LOADMU>(it)) {
+                if (auto *mu = llvm::dyn_cast<LOADMU>(it)) {
                     NodeID def = getDef(mu->getVer());
                     addIntraIndirectVFEdge(
                         def, nodeId, mu->getVer()->getMR()->getPointsTo());
                 }
             }
         } else if (const auto *storeNode =
-                       SVFUtil::dyn_cast<StoreSVFGNode>(node)) {
-            CHISet &chiSet = mssa->getCHISet(
-                SVFUtil::cast<StorePE>(storeNode->getPAGEdge()));
+                       llvm::dyn_cast<StoreSVFGNode>(node)) {
+            CHISet &chiSet =
+                mssa->getCHISet(llvm::cast<StorePE>(storeNode->getPAGEdge()));
             for (auto *it : chiSet) {
-                if (STORECHI *chi = SVFUtil::dyn_cast<STORECHI>(it)) {
+                if (STORECHI *chi = llvm::dyn_cast<STORECHI>(it)) {
                     NodeID def = getDef(chi->getOpVer());
                     addIntraIndirectVFEdge(
                         def, nodeId, chi->getOpVer()->getMR()->getPointsTo());
                 }
             }
         } else if (const auto *formalIn =
-                       SVFUtil::dyn_cast<FormalINSVFGNode>(node)) {
+                       llvm::dyn_cast<FormalINSVFGNode>(node)) {
             PTACallGraphEdge::CallInstSet callInstSet;
             auto *ptaCG = mssa->getPTA()->getPTACallGraph();
             ptaCG->getDirCallSitesInvokingCallee(
@@ -318,14 +318,14 @@ void SVFG::connectIndirectSVFGEdges() {
                 ActualINSVFGNodeSet &actualIns = getActualINSVFGNodes(cs);
                 for (auto ait : actualIns) {
                     const auto *actualIn =
-                        SVFUtil::cast<ActualINSVFGNode>(getSVFGNode(ait));
+                        llvm::cast<ActualINSVFGNode>(getSVFGNode(ait));
                     addInterIndirectVFCallEdge(
                         actualIn, formalIn,
                         getCallSiteID(cs, formalIn->getFun()));
                 }
             }
         } else if (const auto *formalOut =
-                       SVFUtil::dyn_cast<FormalOUTSVFGNode>(node)) {
+                       llvm::dyn_cast<FormalOUTSVFGNode>(node)) {
             PTACallGraphEdge::CallInstSet callInstSet;
             const MemSSA::RETMU *retMu = formalOut->getRetMU();
             mssa->getPTA()->getPTACallGraph()->getDirCallSitesInvokingCallee(
@@ -337,7 +337,7 @@ void SVFG::connectIndirectSVFGEdges() {
                 ActualOUTSVFGNodeSet &actualOuts = getActualOUTSVFGNodes(cs);
                 for (auto ait : actualOuts) {
                     const ActualOUTSVFGNode *actualOut =
-                        SVFUtil::cast<ActualOUTSVFGNode>(getSVFGNode(ait));
+                        llvm::cast<ActualOUTSVFGNode>(getSVFGNode(ait));
                     addInterIndirectVFRetEdge(
                         formalOut, actualOut,
                         getCallSiteID(cs, formalOut->getFun()));
@@ -347,15 +347,15 @@ void SVFG::connectIndirectSVFGEdges() {
             addIntraIndirectVFEdge(def, nodeId,
                                    retMu->getVer()->getMR()->getPointsTo());
         } else if (const auto *actualIn =
-                       SVFUtil::dyn_cast<ActualINSVFGNode>(node)) {
+                       llvm::dyn_cast<ActualINSVFGNode>(node)) {
             const MRVer *ver = actualIn->getCallMU()->getVer();
             NodeID def = getDef(ver);
             addIntraIndirectVFEdge(def, nodeId, ver->getMR()->getPointsTo());
-        } else if (SVFUtil::isa<ActualOUTSVFGNode>(node)) {
+        } else if (llvm::isa<ActualOUTSVFGNode>(node)) {
             /// There's no need to connect actual out node to its definition
             /// site in the same function.
         } else if (const auto *phiNode =
-                       SVFUtil::dyn_cast<MSSAPHISVFGNode>(node)) {
+                       llvm::dyn_cast<MSSAPHISVFGNode>(node)) {
             for (auto it = phiNode->opVerBegin(), eit = phiNode->opVerEnd();
                  it != eit; it++) {
                 const MRVer *op = it->second;
@@ -381,8 +381,7 @@ void SVFG::connectFromGlobalToProgEntry() {
     }
 
     for (const auto *globalVFGNode : globalVFGNodes) {
-        if (const auto *store =
-                SVFUtil::dyn_cast<StoreSVFGNode>(globalVFGNode)) {
+        if (const auto *store = llvm::dyn_cast<StoreSVFGNode>(globalVFGNode)) {
             /// connect this store to main function entry
             const PointsTo &storePts =
                 mssa->getPTA()->getPts(store->getPAGDstNodeID());
@@ -415,9 +414,9 @@ SVFGEdge *SVFG::addIntraIndirectVFEdge(NodeID srcId, NodeID dstId,
     checkIntraEdgeParents(srcNode, dstNode);
     if (SVFGEdge *edge =
             hasIntraVFGEdge(srcNode, dstNode, SVFGEdge::IntraIndirectVF)) {
-        assert(SVFUtil::isa<IndirectSVFGEdge>(edge) &&
+        assert(llvm::isa<IndirectSVFGEdge>(edge) &&
                "this should be a indirect value flow edge!");
-        return (SVFUtil::cast<IndirectSVFGEdge>(edge)->addPointsTo(cpts)
+        return (llvm::cast<IndirectSVFGEdge>(edge)->addPointsTo(cpts)
                     ? edge
                     : nullptr);
     }
@@ -438,9 +437,9 @@ SVFGEdge *SVFG::addThreadMHPIndirectVFEdge(NodeID srcId, NodeID dstId,
     SVFGNode *dstNode = getSVFGNode(dstId);
     if (SVFGEdge *edge =
             hasThreadVFGEdge(srcNode, dstNode, SVFGEdge::TheadMHPIndirectVF)) {
-        assert(SVFUtil::isa<IndirectSVFGEdge>(edge) &&
+        assert(llvm::isa<IndirectSVFGEdge>(edge) &&
                "this should be a indirect value flow edge!");
-        return (SVFUtil::cast<IndirectSVFGEdge>(edge)->addPointsTo(cpts)
+        return (llvm::cast<IndirectSVFGEdge>(edge)->addPointsTo(cpts)
                     ? edge
                     : nullptr);
     }
@@ -460,11 +459,10 @@ SVFGEdge *SVFG::addCallIndirectVFEdge(NodeID srcId, NodeID dstId,
     SVFGNode *dstNode = getSVFGNode(dstId);
     if (SVFGEdge *edge =
             hasInterVFGEdge(srcNode, dstNode, SVFGEdge::CallIndVF, csId)) {
-        assert(SVFUtil::isa<CallIndSVFGEdge>(edge) &&
+        assert(llvm::isa<CallIndSVFGEdge>(edge) &&
                "this should be a indirect value flow edge!");
-        return (SVFUtil::cast<CallIndSVFGEdge>(edge)->addPointsTo(cpts)
-                    ? edge
-                    : nullptr);
+        return (llvm::cast<CallIndSVFGEdge>(edge)->addPointsTo(cpts) ? edge
+                                                                     : nullptr);
     }
 
     auto *callEdge =
@@ -482,11 +480,10 @@ SVFGEdge *SVFG::addRetIndirectVFEdge(NodeID srcId, NodeID dstId,
     SVFGNode *dstNode = getSVFGNode(dstId);
     if (SVFGEdge *edge =
             hasInterVFGEdge(srcNode, dstNode, SVFGEdge::RetIndVF, csId)) {
-        assert(SVFUtil::isa<RetIndSVFGEdge>(edge) &&
+        assert(llvm::isa<RetIndSVFGEdge>(edge) &&
                "this should be a indirect value flow edge!");
-        return (SVFUtil::cast<RetIndSVFGEdge>(edge)->addPointsTo(cpts)
-                    ? edge
-                    : nullptr);
+        return (llvm::cast<RetIndSVFGEdge>(edge)->addPointsTo(cpts) ? edge
+                                                                    : nullptr);
     }
 
     auto *retEdge = new RetIndSVFGEdge(srcNode, dstNode, getNextEdgeId(), csId);
@@ -593,8 +590,7 @@ void SVFG::getInterVFEdgesForIndirectCallSite(
         SVFG::ActualINSVFGNodeSet &actualInNodes =
             getActualINSVFGNodes(callBlockNode);
         for (auto ai_it : actualInNodes) {
-            auto *actualIn =
-                SVFUtil::cast<ActualINSVFGNode>(getSVFGNode(ai_it));
+            auto *actualIn = llvm::cast<ActualINSVFGNode>(getSVFGNode(ai_it));
             getInterVFEdgeAtIndCSFromAInToFIn(actualIn, callee, edges);
         }
     }
@@ -605,8 +601,7 @@ void SVFG::getInterVFEdgesForIndirectCallSite(
         SVFG::ActualOUTSVFGNodeSet &actualOutNodes =
             getActualOUTSVFGNodes(callBlockNode);
         for (auto ao_it : actualOutNodes) {
-            auto *actualOut =
-                SVFUtil::cast<ActualOUTSVFGNode>(getSVFGNode(ao_it));
+            auto *actualOut = llvm::cast<ActualOUTSVFGNode>(getSVFGNode(ao_it));
             getInterVFEdgeAtIndCSFromFOutToAOut(actualOut, callee, edges);
         }
     }
@@ -630,10 +625,10 @@ void SVFG::connectCallerAndCallee(const CallBlockNode *cs,
             getFormalINSVFGNodes(callee);
         for (auto ai_it : actualInNodes) {
             const auto *actualIn =
-                SVFUtil::cast<ActualINSVFGNode>(getSVFGNode(ai_it));
+                llvm::cast<ActualINSVFGNode>(getSVFGNode(ai_it));
             for (auto fi_it : formalInNodes) {
                 const auto *formalIn =
-                    SVFUtil::cast<FormalINSVFGNode>(getSVFGNode(fi_it));
+                    llvm::cast<FormalINSVFGNode>(getSVFGNode(fi_it));
                 connectAInAndFIn(actualIn, formalIn, csId, edges);
             }
         }
@@ -647,10 +642,10 @@ void SVFG::connectCallerAndCallee(const CallBlockNode *cs,
         SVFG::ActualOUTSVFGNodeSet &actualOutNodes = getActualOUTSVFGNodes(cs);
         for (auto fo_it : formalOutNodes) {
             const auto *formalOut =
-                SVFUtil::cast<FormalOUTSVFGNode>(getSVFGNode(fo_it));
+                llvm::cast<FormalOUTSVFGNode>(getSVFGNode(fo_it));
             for (auto ao_it : actualOutNodes) {
                 const auto *actualOut =
-                    SVFUtil::cast<ActualOUTSVFGNode>(getSVFGNode(ao_it));
+                    llvm::cast<ActualOUTSVFGNode>(getSVFGNode(ao_it));
                 connectFOutAndAOut(formalOut, actualOut, csId, edges);
             }
         }
@@ -661,19 +656,19 @@ void SVFG::connectCallerAndCallee(const CallBlockNode *cs,
  * Whether this is an function entry SVFGNode (formal parameter, formal In)
  */
 const SVFFunction *SVFG::isFunEntrySVFGNode(const SVFGNode *node) const {
-    if (const auto *fp = SVFUtil::dyn_cast<FormalParmSVFGNode>(node)) {
+    if (const auto *fp = llvm::dyn_cast<FormalParmSVFGNode>(node)) {
         return fp->getFun();
     }
 
-    if (const auto *phi = SVFUtil::dyn_cast<InterPHISVFGNode>(node)) {
+    if (const auto *phi = llvm::dyn_cast<InterPHISVFGNode>(node)) {
         if (phi->isFormalParmPHI()) {
             return phi->getFun();
         }
-    } else if (const auto *fi = SVFUtil::dyn_cast<FormalINSVFGNode>(node)) {
+    } else if (const auto *fi = llvm::dyn_cast<FormalINSVFGNode>(node)) {
         return fi->getFun();
     }
 
-    if (const auto *mphi = SVFUtil::dyn_cast<InterMSSAPHISVFGNode>(node)) {
+    if (const auto *mphi = llvm::dyn_cast<InterMSSAPHISVFGNode>(node)) {
         if (mphi->isFormalINPHI()) {
             return mphi->getFun();
         }
@@ -686,19 +681,19 @@ const SVFFunction *SVFG::isFunEntrySVFGNode(const SVFGNode *node) const {
  * Whether this is an callsite return SVFGNode (actual return, actual out)
  */
 const CallBlockNode *SVFG::isCallSiteRetSVFGNode(const SVFGNode *node) const {
-    if (const auto *ar = SVFUtil::dyn_cast<ActualRetSVFGNode>(node)) {
+    if (const auto *ar = llvm::dyn_cast<ActualRetSVFGNode>(node)) {
         return ar->getCallSite();
     }
 
-    if (const auto *phi = SVFUtil::dyn_cast<InterPHISVFGNode>(node)) {
+    if (const auto *phi = llvm::dyn_cast<InterPHISVFGNode>(node)) {
         if (phi->isActualRetPHI()) {
             return phi->getCallSite();
         }
-    } else if (const auto *ao = SVFUtil::dyn_cast<ActualOUTSVFGNode>(node)) {
+    } else if (const auto *ao = llvm::dyn_cast<ActualOUTSVFGNode>(node)) {
         return ao->getCallSite();
     }
 
-    if (const auto *mphi = SVFUtil::dyn_cast<InterMSSAPHISVFGNode>(node)) {
+    if (const auto *mphi = llvm::dyn_cast<InterMSSAPHISVFGNode>(node)) {
         if (mphi->isActualOUTPHI()) {
             return mphi->getCallSite();
         }
@@ -736,35 +731,35 @@ template <> struct DOTGraphTraits<SVFG *> : public DOTGraphTraits<PAG *> {
         std::string str;
         raw_string_ostream rawstr(str);
 
-        if (auto *stmtNode = SVFUtil::dyn_cast<StmtSVFGNode>(node)) {
+        if (auto *stmtNode = llvm::dyn_cast<StmtSVFGNode>(node)) {
             rawstr << stmtNode->toString();
-        } else if (auto *tphi = SVFUtil::dyn_cast<PHISVFGNode>(node)) {
+        } else if (auto *tphi = llvm::dyn_cast<PHISVFGNode>(node)) {
             rawstr << tphi->toString();
-        } else if (auto *fp = SVFUtil::dyn_cast<FormalParmSVFGNode>(node)) {
+        } else if (auto *fp = llvm::dyn_cast<FormalParmSVFGNode>(node)) {
             rawstr << fp->toString();
-        } else if (auto *ap = SVFUtil::dyn_cast<ActualParmSVFGNode>(node)) {
+        } else if (auto *ap = llvm::dyn_cast<ActualParmSVFGNode>(node)) {
             rawstr << ap->toString();
-        } else if (auto *ar = SVFUtil::dyn_cast<ActualRetSVFGNode>(node)) {
+        } else if (auto *ar = llvm::dyn_cast<ActualRetSVFGNode>(node)) {
             rawstr << ar->toString();
-        } else if (auto *fr = SVFUtil::dyn_cast<FormalRetSVFGNode>(node)) {
+        } else if (auto *fr = llvm::dyn_cast<FormalRetSVFGNode>(node)) {
             rawstr << fr->toString();
-        } else if (auto *fi = SVFUtil::dyn_cast<FormalINSVFGNode>(node)) {
+        } else if (auto *fi = llvm::dyn_cast<FormalINSVFGNode>(node)) {
             rawstr << fi->toString();
-        } else if (auto *fo = SVFUtil::dyn_cast<FormalOUTSVFGNode>(node)) {
+        } else if (auto *fo = llvm::dyn_cast<FormalOUTSVFGNode>(node)) {
             rawstr << fo->toString();
-        } else if (auto *ai = SVFUtil::dyn_cast<ActualINSVFGNode>(node)) {
+        } else if (auto *ai = llvm::dyn_cast<ActualINSVFGNode>(node)) {
             rawstr << ai->toString();
-        } else if (auto *ao = SVFUtil::dyn_cast<ActualOUTSVFGNode>(node)) {
+        } else if (auto *ao = llvm::dyn_cast<ActualOUTSVFGNode>(node)) {
             rawstr << ao->toString();
-        } else if (auto *mphi = SVFUtil::dyn_cast<MSSAPHISVFGNode>(node)) {
+        } else if (auto *mphi = llvm::dyn_cast<MSSAPHISVFGNode>(node)) {
             rawstr << mphi->toString();
-        } else if (SVFUtil::isa<NullPtrSVFGNode>(node)) {
+        } else if (llvm::isa<NullPtrSVFGNode>(node)) {
             rawstr << "NullPtr";
-        } else if (auto *bop = SVFUtil::dyn_cast<BinaryOPVFGNode>(node)) {
+        } else if (auto *bop = llvm::dyn_cast<BinaryOPVFGNode>(node)) {
             rawstr << bop->toString();
-        } else if (auto *uop = SVFUtil::dyn_cast<UnaryOPVFGNode>(node)) {
+        } else if (auto *uop = llvm::dyn_cast<UnaryOPVFGNode>(node)) {
             rawstr << uop->toString();
-        } else if (auto *cmp = SVFUtil::dyn_cast<CmpVFGNode>(node)) {
+        } else if (auto *cmp = llvm::dyn_cast<CmpVFGNode>(node)) {
             rawstr << cmp->toString();
         } else {
             assert(false && "what else kinds of nodes do we have??");
@@ -778,35 +773,35 @@ template <> struct DOTGraphTraits<SVFG *> : public DOTGraphTraits<PAG *> {
 
         std::string str;
         raw_string_ostream rawstr(str);
-        if (auto *stmtNode = SVFUtil::dyn_cast<StmtSVFGNode>(node)) {
+        if (auto *stmtNode = llvm::dyn_cast<StmtSVFGNode>(node)) {
             rawstr << stmtNode->toString();
-        } else if (auto *bop = SVFUtil::dyn_cast<BinaryOPVFGNode>(node)) {
+        } else if (auto *bop = llvm::dyn_cast<BinaryOPVFGNode>(node)) {
             rawstr << bop->toString();
-        } else if (auto *uop = SVFUtil::dyn_cast<UnaryOPVFGNode>(node)) {
+        } else if (auto *uop = llvm::dyn_cast<UnaryOPVFGNode>(node)) {
             rawstr << uop->toString();
-        } else if (auto *cmp = SVFUtil::dyn_cast<CmpVFGNode>(node)) {
+        } else if (auto *cmp = llvm::dyn_cast<CmpVFGNode>(node)) {
             rawstr << cmp->toString();
-        } else if (auto *mphi = SVFUtil::dyn_cast<MSSAPHISVFGNode>(node)) {
+        } else if (auto *mphi = llvm::dyn_cast<MSSAPHISVFGNode>(node)) {
             rawstr << mphi->toString();
-        } else if (auto *tphi = SVFUtil::dyn_cast<PHISVFGNode>(node)) {
+        } else if (auto *tphi = llvm::dyn_cast<PHISVFGNode>(node)) {
             rawstr << tphi->toString();
-        } else if (auto *fi = SVFUtil::dyn_cast<FormalINSVFGNode>(node)) {
+        } else if (auto *fi = llvm::dyn_cast<FormalINSVFGNode>(node)) {
             rawstr << fi->toString();
-        } else if (auto *fo = SVFUtil::dyn_cast<FormalOUTSVFGNode>(node)) {
+        } else if (auto *fo = llvm::dyn_cast<FormalOUTSVFGNode>(node)) {
             rawstr << fo->toString();
-        } else if (auto *fp = SVFUtil::dyn_cast<FormalParmSVFGNode>(node)) {
+        } else if (auto *fp = llvm::dyn_cast<FormalParmSVFGNode>(node)) {
             rawstr << fp->toString();
-        } else if (auto *ai = SVFUtil::dyn_cast<ActualINSVFGNode>(node)) {
+        } else if (auto *ai = llvm::dyn_cast<ActualINSVFGNode>(node)) {
             rawstr << ai->toString();
-        } else if (auto *ao = SVFUtil::dyn_cast<ActualOUTSVFGNode>(node)) {
+        } else if (auto *ao = llvm::dyn_cast<ActualOUTSVFGNode>(node)) {
             rawstr << ao->toString();
-        } else if (auto *ap = SVFUtil::dyn_cast<ActualParmSVFGNode>(node)) {
+        } else if (auto *ap = llvm::dyn_cast<ActualParmSVFGNode>(node)) {
             rawstr << ap->toString();
-        } else if (auto *nptr = SVFUtil::dyn_cast<NullPtrSVFGNode>(node)) {
+        } else if (auto *nptr = llvm::dyn_cast<NullPtrSVFGNode>(node)) {
             rawstr << nptr->toString();
-        } else if (auto *ar = SVFUtil::dyn_cast<ActualRetSVFGNode>(node)) {
+        } else if (auto *ar = llvm::dyn_cast<ActualRetSVFGNode>(node)) {
             rawstr << ar->toString();
-        } else if (auto *fr = SVFUtil::dyn_cast<FormalRetSVFGNode>(node)) {
+        } else if (auto *fr = llvm::dyn_cast<FormalRetSVFGNode>(node)) {
             rawstr << fr->toString();
         } else {
             assert(false && "what else kinds of nodes do we have??");
@@ -819,51 +814,51 @@ template <> struct DOTGraphTraits<SVFG *> : public DOTGraphTraits<PAG *> {
         std::string str;
         raw_string_ostream rawstr(str);
 
-        if (auto *stmtNode = SVFUtil::dyn_cast<StmtSVFGNode>(node)) {
+        if (auto *stmtNode = llvm::dyn_cast<StmtSVFGNode>(node)) {
             const PAGEdge *edge = stmtNode->getPAGEdge();
-            if (SVFUtil::isa<AddrPE>(edge)) {
+            if (llvm::isa<AddrPE>(edge)) {
                 rawstr << "color=green";
-            } else if (SVFUtil::isa<CopyPE>(edge)) {
+            } else if (llvm::isa<CopyPE>(edge)) {
                 rawstr << "color=black";
-            } else if (SVFUtil::isa<RetPE>(edge)) {
+            } else if (llvm::isa<RetPE>(edge)) {
                 rawstr << "color=black,style=dotted";
-            } else if (SVFUtil::isa<GepPE>(edge)) {
+            } else if (llvm::isa<GepPE>(edge)) {
                 rawstr << "color=purple";
-            } else if (SVFUtil::isa<StorePE>(edge)) {
+            } else if (llvm::isa<StorePE>(edge)) {
                 rawstr << "color=blue";
-            } else if (SVFUtil::isa<LoadPE>(edge)) {
+            } else if (llvm::isa<LoadPE>(edge)) {
                 rawstr << "color=red";
             } else {
                 assert(0 && "No such kind edge!!");
             }
             rawstr << "";
-        } else if (SVFUtil::isa<MSSAPHISVFGNode>(node)) {
+        } else if (llvm::isa<MSSAPHISVFGNode>(node)) {
             rawstr << "color=black";
-        } else if (SVFUtil::isa<PHISVFGNode>(node)) {
+        } else if (llvm::isa<PHISVFGNode>(node)) {
             rawstr << "color=black";
-        } else if (SVFUtil::isa<NullPtrSVFGNode>(node)) {
+        } else if (llvm::isa<NullPtrSVFGNode>(node)) {
             rawstr << "color=grey";
-        } else if (SVFUtil::isa<FormalINSVFGNode>(node)) {
+        } else if (llvm::isa<FormalINSVFGNode>(node)) {
             rawstr << "color=yellow,style=double";
-        } else if (SVFUtil::isa<FormalOUTSVFGNode>(node)) {
+        } else if (llvm::isa<FormalOUTSVFGNode>(node)) {
             rawstr << "color=yellow,style=double";
-        } else if (SVFUtil::isa<FormalParmSVFGNode>(node)) {
+        } else if (llvm::isa<FormalParmSVFGNode>(node)) {
             rawstr << "color=yellow,style=double";
-        } else if (SVFUtil::isa<ActualINSVFGNode>(node)) {
+        } else if (llvm::isa<ActualINSVFGNode>(node)) {
             rawstr << "color=yellow,style=double";
-        } else if (SVFUtil::isa<ActualOUTSVFGNode>(node)) {
+        } else if (llvm::isa<ActualOUTSVFGNode>(node)) {
             rawstr << "color=yellow,style=double";
-        } else if (SVFUtil::isa<ActualParmSVFGNode>(node)) {
+        } else if (llvm::isa<ActualParmSVFGNode>(node)) {
             rawstr << "color=yellow,style=double";
-        } else if (SVFUtil::isa<ActualRetSVFGNode>(node)) {
+        } else if (llvm::isa<ActualRetSVFGNode>(node)) {
             rawstr << "color=yellow,style=double";
-        } else if (SVFUtil::isa<FormalRetSVFGNode>(node)) {
+        } else if (llvm::isa<FormalRetSVFGNode>(node)) {
             rawstr << "color=yellow,style=double";
-        } else if (SVFUtil::isa<BinaryOPVFGNode>(node)) {
+        } else if (llvm::isa<BinaryOPVFGNode>(node)) {
             rawstr << "color=black,style=double";
-        } else if (SVFUtil::isa<CmpVFGNode>(node)) {
+        } else if (llvm::isa<CmpVFGNode>(node)) {
             rawstr << "color=black,style=double";
-        } else if (SVFUtil::isa<UnaryOPVFGNode>(node)) {
+        } else if (llvm::isa<UnaryOPVFGNode>(node)) {
             rawstr << "color=black,style=double";
         } else {
             assert(false && "no such kind of node!!");
@@ -889,22 +884,22 @@ template <> struct DOTGraphTraits<SVFG *> : public DOTGraphTraits<PAG *> {
     static std::string getEdgeAttributes(NodeType *, EdgeIter EI, SVFG *) {
         SVFGEdge *edge = *(EI.getCurrent());
         assert(edge && "No edge found!!");
-        if (SVFUtil::isa<DirectSVFGEdge>(edge)) {
-            if (SVFUtil::isa<CallDirSVFGEdge>(edge)) {
+        if (llvm::isa<DirectSVFGEdge>(edge)) {
+            if (llvm::isa<CallDirSVFGEdge>(edge)) {
                 return "style=solid,color=red";
             }
 
-            if (SVFUtil::isa<RetDirSVFGEdge>(edge)) {
+            if (llvm::isa<RetDirSVFGEdge>(edge)) {
                 return "style=solid,color=blue";
             }
             return "style=solid";
         }
 
-        if (SVFUtil::isa<IndirectSVFGEdge>(edge)) {
-            if (SVFUtil::isa<CallIndSVFGEdge>(edge)) {
+        if (llvm::isa<IndirectSVFGEdge>(edge)) {
+            if (llvm::isa<CallIndSVFGEdge>(edge)) {
                 return "style=dashed,color=red";
             }
-            if (SVFUtil::isa<RetIndSVFGEdge>(edge)) {
+            if (llvm::isa<RetIndSVFGEdge>(edge)) {
                 return "style=dashed,color=blue";
             }
 
@@ -921,13 +916,13 @@ template <> struct DOTGraphTraits<SVFG *> : public DOTGraphTraits<PAG *> {
 
         std::string str;
         raw_string_ostream rawstr(str);
-        if (auto *dirCall = SVFUtil::dyn_cast<CallDirSVFGEdge>(edge)) {
+        if (auto *dirCall = llvm::dyn_cast<CallDirSVFGEdge>(edge)) {
             rawstr << dirCall->getCallSiteId();
-        } else if (auto *dirRet = SVFUtil::dyn_cast<RetDirSVFGEdge>(edge)) {
+        } else if (auto *dirRet = llvm::dyn_cast<RetDirSVFGEdge>(edge)) {
             rawstr << dirRet->getCallSiteId();
-        } else if (auto *indCall = SVFUtil::dyn_cast<CallIndSVFGEdge>(edge)) {
+        } else if (auto *indCall = llvm::dyn_cast<CallIndSVFGEdge>(edge)) {
             rawstr << indCall->getCallSiteId();
-        } else if (auto *indRet = SVFUtil::dyn_cast<RetIndSVFGEdge>(edge)) {
+        } else if (auto *indRet = llvm::dyn_cast<RetIndSVFGEdge>(edge)) {
             rawstr << indRet->getCallSiteId();
         }
 

@@ -184,9 +184,9 @@ class LLVMModuleSet {
             }
 
             auto *flagConstMetadata =
-                SVFUtil::dyn_cast<llvm::ConstantAsMetadata>(ctirModuleFlag);
+                llvm::dyn_cast<llvm::ConstantAsMetadata>(ctirModuleFlag);
             auto *flagConstInt =
-                SVFUtil::dyn_cast<ConstantInt>(flagConstMetadata->getValue());
+                llvm::dyn_cast<ConstantInt>(flagConstMetadata->getValue());
             if (flagConstInt->getZExtValue() !=
                 cppUtil::ctir::moduleFlagValue) {
                 return false;

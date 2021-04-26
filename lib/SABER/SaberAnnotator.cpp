@@ -39,7 +39,7 @@ void SaberAnnotator::annotateSource() {
     std::string str;
     raw_string_ostream rawstr(str);
     rawstr << SB_SLICESOURCE; //<< _curSlice->getSource()->getId();
-    if (const auto *sourceinst = SVFUtil::dyn_cast<Instruction>(
+    if (const auto *sourceinst = llvm::dyn_cast<Instruction>(
             _curSlice->getLLVMValue(_curSlice->getSource()))) {
         addMDTag(const_cast<Instruction *>(sourceinst), rawstr.str());
     } else
@@ -51,11 +51,10 @@ void SaberAnnotator::annotateSource() {
  */
 void SaberAnnotator::annotateSinks() {
     for (const auto *it : _curSlice->getSinks()) {
-        if (const auto *ap = SVFUtil::dyn_cast<ActualParmSVFGNode>(it)) {
+        if (const auto *ap = llvm::dyn_cast<ActualParmSVFGNode>(it)) {
             const Instruction *sinkinst = ap->getCallSite()->getCallSite();
-            assert(SVFUtil::isa<CallInst>(sinkinst) &&
-                   "not a call instruction?");
-            const auto *sink = SVFUtil::cast<CallInst>(sinkinst);
+            assert(llvm::isa<CallInst>(sinkinst) && "not a call instruction?");
+            const auto *sink = llvm::cast<CallInst>(sinkinst);
             std::string str;
             raw_string_ostream rawstr(str);
             rawstr << SB_SLICESINK << _curSlice->getSource()->getId();

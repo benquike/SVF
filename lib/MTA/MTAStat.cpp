@@ -28,7 +28,7 @@ void MTAStat::performThreadCallGraphStat(ThreadCallGraph *tcg) {
          ++it) {
         bool indirectfork = false;
         const auto *spawnee =
-            SVFUtil::dyn_cast<Function>(tcg->getThreadAPI()->getForkedFun(*it));
+            llvm::dyn_cast<Function>(tcg->getThreadAPI()->getForkedFun(*it));
         if (spawnee == nullptr) {
             numOfIndForksite++;
             indirectfork = true;
@@ -99,9 +99,9 @@ void MTAStat::performMHPPairStat(MHP *mhp, LockAnalysis *lsa) {
             for (const_inst_iterator II = inst_begin(fun), E = inst_end(fun);
                  II != E; ++II) {
                 const Instruction *inst = &*II;
-                if (SVFUtil::isa<LoadInst>(inst)) {
+                if (llvm::isa<LoadInst>(inst)) {
                     instSet1.insert(inst);
-                } else if (SVFUtil::isa<StoreInst>(inst)) {
+                } else if (llvm::isa<StoreInst>(inst)) {
                     instSet1.insert(inst);
                     instSet2.insert(inst);
                 }

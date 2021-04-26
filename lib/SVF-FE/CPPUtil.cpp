@@ -114,7 +114,7 @@ string cppUtil::getBeforeBrackets(const string &name) {
 }
 
 bool cppUtil::isValVtbl(const Value *val) {
-    if (!SVFUtil::isa<GlobalVariable>(val)) {
+    if (!llvm::isa<GlobalVariable>(val)) {
         return false;
     }
     string valName = val->getName().str();
@@ -207,13 +207,13 @@ bool cppUtil::isLoadVtblInst(const LoadInst *loadInst) {
     const Type *valTy = loadSrc->getType();
     const Type *elemTy = valTy;
     for (s32_t i = 0; i < 3; ++i) {
-        if (const auto *ptrTy = SVFUtil::dyn_cast<PointerType>(elemTy)) {
+        if (const auto *ptrTy = llvm::dyn_cast<PointerType>(elemTy)) {
             elemTy = ptrTy->getElementType();
         } else {
             return false;
         }
     }
-    if (const auto *functy = SVFUtil::dyn_cast<FunctionType>(elemTy)) {
+    if (const auto *functy = llvm::dyn_cast<FunctionType>(elemTy)) {
         const Type *paramty = functy->getParamType(0);
         string className = cppUtil::getClassNameFromType(paramty);
         if (!className.empty()) {
@@ -245,15 +245,15 @@ bool cppUtil::isVirtualCallSite(CallSite cs, LLVMModuleSet *modSet) {
     }
 
     const Value *vfunc = cs.getCalledValue();
-    if (const auto *vfuncloadinst = SVFUtil::dyn_cast<LoadInst>(vfunc)) {
+    if (const auto *vfuncloadinst = llvm::dyn_cast<LoadInst>(vfunc)) {
         const Value *vfuncptr = vfuncloadinst->getPointerOperand();
         if (const auto *vfuncptrgepinst =
-                SVFUtil::dyn_cast<GetElementPtrInst>(vfuncptr)) {
+                llvm::dyn_cast<GetElementPtrInst>(vfuncptr)) {
             if (vfuncptrgepinst->getNumIndices() != 1) {
                 return false;
             }
             const Value *vtbl = vfuncptrgepinst->getPointerOperand();
-            if (SVFUtil::isa<LoadInst>(vtbl)) {
+            if (llvm::isa<LoadInst>(vtbl)) {
                 return true;
             }
         }
@@ -334,12 +334,12 @@ bool cppUtil::isSameThisPtrInConstructor(const Argument *thisPtr1,
     }
 
     for (const User *thisU : thisPtr1->users()) {
-        if (const auto *store = SVFUtil::dyn_cast<StoreInst>(thisU)) {
+        if (const auto *store = llvm::dyn_cast<StoreInst>(thisU)) {
             for (const User *storeU : store->getPointerOperand()->users()) {
-                if (const auto *load = SVFUtil::dyn_cast<LoadInst>(storeU)) {
+                if (const auto *load = llvm::dyn_cast<LoadInst>(storeU)) {
                     if (load->getNextNode() &&
-                        SVFUtil::isa<CastInst>(load->getNextNode())) {
-                        return SVFUtil::cast<CastInst>(load->getNextNode()) ==
+                        llvm::isa<CastInst>(load->getNextNode())) {
+                        return llvm::cast<CastInst>(load->getNextNode()) ==
                                (thisPtr2->stripPointerCasts());
                     }
                 }
@@ -364,10 +364,10 @@ const Argument *cppUtil::getConstructorThisPtr(const Function *fun) {
  * call %x (...)
  */
 const Value *cppUtil::getVCallVtblPtr(CallSite cs) {
-    const LoadInst *loadInst = SVFUtil::dyn_cast<LoadInst>(cs.getCalledValue());
+    const LoadInst *loadInst = llvm::dyn_cast<LoadInst>(cs.getCalledValue());
     assert(loadInst != nullptr);
     const Value *vfuncptr = loadInst->getPointerOperand();
-    const auto *gepInst = SVFUtil::dyn_cast<GetElementPtrInst>(vfuncptr);
+    const auto *gepInst = llvm::dyn_cast<GetElementPtrInst>(vfuncptr);
     assert(gepInst != nullptr);
     const Value *vtbl = gepInst->getPointerOperand();
     return vtbl;
@@ -375,13 +375,12 @@ const Value *cppUtil::getVCallVtblPtr(CallSite cs) {
 
 u64_t cppUtil::getVCallIdx(CallSite cs) {
     const LoadInst *vfuncloadinst =
-        SVFUtil::dyn_cast<LoadInst>(cs.getCalledValue());
+        llvm::dyn_cast<LoadInst>(cs.getCalledValue());
     assert(vfuncloadinst != nullptr);
     const Value *vfuncptr = vfuncloadinst->getPointerOperand();
-    const auto *vfuncptrgepinst =
-        SVFUtil::dyn_cast<GetElementPtrInst>(vfuncptr);
+    const auto *vfuncptrgepinst = llvm::dyn_cast<GetElementPtrInst>(vfuncptr);
     User::const_op_iterator oi = vfuncptrgepinst->idx_begin();
-    const auto *idx = SVFUtil::dyn_cast<ConstantInt>(&(*oi));
+    const auto *idx = llvm::dyn_cast<ConstantInt>(&(*oi));
     u64_t idx_value;
     if (idx == nullptr) {
         SVFUtil::errs() << "vcall gep idx not constantint\n";
@@ -394,10 +393,10 @@ u64_t cppUtil::getVCallIdx(CallSite cs) {
 
 string cppUtil::getClassNameFromType(const Type *ty) {
     string className = "";
-    if (const auto *ptrType = SVFUtil::dyn_cast<PointerType>(ty)) {
+    if (const auto *ptrType = llvm::dyn_cast<PointerType>(ty)) {
         const Type *elemType = ptrType->getElementType();
-        if (SVFUtil::isa<StructType>(elemType) &&
-            !((SVFUtil::cast<StructType>(elemType))->isLiteral())) {
+        if (llvm::isa<StructType>(elemType) &&
+            !((llvm::cast<StructType>(elemType))->isLiteral())) {
             string elemTypeName = elemType->getStructName().str();
             if (elemTypeName.compare(0, clsName.size(), clsName) == 0) {
                 className = elemTypeName.substr(clsName.size());
@@ -482,8 +481,8 @@ string cppUtil::getClassNameOfThisPtr(CallSite cs) {
     string thisPtrClassName;
     Instruction *inst = cs.getInstruction();
     if (const MDNode *N = inst->getMetadata("VCallPtrType")) {
-        const auto &mdstr = SVFUtil::cast<MDString>((N->getOperand(0)));
-        thisPtrClassName = mdstr.getString().str();
+        const auto *mdstr = llvm::cast<MDString>(N->getOperand(0).get());
+        thisPtrClassName = mdstr->getString().str();
     }
     if (thisPtrClassName.empty()) {
         const Value *thisPtr = getVCallThisPtr(cs);
@@ -505,8 +504,8 @@ string cppUtil::getFunNameOfVCallSite(CallSite cs) {
     string funName;
     Instruction *inst = cs.getInstruction();
     if (const MDNode *N = inst->getMetadata("VCallFunName")) {
-        const auto &mdstr = SVFUtil::cast<MDString>((N->getOperand(0)));
-        funName = mdstr.getString().str();
+        const auto *mdstr = llvm::cast<MDString>(N->getOperand(0).get());
+        funName = mdstr->getString().str();
     }
     return funName;
 }

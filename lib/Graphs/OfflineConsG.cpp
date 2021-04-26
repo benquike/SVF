@@ -46,7 +46,7 @@ void OfflineConsG::buildOfflineCG() {
              it = LoadCGEdgeSet.begin(),
              eit = LoadCGEdgeSet.end();
          it != eit; ++it) {
-        LoadCGEdge *load = SVFUtil::dyn_cast<LoadCGEdge>(*it);
+        LoadCGEdge *load = llvm::dyn_cast<LoadCGEdge>(*it);
         loads.insert(load);
         NodeID src = load->getSrcID();
         NodeID dst = load->getDstID();
@@ -57,7 +57,7 @@ void OfflineConsG::buildOfflineCG() {
              it = StoreCGEdgeSet.begin(),
              eit = StoreCGEdgeSet.end();
          it != eit; ++it) {
-        StoreCGEdge *store = SVFUtil::dyn_cast<StoreCGEdge>(*it);
+        StoreCGEdge *store = llvm::dyn_cast<StoreCGEdge>(*it);
         stores.insert(store);
         NodeID src = store->getSrcID();
         NodeID dst = store->getDstID();
@@ -195,7 +195,7 @@ struct DOTGraphTraits<OfflineConsG *> : public DOTGraphTraits<PAG *> {
             bool nameDisplay = true;
 
             if (briefDisplay) {
-                if (SVFUtil::isa<ValPN>(node)) {
+                if (llvm::isa<ValPN>(node)) {
                     if (nameDisplay) {
                         rawstr << node->getId() << ":" << node->getValueName();
                     } else {
@@ -206,8 +206,8 @@ struct DOTGraphTraits<OfflineConsG *> : public DOTGraphTraits<PAG *> {
                 }
             } else {
                 // print the whole value
-                if (!SVFUtil::isa<DummyValPN>(node) &&
-                    !SVFUtil::isa<DummyObjPN>(node)) {
+                if (!llvm::isa<DummyValPN>(node) &&
+                    !llvm::isa<DummyObjPN>(node)) {
                     rawstr << *node->getValue();
                 } else {
                     rawstr << "";

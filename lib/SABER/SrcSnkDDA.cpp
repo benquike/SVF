@@ -143,16 +143,16 @@ bool SrcSnkDDA::isInAWrapper(const SVFGNode *src, CallSiteSet &csIdSet) {
             else if (edge->isRetDirectVFGEdge()) {
                 reachFunExit = true;
                 csIdSet.insert(getSVFG()->getCallSite(
-                    SVFUtil::cast<RetDirSVFGEdge>(edge)->getCallSiteId()));
+                    llvm::cast<RetDirSVFGEdge>(edge)->getCallSiteId()));
             }
             // if this is an intra edge
             else {
                 const SVFGNode *succ = edge->getDstNode();
-                if (SVFUtil::isa<CopySVFGNode>(succ) ||
-                    SVFUtil::isa<GepSVFGNode>(succ) ||
-                    SVFUtil::isa<PHISVFGNode>(succ) ||
-                    SVFUtil::isa<FormalRetSVFGNode>(succ) ||
-                    SVFUtil::isa<ActualRetSVFGNode>(succ)) {
+                if (llvm::isa<CopySVFGNode>(succ) ||
+                    llvm::isa<GepSVFGNode>(succ) ||
+                    llvm::isa<PHISVFGNode>(succ) ||
+                    llvm::isa<FormalRetSVFGNode>(succ) ||
+                    llvm::isa<ActualRetSVFGNode>(succ)) {
                     worklist.push(succ);
                 } else {
                     return false;
@@ -192,10 +192,10 @@ void SrcSnkDDA::FWProcessOutgoingEdge(const DPIm &item, SVFGEdge *edge) {
     if (edge->isCallVFGEdge()) {
         CallSiteID csId = 0;
         if (const CallDirSVFGEdge *callEdge =
-                SVFUtil::dyn_cast<CallDirSVFGEdge>(edge))
+                llvm::dyn_cast<CallDirSVFGEdge>(edge))
             csId = callEdge->getCallSiteId();
         else
-            csId = SVFUtil::cast<CallIndSVFGEdge>(edge)->getCallSiteId();
+            csId = llvm::cast<CallIndSVFGEdge>(edge)->getCallSiteId();
 
         newItem.pushContext(csId);
         DBOUT(DSaber, outs() << " push cxt [" << csId << "] ");
@@ -204,10 +204,10 @@ void SrcSnkDDA::FWProcessOutgoingEdge(const DPIm &item, SVFGEdge *edge) {
     else if (edge->isRetVFGEdge()) {
         CallSiteID csId = 0;
         if (const RetDirSVFGEdge *callEdge =
-                SVFUtil::dyn_cast<RetDirSVFGEdge>(edge))
+                llvm::dyn_cast<RetDirSVFGEdge>(edge))
             csId = callEdge->getCallSiteId();
         else
-            csId = SVFUtil::cast<RetIndSVFGEdge>(edge)->getCallSiteId();
+            csId = llvm::cast<RetIndSVFGEdge>(edge)->getCallSiteId();
 
         if (newItem.matchContext(csId) == false) {
             DBOUT(DSaber, outs() << "-|-\n");

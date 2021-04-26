@@ -155,10 +155,9 @@ void MemSSA::createMUCHI(const SVFFunction &fun) {
             if (mrGen->hasPAGEdgeList(inst)) {
                 PAGEdgeList &pagEdgeList = mrGen->getPAGEdgesFromInst(inst);
                 for (const auto *inst : pagEdgeList) {
-                    if (const auto *load = SVFUtil::dyn_cast<LoadPE>(inst))
+                    if (const auto *load = llvm::dyn_cast<LoadPE>(inst))
                         AddLoadMU(bb, load, mrGen->getLoadMRSet(load));
-                    else if (const auto *store =
-                                 SVFUtil::dyn_cast<StorePE>(inst))
+                    else if (const auto *store = llvm::dyn_cast<StorePE>(inst))
                         AddStoreCHI(bb, store, mrGen->getStoreMRSet(store));
                 }
             }
@@ -274,9 +273,9 @@ void MemSSA::SSARenameBB(const BasicBlock &bb) {
         if (mrGen->hasPAGEdgeList(inst)) {
             PAGEdgeList &pagEdgeList = mrGen->getPAGEdgesFromInst(inst);
             for (const auto *inst : pagEdgeList) {
-                if (const LoadPE *load = SVFUtil::dyn_cast<LoadPE>(inst))
+                if (const LoadPE *load = llvm::dyn_cast<LoadPE>(inst))
                     RenameMuSet(getMUSet(load));
-                else if (const auto *store = SVFUtil::dyn_cast<StorePE>(inst))
+                else if (const auto *store = llvm::dyn_cast<StorePE>(inst))
                     RenameChiSet(getCHISet(store), memRegs);
             }
         }
@@ -554,8 +553,7 @@ void MemSSA::dumpMSSA(raw_ostream &Out) {
                     PAGEdgeList &pagEdgeList =
                         mrGen->getPAGEdgesFromInst(&inst);
                     for (const auto *edge : pagEdgeList) {
-                        if (const auto *load =
-                                SVFUtil::dyn_cast<LoadPE>(edge)) {
+                        if (const auto *load = llvm::dyn_cast<LoadPE>(edge)) {
                             MUSet &muSet = getMUSet(load);
                             for (auto *it : muSet) {
                                 if (!dump_preamble && !last_is_chi) {
@@ -572,7 +570,7 @@ void MemSSA::dumpMSSA(raw_ostream &Out) {
                     bool has_chi = false;
                     for (const auto *edge : pagEdgeList) {
                         if (const StorePE *store =
-                                SVFUtil::dyn_cast<StorePE>(edge)) {
+                                llvm::dyn_cast<StorePE>(edge)) {
                             CHISet &chiSet = getCHISet(store);
                             for (auto *it : chiSet) {
                                 has_chi = true;

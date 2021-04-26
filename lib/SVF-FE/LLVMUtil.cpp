@@ -41,19 +41,19 @@ using namespace SVF;
  */
 bool SVFUtil::isObject(const Value *ref, SVFModule *svfMod) {
     bool createobj = false;
-    if (SVFUtil::isa<Instruction>(ref) &&
-        SVFUtil::isStaticExtCall(SVFUtil::cast<Instruction>(ref), svfMod)) {
+    if (llvm::isa<Instruction>(ref) &&
+        SVFUtil::isStaticExtCall(llvm::cast<Instruction>(ref), svfMod)) {
         /// a call to external function
         createobj = true;
-    } else if (SVFUtil::isa<Instruction>(ref) &&
-               SVFUtil::isHeapAllocExtCallViaRet(
-                   SVFUtil::cast<Instruction>(ref), svfMod)) {
+    } else if (llvm::isa<Instruction>(ref) &&
+               SVFUtil::isHeapAllocExtCallViaRet(llvm::cast<Instruction>(ref),
+                                                 svfMod)) {
         // a call to heap allocation function
         createobj = true;
-    } else if (SVFUtil::isa<GlobalVariable>(ref)) {
+    } else if (llvm::isa<GlobalVariable>(ref)) {
         // global variable
         createobj = true;
-    } else if (SVFUtil::isa<Function>(ref) || SVFUtil::isa<AllocaInst>(ref)) {
+    } else if (llvm::isa<Function>(ref) || llvm::isa<AllocaInst>(ref)) {
         /// function or Alloca instruction
         createobj = true;
     }
@@ -100,7 +100,7 @@ bool SVFUtil::functionDoesNotRet(const Function *fun) {
         const BasicBlock *bb = bbVec.back();
         bbVec.pop_back();
         for (const auto &it : *bb) {
-            if (SVFUtil::isa<ReturnInst>(it))
+            if (llvm::isa<ReturnInst>(it))
                 return false;
         }
 
@@ -156,10 +156,10 @@ bool SVFUtil::isDeadFunction(const Function *fun, SVFModule *svfMod) {
  * caller)
  */
 bool SVFUtil::isPtrInDeadFunction(const Value *value, SVFModule *svfMod) {
-    if (const auto *inst = SVFUtil::dyn_cast<Instruction>(value)) {
+    if (const auto *inst = llvm::dyn_cast<Instruction>(value)) {
         if (isDeadFunction(inst->getParent()->getParent(), svfMod))
             return true;
-    } else if (const auto *arg = SVFUtil::dyn_cast<Argument>(value)) {
+    } else if (const auto *arg = llvm::dyn_cast<Argument>(value)) {
         if (isDeadFunction(arg->getParent(), svfMod))
             return true;
     }
@@ -170,9 +170,9 @@ bool SVFUtil::isPtrInDeadFunction(const Value *value, SVFModule *svfMod) {
  * Strip constant casts
  */
 const Value *SVFUtil::stripConstantCasts(const Value *val) {
-    if (SVFUtil::isa<GlobalValue>(val) || isInt2PtrConstantExpr(val))
+    if (llvm::isa<GlobalValue>(val) || isInt2PtrConstantExpr(val))
         return val;
-    else if (const auto *CE = SVFUtil::dyn_cast<ConstantExpr>(val)) {
+    else if (const auto *CE = llvm::dyn_cast<ConstantExpr>(val)) {
         if (Instruction::isCast(CE->getOpcode()))
             return stripConstantCasts(CE->getOperand(0));
     }
@@ -184,9 +184,9 @@ const Value *SVFUtil::stripConstantCasts(const Value *val) {
  */
 Value *SVFUtil::stripAllCasts(Value *val) {
     while (true) {
-        if (auto *ci = SVFUtil::dyn_cast<CastInst>(val)) {
+        if (auto *ci = llvm::dyn_cast<CastInst>(val)) {
             val = ci->getOperand(0);
-        } else if (auto *ce = SVFUtil::dyn_cast<ConstantExpr>(val)) {
+        } else if (auto *ce = llvm::dyn_cast<ConstantExpr>(val)) {
             if (ce->isCast())
                 val = ce->getOperand(0);
         } else {
@@ -247,21 +247,20 @@ void SVFUtil::getPrevInsts(const Instruction *curInst,
  */
 const Type *SVFUtil::getTypeOfHeapAlloc(const Instruction *inst,
                                         SVFModule *svfMod) {
-    const PointerType *type = SVFUtil::dyn_cast<PointerType>(inst->getType());
+    const PointerType *type = llvm::dyn_cast<PointerType>(inst->getType());
 
     if (isHeapAllocExtCallViaRet(inst, svfMod)) {
         const Instruction *nextInst = inst->getNextNode();
         if (nextInst && nextInst->getOpcode() == Instruction::BitCast)
             // we only consider bitcast instructions and ignore others (e.g.,
             // IntToPtr and ZExt)
-            type =
-                SVFUtil::dyn_cast<PointerType>(inst->getNextNode()->getType());
+            type = llvm::dyn_cast<PointerType>(inst->getNextNode()->getType());
     } else if (isHeapAllocExtCallViaArg(inst, svfMod)) {
         CallSite cs = getLLVMCallSite(inst);
         int arg_pos = getHeapAllocHoldingArgPosition(
             getCallee(svfMod->getLLVMModSet(), cs));
         const Value *arg = cs.getArgument(arg_pos);
-        type = SVFUtil::dyn_cast<PointerType>(arg->getType());
+        type = llvm::dyn_cast<PointerType>(arg->getType());
     } else {
         assert(false && "not a heap allocation instruction?");
     }

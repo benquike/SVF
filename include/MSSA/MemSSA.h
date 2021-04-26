@@ -284,7 +284,7 @@ class MemSSA {
     /// Has mu/chi methods
     //@{
     inline bool hasMU(const PAGEdge *inst) const {
-        if (const LoadPE *load = SVFUtil::dyn_cast<LoadPE>(inst)) {
+        if (const LoadPE *load = llvm::dyn_cast<LoadPE>(inst)) {
             assert(0 != load2MuSetMap.count(load) &&
                    "not associated with mem region!");
             return true;
@@ -293,7 +293,7 @@ class MemSSA {
         return false;
     }
     inline bool hasCHI(const PAGEdge *inst) const {
-        if (const auto *store = SVFUtil::dyn_cast<StorePE>(inst)) {
+        if (const auto *store = llvm::dyn_cast<StorePE>(inst)) {
             assert(0 != store2ChiSetMap.count(store) &&
                    "not associated with mem region!");
             return true;

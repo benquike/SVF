@@ -128,22 +128,22 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
         resolveFunPtr(dpm);
 
         const SVFGNode *node = dpm.getLoc();
-        if (SVFUtil::isa<AddrSVFGNode>(node)) {
-            handleAddr(pts, dpm, SVFUtil::cast<AddrSVFGNode>(node));
-        } else if (SVFUtil::isa<CopySVFGNode>(node) ||
-                   SVFUtil::isa<PHISVFGNode>(node) ||
-                   SVFUtil::isa<ActualParmSVFGNode>(node) ||
-                   SVFUtil::isa<FormalParmSVFGNode>(node) ||
-                   SVFUtil::isa<ActualRetSVFGNode>(node) ||
-                   SVFUtil::isa<FormalRetSVFGNode>(node) ||
-                   SVFUtil::isa<NullPtrSVFGNode>(node)) {
+        if (llvm::isa<AddrSVFGNode>(node)) {
+            handleAddr(pts, dpm, llvm::cast<AddrSVFGNode>(node));
+        } else if (llvm::isa<CopySVFGNode>(node) ||
+                   llvm::isa<PHISVFGNode>(node) ||
+                   llvm::isa<ActualParmSVFGNode>(node) ||
+                   llvm::isa<FormalParmSVFGNode>(node) ||
+                   llvm::isa<ActualRetSVFGNode>(node) ||
+                   llvm::isa<FormalRetSVFGNode>(node) ||
+                   llvm::isa<NullPtrSVFGNode>(node)) {
             backtraceAlongDirectVF(pts, dpm);
-        } else if (SVFUtil::isa<GepSVFGNode>(node)) {
+        } else if (llvm::isa<GepSVFGNode>(node)) {
             CPtSet gepPts;
             backtraceAlongDirectVF(gepPts, dpm);
-            unionDDAPts(
-                pts, processGepPts(SVFUtil::cast<GepSVFGNode>(node), gepPts));
-        } else if (SVFUtil::isa<LoadSVFGNode>(node)) {
+            unionDDAPts(pts,
+                        processGepPts(llvm::cast<GepSVFGNode>(node), gepPts));
+        } else if (llvm::isa<LoadSVFGNode>(node)) {
             CPtSet loadpts;
             startNewPTCompFromLoadSrc(loadpts, dpm);
             for (typename CPtSet::iterator it = loadpts.begin(),
@@ -152,7 +152,7 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
                 backtraceAlongIndirectVF(pts,
                                          getDPImWithOldCond(dpm, *it, node));
             }
-        } else if (SVFUtil::isa<StoreSVFGNode>(node)) {
+        } else if (llvm::isa<StoreSVFGNode>(node)) {
             if (isMustAlias(getLoadDpm(dpm), dpm)) {
                 DBOUT(DDDA, SVFUtil::outs()
                                 << "+++must alias for load and store:");
@@ -171,8 +171,8 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
                         backtraceToStoreSrc(pts,
                                             getDPImWithOldCond(dpm, *it, node));
 
-                        if (isStrongUpdate(
-                                storepts, SVFUtil::cast<StoreSVFGNode>(node))) {
+                        if (isStrongUpdate(storepts,
+                                           llvm::cast<StoreSVFGNode>(node))) {
                             DBOUT(DDDA, SVFUtil::outs()
                                             << "backward strong update for obj "
                                             << dpm.getCurNodeID() << "\n");
@@ -187,7 +187,7 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
                     }
                 }
             }
-        } else if (SVFUtil::isa<MRSVFGNode>(node)) {
+        } else if (llvm::isa<MRSVFGNode>(node)) {
             backtraceAlongIndirectVF(pts, dpm);
         } else {
             assert(false && "unexpected kind of SVFG nodes");
@@ -233,8 +233,8 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
                                                      eit = dpmSet.end();
                  it != eit; ++it) {
                 const DPIm &dstDpm = *it;
-                if (!indirectCall && SVFUtil::isa<IndirectSVFGEdge>(edge) &&
-                    !SVFUtil::isa<LoadSVFGNode>(edge->getDstNode())) {
+                if (!indirectCall && llvm::isa<IndirectSVFGEdge>(edge) &&
+                    !llvm::isa<LoadSVFGNode>(edge->getDstNode())) {
                     if (dstDpm.getCurNodeID() == dpm.getCurNodeID()) {
                         DBOUT(DDDA, SVFUtil::outs()
                                         << "\t Recompute, forward from :");
@@ -309,7 +309,7 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
         const SVFGEdgeSet &edgeSet(node->getInEdges());
         for (auto *it : edgeSet) {
             if (const IndirectSVFGEdge *indirEdge =
-                    SVFUtil::dyn_cast<IndirectSVFGEdge>(it)) {
+                    llvm::dyn_cast<IndirectSVFGEdge>(it)) {
                 auto &guard = const_cast<PointsTo &>(indirEdge->getPointsTo());
                 if (guard.test(obj)) {
                     DBOUT(DDDA, SVFUtil::outs()
@@ -328,7 +328,7 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
         const SVFGEdgeSet edgeSet(node->getInEdges());
         for (auto *it : edgeSet) {
             if (const DirectSVFGEdge *dirEdge =
-                    SVFUtil::dyn_cast<DirectSVFGEdge>(it)) {
+                    llvm::dyn_cast<DirectSVFGEdge>(it)) {
                 DBOUT(DDDA, SVFUtil::outs()
                                 << "\t\t==backtrace directVF svfgNode "
                                 << dirEdge->getDstID() << " --> "
@@ -344,7 +344,7 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
     /// Backward traverse for top-level pointers of load/store statements
     ///@{
     inline void startNewPTCompFromLoadSrc(CPtSet &pts, const DPIm &oldDpm) {
-        const LoadSVFGNode *load = SVFUtil::cast<LoadSVFGNode>(oldDpm.getLoc());
+        const LoadSVFGNode *load = llvm::cast<LoadSVFGNode>(oldDpm.getLoc());
         const SVFGNode *loadSrc = getDefSVFGNode(load->getPAGSrcNode());
         DBOUT(DDDA, SVFUtil::outs()
                         << "!##start new computation from loadSrc svfgNode "
@@ -356,8 +356,7 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
         backwardPropDpm(pts, load->getPAGSrcNodeID(), oldDpm, edge);
     }
     inline void startNewPTCompFromStoreDst(CPtSet &pts, const DPIm &oldDpm) {
-        const StoreSVFGNode *store =
-            SVFUtil::cast<StoreSVFGNode>(oldDpm.getLoc());
+        const StoreSVFGNode *store = llvm::cast<StoreSVFGNode>(oldDpm.getLoc());
         const SVFGNode *storeDst = getDefSVFGNode(store->getPAGDstNode());
         DBOUT(DDDA, SVFUtil::outs()
                         << "!##start new computation from storeDst svfgNode "
@@ -369,8 +368,7 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
         backwardPropDpm(pts, store->getPAGDstNodeID(), oldDpm, edge);
     }
     inline void backtraceToStoreSrc(CPtSet &pts, const DPIm &oldDpm) {
-        const StoreSVFGNode *store =
-            SVFUtil::cast<StoreSVFGNode>(oldDpm.getLoc());
+        const StoreSVFGNode *store = llvm::cast<StoreSVFGNode>(oldDpm.getLoc());
         const SVFGNode *storeSrc = getDefSVFGNode(store->getPAGSrcNode());
         DBOUT(DDDA, SVFUtil::outs() << "++backtrace to storeSrc from svfgNode "
                                     << getLoadDpm(oldDpm).getLoc()->getId()
@@ -401,7 +399,7 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
         }
 
         /// record the source of load dpm
-        if (SVFUtil::isa<IndirectSVFGEdge>(edge)) {
+        if (llvm::isa<IndirectSVFGEdge>(edge)) {
             addLoadDpmAndCVar(dpm, getLoadDpm(oldDpm), getLoadCVar(oldDpm));
         }
 
@@ -434,7 +432,7 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
         assert(obj && "object not found!!");
         if (obj->isStack()) {
             if (const auto *local =
-                    SVFUtil::dyn_cast<AllocaInst>(obj->getRefVal())) {
+                    llvm::dyn_cast<AllocaInst>(obj->getRefVal())) {
                 LLVMModuleSet *modSet = _pag->getModule()->getLLVMModSet();
                 const SVFFunction *fun =
                     modSet->getSVFFunction(local->getFunction());
@@ -543,8 +541,7 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
 
     /// Whether this is a top-level pointer statement
     inline bool isTopLevelPtrStmt(const SVFGNode *stmt) {
-        if (SVFUtil::isa<StoreSVFGNode>(stmt) ||
-            SVFUtil::isa<MRSVFGNode>(stmt)) {
+        if (llvm::isa<StoreSVFGNode>(stmt) || llvm::isa<MRSVFGNode>(stmt)) {
             return false;
         } else {
             return true;
@@ -556,11 +553,11 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
         DPIm dpm(oldDpm);
         dpm.setLocVar(loc, getPtrNodeID(var));
 
-        if (SVFUtil::isa<StoreSVFGNode>(loc)) {
+        if (llvm::isa<StoreSVFGNode>(loc)) {
             addLoadDpmAndCVar(dpm, getLoadDpm(oldDpm), var);
         }
 
-        if (SVFUtil::isa<LoadSVFGNode>(loc)) {
+        if (llvm::isa<LoadSVFGNode>(loc)) {
             addLoadDpmAndCVar(dpm, oldDpm, var);
         }
 

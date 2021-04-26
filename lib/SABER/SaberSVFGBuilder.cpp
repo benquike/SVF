@@ -64,16 +64,15 @@ void SaberSVFGBuilder::collectGlobals(BVDataPTAImpl *pta) {
     NodeVector worklist;
     for (auto it = pag->begin(), eit = pag->end(); it != eit; it++) {
         PAGNode *pagNode = it->second;
-        if (SVFUtil::isa<DummyValPN>(pagNode) ||
-            SVFUtil::isa<DummyObjPN>(pagNode))
+        if (llvm::isa<DummyValPN>(pagNode) || llvm::isa<DummyObjPN>(pagNode))
             continue;
 
-        if (auto *gepobj = SVFUtil::dyn_cast<GepObjPN>(pagNode)) {
-            if (SVFUtil::isa<DummyObjPN>(pag->getGNode(gepobj->getBaseNode())))
+        if (auto *gepobj = llvm::dyn_cast<GepObjPN>(pagNode)) {
+            if (llvm::isa<DummyObjPN>(pag->getGNode(gepobj->getBaseNode())))
                 continue;
         }
         if (const Value *val = pagNode->getValue()) {
-            if (SVFUtil::isa<GlobalVariable>(val))
+            if (llvm::isa<GlobalVariable>(val))
                 worklist.push_back(it->first);
         }
     }
@@ -135,9 +134,9 @@ void SaberSVFGBuilder::rmDerefDirSVFGEdges(BVDataPTAImpl *pta) {
     for (auto &it : *svfg) {
         const SVFGNode *node = it.second;
 
-        if (const auto *stmtNode = SVFUtil::dyn_cast<StmtSVFGNode>(node)) {
+        if (const auto *stmtNode = llvm::dyn_cast<StmtSVFGNode>(node)) {
             /// for store, connect the RHS/LHS pointer to its def
-            if (SVFUtil::isa<StoreSVFGNode>(stmtNode)) {
+            if (llvm::isa<StoreSVFGNode>(stmtNode)) {
                 const SVFGNode *def =
                     svfg->getDefSVFGNode(stmtNode->getPAGDstNode());
                 SVFGEdge *edge = svfg->getIntraVFGEdge(def, stmtNode,
@@ -148,7 +147,7 @@ void SaberSVFGBuilder::rmDerefDirSVFGEdges(BVDataPTAImpl *pta) {
                 if (accessGlobal(pta, stmtNode->getPAGDstNode())) {
                     globSVFGNodes.insert(stmtNode);
                 }
-            } else if (SVFUtil::isa<LoadSVFGNode>(stmtNode)) {
+            } else if (llvm::isa<LoadSVFGNode>(stmtNode)) {
                 const SVFGNode *def =
                     svfg->getDefSVFGNode(stmtNode->getPAGSrcNode());
                 SVFGEdge *edge = svfg->getIntraVFGEdge(def, stmtNode,

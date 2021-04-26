@@ -158,7 +158,7 @@ void CHGraph::buildCHG() {
 void CHGraph::buildCHGNodes(const GlobalValue *globalvalue) {
     if (isValVtbl(globalvalue) && globalvalue->getNumOperands() > 0) {
         const ConstantStruct *vtblStruct =
-            SVFUtil::dyn_cast<ConstantStruct>(globalvalue->getOperand(0));
+            llvm::dyn_cast<ConstantStruct>(globalvalue->getOperand(0));
         assert(vtblStruct && "Initializer of a vtable not a struct?");
         string className = getClassNameFromVtblObj(globalvalue);
         if (!getNode(className)) {
@@ -167,14 +167,14 @@ void CHGraph::buildCHGNodes(const GlobalValue *globalvalue) {
 
         for (unsigned int ei = 0; ei < vtblStruct->getNumOperands(); ++ei) {
             const ConstantArray *vtbl =
-                SVFUtil::dyn_cast<ConstantArray>(vtblStruct->getOperand(ei));
+                llvm::dyn_cast<ConstantArray>(vtblStruct->getOperand(ei));
             assert(vtbl && "Element of initializer not an array?");
             for (u32_t i = 0; i < vtbl->getNumOperands(); ++i) {
                 if (const ConstantExpr *ce =
                         isCastConstantExpr(vtbl->getOperand(i))) {
                     const Value *bitcastValue = ce->getOperand(0);
                     if (const Function *func =
-                            SVFUtil::dyn_cast<Function>(bitcastValue)) {
+                            llvm::dyn_cast<Function>(bitcastValue)) {
                         LLVMModuleSet *modSet = svfMod->getLLVMModSet();
                         buildCHGNodes(getDefFunForMultipleModule(modSet, func));
                     }
@@ -209,8 +209,7 @@ void CHGraph::buildCHGEdges(const SVFFunction *fun) {
                 if (SVFUtil::isCallSite(&I)) {
                     CallSite cs = SVFUtil::getLLVMCallSite(&I);
                     connectInheritEdgeViaCall(fun, cs);
-                } else if (const auto *store =
-                               SVFUtil::dyn_cast<StoreInst>(&I)) {
+                } else if (const auto *store = llvm::dyn_cast<StoreInst>(&I)) {
                     connectInheritEdgeViaStore(fun, store);
                 }
             }
@@ -261,11 +260,10 @@ void CHGraph::connectInheritEdgeViaStore(const SVFFunction *caller,
                                          const StoreInst *storeInst) {
     struct DemangledName dname = demangle(caller->getName().str());
     if (const auto *ce =
-            SVFUtil::dyn_cast<ConstantExpr>(storeInst->getValueOperand())) {
+            llvm::dyn_cast<ConstantExpr>(storeInst->getValueOperand())) {
         if (ce->getOpcode() == Instruction::BitCast) {
             const Value *bitcastval = ce->getOperand(0);
-            if (const auto *bcce =
-                    SVFUtil::dyn_cast<ConstantExpr>(bitcastval)) {
+            if (const auto *bcce = llvm::dyn_cast<ConstantExpr>(bitcastval)) {
                 if (bcce->getOpcode() == Instruction::GetElementPtr) {
                     const Value *gepval = bcce->getOperand(0);
                     if (isValVtbl(gepval)) {
@@ -296,8 +294,8 @@ void CHGraph::readInheritanceMetadataFromModule(const Module &M) {
                                             opeit = md->op_end();
              opit != opeit; ++opit) {
             const MDNode *N = *opit;
-            const auto &mdstr = SVFUtil::cast<MDString>(N->getOperand(0));
-            string baseName = mdstr.getString().str();
+            const auto *mdstr = llvm::cast<MDString>(N->getOperand(0).get());
+            string baseName = mdstr->getString().str();
             addEdge(className, baseName, CHEdge::INHERITANCE);
         }
     }
@@ -452,10 +450,10 @@ void CHGraph::analyzeVTables(const Module &M) {
     LLVMModuleSet *modSet = svfMod->getLLVMModSet();
     for (Module::const_global_iterator I = M.global_begin(), E = M.global_end();
          I != E; ++I) {
-        const auto *globalvalue = SVFUtil::dyn_cast<const GlobalValue>(&(*I));
+        const auto *globalvalue = llvm::dyn_cast<const GlobalValue>(&(*I));
         if (isValVtbl(globalvalue) && globalvalue->getNumOperands() > 0) {
             const auto *vtblStruct =
-                SVFUtil::dyn_cast<ConstantStruct>(globalvalue->getOperand(0));
+                llvm::dyn_cast<ConstantStruct>(globalvalue->getOperand(0));
             assert(vtblStruct && "Initializer of a vtable not a struct?");
 
             string vtblClassName = getClassNameFromVtblObj(globalvalue);
@@ -465,8 +463,8 @@ void CHGraph::analyzeVTables(const Module &M) {
             node->setVTable(globalvalue);
 
             for (unsigned int ei = 0; ei < vtblStruct->getNumOperands(); ++ei) {
-                const auto *vtbl = SVFUtil::dyn_cast<ConstantArray>(
-                    vtblStruct->getOperand(ei));
+                const auto *vtbl =
+                    llvm::dyn_cast<ConstantArray>(vtblStruct->getOperand(ei));
                 assert(vtbl && "Element of initializer not an array?");
 
                 /*
@@ -482,13 +480,12 @@ void CHGraph::analyzeVTables(const Module &M) {
                     bool is_virtual = false; // virtual inheritance
                     int null_ptr_num = 0;
                     for (; i < vtbl->getNumOperands(); ++i) {
-                        if (SVFUtil::isa<ConstantPointerNull>(
+                        if (llvm::isa<ConstantPointerNull>(
                                 vtbl->getOperand(i))) {
-                            if (i > 0 && !SVFUtil::isa<ConstantPointerNull>(
+                            if (i > 0 && !llvm::isa<ConstantPointerNull>(
                                              vtbl->getOperand(i - 1))) {
-                                const auto *ce =
-                                    SVFUtil::dyn_cast<ConstantExpr>(
-                                        vtbl->getOperand(i - 1));
+                                const auto *ce = llvm::dyn_cast<ConstantExpr>(
+                                    vtbl->getOperand(i - 1));
                                 if (ce->getOpcode() == Instruction::BitCast) {
                                     const Value *bitcastValue =
                                         ce->getOperand(0);
@@ -501,8 +498,7 @@ void CHGraph::analyzeVTables(const Module &M) {
                                         null_ptr_num = 1;
                                         while (i + null_ptr_num <
                                                vtbl->getNumOperands()) {
-                                            if (SVFUtil::isa<
-                                                    ConstantPointerNull>(
+                                            if (llvm::isa<ConstantPointerNull>(
                                                     vtbl->getOperand(
                                                         i + null_ptr_num))) {
                                                 null_ptr_num++;
@@ -515,8 +511,8 @@ void CHGraph::analyzeVTables(const Module &M) {
                             }
                             continue;
                         }
-                        const auto *ce = SVFUtil::dyn_cast<ConstantExpr>(
-                            vtbl->getOperand(i));
+                        const auto *ce =
+                            llvm::dyn_cast<ConstantExpr>(vtbl->getOperand(i));
                         assert(ce != nullptr &&
                                "item in vtable not constantexp or null");
                         u32_t opcode = ce->getOpcode();
@@ -539,10 +535,10 @@ void CHGraph::analyzeVTables(const Module &M) {
                              * Function
                              * GlobalAlias (alias to other function)
                              */
-                            assert(SVFUtil::isa<Function>(bitcastValue) ||
-                                   SVFUtil::isa<GlobalValue>(bitcastValue));
+                            assert(llvm::isa<Function>(bitcastValue) ||
+                                   llvm::isa<GlobalValue>(bitcastValue));
                             if (const auto *f =
-                                    SVFUtil::dyn_cast<Function>(bitcastValue)) {
+                                    llvm::dyn_cast<Function>(bitcastValue)) {
                                 const SVFFunction *func =
                                     modSet->getSVFFunction(f);
                                 addFuncToFuncVector(virtualFunctions, func);
@@ -561,20 +557,19 @@ void CHGraph::analyzeVTables(const Module &M) {
                                 }
                             } else {
                                 if (const auto *alias =
-                                        SVFUtil::dyn_cast<GlobalAlias>(
+                                        llvm::dyn_cast<GlobalAlias>(
                                             bitcastValue)) {
                                     const Constant *aliasValue =
                                         alias->getAliasee();
                                     if (const auto *aliasFunc =
-                                            SVFUtil::dyn_cast<Function>(
+                                            llvm::dyn_cast<Function>(
                                                 aliasValue)) {
                                         const SVFFunction *func =
                                             modSet->getSVFFunction(aliasFunc);
                                         addFuncToFuncVector(virtualFunctions,
                                                             func);
                                     } else if (const auto *aliasconst =
-                                                   SVFUtil::dyn_cast<
-                                                       ConstantExpr>(
+                                                   llvm::dyn_cast<ConstantExpr>(
                                                        aliasValue)) {
                                         u32_t aliasopcode =
                                             aliasconst->getOpcode();
@@ -583,7 +578,7 @@ void CHGraph::analyzeVTables(const Module &M) {
                                                "aliased constantexpr in vtable "
                                                "not a bitcast");
                                         const Function *aliasbitcastfunc =
-                                            SVFUtil::dyn_cast<Function>(
+                                            llvm::dyn_cast<Function>(
                                                 aliasconst->getOperand(0));
                                         assert(aliasbitcastfunc &&
                                                "aliased bitcast in vtable not "

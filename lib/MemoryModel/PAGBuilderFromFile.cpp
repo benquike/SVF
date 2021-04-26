@@ -145,11 +145,11 @@ void PAGBuilderFromFile::addEdge(NodeID srcID, NodeID dstID,
     PAGNode *dstNode = pag->getGNode(dstID);
 
     /// sanity check for PAG from txt
-    assert(SVFUtil::isa<ValPN>(dstNode) && "dst not an value node?");
+    assert(llvm::isa<ValPN>(dstNode) && "dst not an value node?");
     if (edge == "addr") {
-        assert(SVFUtil::isa<ObjPN>(srcNode) && "src not an value node?");
+        assert(llvm::isa<ObjPN>(srcNode) && "src not an value node?");
     } else {
-        assert(!SVFUtil::isa<ObjPN>(srcNode) && "src not an object node?");
+        assert(!llvm::isa<ObjPN>(srcNode) && "src not an object node?");
     }
 
     if (edge == "addr") {

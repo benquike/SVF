@@ -43,14 +43,14 @@ void MTASVFGBuilder::collectLoadStoreSVFGNodes() {
     for (SVFG::const_iterator it = svfg->begin(), eit = svfg->end(); it != eit;
          ++it) {
         const SVFGNode *snode = it->second;
-        if (SVFUtil::isa<LoadSVFGNode>(snode)) {
-            const StmtSVFGNode *node = SVFUtil::cast<StmtSVFGNode>(snode);
+        if (llvm::isa<LoadSVFGNode>(snode)) {
+            const StmtSVFGNode *node = llvm::cast<StmtSVFGNode>(snode);
             if (node->getInst()) {
                 ldnodeSet.insert(node);
             }
         }
-        if (SVFUtil::isa<StoreSVFGNode>(snode)) {
-            const StmtSVFGNode *node = SVFUtil::cast<StmtSVFGNode>(snode);
+        if (llvm::isa<StoreSVFGNode>(snode)) {
+            const StmtSVFGNode *node = llvm::cast<StmtSVFGNode>(snode);
             if (node->getInst()) {
                 stnodeSet.insert(node);
             }
@@ -94,11 +94,10 @@ SVFGEdge *MTASVFGBuilder::addTDEdges(NodeID srcId, NodeID dstId,
 
     if (SVFGEdge *edge = svfg->hasThreadVFGEdge(srcNode, dstNode,
                                                 SVFGEdge::TheadMHPIndirectVF)) {
-        assert(SVFUtil::isa<IndirectSVFGEdge>(edge) &&
+        assert(llvm::isa<IndirectSVFGEdge>(edge) &&
                "this should be a indirect value flow edge!");
-        return (SVFUtil::cast<IndirectSVFGEdge>(edge)->addPointsTo(pts)
-                    ? edge
-                    : nullptr);
+        return (llvm::cast<IndirectSVFGEdge>(edge)->addPointsTo(pts) ? edge
+                                                                     : nullptr);
     } else {
         MTASVFGBuilder::numOfNewSVFGEdges++;
         auto *indirectEdge = new ThreadMHPIndSVFGEdge(srcNode, dstNode);
@@ -114,9 +113,9 @@ void MTASVFGBuilder::performRemovingMHPEdges() {
 
         PointsTo remove_pts = edge2pts[edgepair];
         const auto *n1 =
-            SVFUtil::cast<StmtSVFGNode>(svfg->getSVFGNode(edgepair.first));
+            llvm::cast<StmtSVFGNode>(svfg->getSVFGNode(edgepair.first));
         const auto *n2 =
-            SVFUtil::cast<StmtSVFGNode>(svfg->getSVFGNode(edgepair.second));
+            llvm::cast<StmtSVFGNode>(svfg->getSVFGNode(edgepair.second));
 
         assert(n1 && n2 && "one node of removed pair is null");
         assert(n1->hasOutgoingEdge() && "n1 doesn't have out edge");
@@ -127,7 +126,7 @@ void MTASVFGBuilder::performRemovingMHPEdges() {
              iter != n1->OutEdgeEnd(); ++iter) {
             SVFGEdge *edge = *iter;
             if (edge->isIndirectVFGEdge() && (edge->getDstNode() == n2)) {
-                IndirectSVFGEdge *e = SVFUtil::cast<IndirectSVFGEdge>(edge);
+                IndirectSVFGEdge *e = llvm::cast<IndirectSVFGEdge>(edge);
                 const PointsTo &pts = e->getPointsTo();
                 for (NodeBS::iterator o = remove_pts.begin(),
                                       eo = remove_pts.end();
@@ -170,10 +169,10 @@ bool MTASVFGBuilder::isHeadofSpan(const StmtSVFGNode *n,
 
     for (SVFGNodeIDSet::iterator it = prev.begin(), eit = prev.end(); it != eit;
          ++it) {
-        assert(SVFUtil::isa<StoreSVFGNode>(svfg->getSVFGNode(*it)) &&
+        assert(llvm::isa<StoreSVFGNode>(svfg->getSVFGNode(*it)) &&
                "prev is not a store node");
         const StmtSVFGNode *prevNode =
-            SVFUtil::dyn_cast<StmtSVFGNode>(svfg->getSVFGNode(*it));
+            llvm::dyn_cast<StmtSVFGNode>(svfg->getSVFGNode(*it));
         const Instruction *prevIns = prevNode->getInst();
 
         if (lockana->hasOneCxtInLockSpan(prevIns, lspan)) {
@@ -191,10 +190,10 @@ bool MTASVFGBuilder::isHeadofSpan(const StmtSVFGNode *n, InstSet mergespan) {
 
     for (SVFGNodeIDSet::iterator it = prev.begin(), eit = prev.end(); it != eit;
          ++it) {
-        assert(SVFUtil::isa<StoreSVFGNode>(svfg->getSVFGNode(*it)) &&
+        assert(llvm::isa<StoreSVFGNode>(svfg->getSVFGNode(*it)) &&
                "prev is not a store node");
         const auto *prevNode =
-            SVFUtil::dyn_cast<StmtSVFGNode>(svfg->getSVFGNode(*it));
+            llvm::dyn_cast<StmtSVFGNode>(svfg->getSVFGNode(*it));
         const Instruction *prevIns = prevNode->getInst();
         if (mergespan.find(prevIns) != mergespan.end())
             return false;
@@ -212,10 +211,10 @@ bool MTASVFGBuilder::isHeadofSpan(const StmtSVFGNode *n) {
 
     for (SVFGNodeIDSet::iterator it = prev.begin(), eit = prev.end(); it != eit;
          ++it) {
-        assert(SVFUtil::isa<StoreSVFGNode>(svfg->getSVFGNode(*it)) &&
+        assert(llvm::isa<StoreSVFGNode>(svfg->getSVFGNode(*it)) &&
                "prev is not a store node");
         const auto *prevNode =
-            SVFUtil::dyn_cast<StmtSVFGNode>(svfg->getSVFGNode(*it));
+            llvm::dyn_cast<StmtSVFGNode>(svfg->getSVFGNode(*it));
         const Instruction *prevIns = prevNode->getInst();
 
         if (lockana->isInSameSpan(prevIns, n->getInst())) {
@@ -233,11 +232,11 @@ bool MTASVFGBuilder::isTailofSpan(const StmtSVFGNode *n, InstSet mergespan) {
 
     for (SVFGNodeIDSet::iterator it = succ.begin(), eit = succ.end(); it != eit;
          ++it) {
-        assert((SVFUtil::isa<StoreSVFGNode>(svfg->getSVFGNode(*it)) ||
-                SVFUtil::isa<LoadSVFGNode>(svfg->getSVFGNode(*it))) &&
+        assert((llvm::isa<StoreSVFGNode>(svfg->getSVFGNode(*it)) ||
+                llvm::isa<LoadSVFGNode>(svfg->getSVFGNode(*it))) &&
                "succ is not a store/load node");
         const auto *succNode =
-            SVFUtil::dyn_cast<StmtSVFGNode>(svfg->getSVFGNode(*it));
+            llvm::dyn_cast<StmtSVFGNode>(svfg->getSVFGNode(*it));
         const Instruction *succIns = succNode->getInst();
 
         if (mergespan.find(succIns) != mergespan.end())
@@ -249,7 +248,7 @@ bool MTASVFGBuilder::isTailofSpan(const StmtSVFGNode *n, InstSet mergespan) {
 /// whether is a last write in the lock span.
 bool MTASVFGBuilder::isTailofSpan(const StmtSVFGNode *n,
                                   LockAnalysis::LockSpan lspan) {
-    assert(SVFUtil::isa<StoreSVFGNode>(n) && "Node is not a store node");
+    assert(llvm::isa<StoreSVFGNode>(n) && "Node is not a store node");
 
     SVFGNodeLockSpanPair pair = std::make_pair(n, lspan);
     if (pairtailmap.find(pair) != pairtailmap.end())
@@ -258,13 +257,13 @@ bool MTASVFGBuilder::isTailofSpan(const StmtSVFGNode *n,
     SVFGNodeIDSet succ = getSuccNodes(n);
     for (SVFGNodeIDSet::iterator it = succ.begin(), eit = succ.end(); it != eit;
          ++it) {
-        assert((SVFUtil::isa<StoreSVFGNode>(svfg->getSVFGNode(*it)) ||
-                SVFUtil::isa<LoadSVFGNode>(svfg->getSVFGNode(*it))) &&
+        assert((llvm::isa<StoreSVFGNode>(svfg->getSVFGNode(*it)) ||
+                llvm::isa<LoadSVFGNode>(svfg->getSVFGNode(*it))) &&
                "succ is not a store/load node");
-        if (SVFUtil::isa<LoadSVFGNode>(svfg->getSVFGNode(*it)))
+        if (llvm::isa<LoadSVFGNode>(svfg->getSVFGNode(*it)))
             continue;
         const StmtSVFGNode *succNode =
-            SVFUtil::dyn_cast<StmtSVFGNode>(svfg->getSVFGNode(*it));
+            llvm::dyn_cast<StmtSVFGNode>(svfg->getSVFGNode(*it));
         const Instruction *succIns = succNode->getInst();
 
         if (lockana->hasOneCxtInLockSpan(succIns, lspan)) {
@@ -279,7 +278,7 @@ bool MTASVFGBuilder::isTailofSpan(const StmtSVFGNode *n,
 /// whether for all lockspans that n belongs to, n is the last write.
 /// strong constraints but scalable
 bool MTASVFGBuilder::isTailofSpan(const StmtSVFGNode *n) {
-    assert(SVFUtil::isa<StoreSVFGNode>(n) && "Node is not a store node");
+    assert(llvm::isa<StoreSVFGNode>(n) && "Node is not a store node");
 
     if (tailmap.find(n) != tailmap.end())
         return tailmap[n];
@@ -288,14 +287,14 @@ bool MTASVFGBuilder::isTailofSpan(const StmtSVFGNode *n) {
 
     for (SVFGNodeIDSet::iterator it = succ.begin(), eit = succ.end(); it != eit;
          ++it) {
-        assert((SVFUtil::isa<StoreSVFGNode>(svfg->getSVFGNode(*it)) ||
-                SVFUtil::isa<LoadSVFGNode>(svfg->getSVFGNode(*it))) &&
+        assert((llvm::isa<StoreSVFGNode>(svfg->getSVFGNode(*it)) ||
+                llvm::isa<LoadSVFGNode>(svfg->getSVFGNode(*it))) &&
                "succ is not a store/load node");
-        if (SVFUtil::isa<LoadSVFGNode>(svfg->getSVFGNode(*it)))
+        if (llvm::isa<LoadSVFGNode>(svfg->getSVFGNode(*it)))
             continue;
 
         const StmtSVFGNode *succNode =
-            SVFUtil::dyn_cast<StmtSVFGNode>(svfg->getSVFGNode(*it));
+            llvm::dyn_cast<StmtSVFGNode>(svfg->getSVFGNode(*it));
         const Instruction *succIns = succNode->getInst();
 
         if (lockana->isInSameSpan(succIns, n->getInst())) {
@@ -328,7 +327,7 @@ MTASVFGBuilder::getPrevNodes(const StmtSVFGNode *n) {
         const SVFGNode *node = *worklist.begin();
         worklist.erase(worklist.begin());
         visited.insert(node);
-        if (SVFUtil::isa<StoreSVFGNode>(node))
+        if (llvm::isa<StoreSVFGNode>(node))
             prev.set(node->getId());
         else {
             for (SVFGEdge::SVFGEdgeSetTy::iterator iter = node->InEdgeBegin();
@@ -364,8 +363,7 @@ MTASVFGBuilder::getSuccNodes(const StmtSVFGNode *n) {
         const SVFGNode *node = *worklist.begin();
         worklist.erase(worklist.begin());
         visited.insert(node);
-        if (SVFUtil::isa<StoreSVFGNode>(node) ||
-            SVFUtil::isa<LoadSVFGNode>(node))
+        if (llvm::isa<StoreSVFGNode>(node) || llvm::isa<LoadSVFGNode>(node))
             succ.set(node->getId());
         else {
             for (SVFGEdge::SVFGEdgeSetTy::iterator iter = node->OutEdgeBegin();
@@ -391,7 +389,7 @@ MTASVFGBuilder::getSuccNodes(const StmtSVFGNode *n, NodeID o) {
          iter != n->OutEdgeEnd(); ++iter) {
         SVFGEdge *edge = *iter;
         if (edge->isIndirectVFGEdge()) {
-            auto *e = SVFUtil::cast<IndirectSVFGEdge>(edge);
+            auto *e = llvm::cast<IndirectSVFGEdge>(edge);
             PointsTo pts = e->getPointsTo();
             if (pts.test(o))
                 worklist.insert(edge->getDstNode());
@@ -402,8 +400,7 @@ MTASVFGBuilder::getSuccNodes(const StmtSVFGNode *n, NodeID o) {
         const SVFGNode *node = *worklist.begin();
         worklist.erase(worklist.begin());
         visited.insert(node);
-        if (SVFUtil::isa<StoreSVFGNode>(node) ||
-            SVFUtil::isa<LoadSVFGNode>(node))
+        if (llvm::isa<StoreSVFGNode>(node) || llvm::isa<LoadSVFGNode>(node))
             succ.set(node->getId());
         else {
             for (SVFGEdge::SVFGEdgeSetTy::iterator iter = node->OutEdgeBegin();
@@ -411,7 +408,7 @@ MTASVFGBuilder::getSuccNodes(const StmtSVFGNode *n, NodeID o) {
                 SVFGEdge *edge = *iter;
                 if (edge->isIndirectVFGEdge() &&
                     visited.find(edge->getDstNode()) == visited.end()) {
-                    auto *e = SVFUtil::cast<IndirectSVFGEdge>(edge);
+                    auto *e = llvm::cast<IndirectSVFGEdge>(edge);
                     PointsTo pts = e->getPointsTo();
                     if (pts.test(o))
                         worklist.insert(edge->getDstNode());
@@ -635,17 +632,17 @@ void MTASVFGBuilder::readPrecision() {
 
     for (SVFGNodeSet::iterator it1 = stnodeSet.begin(), eit1 = stnodeSet.end();
          it1 != eit1; ++it1) {
-        const StmtSVFGNode *n1 = SVFUtil::cast<StmtSVFGNode>(*it1);
+        const StmtSVFGNode *n1 = llvm::cast<StmtSVFGNode>(*it1);
 
         for (SVFGEdge::SVFGEdgeSetTy::iterator iter = n1->InEdgeBegin();
              iter != n1->InEdgeEnd(); ++iter) {
             SVFGEdge *edge = *iter;
             if (edge->isIndirectVFGEdge() &&
-                SVFUtil::isa<StoreSVFGNode>(edge->getSrcNode())) {
+                llvm::isa<StoreSVFGNode>(edge->getSrcNode())) {
                 const StmtSVFGNode *n2 =
-                    SVFUtil::cast<StmtSVFGNode>(edge->getSrcNode());
+                    llvm::cast<StmtSVFGNode>(edge->getSrcNode());
 
-                IndirectSVFGEdge *e = SVFUtil::cast<IndirectSVFGEdge>(edge);
+                IndirectSVFGEdge *e = llvm::cast<IndirectSVFGEdge>(edge);
                 PointsTo pts = e->getPointsTo();
                 PointsTo remove_pts;
 
@@ -691,13 +688,13 @@ void MTASVFGBuilder::connectMHPEdges(PointerAnalysis *pta) {
     for (SVFGNodeSet::const_iterator it1 = stnodeSet.begin(),
                                      eit1 = stnodeSet.end();
          it1 != eit1; ++it1) {
-        const StmtSVFGNode *n1 = SVFUtil::cast<StmtSVFGNode>(*it1);
+        const StmtSVFGNode *n1 = llvm::cast<StmtSVFGNode>(*it1);
         const Instruction *i1 = n1->getInst();
 
         for (SVFGNodeSet::const_iterator it2 = ldnodeSet.begin(),
                                          eit2 = ldnodeSet.end();
              it2 != eit2; ++it2) {
-            const StmtSVFGNode *n2 = SVFUtil::cast<StmtSVFGNode>(*it2);
+            const StmtSVFGNode *n2 = llvm::cast<StmtSVFGNode>(*it2);
             const Instruction *i2 = n2->getInst();
             if (ADDEDGE_NONSPARSE == Options::AddModelFlag) {
                 if (Options::UsePCG) {
@@ -715,7 +712,7 @@ void MTASVFGBuilder::connectMHPEdges(PointerAnalysis *pta) {
         for (SVFGNodeSet::const_iterator it2 = std::next(it1),
                                          eit2 = stnodeSet.end();
              it2 != eit2; ++it2) {
-            const StmtSVFGNode *n2 = SVFUtil::cast<StmtSVFGNode>(*it2);
+            const StmtSVFGNode *n2 = llvm::cast<StmtSVFGNode>(*it2);
             const Instruction *i2 = n2->getInst();
             if (ADDEDGE_NONSPARSE == Options::AddModelFlag) {
                 if (Options::UsePCG) {

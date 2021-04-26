@@ -267,35 +267,35 @@ void SVFGStat::processGraph() {
 
     for (auto &it : *graph) {
         numOfNodes++;
-        if (SVFUtil::isa<FormalINSVFGNode>(it.second)) {
+        if (llvm::isa<FormalINSVFGNode>(it.second)) {
             numOfFormalIn++;
-        } else if (SVFUtil::isa<FormalOUTSVFGNode>(it.second)) {
+        } else if (llvm::isa<FormalOUTSVFGNode>(it.second)) {
             numOfFormalOut++;
-        } else if (SVFUtil::isa<FormalParmSVFGNode>(it.second)) {
+        } else if (llvm::isa<FormalParmSVFGNode>(it.second)) {
             numOfFormalParam++;
-        } else if (SVFUtil::isa<FormalRetSVFGNode>(it.second)) {
+        } else if (llvm::isa<FormalRetSVFGNode>(it.second)) {
             numOfFormalRet++;
-        } else if (SVFUtil::isa<ActualINSVFGNode>(it.second)) {
+        } else if (llvm::isa<ActualINSVFGNode>(it.second)) {
             numOfActualIn++;
-        } else if (SVFUtil::isa<ActualOUTSVFGNode>(it.second)) {
+        } else if (llvm::isa<ActualOUTSVFGNode>(it.second)) {
             numOfActualOut++;
-        } else if (SVFUtil::isa<ActualParmSVFGNode>(it.second)) {
+        } else if (llvm::isa<ActualParmSVFGNode>(it.second)) {
             numOfActualParam++;
-        } else if (SVFUtil::isa<ActualRetSVFGNode>(it.second)) {
+        } else if (llvm::isa<ActualRetSVFGNode>(it.second)) {
             numOfActualRet++;
-        } else if (SVFUtil::isa<AddrSVFGNode>(it.second)) {
+        } else if (llvm::isa<AddrSVFGNode>(it.second)) {
             numOfAddr++;
-        } else if (SVFUtil::isa<CopySVFGNode>(it.second)) {
+        } else if (llvm::isa<CopySVFGNode>(it.second)) {
             numOfCopy++;
-        } else if (SVFUtil::isa<GepSVFGNode>(it.second)) {
+        } else if (llvm::isa<GepSVFGNode>(it.second)) {
             numOfGep++;
-        } else if (SVFUtil::isa<LoadSVFGNode>(it.second)) {
+        } else if (llvm::isa<LoadSVFGNode>(it.second)) {
             numOfLoad++;
-        } else if (SVFUtil::isa<StoreSVFGNode>(it.second)) {
+        } else if (llvm::isa<StoreSVFGNode>(it.second)) {
             numOfStore++;
-        } else if (SVFUtil::isa<PHISVFGNode>(it.second)) {
+        } else if (llvm::isa<PHISVFGNode>(it.second)) {
             numOfPhi++;
-        } else if (SVFUtil::isa<MSSAPHISVFGNode>(it.second)) {
+        } else if (llvm::isa<MSSAPHISVFGNode>(it.second)) {
             numOfMSSAPhi++;
         }
 
@@ -330,7 +330,7 @@ void SVFGStat::calculateNodeDegrees(SVFGNode *node, NodeSet &nodeHasIndInEdge,
     // indirect in edge
     Size_t indInEdges = 0;
     for (const auto &edgeIt : inEdges) {
-        if (auto *edge = SVFUtil::dyn_cast<IndirectSVFGEdge>(edgeIt)) {
+        if (auto *edge = llvm::dyn_cast<IndirectSVFGEdge>(edgeIt)) {
             indInEdges++;
             nodeHasIndInEdge.insert(node->getId());
             // get edge's weight
@@ -340,13 +340,13 @@ void SVFGStat::calculateNodeDegrees(SVFGNode *node, NodeSet &nodeHasIndInEdge,
             totalIndEdgeLabels += cpts.count();
         }
 
-        if (SVFUtil::isa<CallDirSVFGEdge>(edgeIt)) {
+        if (llvm::isa<CallDirSVFGEdge>(edgeIt)) {
             totalDirCallEdge++;
-        } else if (SVFUtil::isa<CallIndSVFGEdge>(edgeIt)) {
+        } else if (llvm::isa<CallIndSVFGEdge>(edgeIt)) {
             totalIndCallEdge++;
-        } else if (SVFUtil::isa<RetDirSVFGEdge>(edgeIt)) {
+        } else if (llvm::isa<RetDirSVFGEdge>(edgeIt)) {
             totalDirRetEdge++;
-        } else if (SVFUtil::isa<RetIndSVFGEdge>(edgeIt)) {
+        } else if (llvm::isa<RetIndSVFGEdge>(edgeIt)) {
             totalIndRetEdge++;
         }
     }

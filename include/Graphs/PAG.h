@@ -613,7 +613,7 @@ class PAG : public GenericPAGTy {
     //@{
     inline const MemObj *getObject(NodeID id) const {
         const PAGNode *node = getGNode(id);
-        if (const ObjPN *objPN = SVFUtil::dyn_cast<ObjPN>(node)) {
+        if (const ObjPN *objPN = llvm::dyn_cast<ObjPN>(node)) {
             return getObject(objPN);
         }
 
@@ -651,8 +651,8 @@ class PAG : public GenericPAGTy {
 
     inline NodeID getFIObjNode(NodeID id) const {
         PAGNode *node = getGNode(id);
-        assert(SVFUtil::isa<ObjPN>(node) && "need an object node");
-        auto *obj = SVFUtil::cast<ObjPN>(node);
+        assert(llvm::isa<ObjPN>(node) && "need an object node");
+        auto *obj = llvm::cast<ObjPN>(node);
         return getFIObjNode(obj->getMemObj());
     }
     //@}
@@ -695,12 +695,12 @@ class PAG : public GenericPAGTy {
 
     inline bool isNonPointerObj(NodeID id) const {
         PAGNode *node = getGNode(id);
-        if (FIObjPN *fiNode = SVFUtil::dyn_cast<FIObjPN>(node)) {
+        if (FIObjPN *fiNode = llvm::dyn_cast<FIObjPN>(node)) {
             return (fiNode->getMemObj()->hasPtrObj() == false);
-        } else if (GepObjPN *gepNode = SVFUtil::dyn_cast<GepObjPN>(node)) {
+        } else if (GepObjPN *gepNode = llvm::dyn_cast<GepObjPN>(node)) {
             return (gepNode->getMemObj()->isNonPtrFieldObj(
                 gepNode->getLocationSet()));
-        } else if (SVFUtil::isa<DummyObjPN>(node)) {
+        } else if (llvm::isa<DummyObjPN>(node)) {
             return false;
         } else {
             assert(false && "expecting a object node");
@@ -737,8 +737,8 @@ class PAG : public GenericPAGTy {
 
     inline const MemObj *getBaseObj(NodeID id) const {
         const PAGNode *node = getGNode(id);
-        assert(SVFUtil::isa<ObjPN>(node) && "need an object node");
-        const auto *obj = SVFUtil::cast<ObjPN>(node);
+        assert(llvm::isa<ObjPN>(node) && "need an object node");
+        const auto *obj = llvm::cast<ObjPN>(node);
         return obj->getMemObj();
     }
     //@}

@@ -171,7 +171,7 @@ void ThreadAPI::performAPIStat(SVFModule *module) {
         for (inst_iterator II = inst_begin(*it), E = inst_end(*it); II != E;
              ++II) {
             const Instruction *inst = &*II;
-            if (!SVFUtil::isa<CallInst>(inst))
+            if (!llvm::isa<CallInst>(inst))
                 continue;
 
             const SVFFunction *fun =

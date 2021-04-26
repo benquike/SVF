@@ -55,7 +55,7 @@ void PTACallGraphEdge::addInDirectCallSite(const CallBlockNode *call,
     const Instruction *callInst = call->getCallSite();
     llvm::ImmutableCallSite cs(callInst);
     assert((nullptr == cs.getCalledFunction() ||
-            nullptr == SVFUtil::dyn_cast<Function>(
+            nullptr == llvm::dyn_cast<Function>(
                            proj->getForkedFun(call->getCallSite()))) &&
            "not an indirect callsite??");
     indirectCalls.insert(call);

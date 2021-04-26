@@ -201,11 +201,11 @@ class ThreadAPI {
         CallSite cs = SVFUtil::getLLVMCallSite(inst);
         Value *join = cs.getArgument(0);
 
-        if (SVFUtil::isa<LoadInst>(join)) {
-            return SVFUtil::cast<LoadInst>(join)->getPointerOperand();
+        if (llvm::isa<LoadInst>(join)) {
+            return llvm::cast<LoadInst>(join)->getPointerOperand();
         }
 
-        if (SVFUtil::isa<Argument>(join)) {
+        if (llvm::isa<Argument>(join)) {
             return join;
         }
 

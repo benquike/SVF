@@ -232,7 +232,7 @@ void TCT::handleCallRelation(CxtThreadProc &ctp, const PTACallGraphEdge *cgEdge,
     }
 
     else if (cgEdge->getEdgeKind() == PTACallGraphEdge::TDForkEdge) {
-        const CallInst *fork = SVFUtil::cast<CallInst>(cs.getInstruction());
+        const CallInst *fork = llvm::cast<CallInst>(cs.getInstruction());
 
         /// Create spawnee TCT node
         TCTNode *spawneeNode = getOrCreateTCTNode(cxt, fork, oldCxt, callee);

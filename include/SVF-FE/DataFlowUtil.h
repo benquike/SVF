@@ -50,12 +50,12 @@ class PTASCEV {
     PTASCEV(const Value *p, const SCEV *s, ScalarEvolution *SE)
         : scev(s), start(nullptr), step(nullptr), ptr(p), inloop(false),
           tripcount(0) {
-        if (const SCEVAddRecExpr *ar = SVFUtil::dyn_cast<SCEVAddRecExpr>(s)) {
+        if (const SCEVAddRecExpr *ar = llvm::dyn_cast<SCEVAddRecExpr>(s)) {
             if (const SCEVConstant *startExpr =
-                    SVFUtil::dyn_cast<SCEVConstant>(ar->getStart()))
+                    llvm::dyn_cast<SCEVConstant>(ar->getStart()))
                 start = startExpr->getValue();
             if (const SCEVConstant *stepExpr =
-                    SVFUtil::dyn_cast<SCEVConstant>(ar->getStepRecurrence(*SE)))
+                    llvm::dyn_cast<SCEVConstant>(ar->getStepRecurrence(*SE)))
                 step = stepExpr->getValue();
             tripcount = SE->getSmallConstantTripCount(
                 const_cast<Loop *>(ar->getLoop()));

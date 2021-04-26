@@ -94,7 +94,7 @@ void BVDataPTAImpl::writeToFile(const string &filename) {
     // Write GepPAGNodes to file
     for (auto it = pag->begin(), ie = pag->end(); it != ie; ++it) {
         PAGNode *pagNode = it->second;
-        if (auto *gepObjPN = SVFUtil::dyn_cast<GepObjPN>(pagNode)) {
+        if (auto *gepObjPN = llvm::dyn_cast<GepObjPN>(pagNode)) {
             F.os() << it->first << " ";
             F.os() << pag->getBaseObjNode(it->first) << " ";
             F.os() << gepObjPN->getLocationSet().getOffset() << "\n";

@@ -238,7 +238,7 @@ class DCHGraph : public CommonCHGraph, public GenericGraph<DCHNode, DCHEdge> {
         }
 
         if (base->getTag() == dwarf::DW_TAG_array_type) {
-            const auto *cbase = SVFUtil::dyn_cast<DICompositeType>(base);
+            const auto *cbase = llvm::dyn_cast<DICompositeType>(base);
             assert(cbase && "DCHG: bad DIComposite case");
             return cbase->getBaseType();
         }
@@ -341,7 +341,7 @@ class DCHGraph : public CommonCHGraph, public GenericGraph<DCHNode, DCHEdge> {
         MDNode *md =
             cs.getInstruction()->getMetadata(cppUtil::ctir::derefMDName);
         assert(md != nullptr && "Missing type metadata at virtual callsite");
-        auto *diType = SVFUtil::dyn_cast<DIType>(md);
+        auto *diType = llvm::dyn_cast<DIType>(md);
         assert(diType != nullptr &&
                "Incorrect metadata type at virtual callsite");
         return diType;

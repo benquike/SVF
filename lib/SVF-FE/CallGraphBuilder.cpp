@@ -73,7 +73,7 @@ PTACallGraph *ThreadCallGraphBuilder::buildThreadCallGraph() {
 
     buildCallGraph();
 
-    auto *cg = dyn_cast<ThreadCallGraph>(callgraph);
+    auto *cg = llvm::dyn_cast<ThreadCallGraph>(callgraph);
     assert(cg && "not a thread callgraph?");
 
     ThreadAPI *tdAPI = proj->getThreadAPI();
@@ -87,7 +87,7 @@ PTACallGraph *ThreadCallGraphBuilder::buildThreadCallGraph() {
                 const CallBlockNode *cs = icfg->getCallBlockNode(inst);
                 cg->addForksite(cs);
                 const auto *forkee =
-                    SVFUtil::dyn_cast<Function>(tdAPI->getForkedFun(inst));
+                    llvm::dyn_cast<Function>(tdAPI->getForkedFun(inst));
                 if (forkee) {
                     cg->addDirectForkEdge(cs);
                 }
@@ -98,7 +98,7 @@ PTACallGraph *ThreadCallGraphBuilder::buildThreadCallGraph() {
             } else if (tdAPI->isHareParFor(inst)) {
                 const CallBlockNode *cs = icfg->getCallBlockNode(inst);
                 cg->addParForSite(cs);
-                const auto *taskFunc = SVFUtil::dyn_cast<Function>(
+                const auto *taskFunc = llvm::dyn_cast<Function>(
                     tdAPI->getTaskFuncAtHareParForSite(inst));
                 if (taskFunc) {
                     cg->addDirectParForEdge(cs);

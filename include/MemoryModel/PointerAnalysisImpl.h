@@ -136,25 +136,25 @@ class BVDataPTAImpl : public PointerAnalysis {
     inline PTDataTy *getPTDataTy() const { return ptD; }
 
     inline DiffPTDataTy *getDiffPTDataTy() const {
-        auto *diff = SVFUtil::dyn_cast<DiffPTDataTy>(ptD);
+        auto *diff = llvm::dyn_cast<DiffPTDataTy>(ptD);
         assert(diff && "BVDataPTAImpl::getDiffPTDataTy: not a DiffPTDataTy!");
         return diff;
     }
 
     inline DFPTDataTy *getDFPTDataTy() const {
-        auto *df = SVFUtil::dyn_cast<DFPTDataTy>(ptD);
+        auto *df = llvm::dyn_cast<DFPTDataTy>(ptD);
         assert(df && "BVDataPTAImpl::getDFPTDataTy: not a DFPTDataTy!");
         return df;
     }
 
     inline MutDFPTDataTy *getMutDFPTDataTy() const {
-        auto *mdf = SVFUtil::dyn_cast<MutDFPTDataTy>(ptD);
+        auto *mdf = llvm::dyn_cast<MutDFPTDataTy>(ptD);
         assert(mdf && "BVDataPTAImpl::getMutDFPTDataTy: not a MutDFPTDataTy!");
         return mdf;
     }
 
     inline VersionedPTDataTy *getVersionedPTDataTy() const {
-        auto *v = SVFUtil::dyn_cast<VersionedPTDataTy>(ptD);
+        auto *v = llvm::dyn_cast<VersionedPTDataTy>(ptD);
         assert(v &&
                "BVDataPTAImpl::getVersionedPTDataTy: not a VersionedPTDataTy!");
         return v;
@@ -260,15 +260,15 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
     inline PTDataTy *getPTDataTy() const { return ptD; }
 
     inline MutPTDataTy *getMutPTDataTy() const {
-        MutPTDataTy *mut = SVFUtil::dyn_cast<MutPTDataTy>(ptD);
+        MutPTDataTy *mut = llvm::dyn_cast<MutPTDataTy>(ptD);
         assert(mut && "BVDataPTAImpl::getMutPTDataTy: not a MutPTDataTy!");
         return mut;
     }
 
-    inline bool hasPtsMap(void) const { return SVFUtil::isa<MutPTDataTy>(ptD); }
+    inline bool hasPtsMap(void) const { return llvm::isa<MutPTDataTy>(ptD); }
 
     inline const typename MutPTDataTy::PtsMap &getPtsMap() const {
-        if (MutPTDataTy *m = SVFUtil::dyn_cast<MutPTDataTy>(ptD)) {
+        if (MutPTDataTy *m = llvm::dyn_cast<MutPTDataTy>(ptD)) {
             return m->getPtsMap();
         }
         assert(false && "CondPTAImpl::getPtsMap: not a PTData with a PtsMap!");
@@ -539,10 +539,10 @@ template <class Cond> class CondPTAImpl : public PointerAnalysis {
              nIter != this->getAllValidPtrs().end(); ++nIter) {
             const PAGNode *node = getPAG()->getGNode(*nIter);
             if (this->getPAG()->isValidTopLevelPtr(node)) {
-                if (SVFUtil::isa<DummyObjPN>(node)) {
+                if (llvm::isa<DummyObjPN>(node)) {
                     SVFUtil::outs()
                         << "##<Blackhole or constant> id:" << node->getId();
-                } else if (!SVFUtil::isa<DummyValPN>(node)) {
+                } else if (!llvm::isa<DummyValPN>(node)) {
                     SVFUtil::outs()
                         << "##<" << node->getValue()->getName() << "> ";
                     // SVFUtil::outs() << "Source Loc: " <<

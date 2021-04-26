@@ -169,7 +169,7 @@ void PTAStat::performStat() {
 
     for (PAG::iterator it = pag->begin(), eit = pag->end(); it != eit; ++it) {
         PAGNode *node = it->second;
-        if (ObjPN *obj = SVFUtil::dyn_cast<ObjPN>(node)) {
+        if (ObjPN *obj = llvm::dyn_cast<ObjPN>(node)) {
             const MemObj *mem = obj->getMemObj();
             if (memObjSet.insert(mem->getSymId()).second == false)
                 continue;
@@ -344,9 +344,8 @@ void PTAStat::bitcastInstStat() {
         const Function *func = *funIter;
         for (const auto &bb : *func) {
             for (const auto &inst : bb) {
-                if (const auto *bitcast =
-                        SVFUtil::dyn_cast<BitCastInst>(&inst)) {
-                    if (SVFUtil::isa<PointerType>(bitcast->getSrcTy()))
+                if (const auto *bitcast = llvm::dyn_cast<BitCastInst>(&inst)) {
+                    if (llvm::isa<PointerType>(bitcast->getSrcTy()))
                         numberOfBitCast++;
                 }
             }

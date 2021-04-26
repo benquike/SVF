@@ -295,13 +295,13 @@ class VFG : public GenericVFGTy {
     inline bool hasBlackHoleConstObjAddrAsDef(const PAGNode *pagNode) const {
         if (hasDef(pagNode)) {
             const VFGNode *defNode = getVFGNode(getDef(pagNode));
-            if (const auto *addr = SVFUtil::dyn_cast<AddrVFGNode>(defNode)) {
+            if (const auto *addr = llvm::dyn_cast<AddrVFGNode>(defNode)) {
                 if (pag->isBlkObjOrConstantObj(
                         addr->getPAGEdge()->getSrcID())) {
                     return true;
                 }
             } else if (const auto *copy =
-                           SVFUtil::dyn_cast<CopyVFGNode>(defNode)) {
+                           llvm::dyn_cast<CopyVFGNode>(defNode)) {
                 if (pag->isNullPtr(copy->getPAGEdge()->getSrcID())) {
                     return true;
                 }

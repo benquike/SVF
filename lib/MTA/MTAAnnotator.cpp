@@ -20,10 +20,10 @@ void MTAAnnotator::annotateDRCheck(Instruction *inst) {
     rawstr << DR_CHECK;
 
     /// memcpy and memset is not annotated
-    if (auto *st = SVFUtil::dyn_cast<StoreInst>(inst)) {
+    if (auto *st = llvm::dyn_cast<StoreInst>(inst)) {
         numOfAnnotatedSt++;
         addMDTag(inst, st->getPointerOperand(), rawstr.str());
-    } else if (auto *ld = SVFUtil::dyn_cast<LoadInst>(inst)) {
+    } else if (auto *ld = llvm::dyn_cast<LoadInst>(inst)) {
         numOfAnnotatedLd++;
         addMDTag(inst, ld->getPointerOperand(), rawstr.str());
     }
@@ -37,9 +37,9 @@ void MTAAnnotator::collectLoadStoreInst(SVFModule *mod) {
             continue;
         for (inst_iterator II = inst_begin(F), E = inst_end(F); II != E; ++II) {
             const Instruction *inst = &*II;
-            if (SVFUtil::isa<LoadInst>(inst)) {
+            if (llvm::isa<LoadInst>(inst)) {
                 loadset.insert(inst);
-            } else if (SVFUtil::isa<StoreInst>(inst)) {
+            } else if (llvm::isa<StoreInst>(inst)) {
                 storeset.insert(inst);
             } else if (isMemset(inst)) {
                 storeset.insert(inst);
@@ -55,7 +55,7 @@ void MTAAnnotator::collectLoadStoreInst(SVFModule *mod) {
 }
 
 const Value *MTAAnnotator::getStoreOperand(const Instruction *inst) {
-    if (const auto *st = SVFUtil::dyn_cast<StoreInst>(inst)) {
+    if (const auto *st = llvm::dyn_cast<StoreInst>(inst)) {
         return st->getPointerOperand();
     } else if (isMemset(inst)) {
         return inst->getOperand(0);
@@ -67,7 +67,7 @@ const Value *MTAAnnotator::getStoreOperand(const Instruction *inst) {
     return nullptr;
 }
 const Value *MTAAnnotator::getLoadOperand(const Instruction *inst) {
-    if (const auto *ld = SVFUtil::dyn_cast<LoadInst>(inst)) {
+    if (const auto *ld = llvm::dyn_cast<LoadInst>(inst)) {
         return ld->getPointerOperand();
     }
 

@@ -84,7 +84,7 @@ class SVFGOPT : public SVFG {
         NodeID phiId = getDef(fun_arg);
         SVFGEdge *edge = addCallEdge(getDef(cs_arg), phiId, csId);
         if (edge != nullptr) {
-            auto *phi = SVFUtil::cast<PHISVFGNode>(getSVFGNode(phiId));
+            auto *phi = llvm::cast<PHISVFGNode>(getSVFGNode(phiId));
             addInterPHIOperands(phi, cs_arg);
             edges.insert(edge);
         }
@@ -96,7 +96,7 @@ class SVFGOPT : public SVFG {
         NodeID phiId = getDef(cs_ret);
         SVFGEdge *edge = addRetEdge(getDef(fun_ret), phiId, csId);
         if (edge != nullptr) {
-            PHISVFGNode *phi = SVFUtil::cast<PHISVFGNode>(getSVFGNode(phiId));
+            PHISVFGNode *phi = llvm::cast<PHISVFGNode>(getSVFGNode(phiId));
             addInterPHIOperands(phi, fun_ret);
             edges.insert(edge);
         }
@@ -205,7 +205,7 @@ class SVFGOPT : public SVFG {
     /// 1. it's not def-site of actual-in/formal-out;
     /// 2. it doesn't have incoming and outgoing call/ret at the same time.
     inline bool addIntoWorklist(const SVFGNode *node) {
-        if (const auto *phi = SVFUtil::dyn_cast<MSSAPHISVFGNode>(node)) {
+        if (const auto *phi = llvm::dyn_cast<MSSAPHISVFGNode>(node)) {
             if (isConnectingTwoCallSites(phi) == false &&
                 isDefOfAInFOut(phi) == false) {
                 return worklist.push(phi);
@@ -228,10 +228,10 @@ class SVFGOPT : public SVFG {
     /// Return TRUE if both edges are indirect call/ret edges.
     inline bool bothInterEdges(const SVFGEdge *edge1,
                                const SVFGEdge *edge2) const {
-        bool inter1 = (SVFUtil::isa<CallIndSVFGEdge>(edge1) ||
-                       SVFUtil::isa<RetIndSVFGEdge>(edge1));
-        bool inter2 = (SVFUtil::isa<CallIndSVFGEdge>(edge2) ||
-                       SVFUtil::isa<RetIndSVFGEdge>(edge2));
+        bool inter1 = (llvm::isa<CallIndSVFGEdge>(edge1) ||
+                       llvm::isa<RetIndSVFGEdge>(edge1));
+        bool inter2 = (llvm::isa<CallIndSVFGEdge>(edge2) ||
+                       llvm::isa<RetIndSVFGEdge>(edge2));
         return (inter1 && inter2);
     }
 

@@ -43,7 +43,7 @@ inline bool isAnAllocationWraper(const Instruction *) { return false; }
 
 /// Return LLVM function if this value is
 inline const Function *getLLVMFunction(const Value *val) {
-    const auto *fun = SVFUtil::dyn_cast<Function>(val->stripPointerCasts());
+    const auto *fun = llvm::dyn_cast<Function>(val->stripPointerCasts());
     return fun;
 }
 
@@ -214,8 +214,8 @@ inline const PointerType *getRefTypeOfHeapAllocOrStatic(const CallSite cs,
         int argPos = getHeapAllocHoldingArgPosition(cs, svfMod);
         const Value *arg = cs.getArgument(argPos);
         if (const PointerType *argType =
-                SVFUtil::dyn_cast<PointerType>(arg->getType())) {
-            refType = SVFUtil::dyn_cast<PointerType>(argType->getElementType());
+                llvm::dyn_cast<PointerType>(arg->getType())) {
+            refType = llvm::dyn_cast<PointerType>(argType->getElementType());
         }
     }
     // Case 2: heap/static object held by return value.
@@ -223,7 +223,7 @@ inline const PointerType *getRefTypeOfHeapAllocOrStatic(const CallSite cs,
         assert((isStaticExtCall(cs, svfMod) ||
                 isHeapAllocExtCallViaRet(cs, svfMod)) &&
                "Must be heap alloc via ret, or static allocation site");
-        refType = SVFUtil::dyn_cast<PointerType>(cs.getType());
+        refType = llvm::dyn_cast<PointerType>(cs.getType());
     }
     assert(refType &&
            "Allocated object must be held by a pointer-typed value.");
@@ -242,10 +242,8 @@ bool isObject(const Value *ref, SVFModule *svfMod);
 
 /// Return true if the value refers to constant data, e.g., i32 0
 inline bool isConstantData(const Value *val) {
-    return SVFUtil::isa<ConstantData>(val) ||
-           SVFUtil::isa<ConstantAggregate>(val) ||
-           SVFUtil::isa<MetadataAsValue>(val) ||
-           SVFUtil::isa<BlockAddress>(val);
+    return llvm::isa<ConstantData>(val) || llvm::isa<ConstantAggregate>(val) ||
+           llvm::isa<MetadataAsValue>(val) || llvm::isa<BlockAddress>(val);
 }
 
 /// Method for dead function, which does not have any possible caller
@@ -257,8 +255,8 @@ bool isDeadFunction(const Function *fun, SVFModule *svfMod);
 
 /// whether this is an argument in dead function
 inline bool ArgInDeadFunction(const Value *val, SVFModule *svfMod) {
-    return SVFUtil::isa<Argument>(val) &&
-           isDeadFunction(SVFUtil::cast<Argument>(val)->getParent(), svfMod);
+    return llvm::isa<Argument>(val) &&
+           isDeadFunction(llvm::cast<Argument>(val)->getParent(), svfMod);
 }
 //@}
 
@@ -286,8 +284,8 @@ inline const SVFFunction *getProgEntryFunction(SVFModule *svfModule) {
 
 /// Return true if this is an argument of a program entry function (e.g. main)
 inline bool ArgInProgEntryFunction(const Value *val) {
-    return SVFUtil::isa<Argument>(val) &&
-           isProgEntryFunction(SVFUtil::cast<Argument>(val)->getParent());
+    return llvm::isa<Argument>(val) &&
+           isProgEntryFunction(llvm::cast<Argument>(val)->getParent());
 }
 /// Return true if this is value in a dead function (function without any
 /// caller)
@@ -321,9 +319,8 @@ inline bool isNoCallerFunction(const Function *fun, SVFModule *svfMod) {
 
 /// Return true if the argument in a function does not have a caller
 inline bool ArgInNoCallerFunction(const Value *val, SVFModule *svfMod) {
-    return SVFUtil::isa<Argument>(val) &&
-           isNoCallerFunction(SVFUtil::cast<Argument>(val)->getParent(),
-                              svfMod);
+    return llvm::isa<Argument>(val) &&
+           isNoCallerFunction(llvm::cast<Argument>(val)->getParent(), svfMod);
 }
 //@}
 
@@ -354,7 +351,7 @@ const Type *getTypeOfHeapAlloc(const llvm::Instruction *inst,
 /// Return corresponding constant expression, otherwise return nullptr
 //@{
 inline const ConstantExpr *isGepConstantExpr(const Value *val) {
-    if (const auto *constExpr = SVFUtil::dyn_cast<ConstantExpr>(val)) {
+    if (const auto *constExpr = llvm::dyn_cast<ConstantExpr>(val)) {
         if (constExpr->getOpcode() == Instruction::GetElementPtr) {
             return constExpr;
         }
@@ -363,7 +360,7 @@ inline const ConstantExpr *isGepConstantExpr(const Value *val) {
 }
 
 inline const ConstantExpr *isInt2PtrConstantExpr(const Value *val) {
-    if (const auto *constExpr = SVFUtil::dyn_cast<ConstantExpr>(val)) {
+    if (const auto *constExpr = llvm::dyn_cast<ConstantExpr>(val)) {
         if (constExpr->getOpcode() == Instruction::IntToPtr) {
             return constExpr;
         }
@@ -372,7 +369,7 @@ inline const ConstantExpr *isInt2PtrConstantExpr(const Value *val) {
 }
 
 inline const ConstantExpr *isPtr2IntConstantExpr(const Value *val) {
-    if (const auto *constExpr = SVFUtil::dyn_cast<ConstantExpr>(val)) {
+    if (const auto *constExpr = llvm::dyn_cast<ConstantExpr>(val)) {
         if (constExpr->getOpcode() == Instruction::PtrToInt) {
             return constExpr;
         }
@@ -381,7 +378,7 @@ inline const ConstantExpr *isPtr2IntConstantExpr(const Value *val) {
 }
 
 inline const ConstantExpr *isCastConstantExpr(const Value *val) {
-    if (const auto *constExpr = SVFUtil::dyn_cast<ConstantExpr>(val)) {
+    if (const auto *constExpr = llvm::dyn_cast<ConstantExpr>(val)) {
         if (constExpr->getOpcode() == Instruction::BitCast) {
             return constExpr;
         }
@@ -390,7 +387,7 @@ inline const ConstantExpr *isCastConstantExpr(const Value *val) {
 }
 
 inline const ConstantExpr *isSelectConstantExpr(const Value *val) {
-    if (const auto *constExpr = SVFUtil::dyn_cast<ConstantExpr>(val)) {
+    if (const auto *constExpr = llvm::dyn_cast<ConstantExpr>(val)) {
         if (constExpr->getOpcode() == Instruction::Select) {
             return constExpr;
         }
@@ -399,7 +396,7 @@ inline const ConstantExpr *isSelectConstantExpr(const Value *val) {
 }
 
 inline const ConstantExpr *isTruncConstantExpr(const Value *val) {
-    if (const auto *constExpr = SVFUtil::dyn_cast<ConstantExpr>(val)) {
+    if (const auto *constExpr = llvm::dyn_cast<ConstantExpr>(val)) {
         if (constExpr->getOpcode() == Instruction::Trunc ||
             constExpr->getOpcode() == Instruction::FPTrunc ||
             constExpr->getOpcode() == Instruction::ZExt ||
@@ -412,7 +409,7 @@ inline const ConstantExpr *isTruncConstantExpr(const Value *val) {
 }
 
 inline const ConstantExpr *isCmpConstantExpr(const Value *val) {
-    if (const auto *constExpr = SVFUtil::dyn_cast<ConstantExpr>(val)) {
+    if (const auto *constExpr = llvm::dyn_cast<ConstantExpr>(val)) {
         if (constExpr->getOpcode() == Instruction::ICmp ||
             constExpr->getOpcode() == Instruction::FCmp) {
             return constExpr;
@@ -422,7 +419,7 @@ inline const ConstantExpr *isCmpConstantExpr(const Value *val) {
 }
 
 inline const ConstantExpr *isBinaryConstantExpr(const Value *val) {
-    if (const auto *constExpr = SVFUtil::dyn_cast<ConstantExpr>(val)) {
+    if (const auto *constExpr = llvm::dyn_cast<ConstantExpr>(val)) {
         if ((constExpr->getOpcode() >= Instruction::BinaryOpsBegin) &&
             (constExpr->getOpcode() <= Instruction::BinaryOpsEnd)) {
             return constExpr;
@@ -432,7 +429,7 @@ inline const ConstantExpr *isBinaryConstantExpr(const Value *val) {
 }
 
 inline const ConstantExpr *isUnaryConstantExpr(const Value *val) {
-    if (const auto *constExpr = SVFUtil::dyn_cast<ConstantExpr>(val)) {
+    if (const auto *constExpr = llvm::dyn_cast<ConstantExpr>(val)) {
         if ((constExpr->getOpcode() >= Instruction::UnaryOpsBegin) &&
             (constExpr->getOpcode() <= Instruction::UnaryOpsEnd)) {
             return constExpr;

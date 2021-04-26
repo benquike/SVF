@@ -69,8 +69,7 @@ void AndersenStat::collectCycleInfo(ConstraintGraph *consCG) {
         NodeBS clone = subNodes;
         for (const auto &nodeId : subNodes) {
             PAGNode *pagNode = pta->getPAG()->getGNode(nodeId);
-            if (SVFUtil::isa<ObjPN>(pagNode) &&
-                pta->isFieldInsensitive(nodeId)) {
+            if (llvm::isa<ObjPN>(pagNode) && pta->isFieldInsensitive(nodeId)) {
                 NodeID baseId = consCG->getBaseObjNode(nodeId);
                 clone.reset(nodeId);
                 clone.set(baseId);
@@ -98,9 +97,9 @@ void AndersenStat::constraintGraphStat() {
     u32_t numOfGeps = 0;
     // collect copy and gep edges
     for (auto *it : consCG->getDirectCGEdges()) {
-        if (SVFUtil::isa<CopyCGEdge>(it))
+        if (llvm::isa<CopyCGEdge>(it))
             numOfCopys++;
-        else if (SVFUtil::isa<GepCGEdge>(it))
+        else if (llvm::isa<GepCGEdge>(it))
             numOfGeps++;
         else
             assert(false && "what else!!");
@@ -132,7 +131,7 @@ void AndersenStat::constraintGraphStat() {
             nodeIt.second->getOutEdges().empty())
             continue;
         cgNodeNumber++;
-        if (SVFUtil::isa<ObjPN>(pta->getPAG()->getGNode(nodeIt.first)))
+        if (llvm::isa<ObjPN>(pta->getPAG()->getGNode(nodeIt.first)))
             objNodeNumber++;
 
         u32_t nCopyIn = nodeIt.second->getDirectInEdges().size();
@@ -232,8 +231,8 @@ void AndersenStat::statNullPtr() {
             if (pts.empty()) {
                 std::string str;
                 raw_string_ostream rawstr(str);
-                if (!SVFUtil::isa<DummyValPN>(pagNode) &&
-                    !SVFUtil::isa<DummyObjPN>(pagNode)) {
+                if (!llvm::isa<DummyValPN>(pagNode) &&
+                    !llvm::isa<DummyObjPN>(pagNode)) {
                     // if a pointer is in dead function, we do not care
                     if (!isPtrInDeadFunction(pagNode->getValue(), svfMod)) {
                         _NumOfNullPtr++;
@@ -259,7 +258,7 @@ void AndersenStat::statNullPtr() {
  */
 void AndersenStat::performStat() {
 
-    assert(SVFUtil::isa<AndersenBase>(pta) &&
+    assert(llvm::isa<AndersenBase>(pta) &&
            "not an andersen pta pass!! what else??");
     endClk();
 

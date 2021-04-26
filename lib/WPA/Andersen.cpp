@@ -177,7 +177,7 @@ void Andersen::handleCopyGep(ConstraintNode *node) {
         for (ConstraintEdge *edge : node->getCopyOutEdges())
             processCopy(nodeId, edge);
         for (ConstraintEdge *edge : node->getGepOutEdges()) {
-            if (auto *gepEdge = SVFUtil::dyn_cast<GepCGEdge>(edge))
+            if (auto *gepEdge = llvm::dyn_cast<GepCGEdge>(edge))
                 processGep(nodeId, gepEdge);
         }
     }
@@ -219,7 +219,7 @@ void Andersen::processAllAddr() {
         for (auto it = cgNode->incomingAddrsBegin(),
                   eit = cgNode->incomingAddrsEnd();
              it != eit; ++it)
-            processAddr(SVFUtil::cast<AddrCGEdge>(*it));
+            processAddr(llvm::cast<AddrCGEdge>(*it));
     }
 }
 
@@ -281,7 +281,7 @@ bool Andersen::processStore(NodeID node, const ConstraintEdge *store) {
 bool Andersen::processCopy(NodeID node, const ConstraintEdge *edge) {
     numOfProcessedCopy++;
 
-    assert((SVFUtil::isa<CopyCGEdge>(edge)) && "not copy/call/ret ??");
+    assert((llvm::isa<CopyCGEdge>(edge)) && "not copy/call/ret ??");
     NodeID dst = edge->getDstID();
     const PointsTo &srcPts = getDiffPts(node);
 
@@ -309,7 +309,7 @@ bool Andersen::processGepPts(const PointsTo &pts, const GepCGEdge *edge) {
     numOfProcessedGep++;
 
     PointsTo tmpDstPts;
-    if (SVFUtil::isa<VariantGepCGEdge>(edge)) {
+    if (llvm::isa<VariantGepCGEdge>(edge)) {
         // If a pointer is connected by a variant gep edge,
         // then set this memory object to be field insensitive,
         // unless the object is a black hole/constant.
@@ -329,7 +329,7 @@ bool Andersen::processGepPts(const PointsTo &pts, const GepCGEdge *edge) {
             tmpDstPts.set(baseId);
         }
     } else if (const auto *normalGepEdge =
-                   SVFUtil::dyn_cast<NormalGepCGEdge>(edge)) {
+                   llvm::dyn_cast<NormalGepCGEdge>(edge)) {
         // TODO: after the node is set to field insensitive, handling invariant
         // gep edge may lose precision because offsets here are ignored, and the
         // base object is always returned.

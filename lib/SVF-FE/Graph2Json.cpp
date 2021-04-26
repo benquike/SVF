@@ -26,7 +26,7 @@ void ICFGPrinter::printICFGToJson(const std::string &filename) {
         llvm::json::Object ICFGNode_Obj;
         ICFGNode_Obj["ICFG_ID"] = id;
         ICFGNode_Obj["Node Type"] = getICFGKind(node->getNodeKind());
-        if (IntraBlockNode *bNode = SVFUtil::dyn_cast<IntraBlockNode>(node)) {
+        if (IntraBlockNode *bNode = llvm::dyn_cast<IntraBlockNode>(node)) {
             ICFGNode_Obj["Source Location"] = getSourceLoc(bNode->getInst());
             PAG::PAGEdgeList &edges = getPAG()->getInstPTAPAGEdgeList(bNode);
             llvm::json::Array PAGEdge_array;
@@ -48,8 +48,7 @@ void ICFGPrinter::printICFGToJson(const std::string &filename) {
                 edge_obj["srcValueName"] = edge->getSrcNode()->getValueName();
                 edge_obj["dstValueName"] = edge->getDstNode()->getValueName();
                 if (edge->getEdgeKind() == PAGEdge::NormalGep) {
-                    const NormalGepPE *gepEdge =
-                        SVFUtil::cast<NormalGepPE>(edge);
+                    const NormalGepPE *gepEdge = llvm::cast<NormalGepPE>(edge);
                     edge_obj["offset"] = gepEdge->getOffset();
                 }
                 llvm::json::Value edge_value = llvm::json::Object{edge_obj};
@@ -58,7 +57,7 @@ void ICFGPrinter::printICFGToJson(const std::string &filename) {
             llvm::json::Value PagEdge_value = llvm::json::Array{PAGEdge_array};
             ICFGNode_Obj["PAG Edges"] = PagEdge_value;
         } else if (FunEntryBlockNode *entry =
-                       SVFUtil::dyn_cast<FunEntryBlockNode>(node)) {
+                       llvm::dyn_cast<FunEntryBlockNode>(node)) {
             if (isExtCall(entry->getFun()))
                 ICFGNode_Obj["isExtCall"] = true;
             else {
@@ -68,7 +67,7 @@ void ICFGPrinter::printICFGToJson(const std::string &filename) {
             }
             ICFGNode_Obj["Function Name"] = entry->getFun()->getName();
         } else if (FunExitBlockNode *exit =
-                       SVFUtil::dyn_cast<FunExitBlockNode>(node)) {
+                       llvm::dyn_cast<FunExitBlockNode>(node)) {
             if (isExtCall(exit->getFun()))
                 ICFGNode_Obj["isExtCall"] = true;
             else {
@@ -77,10 +76,9 @@ void ICFGPrinter::printICFGToJson(const std::string &filename) {
                     getSourceLoc(&(exit->getFun()->getLLVMFun()->back()));
             }
             ICFGNode_Obj["Function Name"] = exit->getFun()->getName();
-        } else if (CallBlockNode *call =
-                       SVFUtil::dyn_cast<CallBlockNode>(node)) {
+        } else if (CallBlockNode *call = llvm::dyn_cast<CallBlockNode>(node)) {
             ICFGNode_Obj["Source Location"] = getSourceLoc(call->getCallSite());
-        } else if (RetBlockNode *ret = SVFUtil::dyn_cast<RetBlockNode>(node)) {
+        } else if (RetBlockNode *ret = llvm::dyn_cast<RetBlockNode>(node)) {
             ICFGNode_Obj["Source Location"] = getSourceLoc(ret->getCallSite());
         } else
             assert(false && "what else kinds of nodes do we have??");
@@ -91,19 +89,18 @@ void ICFGPrinter::printICFGToJson(const std::string &filename) {
              sit != esit; ++sit) {
             ICFGEdge *edge = *sit;
             llvm::json::Object ICFGEdge_obj;
-            if (SVFUtil::isa<CallCFGEdge>(edge)) {
-                CallCFGEdge *call = SVFUtil::dyn_cast<CallCFGEdge>(edge);
+            if (llvm::isa<CallCFGEdge>(edge)) {
+                CallCFGEdge *call = llvm::dyn_cast<CallCFGEdge>(edge);
                 ICFGEdge_obj["ICFG Edge Type"] = "CallCFGEdge";
                 ICFGEdge_obj["ICFGEdgeSrcID"] = call->getSrcID();
                 ICFGEdge_obj["ICFGEdgeDstID"] = call->getDstID();
-            } else if (SVFUtil::isa<RetCFGEdge>(edge)) {
-                RetCFGEdge *call = SVFUtil::dyn_cast<RetCFGEdge>(edge);
+            } else if (llvm::isa<RetCFGEdge>(edge)) {
+                RetCFGEdge *call = llvm::dyn_cast<RetCFGEdge>(edge);
                 ICFGEdge_obj["ICFG Edge Type"] = "RetCFGEdge";
                 ICFGEdge_obj["ICFGEdgeSrcID"] = call->getSrcID();
                 ICFGEdge_obj["ICFGEdgeDstID"] = call->getDstID();
-            } else if (SVFUtil::isa<IntraCFGEdge>(edge)) {
-                IntraCFGEdge *intraCFGEdge =
-                    SVFUtil::dyn_cast<IntraCFGEdge>(edge);
+            } else if (llvm::isa<IntraCFGEdge>(edge)) {
+                IntraCFGEdge *intraCFGEdge = llvm::dyn_cast<IntraCFGEdge>(edge);
                 ICFGEdge_obj["ICFG Edge Type"] = "IntraCFGEdge";
                 ICFGEdge_obj["ICFGEdgeSrcID"] = intraCFGEdge->getSrcID();
                 ICFGEdge_obj["ICFGEdgeDstID"] = intraCFGEdge->getDstID();

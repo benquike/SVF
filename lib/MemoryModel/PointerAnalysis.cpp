@@ -181,8 +181,7 @@ bool PointerAnalysis::isLocalVarInRecursiveFun(NodeID id) const {
     const MemObj *obj = pag->getObject(id);
     assert(obj && "object not found!!");
     if (obj->isStack()) {
-        if (const auto *local =
-                SVFUtil::dyn_cast<AllocaInst>(obj->getRefVal())) {
+        if (const auto *local = llvm::dyn_cast<AllocaInst>(obj->getRefVal())) {
             const SVFFunction *fun =
                 svfMod->getLLVMModSet()->getSVFFunction(local->getFunction());
             return callGraphSCC->isInCycle(
@@ -197,7 +196,7 @@ bool PointerAnalysis::isLocalVarInRecursiveFun(NodeID id) const {
  */
 void PointerAnalysis::resetObjFieldSensitive() {
     for (auto &nIter : *pag) {
-        if (auto *node = SVFUtil::dyn_cast<ObjPN>(nIter.second)) {
+        if (auto *node = llvm::dyn_cast<ObjPN>(nIter.second)) {
             const_cast<MemObj *>(node->getMemObj())->setFieldSensitive();
         }
     }
@@ -271,7 +270,7 @@ void PointerAnalysis::finalize() {
 
     // FSTBHC has its own TBHC-specific test validation.
     if (!pag->isBuiltFromFile() && alias_validation &&
-        !SVFUtil::isa<FlowSensitiveTBHC>(this)) {
+        !llvm::isa<FlowSensitiveTBHC>(this)) {
         validateTests();
     }
 
@@ -302,7 +301,7 @@ void PointerAnalysis::validateTests() {
 void PointerAnalysis::dumpAllTypes() {
     for (auto nIter : this->getAllValidPtrs()) {
         const PAGNode *node = getPAG()->getGNode(nIter);
-        if (SVFUtil::isa<DummyObjPN>(node) || SVFUtil::isa<DummyValPN>(node)) {
+        if (llvm::isa<DummyObjPN>(node) || llvm::isa<DummyValPN>(node)) {
             continue;
         }
 
@@ -313,7 +312,7 @@ void PointerAnalysis::dumpAllTypes() {
         Type *type = node->getValue()->getType();
         SymbolTableInfo *symbolTableInfo = getPAG()->getSymbolTableInfo();
         symbolTableInfo->printFlattenFields(type);
-        if (auto *ptType = SVFUtil::dyn_cast<PointerType>(type)) {
+        if (auto *ptType = llvm::dyn_cast<PointerType>(type)) {
             symbolTableInfo->printFlattenFields(ptType->getElementType());
         }
     }
@@ -326,10 +325,9 @@ void PointerAnalysis::dumpPts(NodeID ptr, const PointsTo &pts) {
 
     const PAGNode *node = pag->getGNode(ptr);
     /// print the points-to set of node which has the maximum pts size.
-    if (SVFUtil::isa<DummyObjPN>(node)) {
+    if (llvm::isa<DummyObjPN>(node)) {
         outs() << "##<Dummy Obj > id:" << node->getId();
-    } else if (!SVFUtil::isa<DummyValPN>(node) &&
-               !SVFModule::pagReadFromTXT()) {
+    } else if (!llvm::isa<DummyValPN>(node) && !SVFModule::pagReadFromTXT()) {
         if (node->hasValue()) {
             outs() << "##<" << node->getValue()->getName() << "> ";
             outs() << "Source Loc: " << getSourceLoc(node->getValue());
@@ -351,15 +349,15 @@ void PointerAnalysis::dumpPts(NodeID ptr, const PointsTo &pts) {
 
     for (auto it : pts) {
         const PAGNode *node = pag->getGNode(it);
-        if (SVFUtil::isa<ObjPN>(node) == false) {
+        if (llvm::isa<ObjPN>(node) == false) {
             continue;
         }
         NodeID ptd = node->getId();
         outs() << "!!Target NodeID " << ptd << "\t [";
         const PAGNode *pagNode = pag->getGNode(ptd);
-        if (SVFUtil::isa<DummyValPN>(node)) {
+        if (llvm::isa<DummyValPN>(node)) {
             outs() << "DummyVal\n";
-        } else if (SVFUtil::isa<DummyObjPN>(node)) {
+        } else if (llvm::isa<DummyObjPN>(node)) {
             outs() << "Dummy Obj id: " << node->getId() << "]\n";
         } else {
             if (!SVFModule::pagReadFromTXT()) {
@@ -439,12 +437,11 @@ void PointerAnalysis::resolveIndCalls(const CallBlockNode *cs,
             return;
         }
 
-        if (auto *objPN = SVFUtil::dyn_cast<ObjPN>(pag->getGNode(ii))) {
+        if (auto *objPN = llvm::dyn_cast<ObjPN>(pag->getGNode(ii))) {
             const MemObj *obj = pag->getObject(objPN);
 
             if (obj->isFunction()) {
-                const auto *calleefun =
-                    SVFUtil::cast<Function>(obj->getRefVal());
+                const auto *calleefun = llvm::cast<Function>(obj->getRefVal());
                 const SVFFunction *callee = getDefFunForMultipleModule(
                     svfMod->getLLVMModSet(), calleefun);
 
@@ -512,7 +509,7 @@ void PointerAnalysis::getVFnsFromPts(const CallBlockNode *cs,
             const PAGNode *ptdnode = pag->getGNode(it);
             if (ptdnode->hasValue()) {
                 if (const auto *vtbl =
-                        SVFUtil::dyn_cast<GlobalValue>(ptdnode->getValue())) {
+                        llvm::dyn_cast<GlobalValue>(ptdnode->getValue())) {
                     if (chaVtbls.find(vtbl) != chaVtbls.end()) {
                         vtbls.insert(vtbl);
                     }
@@ -666,7 +663,7 @@ void PointerAnalysis::validateExpectedFailureTests(std::string fun) {
         for (Value::user_iterator i = checkFun->getLLVMFun()->user_begin(),
                                   e = checkFun->getLLVMFun()->user_end();
              i != e; ++i) {
-            if (CallInst *call = SVFUtil::dyn_cast<CallInst>(*i)) {
+            if (CallInst *call = llvm::dyn_cast<CallInst>(*i)) {
                 assert(call->getNumArgOperands() == 2 &&
                        "arguments should be two pointers!!");
                 Value *V1 = call->getArgOperand(0);

@@ -60,15 +60,15 @@ void ThreadCallGraph::updateCallGraph(PointerAnalysis *pta) {
     // Fork sites
     for (auto it = forksitesBegin(), eit = forksitesEnd(); it != eit; ++it) {
         const Value *forkedval = tdAPI->getForkedFun((*it)->getCallSite());
-        if (SVFUtil::dyn_cast<Function>(forkedval) == nullptr) {
+        if (llvm::dyn_cast<Function>(forkedval) == nullptr) {
             PAG *pag = pta->getPAG();
             const PointsTo &targets = pta->getPts(pag->getValueNode(forkedval));
             for (auto ii : targets) {
-                if (auto *objPN = SVFUtil::dyn_cast<ObjPN>(pag->getGNode(ii))) {
+                if (auto *objPN = llvm::dyn_cast<ObjPN>(pag->getGNode(ii))) {
                     const MemObj *obj = pag->getObject(objPN);
                     if (obj->isFunction()) {
                         const auto *callee =
-                            SVFUtil::cast<Function>(obj->getRefVal());
+                            llvm::cast<Function>(obj->getRefVal());
                         LLVMModuleSet *modSet =
                             getPAG()->getModule()->getLLVMModSet();
                         const SVFFunction *svfCallee =
@@ -85,15 +85,15 @@ void ThreadCallGraph::updateCallGraph(PointerAnalysis *pta) {
          ++it) {
         const Value *forkedval =
             tdAPI->getTaskFuncAtHareParForSite((*it)->getCallSite());
-        if (SVFUtil::dyn_cast<Function>(forkedval) == nullptr) {
+        if (llvm::dyn_cast<Function>(forkedval) == nullptr) {
             PAG *pag = pta->getPAG();
             const PointsTo &targets = pta->getPts(pag->getValueNode(forkedval));
             for (auto ii : targets) {
-                if (auto *objPN = SVFUtil::dyn_cast<ObjPN>(pag->getGNode(ii))) {
+                if (auto *objPN = llvm::dyn_cast<ObjPN>(pag->getGNode(ii))) {
                     const MemObj *obj = pag->getObject(objPN);
                     if (obj->isFunction()) {
                         const auto *callee =
-                            SVFUtil::cast<Function>(obj->getRefVal());
+                            llvm::cast<Function>(obj->getRefVal());
                         LLVMModuleSet *modSet =
                             getPAG()->getModule()->getLLVMModSet();
                         const SVFFunction *svfCallee =
@@ -135,7 +135,7 @@ void ThreadCallGraph::addDirectForkEdge(const CallBlockNode *cs) {
 
     PTACallGraphNode *caller = getCallGraphNode(cs->getCaller());
     const auto *forkee =
-        SVFUtil::dyn_cast<Function>(tdAPI->getForkedFun(cs->getCallSite()));
+        llvm::dyn_cast<Function>(tdAPI->getForkedFun(cs->getCallSite()));
     assert(forkee && "callee does not exist");
     LLVMModuleSet *modSet = getPAG()->getModule()->getLLVMModSet();
     PTACallGraphNode *callee =
@@ -191,7 +191,7 @@ void ThreadCallGraph::addDirectJoinEdge(const CallBlockNode *cs,
     for (const auto *it : forkset) {
 
         const auto *threadRoutineFun =
-            SVFUtil::dyn_cast<Function>(tdAPI->getForkedFun(it->getCallSite()));
+            llvm::dyn_cast<Function>(tdAPI->getForkedFun(it->getCallSite()));
         assert(threadRoutineFun && "thread routine function does not exist");
         LLVMModuleSet *modSet = getPAG()->getModule()->getLLVMModSet();
         const SVFFunction *svfRoutineFun =
@@ -218,7 +218,7 @@ void ThreadCallGraph::addDirectJoinEdge(const CallBlockNode *cs,
 void ThreadCallGraph::addDirectParForEdge(const CallBlockNode *cs) {
 
     PTACallGraphNode *caller = getCallGraphNode(cs->getCaller());
-    const auto *taskFunc = SVFUtil::dyn_cast<Function>(
+    const auto *taskFunc = llvm::dyn_cast<Function>(
         tdAPI->getTaskFuncAtHareParForSite(cs->getCallSite()));
     assert(taskFunc && "callee does not exist");
     LLVMModuleSet *modSet = getPAG()->getModule()->getLLVMModSet();

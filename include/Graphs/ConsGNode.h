@@ -367,7 +367,7 @@ class ConstraintNode : public GenericConsNodeTy {
     }
 
     inline void removeOutgoingDirectEdge(ConstraintEdge *outEdge) {
-        if (SVFUtil::isa<GepCGEdge>(outEdge)) {
+        if (llvm::isa<GepCGEdge>(outEdge)) {
             gepOutEdges.erase(outEdge);
         } else {
             copyOutEdges.erase(outEdge);
@@ -377,7 +377,7 @@ class ConstraintNode : public GenericConsNodeTy {
     }
 
     inline void removeIncomingDirectEdge(ConstraintEdge *inEdge) {
-        if (SVFUtil::isa<GepCGEdge>(inEdge)) {
+        if (llvm::isa<GepCGEdge>(inEdge)) {
             gepInEdges.erase(inEdge);
         } else {
             copyInEdges.erase(inEdge);

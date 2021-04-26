@@ -274,8 +274,7 @@ PathCondAllocator::Condition *PathCondAllocator::evaluateBranchCond(
         return getTrueCond();
     }
 
-    if (const auto *brInst =
-            SVFUtil::dyn_cast<BranchInst>(bb->getTerminator())) {
+    if (const auto *brInst = llvm::dyn_cast<BranchInst>(bb->getTerminator())) {
         assert(brInst->getNumSuccessors() == 2 &&
                "not a two successors branch??");
         const BasicBlock *succ1 = brInst->getSuccessor(0);
@@ -308,7 +307,7 @@ bool PathCondAllocator::isNECmp(const CmpInst *cmp) const {
 
 bool PathCondAllocator::isTestNullExpr(const Value *test,
                                        const Value *val) const {
-    if (const auto *cmp = SVFUtil::dyn_cast<CmpInst>(test)) {
+    if (const auto *cmp = llvm::dyn_cast<CmpInst>(test)) {
         return isTestContainsNullAndTheValue(cmp, val) && isEQCmp(cmp);
     }
     return false;
@@ -316,7 +315,7 @@ bool PathCondAllocator::isTestNullExpr(const Value *test,
 
 bool PathCondAllocator::isTestNotNullExpr(const Value *test,
                                           const Value *val) const {
-    if (const auto *cmp = SVFUtil::dyn_cast<CmpInst>(test)) {
+    if (const auto *cmp = llvm::dyn_cast<CmpInst>(test)) {
         return isTestContainsNullAndTheValue(cmp, val) && isNECmp(cmp);
     }
     return false;
@@ -327,8 +326,8 @@ bool PathCondAllocator::isTestContainsNullAndTheValue(const CmpInst *cmp,
 
     const Value *op0 = cmp->getOperand(0);
     const Value *op1 = cmp->getOperand(1);
-    if ((op0 == val && SVFUtil::isa<ConstantPointerNull>(op1)) ||
-        (op1 == val && SVFUtil::isa<ConstantPointerNull>(op0)))
+    if ((op0 == val && llvm::isa<ConstantPointerNull>(op1)) ||
+        (op1 == val && llvm::isa<ConstantPointerNull>(op0)))
         return true;
 
     return false;
@@ -342,7 +341,7 @@ void PathCondAllocator::collectBBCallingProgExit(const BasicBlock &bb) {
     for (BasicBlock::const_iterator it = bb.begin(), eit = bb.end(); it != eit;
          it++) {
         const Instruction *inst = &*it;
-        if (SVFUtil::isa<CallInst>(inst) || SVFUtil::isa<InvokeInst>(inst)) {
+        if (llvm::isa<CallInst>(inst) || llvm::isa<InvokeInst>(inst)) {
             if (SVFUtil::isProgExitCall(inst, svfMod)) {
                 funToExitBBsMap[bb.getParent()].insert(&bb);
             }

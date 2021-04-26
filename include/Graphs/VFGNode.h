@@ -346,7 +346,7 @@ class CmpVFGNode : public VFGNode {
   public:
     /// Constructor
     CmpVFGNode(NodeID id, const PAGNode *r) : VFGNode(id, Cmp), res(r) {
-        const auto *cmp = SVFUtil::dyn_cast<CmpInst>(r->getValue());
+        const auto *cmp = llvm::dyn_cast<CmpInst>(r->getValue());
         assert(cmp && "not a binary operator?");
     }
     CmpVFGNode() = default;
@@ -411,7 +411,7 @@ class BinaryOPVFGNode : public VFGNode {
     /// Constructor
     BinaryOPVFGNode(NodeID id, const PAGNode *r)
         : VFGNode(id, BinaryOp), res(r) {
-        const auto *binary = SVFUtil::dyn_cast<BinaryOperator>(r->getValue());
+        const auto *binary = llvm::dyn_cast<BinaryOperator>(r->getValue());
         assert(binary && "not a binary operator?");
     }
     BinaryOPVFGNode() = default;
@@ -476,9 +476,8 @@ class UnaryOPVFGNode : public VFGNode {
     /// Constructor
     UnaryOPVFGNode(NodeID id, const PAGNode *r) : VFGNode(id, UnaryOp), res(r) {
         const Value *val = r->getValue();
-        bool unop =
-            (SVFUtil::isa<UnaryOperator>(val) ||
-             SVFUtil::isa<BranchInst>(val) || SVFUtil::isa<SwitchInst>(val));
+        bool unop = (llvm::isa<UnaryOperator>(val) ||
+                     llvm::isa<BranchInst>(val) || llvm::isa<SwitchInst>(val));
         assert(unop && "not a unary operator or a BranchInst or a SwitchInst?");
     }
     UnaryOPVFGNode() = default;

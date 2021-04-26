@@ -201,7 +201,7 @@ void DDAStat::performStat() {
 
     for (auto nodeIt : *pag) {
         PAGNode *pagNode = nodeIt.second;
-        if (SVFUtil::isa<ObjPN>(pagNode)) {
+        if (llvm::isa<ObjPN>(pagNode)) {
             if (getPTA()->isLocalVarInRecursiveFun(nodeIt.first)) {
                 localVarInRecursion.set(nodeIt.first);
             }

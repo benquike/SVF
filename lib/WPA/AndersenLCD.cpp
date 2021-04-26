@@ -68,7 +68,7 @@ void AndersenLCD::handleCopyGep(ConstraintNode *node) {
         processCopy(nodeId, edge);
     }
     for (ConstraintEdge *edge : node->getGepOutEdges()) {
-        if (GepCGEdge *gepEdge = SVFUtil::dyn_cast<GepCGEdge>(edge)) {
+        if (GepCGEdge *gepEdge = llvm::dyn_cast<GepCGEdge>(edge)) {
             processGep(nodeId, gepEdge);
         }
     }

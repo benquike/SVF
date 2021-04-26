@@ -267,14 +267,13 @@ class TypeSystem {
 
             const Type *nodeType = valType;
 
-            if (const auto *gepvalnode = SVFUtil::dyn_cast<GepValPN>(pagNode)) {
+            if (const auto *gepvalnode = llvm::dyn_cast<GepValPN>(pagNode)) {
                 nodeType = gepvalnode->getType();
-            } else if (SVFUtil::isa<RetPN>(pagNode)) {
+            } else if (llvm::isa<RetPN>(pagNode)) {
                 const llvm::PointerType *ptrTy =
-                    SVFUtil::dyn_cast<llvm::PointerType>(valType);
+                    llvm::dyn_cast<llvm::PointerType>(valType);
                 const llvm::FunctionType *funTy =
-                    SVFUtil::dyn_cast<llvm::FunctionType>(
-                        ptrTy->getElementType());
+                    llvm::dyn_cast<llvm::FunctionType>(ptrTy->getElementType());
                 nodeType = funTy->getReturnType();
             }
 

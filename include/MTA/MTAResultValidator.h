@@ -246,7 +246,7 @@ class RaceResultValidator {
              it != ie; ++it) {
             const Use *u = &*it;
             const Value *user = u->getUser();
-            const CallInst *csInst = SVFUtil::dyn_cast<CallInst>(user);
+            const CallInst *csInst = llvm::dyn_cast<CallInst>(user);
             assert(csInst);
             csInsts.push_back(csInst);
         }
@@ -261,7 +261,7 @@ class RaceResultValidator {
             const CallInst *CI1 = csInsts[i++];
             const CallInst *CI2 = csInsts[i++];
             const ConstantInt *C =
-                SVFUtil::dyn_cast<ConstantInt>(CI1->getOperand(1));
+                llvm::dyn_cast<ConstantInt>(CI1->getOperand(1));
             assert(C);
             const Instruction *I1 = getPreviousMemoryAccessInst(CI1);
             const Instruction *I2 = getPreviousMemoryAccessInst(CI2);
@@ -347,8 +347,8 @@ class RaceResultValidator {
     static bool compare(const CallInst *CI1, const CallInst *CI2) {
         const Value *V1 = CI1->getOperand(0);
         const Value *V2 = CI2->getOperand(0);
-        const ConstantInt *C1 = SVFUtil::dyn_cast<ConstantInt>(V1);
-        const ConstantInt *C2 = SVFUtil::dyn_cast<ConstantInt>(V2);
+        const ConstantInt *C1 = llvm::dyn_cast<ConstantInt>(V1);
+        const ConstantInt *C2 = llvm::dyn_cast<ConstantInt>(V2);
         assert(0 != C1 && 0 != C2);
         return C1->getZExtValue() < C2->getZExtValue();
     }
@@ -361,7 +361,7 @@ class RaceResultValidator {
     const Instruction *getPreviousMemoryAccessInst(const Instruction *I) {
         I = I->getPrevNode();
         while (I) {
-            if (SVFUtil::isa<LoadInst>(I) || SVFUtil::isa<StoreInst>(I))
+            if (llvm::isa<LoadInst>(I) || llvm::isa<StoreInst>(I))
                 return I;
             if (const Function *callee = SVFUtil::getCallee(I)) {
                 if (ExtAPI::EFT_L_A0__A0R_A1R ==

@@ -19,10 +19,10 @@ using namespace SVFUtil;
  * Get the base pointer from any GEP.
  */
 static const Value *getBasePtr(const Value *v) {
-    const GetElementPtrInst *GEP = SVFUtil::dyn_cast<GetElementPtrInst>(v);
+    const GetElementPtrInst *GEP = llvm::dyn_cast<GetElementPtrInst>(v);
     while (GEP) {
         v = GEP->getOperand(0);
-        GEP = SVFUtil::dyn_cast<GetElementPtrInst>(v);
+        GEP = llvm::dyn_cast<GetElementPtrInst>(v);
     }
     return v;
 }
@@ -128,12 +128,12 @@ void MHP::analyzeInterleaving() {
                     handleFork(cts, rootTid);
                 } else if (isTDJoin(curInst)) {
                     handleJoin(cts, rootTid);
-                } else if (SVFUtil::isa<CallInst>(curInst) &&
+                } else if (llvm::isa<CallInst>(curInst) &&
                            !isExtCall(curInst)) {
                     handleCall(cts, rootTid);
                     if (!tct->isCandidateFun(getCallee(curInst)))
                         handleIntra(cts);
-                } else if (SVFUtil::isa<ReturnInst>(curInst)) {
+                } else if (llvm::isa<ReturnInst>(curInst)) {
                     handleRet(cts);
                 } else {
                     handleIntra(cts);
@@ -214,7 +214,7 @@ void MHP::handleNonCandidateFun(const CxtThreadStmt &cts) {
  */
 void MHP::handleFork(const CxtThreadStmt &cts, NodeID rootTid) {
 
-    const CallInst *call = SVFUtil::cast<CallInst>(cts.getStmt());
+    const CallInst *call = llvm::cast<CallInst>(cts.getStmt());
     const CallStrCxt &curCxt = cts.getContext();
 
     assert(isTDFork(call));
@@ -241,7 +241,7 @@ void MHP::handleFork(const CxtThreadStmt &cts, NodeID rootTid) {
  */
 void MHP::handleJoin(const CxtThreadStmt &cts, NodeID rootTid) {
 
-    const CallInst *call = SVFUtil::cast<CallInst>(cts.getStmt());
+    const CallInst *call = llvm::cast<CallInst>(cts.getStmt());
     const CallStrCxt &curCxt = cts.getContext();
 
     assert(isTDJoin(call));
@@ -286,7 +286,7 @@ void MHP::handleJoin(const CxtThreadStmt &cts, NodeID rootTid) {
  */
 void MHP::handleCall(const CxtThreadStmt &cts, NodeID rootTid) {
 
-    const CallInst *call = SVFUtil::cast<CallInst>(cts.getStmt());
+    const CallInst *call = llvm::cast<CallInst>(cts.getStmt());
     const CallStrCxt &curCxt = cts.getContext();
 
     if (tct->getThreadCallGraph()->hasCallGraphEdge(call)) {
@@ -318,8 +318,7 @@ void MHP::handleRet(const CxtThreadStmt &cts) {
                                           eit = curFunNode->getInEdges().end();
          it != eit; ++it) {
         PTACallGraphEdge *edge = *it;
-        if (SVFUtil::isa<ThreadForkEdge>(edge) ||
-            SVFUtil::isa<ThreadJoinEdge>(edge))
+        if (llvm::isa<ThreadForkEdge>(edge) || llvm::isa<ThreadJoinEdge>(edge))
             continue;
         for (PTACallGraphEdge::CallInstSet::const_iterator
                  cit = (edge)->directCallsBegin(),
@@ -752,10 +751,10 @@ void ForkJoinAnalysis::analyzeForkJoinPair() {
                     handleFork(cts, rootTid);
                 } else if (isTDJoin(curInst)) {
                     handleJoin(cts, rootTid);
-                } else if (SVFUtil::isa<CallInst>(curInst) &&
+                } else if (llvm::isa<CallInst>(curInst) &&
                            tct->isCandidateFun(SVFUtil::getCallee(curInst))) {
                     handleCall(cts, rootTid);
-                } else if (SVFUtil::isa<ReturnInst>(curInst)) {
+                } else if (llvm::isa<ReturnInst>(curInst)) {
                     handleRet(cts);
                 } else {
                     handleIntra(cts);
@@ -774,7 +773,7 @@ void ForkJoinAnalysis::analyzeForkJoinPair() {
 
 /// Handle fork
 void ForkJoinAnalysis::handleFork(const CxtStmt &cts, NodeID rootTid) {
-    const CallInst *call = SVFUtil::cast<CallInst>(cts.getStmt());
+    const CallInst *call = llvm::cast<CallInst>(cts.getStmt());
     const CallStrCxt &curCxt = cts.getContext();
 
     assert(isTDFork(call));
@@ -799,7 +798,7 @@ void ForkJoinAnalysis::handleFork(const CxtStmt &cts, NodeID rootTid) {
 
 /// Handle join
 void ForkJoinAnalysis::handleJoin(const CxtStmt &cts, NodeID rootTid) {
-    const CallInst *call = SVFUtil::cast<CallInst>(cts.getStmt());
+    const CallInst *call = llvm::cast<CallInst>(cts.getStmt());
     const CallStrCxt &curCxt = cts.getContext();
 
     assert(isTDJoin(call));
@@ -850,7 +849,7 @@ void ForkJoinAnalysis::handleJoin(const CxtStmt &cts, NodeID rootTid) {
 /// Handle call
 void ForkJoinAnalysis::handleCall(const CxtStmt &cts, NodeID rootTid) {
 
-    const CallInst *call = SVFUtil::cast<CallInst>(cts.getStmt());
+    const CallInst *call = llvm::cast<CallInst>(cts.getStmt());
     const CallStrCxt &curCxt = cts.getContext();
 
     if (getTCG()->hasCallGraphEdge(call)) {
@@ -881,8 +880,7 @@ void ForkJoinAnalysis::handleRet(const CxtStmt &cts) {
                                           eit = curFunNode->getInEdges().end();
          it != eit; ++it) {
         PTACallGraphEdge *edge = *it;
-        if (SVFUtil::isa<ThreadForkEdge>(edge) ||
-            SVFUtil::isa<ThreadJoinEdge>(edge))
+        if (llvm::isa<ThreadForkEdge>(edge) || llvm::isa<ThreadJoinEdge>(edge))
             continue;
         for (PTACallGraphEdge::CallInstSet::const_iterator
                  cit = (edge)->directCallsBegin(),
@@ -983,7 +981,7 @@ static bool accessSameArrayIndex(const GetElementPtrInst *ptr1,
     std::vector<u32_t> ptr1vec;
     for (gep_type_iterator gi = gep_type_begin(*ptr1), ge = gep_type_end(*ptr1);
          gi != ge; ++gi) {
-        if (ConstantInt *ci = SVFUtil::dyn_cast<ConstantInt>(gi.getOperand())) {
+        if (ConstantInt *ci = llvm::dyn_cast<ConstantInt>(gi.getOperand())) {
             Size_t idx = ci->getSExtValue();
             ptr1vec.push_back(idx);
         } else
@@ -993,7 +991,7 @@ static bool accessSameArrayIndex(const GetElementPtrInst *ptr1,
     std::vector<u32_t> ptr2vec;
     for (gep_type_iterator gi = gep_type_begin(*ptr2), ge = gep_type_end(*ptr2);
          gi != ge; ++gi) {
-        if (ConstantInt *ci = SVFUtil::dyn_cast<ConstantInt>(gi.getOperand())) {
+        if (ConstantInt *ci = llvm::dyn_cast<ConstantInt>(gi.getOperand())) {
             Size_t idx = ci->getSExtValue();
             ptr2vec.push_back(idx);
         } else
@@ -1021,13 +1019,12 @@ bool ForkJoinAnalysis::isSameSCEV(const Instruction *forkSite,
     if (forkse.inloop && joinse.inloop)
         return forkse.start == joinse.start && forkse.step == joinse.step &&
                forkse.tripcount <= joinse.tripcount;
-    else if (SVFUtil::isa<GetElementPtrInst>(forkse.ptr) &&
-             SVFUtil::isa<GetElementPtrInst>(joinse.ptr))
-        return accessSameArrayIndex(
-            SVFUtil::cast<GetElementPtrInst>(forkse.ptr),
-            SVFUtil::cast<GetElementPtrInst>(joinse.ptr));
-    else if (SVFUtil::isa<GetElementPtrInst>(forkse.ptr) ||
-             SVFUtil::isa<GetElementPtrInst>(joinse.ptr))
+    else if (llvm::isa<GetElementPtrInst>(forkse.ptr) &&
+             llvm::isa<GetElementPtrInst>(joinse.ptr))
+        return accessSameArrayIndex(llvm::cast<GetElementPtrInst>(forkse.ptr),
+                                    llvm::cast<GetElementPtrInst>(joinse.ptr));
+    else if (llvm::isa<GetElementPtrInst>(forkse.ptr) ||
+             llvm::isa<GetElementPtrInst>(joinse.ptr))
         return false;
     else
         return true;

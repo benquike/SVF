@@ -127,10 +127,10 @@ void AndersenWaveDiff::handleCopyGep(ConstraintNode *node) {
 
     if (!getDiffPts(nodeId).empty()) {
         for (ConstraintEdge *edge : node->getCopyOutEdges())
-            if (auto *copyEdge = SVFUtil::dyn_cast<CopyCGEdge>(edge))
+            if (auto *copyEdge = llvm::dyn_cast<CopyCGEdge>(edge))
                 processCopy(nodeId, copyEdge);
         for (ConstraintEdge *edge : node->getGepOutEdges())
-            if (auto *gepEdge = SVFUtil::dyn_cast<GepCGEdge>(edge))
+            if (auto *gepEdge = llvm::dyn_cast<GepCGEdge>(edge))
                 processGep(nodeId, gepEdge);
     }
 }
@@ -168,7 +168,7 @@ bool AndersenWaveDiff::processCopy(NodeID node, const ConstraintEdge *edge) {
     numOfProcessedCopy++;
 
     bool changed = false;
-    assert((SVFUtil::isa<CopyCGEdge>(edge)) && "not copy/call/ret ??");
+    assert((llvm::isa<CopyCGEdge>(edge)) && "not copy/call/ret ??");
     NodeID dst = edge->getDstID();
     const PointsTo &srcDiffPts = getDiffPts(node);
     processCast(edge);

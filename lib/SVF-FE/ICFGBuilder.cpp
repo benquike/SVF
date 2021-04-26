@@ -104,7 +104,7 @@ void ICFGBuilder::processFunBody(WorkList &worklist) {
                     srcNode = retICFGNode;
                 }
 
-                const auto *br = SVFUtil::dyn_cast<BranchInst>(inst);
+                const auto *br = llvm::dyn_cast<BranchInst>(inst);
 
                 if (br && br->isConditional())
                     icfg->addConditionalIntraEdge(srcNode, dstNode,

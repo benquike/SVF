@@ -47,27 +47,27 @@ u32_t StInfo::maxFieldLimit = 0;
  */
 void ObjTypeInfo::analyzeGlobalStackObjType(const Value *val) {
 
-    const PointerType *refty = SVFUtil::dyn_cast<PointerType>(val->getType());
-    assert(SVFUtil::isa<PointerType>(refty) &&
+    const PointerType *refty = llvm::dyn_cast<PointerType>(val->getType());
+    assert(llvm::isa<PointerType>(refty) &&
            "this value should be a pointer type!");
     Type *elemTy = refty->getElementType();
     bool isPtrObj = false;
     // Find the inter nested array element
-    while (const ArrayType *AT = SVFUtil::dyn_cast<ArrayType>(elemTy)) {
+    while (const ArrayType *AT = llvm::dyn_cast<ArrayType>(elemTy)) {
         elemTy = AT->getElementType();
         if (elemTy->isPointerTy()) {
             isPtrObj = true;
         }
-        if (SVFUtil::isa<GlobalVariable>(val) &&
-            SVFUtil::cast<GlobalVariable>(val)->hasInitializer() &&
-            SVFUtil::isa<ConstantArray>(
-                SVFUtil::cast<GlobalVariable>(val)->getInitializer())) {
+        if (llvm::isa<GlobalVariable>(val) &&
+            llvm::cast<GlobalVariable>(val)->hasInitializer() &&
+            llvm::isa<ConstantArray>(
+                llvm::cast<GlobalVariable>(val)->getInitializer())) {
             setFlag(CONST_ARRAY_OBJ);
         } else {
             setFlag(VAR_ARRAY_OBJ);
         }
     }
-    if (const StructType *ST = SVFUtil::dyn_cast<StructType>(elemTy)) {
+    if (const StructType *ST = llvm::dyn_cast<StructType>(elemTy)) {
         const std::vector<FieldInfo> &flattenFields =
             symbolTableInfo->getFlattenFieldInfoVec(ST);
         for (const auto &flattenField : flattenFields) {
@@ -75,10 +75,10 @@ void ObjTypeInfo::analyzeGlobalStackObjType(const Value *val) {
                 isPtrObj = true;
             }
         }
-        if (SVFUtil::isa<GlobalVariable>(val) &&
-            SVFUtil::cast<GlobalVariable>(val)->hasInitializer() &&
-            SVFUtil::isa<ConstantStruct>(
-                SVFUtil::cast<GlobalVariable>(val)->getInitializer())) {
+        if (llvm::isa<GlobalVariable>(val) &&
+            llvm::cast<GlobalVariable>(val)->hasInitializer() &&
+            llvm::isa<ConstantStruct>(
+                llvm::cast<GlobalVariable>(val)->getInitializer())) {
             setFlag(CONST_STRUCT_OBJ);
         } else {
             setFlag(VAR_STRUCT_OBJ);
@@ -107,9 +107,9 @@ void ObjTypeInfo::analyzeHeapStaticObjType(const Value *) {
  */
 u32_t ObjTypeInfo::getObjSize(const Value *val) {
 
-    Type *ety = SVFUtil::cast<PointerType>(val->getType())->getElementType();
+    Type *ety = llvm::cast<PointerType>(val->getType())->getElementType();
     u32_t numOfFields = 1;
-    if (SVFUtil::isa<StructType>(ety) || SVFUtil::isa<ArrayType>(ety)) {
+    if (llvm::isa<StructType>(ety) || llvm::isa<ArrayType>(ety)) {
         numOfFields = symbolTableInfo->getFlattenFieldInfoVec(ety).size();
     }
     return numOfFields;
@@ -122,30 +122,30 @@ void ObjTypeInfo::init(const Value *val) {
 
     Size_t objSize = 1;
     // Global variable
-    if (SVFUtil::isa<Function>(val)) {
+    if (llvm::isa<Function>(val)) {
         setFlag(FUNCTION_OBJ);
         analyzeGlobalStackObjType(val);
         objSize = getObjSize(val);
-    } else if (SVFUtil::isa<AllocaInst>(val)) {
+    } else if (llvm::isa<AllocaInst>(val)) {
         setFlag(STACK_OBJ);
         analyzeGlobalStackObjType(val);
         objSize = getObjSize(val);
-    } else if (SVFUtil::isa<GlobalVariable>(val)) {
+    } else if (llvm::isa<GlobalVariable>(val)) {
         setFlag(GLOBVAR_OBJ);
         if (symbolTableInfo->isConstantObjSym(val)) {
             setFlag(CONST_OBJ);
         }
         analyzeGlobalStackObjType(val);
         objSize = getObjSize(val);
-    } else if (SVFUtil::isa<Instruction>(val) &&
-               isHeapAllocExtCall(SVFUtil::cast<Instruction>(val),
+    } else if (llvm::isa<Instruction>(val) &&
+               isHeapAllocExtCall(llvm::cast<Instruction>(val),
                                   symbolTableInfo->getModule())) {
         setFlag(HEAP_OBJ);
         analyzeHeapStaticObjType(val);
         // Heap object, label its field as infinite here
         objSize = -1;
-    } else if (SVFUtil::isa<Instruction>(val) &&
-               isStaticExtCall(SVFUtil::cast<Instruction>(val),
+    } else if (llvm::isa<Instruction>(val) &&
+               isStaticExtCall(llvm::cast<Instruction>(val),
                                symbolTableInfo->getModule())) {
         setFlag(STATIC_OBJ);
         analyzeHeapStaticObjType(val);
@@ -175,11 +175,11 @@ bool ObjTypeInfo::isNonPtrFieldObj(const LocationSet &ls) {
     }
 
     const Type *ety = getType();
-    while (const auto *AT = SVFUtil::dyn_cast<ArrayType>(ety)) {
+    while (const auto *AT = llvm::dyn_cast<ArrayType>(ety)) {
         ety = AT->getElementType();
     }
 
-    if (SVFUtil::isa<StructType>(ety) || SVFUtil::isa<ArrayType>(ety)) {
+    if (llvm::isa<StructType>(ety) || llvm::isa<ArrayType>(ety)) {
         bool hasIntersection = false;
         const vector<FieldInfo> &infovec =
             symbolTableInfo->getFlattenFieldInfoVec(ety);
@@ -259,13 +259,13 @@ bool MemObj::isBlackHoleObj() const {
 const Type *MemObj::getType() const {
     if (isHeap() == false) {
         if (const PointerType *type =
-                SVFUtil::dyn_cast<PointerType>(typeInfo->getType())) {
+                llvm::dyn_cast<PointerType>(typeInfo->getType())) {
             return type->getElementType();
         } else {
             return typeInfo->getType();
         }
-    } else if (refVal && SVFUtil::isa<Instruction>(refVal)) {
-        return SVFUtil::getTypeOfHeapAlloc(SVFUtil::cast<Instruction>(refVal),
+    } else if (refVal && llvm::isa<Instruction>(refVal)) {
+        return SVFUtil::getTypeOfHeapAlloc(llvm::cast<Instruction>(refVal),
                                            symbolTableInfo->getModule());
     } else {
         return typeInfo->getType();
@@ -289,7 +289,7 @@ bool LocSymTableInfo::computeGepOffset(const User *V, LocationSet &ls) {
     int index = 0;
     for (bridge_gep_iterator gi = bridge_gep_begin(*V), ge = bridge_gep_end(*V);
          gi != ge; ++gi, ++index) {
-        if (SVFUtil::isa<ConstantInt>(gi.getOperand()) == false) {
+        if (llvm::isa<ConstantInt>(gi.getOperand()) == false) {
             baseIndex = index;
         }
     }
@@ -301,12 +301,12 @@ bool LocSymTableInfo::computeGepOffset(const User *V, LocationSet &ls) {
         if (index <= baseIndex) {
             /// variant offset
             // Handling pointer types
-            if (const PointerType *pty = SVFUtil::dyn_cast<PointerType>(*gi)) {
+            if (const PointerType *pty = llvm::dyn_cast<PointerType>(*gi)) {
                 const Type *et = pty->getElementType();
                 Size_t sz = getTypeSizeInBytes(et);
 
                 Size_t num = 1;
-                if (const ArrayType *aty = SVFUtil::dyn_cast<ArrayType>(et)) {
+                if (const ArrayType *aty = llvm::dyn_cast<ArrayType>(et)) {
                     num = aty->getNumElements();
                 } else {
                     num = StInfo::getMaxFieldLimit();
@@ -315,7 +315,7 @@ bool LocSymTableInfo::computeGepOffset(const User *V, LocationSet &ls) {
                 ls.addElemNumStridePair(std::make_pair(num, sz));
             }
             // Calculate the size of the array element
-            else if (const ArrayType *at = SVFUtil::dyn_cast<ArrayType>(*gi)) {
+            else if (const ArrayType *at = llvm::dyn_cast<ArrayType>(*gi)) {
                 const Type *et = at->getElementType();
                 Size_t sz = getTypeSizeInBytes(et);
                 Size_t num = at->getNumElements();
@@ -326,10 +326,10 @@ bool LocSymTableInfo::computeGepOffset(const User *V, LocationSet &ls) {
         }
         // constant offset
         else {
-            assert(SVFUtil::isa<ConstantInt>(gi.getOperand()) &&
+            assert(llvm::isa<ConstantInt>(gi.getOperand()) &&
                    "expecting a constant");
 
-            ConstantInt *op = SVFUtil::cast<ConstantInt>(gi.getOperand());
+            ConstantInt *op = llvm::cast<ConstantInt>(gi.getOperand());
 
             // The actual index
             Size_t idx = op->getSExtValue();
@@ -338,20 +338,19 @@ bool LocSymTableInfo::computeGepOffset(const User *V, LocationSet &ls) {
             // These GEP instructions are simply making address computations
             // from the base pointer address e.g. idx1 = (char*) &MyVar + 4,  at
             // this case gep only one offset index (idx)
-            if (const PointerType *pty = SVFUtil::dyn_cast<PointerType>(*gi)) {
+            if (const PointerType *pty = llvm::dyn_cast<PointerType>(*gi)) {
                 const Type *et = pty->getElementType();
                 Size_t sz = getTypeSizeInBytes(et);
                 ls.setByteOffset(ls.getByteOffset() + idx * sz);
             }
             // Calculate the size of the array element
-            else if (const ArrayType *at = SVFUtil::dyn_cast<ArrayType>(*gi)) {
+            else if (const ArrayType *at = llvm::dyn_cast<ArrayType>(*gi)) {
                 const Type *et = at->getElementType();
                 Size_t sz = getTypeSizeInBytes(et);
                 ls.setByteOffset(ls.getByteOffset() + idx * sz);
             }
             // Handling struct here
-            else if (const StructType *ST =
-                         SVFUtil::dyn_cast<StructType>(*gi)) {
+            else if (const StructType *ST = llvm::dyn_cast<StructType>(*gi)) {
                 assert(op && "non-const struct index in GEP");
                 const vector<u32_t> &so = getFattenFieldOffsetVec(ST);
                 if ((unsigned)idx >= so.size()) {
@@ -471,7 +470,7 @@ LocationSet LocSymTableInfo::getModulusOffset(const MemObj *obj,
                                               const LocationSet &ls) {
     const Type *ety = obj->getType();
 
-    if (SVFUtil::isa<StructType>(ety) || SVFUtil::isa<ArrayType>(ety)) {
+    if (llvm::isa<StructType>(ety) || llvm::isa<ArrayType>(ety)) {
         /// Find an appropriate field for this LocationSet
         const std::vector<FieldInfo> &infovec = getFlattenFieldInfoVec(ety);
         std::vector<FieldInfo>::const_iterator it = infovec.begin();
@@ -572,6 +571,6 @@ void LocSymTableInfo::verifyStructSize(StInfo *stinfo, u32_t structSize) {
  */
 u32_t LocObjTypeInfo::getObjSize(const Value *val) {
 
-    Type *ety = SVFUtil::cast<PointerType>(val->getType())->getElementType();
+    Type *ety = llvm::cast<PointerType>(val->getType())->getElementType();
     return symbolTableInfo->getTypeSizeInBytes(ety);
 }

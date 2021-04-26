@@ -139,12 +139,12 @@ CxtPtSet ContextDDA::processGepPts(const GepSVFGNode *gep,
         if (isBlkObjOrConstantObj(ptd.get_id())) {
             tmpDstPts.set(ptd);
         } else {
-            if (SVFUtil::isa<VariantGepPE>(gep->getPAGEdge())) {
+            if (llvm::isa<VariantGepPE>(gep->getPAGEdge())) {
                 setObjFieldInsensitive(ptd.get_id());
                 CxtVar var(ptd.get_cond(), getFIObjNode(ptd.get_id()));
                 tmpDstPts.set(var);
             } else if (const NormalGepPE *normalGep =
-                           SVFUtil::dyn_cast<NormalGepPE>(gep->getPAGEdge())) {
+                           llvm::dyn_cast<NormalGepPE>(gep->getPAGEdge())) {
                 CxtVar var(
                     ptd.get_cond(),
                     getGepObjNode(ptd.get_id(), normalGep->getLocationSet()));
@@ -190,10 +190,10 @@ CallSiteID ContextDDA::getCSIDAtCall(CxtLocDPItem &, const SVFGEdge *edge) {
 
     CallSiteID svfg_csId = 0;
     if (const CallDirSVFGEdge *callEdge =
-            SVFUtil::dyn_cast<CallDirSVFGEdge>(edge)) {
+            llvm::dyn_cast<CallDirSVFGEdge>(edge)) {
         svfg_csId = callEdge->getCallSiteId();
     } else {
-        svfg_csId = SVFUtil::cast<CallIndSVFGEdge>(edge)->getCallSiteId();
+        svfg_csId = llvm::cast<CallIndSVFGEdge>(edge)->getCallSiteId();
     }
 
     const CallBlockNode *cbn = getSVFG()->getCallSite(svfg_csId);
@@ -214,11 +214,10 @@ CallSiteID ContextDDA::getCSIDAtCall(CxtLocDPItem &, const SVFGEdge *edge) {
 CallSiteID ContextDDA::getCSIDAtRet(CxtLocDPItem &, const SVFGEdge *edge) {
 
     CallSiteID svfg_csId = 0;
-    if (const RetDirSVFGEdge *retEdge =
-            SVFUtil::dyn_cast<RetDirSVFGEdge>(edge)) {
+    if (const RetDirSVFGEdge *retEdge = llvm::dyn_cast<RetDirSVFGEdge>(edge)) {
         svfg_csId = retEdge->getCallSiteId();
     } else {
-        svfg_csId = SVFUtil::cast<RetIndSVFGEdge>(edge)->getCallSiteId();
+        svfg_csId = llvm::cast<RetIndSVFGEdge>(edge)->getCallSiteId();
     }
 
     const CallBlockNode *cbn = getSVFG()->getCallSite(svfg_csId);
@@ -315,7 +314,7 @@ bool ContextDDA::isHeapCondMemObj(const CxtVar &var, const StoreSVFGNode *) {
     assert(mem && "memory object is null??");
     if (mem->isHeap()) {
         if (const Instruction *mallocSite =
-                SVFUtil::dyn_cast<Instruction>(mem->getRefVal())) {
+                llvm::dyn_cast<Instruction>(mem->getRefVal())) {
             const Function *fun = mallocSite->getFunction();
             LLVMModuleSet *modSet = getPAG()->getModule()->getLLVMModSet();
             const SVFFunction *svfFun = modSet->getSVFFunction(fun);

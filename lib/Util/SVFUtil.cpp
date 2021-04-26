@@ -203,13 +203,13 @@ std::string SVFUtil::getSourceLoc(const Value *val) {
     raw_string_ostream rawstr(str);
     rawstr << "{ ";
 
-    if (const auto *inst = SVFUtil::dyn_cast<Instruction>(val)) {
-        if (SVFUtil::isa<AllocaInst>(inst)) {
+    if (const auto *inst = llvm::dyn_cast<Instruction>(val)) {
+        if (llvm::isa<AllocaInst>(inst)) {
             for (llvm::DbgInfoIntrinsic *DII :
                  FindDbgAddrUses(const_cast<Instruction *>(inst))) {
-                if (auto *DDI = SVFUtil::dyn_cast<llvm::DbgDeclareInst>(DII)) {
+                if (auto *DDI = llvm::dyn_cast<llvm::DbgDeclareInst>(DII)) {
                     auto *DIVar =
-                        SVFUtil::cast<llvm::DIVariable>(DDI->getVariable());
+                        llvm::cast<llvm::DIVariable>(DDI->getVariable());
                     rawstr << "ln: " << DIVar->getLine()
                            << " fl: " << DIVar->getFilename();
                     break;
@@ -218,8 +218,8 @@ std::string SVFUtil::getSourceLoc(const Value *val) {
         } else if (MDNode *N = inst->getMetadata(
                        "dbg")) // Here I is an LLVM instruction
         {
-            auto *Loc = SVFUtil::cast<llvm::DILocation>(
-                N); // DILocation is in DebugInfo.h
+            auto *Loc =
+                llvm::cast<llvm::DILocation>(N); // DILocation is in DebugInfo.h
             unsigned Line = Loc->getLine();
             unsigned Column = Loc->getColumn();
             StringRef File = Loc->getFilename();
@@ -234,7 +234,7 @@ std::string SVFUtil::getSourceLoc(const Value *val) {
             }
             rawstr << "ln: " << Line << "  cl: " << Column << "  fl: " << File;
         }
-    } else if (const auto *argument = SVFUtil::dyn_cast<Argument>(val)) {
+    } else if (const auto *argument = llvm::dyn_cast<Argument>(val)) {
         if (argument->getArgNo() % 10 == 1)
             rawstr << argument->getArgNo() << "st";
         else if (argument->getArgNo() % 10 == 2)
@@ -246,14 +246,14 @@ std::string SVFUtil::getSourceLoc(const Value *val) {
         rawstr << " arg "
                << llvm::demangle(argument->getParent()->getName().str()) << " "
                << getSourceLocOfFunction(argument->getParent());
-    } else if (const auto *gvar = SVFUtil::dyn_cast<GlobalVariable>(val)) {
+    } else if (const auto *gvar = llvm::dyn_cast<GlobalVariable>(val)) {
         rawstr << "Glob ";
         NamedMDNode *CU_Nodes =
             gvar->getParent()->getNamedMetadata("llvm.dbg.cu");
         if (CU_Nodes) {
             for (unsigned i = 0, e = CU_Nodes->getNumOperands(); i != e; ++i) {
                 auto *CUNode =
-                    SVFUtil::cast<llvm::DICompileUnit>(CU_Nodes->getOperand(i));
+                    llvm::cast<llvm::DICompileUnit>(CU_Nodes->getOperand(i));
                 for (llvm::DIGlobalVariableExpression *GV :
                      CUNode->getGlobalVariables()) {
                     llvm::DIGlobalVariable *DGV = GV->getVariable();
@@ -265,9 +265,9 @@ std::string SVFUtil::getSourceLoc(const Value *val) {
                 }
             }
         }
-    } else if (const auto *func = SVFUtil::dyn_cast<Function>(val)) {
+    } else if (const auto *func = llvm::dyn_cast<Function>(val)) {
         rawstr << getSourceLocOfFunction(func);
-    } else if (const BasicBlock *bb = SVFUtil::dyn_cast<BasicBlock>(val)) {
+    } else if (const BasicBlock *bb = llvm::dyn_cast<BasicBlock>(val)) {
         rawstr << "basic block: " << bb->getName() << " "
                << getSourceLoc(bb->getFirstNonPHI());
     } else if (SVFUtil::isConstantData(val)) {
@@ -288,7 +288,7 @@ const std::string SVFUtil::value2String(const Value *value) {
     std::string str;
     raw_string_ostream rawstr(str);
     if (value) {
-        if (const SVF::Function *fun = SVFUtil::dyn_cast<Function>(value))
+        if (const SVF::Function *fun = llvm::dyn_cast<Function>(value))
             rawstr << " " << fun->getName() << " ";
         else
             rawstr << " " << *value << " ";

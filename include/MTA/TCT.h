@@ -102,7 +102,7 @@ class TCT : public GenericThreadCreateTreeTy {
     /// Constructor
     TCT(PointerAnalysis *p)
         : pta(p), TCTNodeNum(0), TCTEdgeNum(0), MaxCxtSize(0) {
-        tcg = SVFUtil::cast<ThreadCallGraph>(pta->getPTACallGraph());
+        tcg = llvm::cast<ThreadCallGraph>(pta->getPTACallGraph());
         tcg->updateCallGraph(pta);
         // tcg->updateJoinEdge(pta);
         tcgSCC = pta->getCallGraphSCC();

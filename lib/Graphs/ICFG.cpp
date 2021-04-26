@@ -471,7 +471,7 @@ template <> struct DOTGraphTraits<ICFG *> : public DOTGraphTraits<PAG *> {
         raw_string_ostream rawstr(str);
         rawstr << "NodeID: " << node->getId() << "\n";
 
-        if (auto *bNode = SVFUtil::dyn_cast<IntraBlockNode>(node)) {
+        if (auto *bNode = llvm::dyn_cast<IntraBlockNode>(node)) {
             rawstr << "IntraBlockNode ID: " << bNode->getId() << " \t";
 
             PAG::PAGEdgeList &edges = g->getPAG()->getInstPTAPAGEdgeList(bNode);
@@ -483,15 +483,15 @@ template <> struct DOTGraphTraits<ICFG *> : public DOTGraphTraits<PAG *> {
                 }
             }
             rawstr << " {fun: " << bNode->getFun()->getName() << "}";
-        } else if (auto *entry = SVFUtil::dyn_cast<FunEntryBlockNode>(node)) {
+        } else if (auto *entry = llvm::dyn_cast<FunEntryBlockNode>(node)) {
             rawstr << entry->toString();
-        } else if (auto *exit = SVFUtil::dyn_cast<FunExitBlockNode>(node)) {
+        } else if (auto *exit = llvm::dyn_cast<FunExitBlockNode>(node)) {
             rawstr << exit->toString();
-        } else if (auto *call = SVFUtil::dyn_cast<CallBlockNode>(node)) {
+        } else if (auto *call = llvm::dyn_cast<CallBlockNode>(node)) {
             rawstr << call->toString();
-        } else if (auto *ret = SVFUtil::dyn_cast<RetBlockNode>(node)) {
+        } else if (auto *ret = llvm::dyn_cast<RetBlockNode>(node)) {
             rawstr << ret->toString();
-        } else if (auto *glob = SVFUtil::dyn_cast<GlobalBlockNode>(node)) {
+        } else if (auto *glob = llvm::dyn_cast<GlobalBlockNode>(node)) {
             PAG::PAGEdgeList &edges = g->getPAG()->getInstPTAPAGEdgeList(glob);
             for (const auto *edge : edges) {
                 rawstr << edge->toString();
@@ -507,17 +507,17 @@ template <> struct DOTGraphTraits<ICFG *> : public DOTGraphTraits<PAG *> {
         std::string str;
         raw_string_ostream rawstr(str);
 
-        if (SVFUtil::isa<IntraBlockNode>(node)) {
+        if (llvm::isa<IntraBlockNode>(node)) {
             rawstr << "color=black";
-        } else if (SVFUtil::isa<FunEntryBlockNode>(node)) {
+        } else if (llvm::isa<FunEntryBlockNode>(node)) {
             rawstr << "color=yellow";
-        } else if (SVFUtil::isa<FunExitBlockNode>(node)) {
+        } else if (llvm::isa<FunExitBlockNode>(node)) {
             rawstr << "color=green";
-        } else if (SVFUtil::isa<CallBlockNode>(node)) {
+        } else if (llvm::isa<CallBlockNode>(node)) {
             rawstr << "color=red";
-        } else if (SVFUtil::isa<RetBlockNode>(node)) {
+        } else if (llvm::isa<RetBlockNode>(node)) {
             rawstr << "color=blue";
-        } else if (SVFUtil::isa<GlobalBlockNode>(node)) {
+        } else if (llvm::isa<GlobalBlockNode>(node)) {
             rawstr << "color=purple";
         } else {
             assert(false && "no such kind of node!!");
@@ -532,11 +532,11 @@ template <> struct DOTGraphTraits<ICFG *> : public DOTGraphTraits<PAG *> {
     static std::string getEdgeAttributes(NodeType *, EdgeIter EI, ICFG *) {
         ICFGEdge *edge = *(EI.getCurrent());
         assert(edge && "No edge found!!");
-        if (SVFUtil::isa<CallCFGEdge>(edge)) {
+        if (llvm::isa<CallCFGEdge>(edge)) {
             return "style=solid,color=red";
         }
 
-        if (SVFUtil::isa<RetCFGEdge>(edge)) {
+        if (llvm::isa<RetCFGEdge>(edge)) {
             return "style=solid,color=blue";
         }
 
@@ -552,9 +552,9 @@ template <> struct DOTGraphTraits<ICFG *> : public DOTGraphTraits<PAG *> {
 
         std::string str;
         raw_string_ostream rawstr(str);
-        if (auto *dirCall = SVFUtil::dyn_cast<CallCFGEdge>(edge)) {
+        if (auto *dirCall = llvm::dyn_cast<CallCFGEdge>(edge)) {
             rawstr << dirCall->getCallSite();
-        } else if (auto *dirRet = SVFUtil::dyn_cast<RetCFGEdge>(edge)) {
+        } else if (auto *dirRet = llvm::dyn_cast<RetCFGEdge>(edge)) {
             rawstr << dirRet->getCallSite();
         }
 

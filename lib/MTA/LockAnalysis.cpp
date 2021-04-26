@@ -128,7 +128,7 @@ void LockAnalysis::analyzeIntraProcedualLock() {
     // Identify the protected Instructions.
     for (InstSet::const_iterator it = locksites.begin(), ie = locksites.end();
          it != ie; ++it) {
-        const CallInst *lockSite = SVFUtil::dyn_cast<CallInst>(*it);
+        const CallInst *lockSite = llvm::dyn_cast<CallInst>(*it);
         assert(lockSite && "Lock acquire instruction must be CallInst");
 
         // Perform forward traversal
@@ -353,9 +353,9 @@ void LockAnalysis::analyzeLockSpanCxtStmt() {
         } else if (isTDRelease(curInst)) {
             if (removeCxtStmtToSpan(cts, cts))
                 handleIntra(cts);
-        } else if (SVFUtil::isa<CallInst>(curInst) && !isExtCall(curInst)) {
+        } else if (llvm::isa<CallInst>(curInst) && !isExtCall(curInst)) {
             handleCall(cts);
-        } else if (SVFUtil::isa<ReturnInst>(curInst)) {
+        } else if (llvm::isa<ReturnInst>(curInst)) {
             handleRet(cts);
         } else {
             handleIntra(cts);
@@ -377,7 +377,7 @@ void LockAnalysis::printLocks(const CxtStmt &cts) {
 
 /// Handle fork
 void LockAnalysis::handleFork(const CxtStmt &cts) {
-    const CallInst *call = SVFUtil::cast<CallInst>(cts.getStmt());
+    const CallInst *call = llvm::cast<CallInst>(cts.getStmt());
     const CallStrCxt &curCxt = cts.getContext();
 
     if (getTCG()->hasThreadForkEdge(call)) {
@@ -398,7 +398,7 @@ void LockAnalysis::handleFork(const CxtStmt &cts) {
 /// Handle call
 void LockAnalysis::handleCall(const CxtStmt &cts) {
 
-    const auto *call = SVFUtil::cast<CallInst>(cts.getStmt());
+    const auto *call = llvm::cast<CallInst>(cts.getStmt());
     const CallStrCxt &curCxt = cts.getContext();
 
     if (getTCG()->hasCallGraphEdge(call)) {
@@ -429,8 +429,7 @@ void LockAnalysis::handleRet(const CxtStmt &cts) {
                                           eit = curFunNode->getInEdges().end();
          it != eit; ++it) {
         PTACallGraphEdge *edge = *it;
-        if (SVFUtil::isa<ThreadForkEdge>(edge) ||
-            SVFUtil::isa<ThreadJoinEdge>(edge))
+        if (llvm::isa<ThreadForkEdge>(edge) || llvm::isa<ThreadJoinEdge>(edge))
             continue;
         for (PTACallGraphEdge::CallInstSet::const_iterator
                  cit = (edge)->directCallsBegin(),

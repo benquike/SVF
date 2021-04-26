@@ -198,7 +198,7 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
     /// Check if a given edge is a NormalGepCGEdge with 0 offset.
     inline bool isZeroOffsettedGepCGEdge(ConstraintEdge *edge) const {
         if (NormalGepCGEdge *normalGepCGEdge =
-                SVFUtil::dyn_cast<NormalGepCGEdge>(edge)) {
+                llvm::dyn_cast<NormalGepCGEdge>(edge)) {
             if (0 == normalGepCGEdge->getLocationSet().getOffset()) {
                 return true;
             }

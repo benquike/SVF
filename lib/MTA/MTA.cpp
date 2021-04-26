@@ -162,9 +162,9 @@ void MTA::detect(SVFModule *module) {
         // collect and create symbols inside the function body
         for (inst_iterator II = inst_begin(F), E = inst_end(F); II != E; ++II) {
             const Instruction *inst = &*II;
-            if (const auto *load = SVFUtil::dyn_cast<LoadInst>(inst)) {
+            if (const auto *load = llvm::dyn_cast<LoadInst>(inst)) {
                 loads.insert(load);
-            } else if (const auto *store = SVFUtil::dyn_cast<StoreInst>(inst)) {
+            } else if (const auto *store = llvm::dyn_cast<StoreInst>(inst)) {
                 stores.insert(store);
             }
         }

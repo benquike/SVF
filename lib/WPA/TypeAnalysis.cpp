@@ -87,7 +87,7 @@ void TypeAnalysis::callGraphSolveBasedOnCHA(
 
 void TypeAnalysis::dumpCHAStats() {
 
-    const CHGraph *chgraph = SVFUtil::dyn_cast<CHGraph>(getCHGraph());
+    const CHGraph *chgraph = llvm::dyn_cast<CHGraph>(getCHGraph());
     if (chgraph == nullptr) {
         SVFUtil::errs()
             << "dumpCHAStats only implemented for standard CHGraph.\n";

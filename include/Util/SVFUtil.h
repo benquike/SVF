@@ -137,12 +137,12 @@ inline bool isIntrinsicInst(const Instruction *inst) {
 
 /// Whether an instruction is a call or invoke instruction
 inline bool isCallSite(const Instruction *inst) {
-    return SVFUtil::isa<CallInst>(inst) || SVFUtil::isa<InvokeInst>(inst) ||
-           SVFUtil::isa<CallBrInst>(inst);
+    return llvm::isa<CallInst>(inst) || llvm::isa<InvokeInst>(inst) ||
+           llvm::isa<CallBrInst>(inst);
 }
 /// Whether an instruction is a call or invoke instruction
 inline bool isCallSite(const Value *val) {
-    if (const auto *inst = SVFUtil::dyn_cast<Instruction>(val)) {
+    if (const auto *inst = llvm::dyn_cast<Instruction>(val)) {
         return SVFUtil::isCallSite(inst);
     }
 
@@ -158,7 +158,7 @@ inline bool isNonInstricCallSite(const Instruction *inst) {
 }
 /// Whether an instruction is a return instruction
 inline bool isReturn(const Instruction *inst) {
-    return SVFUtil::isa<ReturnInst>(inst);
+    return llvm::isa<ReturnInst>(inst);
 }
 
 /// Return LLVM callsite given a instruction
@@ -207,7 +207,7 @@ inline const SVFFunction *getCallee(LLVMModuleSet *llvmModSet,
     // FIXME: do we need to strip-off the casts here to discover more library
     // functions
     auto *callee =
-        SVFUtil::dyn_cast<Function>(cs.getCalledValue()->stripPointerCasts());
+        llvm::dyn_cast<Function>(cs.getCalledValue()->stripPointerCasts());
     return getDefFunForMultipleModule(llvmModSet, callee);
 }
 

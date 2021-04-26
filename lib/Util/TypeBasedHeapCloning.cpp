@@ -31,7 +31,7 @@ void TypeBasedHeapCloning::setPAG(PAG *pag) { ppag = pag; }
 bool TypeBasedHeapCloning::isBlkObjOrConstantObj(NodeID o) const {
     if (isClone(o))
         o = cloneToOriginalObj.at(o);
-    return SVFUtil::isa<ObjPN>(ppag->getGNode(o)) &&
+    return llvm::isa<ObjPN>(ppag->getGNode(o)) &&
            ppag->isBlkObjOrConstantObj(o);
 }
 
@@ -103,7 +103,7 @@ void TypeBasedHeapCloning::addGepToObj(NodeID gep, NodeID base,
     objToGeps[base].set(gep);
     const PAGNode *baseNode = ppag->getGNode(base);
     assert(baseNode && "TBHC: given bad base node?");
-    const auto *baseObj = SVFUtil::dyn_cast<ObjPN>(baseNode);
+    const auto *baseObj = llvm::dyn_cast<ObjPN>(baseNode);
     assert(baseObj && "TBHC: non-object given for base?");
     // We can use the base or the gep mem. obj.; should be identical.
     const MemObj *baseMemObj = baseObj->getMemObj();
@@ -129,13 +129,13 @@ const NodeBS TypeBasedHeapCloning::getGepObjClones(NodeID base,
 
     PAGNode *node = ppag->getGNode(base);
     assert(node && "TBHC: base object node does not exist.");
-    auto *baseNode = SVFUtil::dyn_cast<ObjPN>(node);
+    auto *baseNode = llvm::dyn_cast<ObjPN>(node);
     assert(baseNode && "TBHC: base \"object\" node is not an object.");
 
     // totalOffset is the offset from the real base (i.e. base of base),
     // offset is the offset into base, whether it is a field itself or not.
     unsigned totalOffset = offset;
-    if (const GepObjPN *baseGep = SVFUtil::dyn_cast<GepObjPN>(baseNode)) {
+    if (const GepObjPN *baseGep = llvm::dyn_cast<GepObjPN>(baseNode)) {
         totalOffset += baseGep->getLocationSet().getOffset();
     }
 
@@ -162,10 +162,10 @@ const NodeBS TypeBasedHeapCloning::getGepObjClones(NodeID base,
     for (NodeID gep : gepObjs) {
         PAGNode *node = ppag->getGNode(gep);
         assert(node && "TBHC: expected gep node doesn't exist.");
-        assert((SVFUtil::isa<GepObjPN>(node) || SVFUtil::isa<FIObjPN>(node)) &&
+        assert((llvm::isa<GepObjPN>(node) || llvm::isa<FIObjPN>(node)) &&
                "TBHC: expected a GEP or FI object.");
 
-        if (auto *gepNode = SVFUtil::dyn_cast<GepObjPN>(node)) {
+        if (auto *gepNode = llvm::dyn_cast<GepObjPN>(node)) {
             if (gepNode->getLocationSet().getOffset() == totalOffset) {
                 geps.set(gep);
             }
@@ -194,7 +194,7 @@ const NodeBS TypeBasedHeapCloning::getGepObjClones(NodeID base,
             newGep = ppag->getGepObjNode(base, newLS);
         }
 
-        if (auto *gep = SVFUtil::dyn_cast<GepObjPN>(ppag->getGNode(newGep))) {
+        if (auto *gep = llvm::dyn_cast<GepObjPN>(ppag->getGNode(newGep))) {
             gep->setBaseNode(base);
         }
 
@@ -203,11 +203,11 @@ const NodeBS TypeBasedHeapCloning::getGepObjClones(NodeID base,
         if (baseType->getTag() == dwarf::DW_TAG_array_type ||
             baseType->getTag() == dwarf::DW_TAG_pointer_type) {
             if (const auto *arrayType =
-                    SVFUtil::dyn_cast<DICompositeType>(baseType)) {
+                    llvm::dyn_cast<DICompositeType>(baseType)) {
                 // Array access.
                 newGepType = arrayType->getBaseType();
             } else if (const auto *ptrType =
-                           SVFUtil::dyn_cast<DIDerivedType>(baseType)) {
+                           llvm::dyn_cast<DIDerivedType>(baseType)) {
                 // Pointer access.
                 newGepType = ptrType->getBaseType();
             }
@@ -262,7 +262,7 @@ bool TypeBasedHeapCloning::init(NodeID loc, NodeID p, const DIType *tildet,
         // object of the base/struct type if that object is field-insensitive.
         bool fieldInsensitive = false;
         std::vector<const DIType *> fieldTypes;
-        if (ObjPN *obj = SVFUtil::dyn_cast<ObjPN>(ppag->getGNode(o))) {
+        if (ObjPN *obj = llvm::dyn_cast<ObjPN>(ppag->getGNode(o))) {
             fieldInsensitive = obj->getMemObj()->isFieldInsensitive();
             if (tp != nullptr &&
                 (tp->getTag() == dwarf::DW_TAG_structure_type ||
@@ -283,14 +283,14 @@ bool TypeBasedHeapCloning::init(NodeID loc, NodeID p, const DIType *tildet,
             assert(!isGep(obj) && "TBHC: GEP object is untyped!");
             prop = cloneObject(o, tildet, false);
             ++numInit;
-            if (!pta->isHeapMemObj(o) && !SVFUtil::isa<DummyObjPN>(obj))
+            if (!pta->isHeapMemObj(o) && !llvm::isa<DummyObjPN>(obj))
                 ++numSGInit;
         } else if (fieldInsensitive && tp && dchg->isFieldOf(tildet, tp)) {
             // Field-insensitive object but the instruction is operating on a
             // field.
             prop = o;
             ++numTBWU;
-            if (!pta->isHeapMemObj(o) && !SVFUtil::isa<DummyObjPN>(obj))
+            if (!pta->isHeapMemObj(o) && !llvm::isa<DummyObjPN>(obj))
                 ++numSGTBWU;
         } else if (gep && aggs.find(tildet) != aggs.end()) {
             // SVF treats two consecutive GEPs as children to the same
@@ -303,7 +303,7 @@ bool TypeBasedHeapCloning::init(NodeID loc, NodeID p, const DIType *tildet,
             // operating on an object of type 'Struct S', not 'Array of S'.
             prop = cloneObject(o, tildet, false);
             ++numAgg;
-            if (!pta->isHeapMemObj(o) && !SVFUtil::isa<DummyObjPN>(obj))
+            if (!pta->isHeapMemObj(o) && !llvm::isa<DummyObjPN>(obj))
                 ++numSGAgg;
         } else if (isBase(tp, tildet) && tp != tildet &&
                    (reuse || dchg->isFirstField(tp, tildet) ||
@@ -320,26 +320,26 @@ bool TypeBasedHeapCloning::init(NodeID loc, NodeID p, const DIType *tildet,
             //  - reuse: because it can happen to stack/heap objects.
             prop = cloneObject(o, tildet, reuse);
             ++numTBSSU;
-            if (!pta->isHeapMemObj(o) && !SVFUtil::isa<DummyObjPN>(obj))
+            if (!pta->isHeapMemObj(o) && !llvm::isa<DummyObjPN>(obj))
                 ++numSGTBSSU;
         } else if (isBase(tildet, tp)) {
             // Upcast.
             prop = o;
             ++numTBWU;
-            if (!pta->isHeapMemObj(o) && !SVFUtil::isa<DummyObjPN>(obj))
+            if (!pta->isHeapMemObj(o) && !llvm::isa<DummyObjPN>(obj))
                 ++numSGTBWU;
         } else if (tildet != tp && reuse) {
             // Reuse.
             prop = cloneObject(o, tildet, true);
             ++numReuse;
-            if (!pta->isHeapMemObj(o) && !SVFUtil::isa<DummyObjPN>(obj))
+            if (!pta->isHeapMemObj(o) && !llvm::isa<DummyObjPN>(obj))
                 ++numSGReuse;
         } else {
             // Some spurious objects will be filtered.
             filter = true;
             prop = o;
             ++numTBSU;
-            if (!pta->isHeapMemObj(o) && !SVFUtil::isa<DummyObjPN>(obj))
+            if (!pta->isHeapMemObj(o) && !llvm::isa<DummyObjPN>(obj))
                 ++numSGTBSU;
         }
 
@@ -377,7 +377,7 @@ bool TypeBasedHeapCloning::init(NodeID loc, NodeID p, const DIType *tildet,
 NodeID TypeBasedHeapCloning::cloneObject(NodeID o, const DIType *type, bool) {
     NodeID clone;
     const PAGNode *obj = ppag->getGNode(o);
-    if (const GepObjPN *gepObj = SVFUtil::dyn_cast<GepObjPN>(obj)) {
+    if (const GepObjPN *gepObj = llvm::dyn_cast<GepObjPN>(obj)) {
         const NodeBS &clones = getGepObjClones(
             gepObj->getBaseNode(), gepObj->getLocationSet().getOffset());
         // TODO: a bit of repetition.
@@ -402,9 +402,9 @@ NodeID TypeBasedHeapCloning::cloneObject(NodeID o, const DIType *type, bool) {
         // offset).
         setOriginalObj(clone, getOriginalObj(o));
         auto *cloneGepObj =
-            SVFUtil::dyn_cast<CloneGepObjPN>(ppag->getGNode(clone));
+            llvm::dyn_cast<CloneGepObjPN>(ppag->getGNode(clone));
         cloneGepObj->setBaseNode(gepObj->getBaseNode());
-    } else if (SVFUtil::isa<FIObjPN>(obj) || SVFUtil::isa<DummyObjPN>(obj)) {
+    } else if (llvm::isa<FIObjPN>(obj) || llvm::isa<DummyObjPN>(obj)) {
         o = getOriginalObj(o);
         // Check there isn't an appropriate clone already.
         const NodeBS &clones = getClones(o);
@@ -414,10 +414,10 @@ NodeID TypeBasedHeapCloning::cloneObject(NodeID o, const DIType *type, bool) {
             }
         }
 
-        if (const auto *fiObj = SVFUtil::dyn_cast<FIObjPN>(obj)) {
+        if (const auto *fiObj = llvm::dyn_cast<FIObjPN>(obj)) {
             clone = addCloneFIObjNode(fiObj->getMemObj());
         } else {
-            const auto *dummyObj = SVFUtil::dyn_cast<DummyObjPN>(obj);
+            const auto *dummyObj = llvm::dyn_cast<DummyObjPN>(obj);
             clone = addCloneDummyObjNode(dummyObj->getMemObj());
         }
         // We checked above that it's an FIObj or a DummyObj.
@@ -442,9 +442,9 @@ const MDNode *TypeBasedHeapCloning::getRawCTirMetadata(const Value *v) {
     assert(v != nullptr && "TBHC: trying to get metadata from nullptr!");
 
     const MDNode *mdNode = nullptr;
-    if (const auto *inst = SVFUtil::dyn_cast<Instruction>(v)) {
+    if (const auto *inst = llvm::dyn_cast<Instruction>(v)) {
         mdNode = inst->getMetadata(cppUtil::ctir::derefMDName);
-    } else if (const auto *go = SVFUtil::dyn_cast<GlobalObject>(v)) {
+    } else if (const auto *go = llvm::dyn_cast<GlobalObject>(v)) {
         mdNode = go->getMetadata(cppUtil::ctir::derefMDName);
     }
 
@@ -480,7 +480,7 @@ const DIType *TypeBasedHeapCloning::getTypeFromCTirMetadata(const Value *v) {
         return nullptr;
     }
 
-    const auto *type = SVFUtil::dyn_cast<DIType>(mdNode);
+    const auto *type = llvm::dyn_cast<DIType>(mdNode);
     if (type == nullptr) {
         SVFUtil::errs() << "TBHC: bad ctir metadata type\n";
         return nullptr;
@@ -491,7 +491,7 @@ const DIType *TypeBasedHeapCloning::getTypeFromCTirMetadata(const Value *v) {
 
 bool TypeBasedHeapCloning::isGep(const PAGNode *n) const {
     assert(n != nullptr && "TBHC: testing if null is a GEP object!");
-    return SVFUtil::isa<GepObjPN>(n);
+    return llvm::isa<GepObjPN>(n);
 }
 
 /// Returns true if the function name matches MAYALIAS, NOALIAS, etc.
@@ -533,12 +533,12 @@ void TypeBasedHeapCloning::validateTBHCTests(SVFModule *) {
             const Instruction *prevInst = nullptr;
             const Instruction *currInst = cs.getInstruction();
             do {
-                if (const auto *ci = SVFUtil::dyn_cast<CallInst>(currInst)) {
+                if (const auto *ci = llvm::dyn_cast<CallInst>(currInst)) {
                     std::string calledFnName =
                         ci->getCalledFunction()->getName().str();
                     if (calledFnName == derefFnName ||
                         calledFnName == mangledDerefFnName) {
-                        const auto *si = SVFUtil::dyn_cast<StoreInst>(prevInst);
+                        const auto *si = llvm::dyn_cast<StoreInst>(prevInst);
                         assert(si &&
                                "TBHC: validation macro not producing stores?");
                         ps = si;
@@ -557,12 +557,12 @@ void TypeBasedHeapCloning::validateTBHCTests(SVFModule *) {
                 prevInst = currInst;
                 currInst = currInst->getNextNonDebugInstruction();
 
-                if (const auto *ci = SVFUtil::dyn_cast<CallInst>(currInst)) {
+                if (const auto *ci = llvm::dyn_cast<CallInst>(currInst)) {
                     std::string calledFnName =
                         ci->getCalledFunction()->getName().str();
                     if (calledFnName == derefFnName ||
                         calledFnName == mangledDerefFnName) {
-                        const auto *si = SVFUtil::dyn_cast<StoreInst>(prevInst);
+                        const auto *si = llvm::dyn_cast<StoreInst>(prevInst);
                         assert(si &&
                                "TBHC: validation macro not producing stores?");
                         qs = si;
@@ -596,7 +596,7 @@ void TypeBasedHeapCloning::validateTBHCTests(SVFModule *) {
                 }
             }
 
-            auto *bvpta = SVFUtil::dyn_cast<BVDataPTAImpl>(pta);
+            auto *bvpta = llvm::dyn_cast<BVDataPTAImpl>(pta);
             assert(bvpta &&
                    "TBHC: need a BVDataPTAImpl for TBHC alias testing.");
             AliasResult res = bvpta->alias(pPtsFiltered, qPtsFiltered);

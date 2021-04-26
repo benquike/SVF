@@ -82,10 +82,10 @@ bool FlowDDA::handleBKCondition(LocDPItem &dpm, const SVFGEdge *edge) {
     //    if (edge->isCallVFGEdge()) {
     //        /// we don't handle context in recursions, they treated as
     //        assignments if (const CallDirSVFGEdge* callEdge =
-    //        SVFUtil::dyn_cast<CallDirSVFGEdge>(edge))
+    //        llvm::dyn_cast<CallDirSVFGEdge>(edge))
     //            csId = callEdge->getCallSiteId();
     //        else
-    //            csId = SVFUtil::cast<CallIndSVFGEdge>(edge)->getCallSiteId();
+    //            csId = llvm::cast<CallIndSVFGEdge>(edge)->getCallSiteId();
     //
     //        const SVFFunction* callee =
     //        edge->getDstNode()->getBB()->getParent();
@@ -98,10 +98,10 @@ bool FlowDDA::handleBKCondition(LocDPItem &dpm, const SVFGEdge *edge) {
     //    else if (edge->isRetVFGEdge()) {
     //        /// we don't handle context in recursions, they treated as
     //        assignments if (const RetDirSVFGEdge* retEdge =
-    //        SVFUtil::dyn_cast<RetDirSVFGEdge>(edge))
+    //        llvm::dyn_cast<RetDirSVFGEdge>(edge))
     //            csId = retEdge->getCallSiteId();
     //        else
-    //            csId = SVFUtil::cast<RetIndSVFGEdge>(edge)->getCallSiteId();
+    //            csId = llvm::cast<RetIndSVFGEdge>(edge)->getCallSiteId();
     //
     //        const SVFFunction* callee =
     //        edge->getSrcNode()->getBB()->getParent();
@@ -124,11 +124,11 @@ PointsTo FlowDDA::processGepPts(const GepSVFGNode *gep,
         if (isBlkObjOrConstantObj(ptd)) {
             tmpDstPts.set(ptd);
         } else {
-            if (SVFUtil::isa<VariantGepPE>(gep->getPAGEdge())) {
+            if (llvm::isa<VariantGepPE>(gep->getPAGEdge())) {
                 setObjFieldInsensitive(ptd);
                 tmpDstPts.set(getFIObjNode(ptd));
             } else if (const auto *normalGep =
-                           SVFUtil::dyn_cast<NormalGepPE>(gep->getPAGEdge())) {
+                           llvm::dyn_cast<NormalGepPE>(gep->getPAGEdge())) {
                 NodeID fieldSrcPtdNode =
                     getGepObjNode(ptd, normalGep->getLocationSet());
                 tmpDstPts.set(fieldSrcPtdNode);
@@ -155,7 +155,7 @@ bool FlowDDA::isHeapCondMemObj(const NodeID &var, const StoreSVFGNode *) {
     assert(mem && "memory object is null??");
     if (mem->isHeap()) {
         //        if(const Instruction* mallocSite =
-        //        SVFUtil::dyn_cast<Instruction>(mem->getRefVal())) {
+        //        llvm::dyn_cast<Instruction>(mem->getRefVal())) {
         //            const SVFFunction* fun =
         //            mallocSite->getParent()->getParent(); const SVFFunction*
         //            curFun = store->getBB() ? store->getBB()->getParent() :

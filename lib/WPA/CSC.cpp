@@ -80,7 +80,7 @@ void CSC::visit(NodeID nodeId, Size_t _w) {
     for (auto eit = node->directOutEdgeBegin(); eit != node->directOutEdgeEnd();
          ++eit) {
         Size_t offset;
-        if (auto *gepCGEdge = SVFUtil::dyn_cast<NormalGepCGEdge>(*eit))
+        if (auto *gepCGEdge = llvm::dyn_cast<NormalGepCGEdge>(*eit))
             offset = gepCGEdge->getOffset();
         else
             offset = 0;
@@ -98,7 +98,7 @@ void CSC::visit(NodeID nodeId, Size_t _w) {
         _revS.push(backNodeId);
         ConstraintNode *backNode = _consG->getConstraintNode(backNodeId);
         if (_consG->hasGEdge(node, backNode, ConstraintEdge::NormalGep)) {
-            auto *normalGep = SVFUtil::dyn_cast<NormalGepCGEdge>(
+            auto *normalGep = llvm::dyn_cast<NormalGepCGEdge>(
                 _consG->getGEdge(node, backNode, ConstraintEdge::NormalGep));
             Size_t _w = normalGep->getLocationSet().getOffset();
             Size_t _l = _D[nodeId] + _w - _D[backNodeId];

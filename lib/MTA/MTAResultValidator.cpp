@@ -56,10 +56,10 @@ std::vector<std::string> MTAResultValidator::split(const std::string &s,
 }
 NodeID MTAResultValidator::getIntArg(const Instruction *inst,
                                      unsigned int arg_num) {
-    assert(SVFUtil::isa<CallInst>(inst) &&
+    assert(llvm::isa<CallInst>(inst) &&
            "getFirstIntArg: inst is not a callinst");
     CallSite cs = SVFUtil::getLLVMCallSite(inst);
-    auto *x = SVFUtil::dyn_cast<ConstantInt>(cs.getArgument(arg_num));
+    auto *x = llvm::dyn_cast<ConstantInt>(cs.getArgument(arg_num));
     assert((arg_num < cs.arg_size()) && "Does not has this argument");
     return (NodeID)x->getSExtValue();
 }
@@ -67,15 +67,15 @@ NodeID MTAResultValidator::getIntArg(const Instruction *inst,
 std::vector<std::string>
 MTAResultValidator::getStringArg(const Instruction *inst,
                                  unsigned int arg_num) {
-    assert(SVFUtil::isa<CallInst>(inst) &&
+    assert(llvm::isa<CallInst>(inst) &&
            "getFirstIntArg: inst is not a callinst");
     CallSite cs = SVFUtil::getLLVMCallSite(inst);
     assert((arg_num < cs.arg_size()) && "Does not has this argument");
     const auto *gepinst =
-        SVFUtil::dyn_cast<GetElementPtrInst>(cs.getArgument(arg_num));
-    const auto *arrayinst = SVFUtil::dyn_cast<Constant>(gepinst->getOperand(0));
+        llvm::dyn_cast<GetElementPtrInst>(cs.getArgument(arg_num));
+    const auto *arrayinst = llvm::dyn_cast<Constant>(gepinst->getOperand(0));
     const auto *cxtarray =
-        SVFUtil::dyn_cast<ConstantDataArray>(arrayinst->getOperand(0));
+        llvm::dyn_cast<ConstantDataArray>(arrayinst->getOperand(0));
     if (!cxtarray) {
         std::vector<std::string> strvec;
         return strvec;
@@ -109,7 +109,7 @@ const Instruction *
 MTAResultValidator::getPreviousMemoryAccessInst(const Instruction *I) {
     I = I->getPrevNode();
     while (I) {
-        if (SVFUtil::isa<LoadInst>(I) || SVFUtil::isa<StoreInst>(I))
+        if (llvm::isa<LoadInst>(I) || llvm::isa<StoreInst>(I))
             return I;
         I = I->getPrevNode();
     }
@@ -190,13 +190,13 @@ bool MTAResultValidator::collectCallsiteTargets() {
                 NodeID csnum = atoi(bb->getName().str().substr(2).c_str());
                 const Instruction *inst = &bb->front();
                 while (true) {
-                    if (SVFUtil::isa<CallInst>(inst)) {
+                    if (llvm::isa<CallInst>(inst)) {
                         break;
                     }
                     inst = inst->getNextNode();
                     assert(inst && "Wrong cs label, cannot find callsite");
                 }
-                const auto *csInst = SVFUtil::dyn_cast<CallInst>(inst);
+                const auto *csInst = llvm::dyn_cast<CallInst>(inst);
                 csnumToInstMap[csnum] = csInst;
             }
         }
@@ -221,7 +221,7 @@ bool MTAResultValidator::collectCxtThreadTargets() {
          it != ie; ++it) {
         const Use *u = &*it;
         const Value *user = u->getUser();
-        const auto *inst = SVFUtil::dyn_cast<Instruction>(user);
+        const auto *inst = llvm::dyn_cast<Instruction>(user);
 
         NodeID vthdnum = getIntArg(inst, 0);
         CallStrCxt cxt = getCxtArg(inst, 1);
@@ -242,7 +242,7 @@ bool MTAResultValidator::collectTCTTargets() {
          it != ie; ++it) {
         const Use *u = &*it;
         const Value *user = u->getUser();
-        const auto *inst = SVFUtil::dyn_cast<Instruction>(user);
+        const auto *inst = llvm::dyn_cast<Instruction>(user);
 
         NodeID vthdnum = getIntArg(inst, 0);
         NodeID rthdnum = vthdTorthd[vthdnum];
@@ -266,7 +266,7 @@ bool MTAResultValidator::collectInterleavingTargets() {
          it != ie; ++it) {
         const Use *u = &*it;
         const Value *user = u->getUser();
-        const auto *inst = SVFUtil::dyn_cast<Instruction>(user);
+        const auto *inst = llvm::dyn_cast<Instruction>(user);
 
         NodeID vthdnum = getIntArg(inst, 0);
         NodeID rthdnum = vthdTorthd[vthdnum];

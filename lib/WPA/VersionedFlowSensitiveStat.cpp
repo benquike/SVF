@@ -33,7 +33,7 @@ void VersionedFlowSensitiveStat::clearStat() {
 void VersionedFlowSensitiveStat::performStat() {
     // Largely based on that in FlowSensitiveStat. Would be better to split the
     // FSStat version and reuse code rather than copy.
-    assert(SVFUtil::isa<VersionedFlowSensitive>(vfspta) &&
+    assert(llvm::isa<VersionedFlowSensitive>(vfspta) &&
            "VFSStat::performStat: not given VFSPTA.");
     endClk();
 
@@ -50,7 +50,7 @@ void VersionedFlowSensitiveStat::performStat() {
     for (auto it = pag->begin(); it != pag->end(); ++it) {
         NodeID nodeId = it->first;
         PAGNode *pagNode = it->second;
-        if (SVFUtil::isa<ObjPN>(pagNode)) {
+        if (llvm::isa<ObjPN>(pagNode)) {
             const MemObj *memObj = pag->getBaseObj(nodeId);
             SymID baseId = memObj->getSymId();
             if (nodeSet.insert(baseId).second) {
@@ -68,9 +68,9 @@ void VersionedFlowSensitiveStat::performStat() {
     for (auto &it : *vfspta->svfg) {
         numOfNode++;
         SVFGNode *svfgNode = it.second;
-        if (SVFUtil::isa<CopySVFGNode>(svfgNode))
+        if (llvm::isa<CopySVFGNode>(svfgNode))
             numOfCopy++;
-        else if (SVFUtil::isa<StoreSVFGNode>(svfgNode))
+        else if (llvm::isa<StoreSVFGNode>(svfgNode))
             numOfStore++;
     }
 

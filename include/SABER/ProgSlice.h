@@ -205,7 +205,7 @@ class ProgSlice {
     /// (e.g. PAGEdge is an global assignment or NullPtrSVFGNode)
     inline const BasicBlock *getSVFGNodeBB(const SVFGNode *node) const {
         const ICFGNode *icfgNode = node->getICFGNode();
-        if (SVFUtil::isa<NullPtrSVFGNode>(node) == false) {
+        if (llvm::isa<NullPtrSVFGNode>(node) == false) {
             return icfgNode->getBB();
         }
         return nullptr;

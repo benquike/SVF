@@ -104,15 +104,15 @@ class ICFGStat : public PTAStat {
 
             ICFGNode *node = it->second;
 
-            if (SVFUtil::isa<IntraBlockNode>(node)) {
+            if (llvm::isa<IntraBlockNode>(node)) {
                 numOfIntraNodes++;
-            } else if (SVFUtil::isa<CallBlockNode>(node)) {
+            } else if (llvm::isa<CallBlockNode>(node)) {
                 numOfCallNodes++;
-            } else if (SVFUtil::isa<RetBlockNode>(node)) {
+            } else if (llvm::isa<RetBlockNode>(node)) {
                 numOfRetNodes++;
-            } else if (SVFUtil::isa<FunEntryBlockNode>(node)) {
+            } else if (llvm::isa<FunEntryBlockNode>(node)) {
                 numOfEntryNodes++;
-            } else if (SVFUtil::isa<FunExitBlockNode>(node)) {
+            } else if (llvm::isa<FunExitBlockNode>(node)) {
                 numOfExitNodes++;
             }
 

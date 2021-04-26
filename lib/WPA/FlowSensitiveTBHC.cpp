@@ -35,7 +35,7 @@ void FlowSensitiveTBHC::initialize() {
     setGraph(svfg);
     stat = new FlowSensitiveStat(this);
 
-    auto *dchg = SVFUtil::dyn_cast<DCHGraph>(getCHGraph());
+    auto *dchg = llvm::dyn_cast<DCHGraph>(getCHGraph());
     assert(dchg != nullptr && "FSTBHC: DCHGraph required!");
 
     TypeBasedHeapCloning::setDCHG(dchg);
@@ -62,15 +62,15 @@ void FlowSensitiveTBHC::backPropagate(NodeID clone) {
     assert(cloneObj && "FSTBHC: original object does not exist in PAG?");
     // Check the original object too because when reuse of a gep occurs, the new
     // object is an FI object.
-    if (SVFUtil::isa<CloneGepObjPN>(cloneObj) ||
-        SVFUtil::isa<GepObjPN>(originalObj)) {
+    if (llvm::isa<CloneGepObjPN>(cloneObj) ||
+        llvm::isa<GepObjPN>(originalObj)) {
         // Since getGepObjClones is updated, some GEP nodes need to be redone.
         const NodeBS &retrievers = gepToSVFGRetrievers[getOriginalObj(clone)];
         for (NodeID r : retrievers) {
             pushIntoWorklist(r);
         }
-    } else if (SVFUtil::isa<CloneFIObjPN>(cloneObj) ||
-               SVFUtil::isa<CloneDummyObjPN>(cloneObj)) {
+    } else if (llvm::isa<CloneFIObjPN>(cloneObj) ||
+               llvm::isa<CloneDummyObjPN>(cloneObj)) {
         pushIntoWorklist(getAllocationSite(getOriginalObj(clone)));
     } else {
         assert(false && "FSTBHC: unexpected object type?");
@@ -99,7 +99,7 @@ bool FlowSensitiveTBHC::propAlongIndirectEdge(const IndirectSVFGEdge *edge) {
     bool isStore = false;
     const DIType *tildet = nullptr;
     PointsTo storePts;
-    if (const auto *store = SVFUtil::dyn_cast<StoreSVFGNode>(src)) {
+    if (const auto *store = llvm::dyn_cast<StoreSVFGNode>(src)) {
         tildet = getTypeFromCTirMetadata(store);
         isStore = true;
         storePts = getPts(store->getPAGDstNodeID());
@@ -123,7 +123,7 @@ bool FlowSensitiveTBHC::propAlongIndirectEdge(const IndirectSVFGEdge *edge) {
             }
         }
 
-        if (auto *gep = SVFUtil::dyn_cast<GepObjPN>(pag->getGNode(o))) {
+        if (auto *gep = llvm::dyn_cast<GepObjPN>(pag->getGNode(o))) {
             // Want the geps which are at the same "level" as this one (same mem
             // obj, same offset).
             const NodeBS &geps = getGepObjsFromMemObj(
@@ -165,11 +165,11 @@ bool FlowSensitiveTBHC::propAlongDirectEdge(const DirectSVFGEdge *edge) {
     SVFGNode *dst = edge->getDstNode();
     // If this is an actual-param or formal-ret, top-level pointer's pts must be
     // propagated from src to dst.
-    if (auto *ap = SVFUtil::dyn_cast<ActualParmSVFGNode>(src)) {
+    if (auto *ap = llvm::dyn_cast<ActualParmSVFGNode>(src)) {
         if (!ap->getParam()->isPointer())
             return false;
         changed = propagateFromAPToFP(ap, dst);
-    } else if (auto *fp = SVFUtil::dyn_cast<FormalRetSVFGNode>(src)) {
+    } else if (auto *fp = llvm::dyn_cast<FormalRetSVFGNode>(src)) {
         if (!fp->getRet()->isPointer())
             return false;
         changed = propagateFromFRToAR(fp, dst);
@@ -260,7 +260,7 @@ bool FlowSensitiveTBHC::processGep(const GepSVFGNode *gep) {
         if (TypeBasedHeapCloning::isBlkObjOrConstantObj(oq)) {
             tmpDstPts.set(oq);
         } else {
-            if (SVFUtil::isa<VariantGepPE>(gep->getPAGEdge())) {
+            if (llvm::isa<VariantGepPE>(gep->getPAGEdge())) {
                 setObjFieldInsensitive(oq);
                 tmpDstPts.set(oq);
                 const DIType *t = getType(oq);
@@ -274,7 +274,7 @@ bool FlowSensitiveTBHC::processGep(const GepSVFGNode *gep) {
                     }
                 }
             } else if (const auto *normalGep =
-                           SVFUtil::dyn_cast<NormalGepPE>(gep->getPAGEdge())) {
+                           llvm::dyn_cast<NormalGepPE>(gep->getPAGEdge())) {
                 const DIType *baseType = getType(oq);
 
                 // Drop down to field insensitive.
@@ -463,7 +463,7 @@ static const DIType *getVTInitType(const CopySVFGNode *copy, DCHGraph *dchg) {
     if (mdNode == nullptr)
         return nullptr;
 
-    const DIType *type = SVFUtil::dyn_cast<DIType>(mdNode);
+    const DIType *type = llvm::dyn_cast<DIType>(mdNode);
     assert(type != nullptr && "TBHC: bad ctir.vt.init metadata");
     return dchg->getCanonicalType(type);
 }
@@ -534,8 +534,7 @@ bool FlowSensitiveTBHC::propDFOutToIn(const SVFGNode *srcStmt, NodeID srcVar,
 void FlowSensitiveTBHC::determineWhichGepsAreLoads(void) {
     for (auto &nI : *svfg) {
         SVFGNode *svfgNode = nI.second;
-        if (const StmtSVFGNode *gep =
-                SVFUtil::dyn_cast<GepSVFGNode>(svfgNode)) {
+        if (const StmtSVFGNode *gep = llvm::dyn_cast<GepSVFGNode>(svfgNode)) {
             // Only care about ctir nodes - they have the reuse problem.
             if (getTypeFromCTirMetadata(gep)) {
                 bool isLoad = true;
@@ -546,7 +545,7 @@ void FlowSensitiveTBHC::determineWhichGepsAreLoads(void) {
                     if (gep == dst)
                         continue;
 
-                    if (!SVFUtil::isa<LoadSVFGNode>(dst)) {
+                    if (!llvm::isa<LoadSVFGNode>(dst)) {
                         isLoad = false;
                         break;
                     }
@@ -566,7 +565,7 @@ bool FlowSensitiveTBHC::gepIsLoad(NodeID gep) {
 }
 
 const MDNode *FlowSensitiveTBHC::getRawCTirMetadata(const SVFGNode *s) {
-    if (const auto *stmt = SVFUtil::dyn_cast<StmtSVFGNode>(s)) {
+    if (const auto *stmt = llvm::dyn_cast<StmtSVFGNode>(s)) {
         const Value *v =
             stmt->getInst() ? stmt->getInst() : stmt->getPAGEdge()->getValue();
         if (v != nullptr) {
@@ -578,7 +577,7 @@ const MDNode *FlowSensitiveTBHC::getRawCTirMetadata(const SVFGNode *s) {
 }
 
 const DIType *FlowSensitiveTBHC::getTypeFromCTirMetadata(const SVFGNode *s) {
-    if (const auto *stmt = SVFUtil::dyn_cast<StmtSVFGNode>(s)) {
+    if (const auto *stmt = llvm::dyn_cast<StmtSVFGNode>(s)) {
         const Value *v = stmt->getInst();
         if (v != nullptr) {
             return TypeBasedHeapCloning::getTypeFromCTirMetadata(v);
@@ -594,7 +593,7 @@ void FlowSensitiveTBHC::expandFIObjs(const PointsTo &pts,
     for (NodeID o : pts) {
         expandedPts |= getAllFieldsObjNode(o);
         while (const auto *gepObj =
-                   SVFUtil::dyn_cast<GepObjPN>(pag->getGNode(o))) {
+                   llvm::dyn_cast<GepObjPN>(pag->getGNode(o))) {
             expandedPts |= getAllFieldsObjNode(o);
             o = gepObj->getBaseNode();
         }

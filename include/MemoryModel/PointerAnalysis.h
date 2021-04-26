@@ -313,7 +313,7 @@ class PointerAnalysis {
     /// For field-sensitivity
     ///@{
     inline bool isFIObjNode(NodeID id) const {
-        return (SVFUtil::isa<FIObjPN>(getPAG()->getGNode(id)));
+        return (llvm::isa<FIObjPN>(getPAG()->getGNode(id)));
     }
 
     inline NodeID getBaseObjNode(NodeID id) {

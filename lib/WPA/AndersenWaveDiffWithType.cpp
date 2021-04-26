@@ -13,9 +13,9 @@ void AndersenWaveDiffWithType::processCast(const ConstraintEdge *edge) {
         const Value *val =
             pag->getIntraPAGEdge(srcId, dstId, PAGEdge::Copy)->getValue();
         if (val) {
-            if (const auto *castInst = SVFUtil::dyn_cast<CastInst>(val)) {
+            if (const auto *castInst = llvm::dyn_cast<CastInst>(val)) {
                 updateObjType(castInst->getType(), getPts(edge->getSrcID()));
-            } else if (const auto *ce = SVFUtil::dyn_cast<ConstantExpr>(val)) {
+            } else if (const auto *ce = llvm::dyn_cast<ConstantExpr>(val)) {
                 if (ce->getOpcode() == Instruction::BitCast) {
                     updateObjType(ce->getType(), getPts(edge->getSrcID()));
                 }
@@ -49,8 +49,7 @@ void AndersenWaveDiffWithType::processTypeMismatchedGep(NodeID obj,
     NodeBS &nodesOfType = typeSystem->getVarsForType(ptaTy);
 
     for (const auto *edge : edges) {
-        if (const auto *normalGepEdge =
-                SVFUtil::dyn_cast<NormalGepCGEdge>(edge)) {
+        if (const auto *normalGepEdge = llvm::dyn_cast<NormalGepCGEdge>(edge)) {
             if (!nodesOfType.test(normalGepEdge->getSrcID())) {
                 continue;
             }

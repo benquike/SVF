@@ -106,7 +106,7 @@ class PAGEdge : public GenericPAGEdgeTy {
     /// Get/set methods for llvm instruction
     //@{
     inline const Instruction *getInst() const {
-        return SVFUtil::dyn_cast<Instruction>(value);
+        return llvm::dyn_cast<Instruction>(value);
     }
     inline void setValue(const Value *val) { value = val; }
     inline const Value *getValue() const { return value; }

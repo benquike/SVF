@@ -77,7 +77,7 @@ void Steensgaard::processAllAddr() {
              it != eit; ++it) {
             numOfProcessedAddr++;
 
-            const AddrCGEdge *addr = cast<AddrCGEdge>(*it);
+            const AddrCGEdge *addr = llvm::cast<AddrCGEdge>(*it);
             NodeID dst = addr->getDstID();
             NodeID src = addr->getSrcID();
             if (addPts(dst, src))

@@ -58,7 +58,7 @@ void VersionedFlowSensitive::prelabel(void) {
         NodeID l = it.first;
         const SVFGNode *sn = it.second;
 
-        if (const auto *stn = SVFUtil::dyn_cast<StoreSVFGNode>(sn)) {
+        if (const auto *stn = llvm::dyn_cast<StoreSVFGNode>(sn)) {
             // l: *p = q.
             // If p points to o (Andersen's), l yields a new version for o.
             NodeID p = stn->getPAGDstNodeID();
@@ -77,7 +77,7 @@ void VersionedFlowSensitive::prelabel(void) {
             // the node may yield), so we give it one just in case. This is
             // sound but imprecise.
             for (const SVFGEdge *e : sn->getOutEdges()) {
-                const auto *ie = SVFUtil::dyn_cast<IndirectSVFGEdge>(e);
+                const auto *ie = llvm::dyn_cast<IndirectSVFGEdge>(e);
                 if (!ie)
                     continue;
                 for (NodeID o : ie->getPointsTo()) {
@@ -107,7 +107,7 @@ void VersionedFlowSensitive::meldLabel(void) {
 
         // Propagate l's y to lp's c for all l --o--> lp.
         for (const SVFGEdge *e : sl->getOutEdges()) {
-            const auto *ie = SVFUtil::dyn_cast<IndirectSVFGEdge>(e);
+            const auto *ie = llvm::dyn_cast<IndirectSVFGEdge>(e);
             if (!ie)
                 continue;
 
@@ -116,14 +116,14 @@ void VersionedFlowSensitive::meldLabel(void) {
             if (delta(lp))
                 continue;
 
-            bool lpIsStore = SVFUtil::isa<StoreSVFGNode>(svfg->getSVFGNode(lp));
+            bool lpIsStore = llvm::isa<StoreSVFGNode>(svfg->getSVFGNode(lp));
             // Consume and yield are the same for non-stores, so ignore them.
             if (l == lp && !lpIsStore)
                 continue;
 
             // For stores, yield != consume, otherwise they are the same.
             ObjToMeldVersionMap &myl =
-                SVFUtil::isa<StoreSVFGNode>(sl) ? meldYield[l] : meldConsume[l];
+                llvm::isa<StoreSVFGNode>(sl) ? meldYield[l] : meldConsume[l];
             ObjToMeldVersionMap &mclp = meldConsume[lp];
             bool yieldChanged = false;
             for (NodeID o : ie->getPointsTo()) {
@@ -162,7 +162,7 @@ void VersionedFlowSensitive::mapMeldVersions(void) {
     // meldConsume -> consume.
     for (LocMeldVersionMap::value_type &lomv : meldConsume) {
         NodeID l = lomv.first;
-        bool isStore = SVFUtil::isa<StoreSVFGNode>(svfg->getSVFGNode(l));
+        bool isStore = llvm::isa<StoreSVFGNode>(svfg->getSVFGNode(l));
         ObjToVersionMap &consumel = consume[l];
         ObjToVersionMap &yieldl = yield[l];
         for (ObjToMeldVersionMap::value_type &omv : lomv.second) {
@@ -259,7 +259,7 @@ void VersionedFlowSensitive::determineReliance(void) {
         NodeID l = it.first;
         const SVFGNode *sn = it.second;
         for (const SVFGEdge *e : sn->getOutEdges()) {
-            const auto *ie = SVFUtil::dyn_cast<IndirectSVFGEdge>(e);
+            const auto *ie = llvm::dyn_cast<IndirectSVFGEdge>(e);
             if (!ie)
                 continue;
 
@@ -283,7 +283,7 @@ void VersionedFlowSensitive::determineReliance(void) {
 
         // When an object/version points-to set changes, these nodes need to
         // know.
-        if (SVFUtil::isa<LoadSVFGNode>(sn) || SVFUtil::isa<StoreSVFGNode>(sn)) {
+        if (llvm::isa<LoadSVFGNode>(sn) || llvm::isa<StoreSVFGNode>(sn)) {
             for (ObjToVersionMap::value_type &ov : consume[l]) {
                 NodeID o = ov.first;
                 Version &v = ov.second;
@@ -332,11 +332,11 @@ void VersionedFlowSensitive::updateConnectedNodes(
         NodeID src = e->getSrcNode()->getId();
         NodeID dst = dstNode->getId();
 
-        if (SVFUtil::isa<PHISVFGNode>(dstNode)) {
+        if (llvm::isa<PHISVFGNode>(dstNode)) {
             pushIntoWorklist(dst);
-        } else if (SVFUtil::isa<FormalINSVFGNode>(dstNode) ||
-                   SVFUtil::isa<ActualOUTSVFGNode>(dstNode)) {
-            const auto *ie = SVFUtil::dyn_cast<IndirectSVFGEdge>(e);
+        } else if (llvm::isa<FormalINSVFGNode>(dstNode) ||
+                   llvm::isa<ActualOUTSVFGNode>(dstNode)) {
+            const auto *ie = llvm::dyn_cast<IndirectSVFGEdge>(e);
             assert(ie && "VFS::updateConnectedNodes: given direct edge?");
             bool changed = false;
 

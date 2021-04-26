@@ -189,9 +189,9 @@ void LLVMModuleSet::addSVFMain() {
         FunctionCallee svfmainFn = M.getOrInsertFunction(
             SVF_MAIN_FUNC_NAME, Type::getVoidTy(M.getContext()), i32, i8ptr2,
             i8ptr2);
-        Function *svfmain = SVFUtil::dyn_cast<Function>(svfmainFn.getCallee());
+        Function *svfmain = llvm::dyn_cast<Function>(svfmainFn.getCallee());
 #else
-        Function *svfmain = SVFUtil::dyn_cast<Function>(M.getOrInsertFunction(
+        Function *svfmain = llvm::dyn_cast<Function>(M.getOrInsertFunction(
             SVF_MAIN_FUNC_NAME, Type::getVoidTy(M.getContext()), i32, i8ptr2,
             i8ptr2));
 #endif

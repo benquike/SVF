@@ -32,30 +32,29 @@
 
 #include "Graphs/GraphPrinter.h"
 #include "SVF-FE/GEPTypeBridgeIterator.h"
-#include "Util/Casting.h"
 #include "Util/SVFBasicTypes.h"
+#include <llvm/ADT/GraphTraits.h> // for Graphtraits
 #include <llvm/ADT/SmallVector.h> // for small vector
 #include <llvm/ADT/SparseBitVector.h>
 #include <llvm/ADT/StringExtras.h> // for utostr_32
 #include <llvm/Analysis/AliasAnalysis.h>
 #include <llvm/Analysis/CallGraph.h> // call graph
-#include <llvm/Analysis/ScalarEvolution.h>
-#include <llvm/IR/CallSite.h>
-#include <llvm/IR/GetElementPtrTypeIterator.h> //for gep iterator
-#include <llvm/IR/GlobalVariable.h>            // for GlobalVariable
-#include <llvm/IR/InstIterator.h>              // for inst iteration
-#include <llvm/IR/InstVisitor.h>               // for instruction visitor
-#include <llvm/IR/Instructions.h>
-
-#include <llvm/ADT/GraphTraits.h> // for Graphtraits
 #include <llvm/Analysis/DominanceFrontier.h>
 #include <llvm/Analysis/PostDominators.h>
+#include <llvm/Analysis/ScalarEvolution.h>
 #include <llvm/Analysis/ScalarEvolutionExpressions.h>
 #include <llvm/Bitcode/BitcodeReader.h> /// for isBitcode
 #include <llvm/Bitcode/BitcodeWriter.h> // for WriteBitcodeToFile
+#include <llvm/IR/CallSite.h>
 #include <llvm/IR/DebugInfo.h>
-#include <llvm/IR/IRBuilder.h>           // for instrument svf.main
-#include <llvm/IRReader/IRReader.h>      // IR reader for bit file
+#include <llvm/IR/GetElementPtrTypeIterator.h> //for gep iterator
+#include <llvm/IR/GlobalVariable.h>            // for GlobalVariable
+#include <llvm/IR/IRBuilder.h>                 // for instrument svf.main
+#include <llvm/IR/InstIterator.h>              // for inst iteration
+#include <llvm/IR/InstVisitor.h>               // for instruction visitor
+#include <llvm/IR/Instructions.h>
+#include <llvm/IRReader/IRReader.h> // IR reader for bit file
+#include <llvm/Support/Casting.h>
 #include <llvm/Support/GraphWriter.h>    // for graph write
 #include <llvm/Support/SourceMgr.h>      // for SMDiagnostic
 #include <llvm/Transforms/Utils/Local.h> // for FindDbgAddrUses

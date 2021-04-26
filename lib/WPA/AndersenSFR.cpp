@@ -78,7 +78,7 @@ bool AndersenSFR::processGepPts(PointsTo &pts, const GepCGEdge *edge) {
     NodeID dstId = dst->getId();
 
     if (!dst->strides.empty() &&
-        SVFUtil::isa<NormalGepCGEdge>(edge)) // dst is in pwc
+        llvm::isa<NormalGepCGEdge>(edge)) // dst is in pwc
     {
         PointsTo tmpDstPts;
         PointsTo srcInits = pts - getPts(dstId);
@@ -89,8 +89,7 @@ bool AndersenSFR::processGepPts(PointsTo &pts, const GepCGEdge *edge) {
                 sortSrcInits.insert(ptd);
             }
 
-            Size_t offset =
-                SVFUtil::dyn_cast<NormalGepCGEdge>(edge)->getOffset();
+            Size_t offset = llvm::dyn_cast<NormalGepCGEdge>(edge)->getOffset();
             fieldExpand(sortSrcInits, offset, dst->strides, tmpDstPts);
         }
 
@@ -123,10 +122,10 @@ void AndersenSFR::fieldExpand(NodeSet &initials, Size_t offset, NodeBS &strides,
             const MemObj *obj = pag->getBaseObj(init);
             const Size_t maxLimit = obj->getMaxFieldOffsetLimit();
             Size_t initOffset;
-            if (auto *gepNode = SVFUtil::dyn_cast<GepObjPN>(initPN)) {
+            if (auto *gepNode = llvm::dyn_cast<GepObjPN>(initPN)) {
                 initOffset = gepNode->getLocationSet().getOffset();
-            } else if (SVFUtil::isa<FIObjPN>(initPN) ||
-                       SVFUtil::isa<DummyObjPN>(initPN)) {
+            } else if (llvm::isa<FIObjPN>(initPN) ||
+                       llvm::isa<DummyObjPN>(initPN)) {
                 initOffset = 0;
             } else {
                 assert(false && "Not an object node!!");

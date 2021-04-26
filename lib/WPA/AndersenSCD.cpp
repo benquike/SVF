@@ -178,7 +178,7 @@ void AndersenSCD::processPWC(ConstraintNode *rep) {
                 }
             }
             for (ConstraintEdge *edge : node->getGepOutEdges()) {
-                if (auto *gepEdge = SVFUtil::dyn_cast<GepCGEdge>(edge)) {
+                if (auto *gepEdge = llvm::dyn_cast<GepCGEdge>(edge)) {
                     bool changed = processGep(nodeId, gepEdge);
                     if (changed &&
                         pwcNodes.find(edge->getDstID()) != pwcNodes.end()) {

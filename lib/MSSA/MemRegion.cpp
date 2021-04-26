@@ -90,7 +90,7 @@ const MemRegion *MRGenerator::getMR(const PointsTo &cpts) const {
 void MRGenerator::collectGlobals() {
     PAG *pag = pta->getPAG();
     for (auto &nIter : *pag) {
-        if (auto *obj = SVFUtil::dyn_cast<ObjPN>(nIter.second)) {
+        if (auto *obj = llvm::dyn_cast<ObjPN>(nIter.second)) {
             if (obj->getMemObj()->isGlobalObj()) {
                 allGlobals.set(nIter.first);
                 allGlobals |= CollectPtsChain(nIter.first);
@@ -152,7 +152,7 @@ void MRGenerator::collectModRefForLoadStore() {
                 PAGEdgeList &pagEdgeList = getPAGEdgesFromInst(&inst);
                 for (const auto *inst : pagEdgeList) {
                     pagEdgeToFunMap[inst] = &fun;
-                    if (const auto *st = SVFUtil::dyn_cast<StorePE>(inst)) {
+                    if (const auto *st = llvm::dyn_cast<StorePE>(inst)) {
                         PointsTo cpts(pta->getPts(st->getDstID()));
                         // TODO: change this assertion check later when we have
                         // conditional points-to set
@@ -160,8 +160,7 @@ void MRGenerator::collectModRefForLoadStore() {
                             continue;
                         assert(!cpts.empty() && "null pointer!!");
                         addCPtsToStore(cpts, st, &fun);
-                    } else if (const auto *ld =
-                                   SVFUtil::dyn_cast<LoadPE>(inst)) {
+                    } else if (const auto *ld = llvm::dyn_cast<LoadPE>(inst)) {
                         PointsTo cpts(pta->getPts(ld->getSrcID()));
                         // TODO: change this assertion check later when we have
                         // conditional points-to set
@@ -486,8 +485,7 @@ bool MRGenerator::isNonLocalObject(NodeID id, const SVFFunction *curFun) const {
     /// or if the local variable of its callers
     /// or a local variable is in function recursion cycles
     else if (obj->isStack()) {
-        if (const auto *local =
-                SVFUtil::dyn_cast<AllocaInst>(obj->getRefVal())) {
+        if (const auto *local = llvm::dyn_cast<AllocaInst>(obj->getRefVal())) {
             LLVMModuleSet *modSet = pta->getModule()->getLLVMModSet();
             const SVFFunction *fun =
                 modSet->getSVFFunction(local->getFunction());
@@ -514,7 +512,7 @@ bool MRGenerator::handleCallsiteModRef(NodeBS &mod, NodeBS &ref,
     if (isHeapAllocExtCall(cs->getCallSite(), pta->getModule())) {
         PAGEdgeList &pagEdgeList = getPAGEdgesFromInst(cs->getCallSite());
         for (const auto *edge : pagEdgeList) {
-            if (const auto *addr = SVFUtil::dyn_cast<AddrPE>(edge))
+            if (const auto *addr = llvm::dyn_cast<AddrPE>(edge))
                 mod.set(addr->getSrcID());
         }
     }
@@ -582,7 +580,7 @@ PointsTo MRGenerator::getModInfoForCall(const CallBlockNode *cs) {
         PAGEdgeList &pagEdgeList = getPAGEdgesFromInst(cs->getCallSite());
         PointsTo mods;
         for (const auto *edge : pagEdgeList) {
-            if (const auto *st = SVFUtil::dyn_cast<StorePE>(edge))
+            if (const auto *st = llvm::dyn_cast<StorePE>(edge))
                 mods |= pta->getPts(st->getDstID());
         }
         return mods;
@@ -599,7 +597,7 @@ PointsTo MRGenerator::getRefInfoForCall(const CallBlockNode *cs) {
         PAGEdgeList &pagEdgeList = getPAGEdgesFromInst(cs->getCallSite());
         PointsTo refs;
         for (const auto *edge : pagEdgeList) {
-            if (const auto *ld = SVFUtil::dyn_cast<LoadPE>(edge))
+            if (const auto *ld = llvm::dyn_cast<LoadPE>(edge))
                 refs |= pta->getPts(ld->getSrcID());
         }
         return refs;

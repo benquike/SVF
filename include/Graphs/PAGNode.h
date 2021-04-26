@@ -143,14 +143,11 @@ class PAGNode : public GenericPAGNodeTy {
     /// is a global or constantexpr node
     virtual inline const Function *getFunction() const {
         if (value) {
-            if (const Instruction *inst =
-                    SVFUtil::dyn_cast<Instruction>(value)) {
+            if (const Instruction *inst = llvm::dyn_cast<Instruction>(value)) {
                 return inst->getParent()->getParent();
-            } else if (const Argument *arg =
-                           SVFUtil::dyn_cast<Argument>(value)) {
+            } else if (const Argument *arg = llvm::dyn_cast<Argument>(value)) {
                 return arg->getParent();
-            } else if (const Function *fun =
-                           SVFUtil::dyn_cast<Function>(value)) {
+            } else if (const Function *fun = llvm::dyn_cast<Function>(value)) {
                 return fun;
             }
         }

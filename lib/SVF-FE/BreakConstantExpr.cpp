@@ -85,7 +85,7 @@ static llvm::RegisterPass<MergeFunctionRets> MP("merge-rets",
 //  ~nullptr - A pointer to the value casted into a ConstantExpr is returned.
 //
 static ConstantExpr *hasConstantGEP(Value *V) {
-    if (auto *CE = SVFUtil::dyn_cast<ConstantExpr>(V)) {
+    if (auto *CE = llvm::dyn_cast<ConstantExpr>(V)) {
         if (CE->getOpcode() == Instruction::GetElementPtr) {
             return CE;
         }
@@ -292,7 +292,7 @@ bool BreakConstantGEPs::runOnModule(Module &module) {
             // for phi instructions because the new instruction must be added to
             // the appropriate predecessor block.
             //
-            if (auto *PHI = SVFUtil::dyn_cast<PHINode>(I)) {
+            if (auto *PHI = llvm::dyn_cast<PHINode>(I)) {
                 for (unsigned index = 0; index < PHI->getNumIncomingValues();
                      ++index) {
                     //

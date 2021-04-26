@@ -126,19 +126,19 @@ bool ProgSlice::isSatisfiableForPairs() {
 
 const CallBlockNode *ProgSlice::getCallSite(const SVFGEdge *edge) const {
     assert(edge->isCallVFGEdge() && "not a call svfg edge?");
-    if (const auto *callEdge = SVFUtil::dyn_cast<CallDirSVFGEdge>(edge))
+    if (const auto *callEdge = llvm::dyn_cast<CallDirSVFGEdge>(edge))
         return getSVFG()->getCallSite(callEdge->getCallSiteId());
 
     return getSVFG()->getCallSite(
-        SVFUtil::cast<CallIndSVFGEdge>(edge)->getCallSiteId());
+        llvm::cast<CallIndSVFGEdge>(edge)->getCallSiteId());
 }
 const CallBlockNode *ProgSlice::getRetSite(const SVFGEdge *edge) const {
     assert(edge->isRetVFGEdge() && "not a return svfg edge?");
-    if (const auto *callEdge = SVFUtil::dyn_cast<RetDirSVFGEdge>(edge))
+    if (const auto *callEdge = llvm::dyn_cast<RetDirSVFGEdge>(edge))
         return getSVFG()->getCallSite(callEdge->getCallSiteId());
 
     return getSVFG()->getCallSite(
-        SVFUtil::cast<RetIndSVFGEdge>(edge)->getCallSiteId());
+        llvm::cast<RetIndSVFGEdge>(edge)->getCallSiteId());
 }
 
 /*!
@@ -147,20 +147,20 @@ const CallBlockNode *ProgSlice::getRetSite(const SVFGEdge *edge) const {
  * for store/mssaphi/actualIn/acutalOut/formalIn/formalOut
  */
 const Value *ProgSlice::getLLVMValue(const SVFGNode *node) const {
-    if (const auto *stmt = SVFUtil::dyn_cast<StmtSVFGNode>(node)) {
-        if (SVFUtil::isa<StoreSVFGNode>(stmt) == false) {
+    if (const auto *stmt = llvm::dyn_cast<StmtSVFGNode>(node)) {
+        if (llvm::isa<StoreSVFGNode>(stmt) == false) {
             if (stmt->getPAGDstNode()->hasValue())
                 return stmt->getPAGDstNode()->getValue();
         }
-    } else if (const auto *phi = SVFUtil::dyn_cast<PHISVFGNode>(node)) {
+    } else if (const auto *phi = llvm::dyn_cast<PHISVFGNode>(node)) {
         return phi->getRes()->getValue();
-    } else if (const auto *ap = SVFUtil::dyn_cast<ActualParmSVFGNode>(node)) {
+    } else if (const auto *ap = llvm::dyn_cast<ActualParmSVFGNode>(node)) {
         return ap->getParam()->getValue();
-    } else if (const auto *fp = SVFUtil::dyn_cast<FormalParmSVFGNode>(node)) {
+    } else if (const auto *fp = llvm::dyn_cast<FormalParmSVFGNode>(node)) {
         return fp->getParam()->getValue();
-    } else if (const auto *ar = SVFUtil::dyn_cast<ActualRetSVFGNode>(node)) {
+    } else if (const auto *ar = llvm::dyn_cast<ActualRetSVFGNode>(node)) {
         return ar->getRev()->getValue();
-    } else if (const auto *fr = SVFUtil::dyn_cast<FormalRetSVFGNode>(node)) {
+    } else if (const auto *fr = llvm::dyn_cast<FormalRetSVFGNode>(node)) {
         return fr->getRet()->getValue();
     }
 
@@ -207,7 +207,7 @@ void ProgSlice::annotatePaths() {
     for (const auto &elem : elems) {
         Condition *atom = pathAllocator->getCond(elem);
         const Instruction *tinst = pathAllocator->getCondInst(atom);
-        if (const auto *br = SVFUtil::dyn_cast<BranchInst>(tinst)) {
+        if (const auto *br = llvm::dyn_cast<BranchInst>(tinst)) {
             annotator.annotateFeasibleBranch(br, 0);
             annotator.annotateFeasibleBranch(br, 1);
         }
