@@ -110,13 +110,13 @@ class SVFG : public VFG {
     /// Clean up memory
     void destroy();
 
-    /// Constructor
-    SVFG(MemSSA *mssa, PAG *pag, VFGK k);
-
-    SVFG() = default;
-
     /// Start building SVFG
     virtual void buildSVFG();
+
+  public:
+    /// Constructor
+    SVFG(MemSSA *mssa, PAG *pag, VFGK k);
+    SVFG() = default;
 
   private:
     /// support for serialization

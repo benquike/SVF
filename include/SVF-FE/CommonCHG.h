@@ -27,6 +27,8 @@ class CommonCHGraph {
     CommonCHGraph(SymbolTableInfo *symInfo)
         : svfMod(symInfo->getModule()), symbolTableInfo(symInfo){};
 
+    CommonCHGraph() = default;
+
     virtual ~CommonCHGraph(){};
     enum CHGKind { Standard, DI };
 

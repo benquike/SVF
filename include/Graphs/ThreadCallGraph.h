@@ -154,6 +154,8 @@ class ThreadCallGraph : public PTACallGraph {
 
     /// Constructor
     ThreadCallGraph(SVFProject *proj);
+    ThreadCallGraph() = default;
+
     /// Destructor
     virtual ~ThreadCallGraph() {}
 

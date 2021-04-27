@@ -459,12 +459,13 @@ class GepPE : public PAGEdge {
     }
     //@}
 
+    GepPE() = default;
+    virtual ~GepPE() {}
+
   protected:
     /// constructor
     GepPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag, PEDGEK k)
         : PAGEdge(s, d, id, pag, k) {}
-    GepPE() = default;
-    virtual ~GepPE() {}
     virtual const std::string toString() const;
 
   private:

@@ -60,6 +60,9 @@ class ConstraintEdge : public GenericConsEdgeTy {
     ConstraintEdge(ConstraintNode *s, ConstraintNode *d, ConstraintEdgeK k,
                    EdgeID id = 0)
         : GenericConsEdgeTy(s, d, id, k), edgeId(id) {}
+
+    ConstraintEdge() = default;
+
     /// Destructor
     virtual ~ConstraintEdge() {}
     /// Return edge ID
@@ -92,7 +95,6 @@ class ConstraintEdge : public GenericConsEdgeTy {
  */
 class AddrCGEdge : public ConstraintEdge {
   private:
-    AddrCGEdge();                       ///< place holder
     AddrCGEdge(const AddrCGEdge &);     ///< place holder
     void operator=(const AddrCGEdge &); ///< place holder
   public:
@@ -109,7 +111,7 @@ class AddrCGEdge : public ConstraintEdge {
 
     /// constructor
     AddrCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id, PAG *pag);
-
+    AddrCGEdge() = default;
     virtual ~AddrCGEdge() {}
 };
 
@@ -118,7 +120,6 @@ class AddrCGEdge : public ConstraintEdge {
  */
 class CopyCGEdge : public ConstraintEdge {
   private:
-    CopyCGEdge();                       ///< place holder
     CopyCGEdge(const CopyCGEdge &);     ///< place holder
     void operator=(const CopyCGEdge &); ///< place holder
   public:
@@ -136,7 +137,7 @@ class CopyCGEdge : public ConstraintEdge {
     /// constructor
     CopyCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id)
         : ConstraintEdge(s, d, Copy, id) {}
-
+    CopyCGEdge() = default;
     virtual ~CopyCGEdge(){}
 };
 
@@ -145,7 +146,6 @@ class CopyCGEdge : public ConstraintEdge {
  */
 class StoreCGEdge : public ConstraintEdge {
   private:
-    StoreCGEdge();                       ///< place holder
     StoreCGEdge(const StoreCGEdge &);    ///< place holder
     void operator=(const StoreCGEdge &); ///< place holder
 
@@ -164,7 +164,7 @@ class StoreCGEdge : public ConstraintEdge {
     /// constructor
     StoreCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id)
         : ConstraintEdge(s, d, Store, id) {}
-
+    StoreCGEdge() = default;
     virtual ~StoreCGEdge() {}
 };
 
@@ -173,7 +173,6 @@ class StoreCGEdge : public ConstraintEdge {
  */
 class LoadCGEdge : public ConstraintEdge {
   private:
-    LoadCGEdge();                       ///< place holder
     LoadCGEdge(const LoadCGEdge &);     ///< place holder
     void operator=(const LoadCGEdge &); ///< place holder
 
@@ -192,7 +191,7 @@ class LoadCGEdge : public ConstraintEdge {
     /// Constructor
     LoadCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id)
         : ConstraintEdge(s, d, Load, id) {}
-
+    LoadCGEdge() = default;
     virtual ~LoadCGEdge() {}
 };
 
@@ -201,7 +200,6 @@ class LoadCGEdge : public ConstraintEdge {
  */
 class GepCGEdge : public ConstraintEdge {
   private:
-    GepCGEdge();                       ///< place holder
     GepCGEdge(const GepCGEdge &);      ///< place holder
     void operator=(const GepCGEdge &); ///< place holder
 
@@ -210,8 +208,9 @@ class GepCGEdge : public ConstraintEdge {
     GepCGEdge(ConstraintNode *s, ConstraintNode *d, ConstraintEdgeK k,
               EdgeID id)
         : ConstraintEdge(s, d, k, id) {}
-
   public:
+    GepCGEdge() = default;
+
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
     static inline bool classof(const GepCGEdge *) { return true; }
@@ -233,7 +232,6 @@ class GepCGEdge : public ConstraintEdge {
  */
 class NormalGepCGEdge : public GepCGEdge {
   private:
-    NormalGepCGEdge();                        ///< place holder
     NormalGepCGEdge(const NormalGepCGEdge &); ///< place holder
     void operator=(const NormalGepCGEdge &);  ///< place holder
 
@@ -258,7 +256,7 @@ class NormalGepCGEdge : public GepCGEdge {
     NormalGepCGEdge(ConstraintNode *s, ConstraintNode *d, const LocationSet &l,
                     EdgeID id)
         : GepCGEdge(s, d, NormalGep, id), ls(l) {}
-
+    NormalGepCGEdge() = default;
 
     virtual ~NormalGepCGEdge() {}
 
@@ -274,7 +272,6 @@ class NormalGepCGEdge : public GepCGEdge {
  */
 class VariantGepCGEdge : public GepCGEdge {
   private:
-    VariantGepCGEdge();                         ///< place holder
     VariantGepCGEdge(const VariantGepCGEdge &); ///< place holder
     void operator=(const VariantGepCGEdge &);   ///< place holder
 
@@ -296,7 +293,7 @@ class VariantGepCGEdge : public GepCGEdge {
     /// Constructor
     VariantGepCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id)
         : GepCGEdge(s, d, VariantGep, id) {}
-
+    VariantGepCGEdge() = default;
     virtual ~VariantGepCGEdge(){}
 };
 

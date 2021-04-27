@@ -176,6 +176,8 @@ class DCHGraph : public CommonCHGraph, public GenericGraph<DCHNode, DCHEdge> {
         this->kind = DI;
     }
 
+    DCHGraph() = default;
+
     virtual ~DCHGraph(){};
 
     /// Builds the CHG from DWARF debug information. extend determines

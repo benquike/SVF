@@ -86,6 +86,8 @@ class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
   public:
     /// Constructor
     ConstraintGraph(PAG *p) : pag(p) { buildCG(); }
+    ConstraintGraph() = default;
+
     /// Destructor
     virtual ~ConstraintGraph() { destroy(); }
 

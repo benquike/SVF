@@ -91,6 +91,8 @@ class ConstraintNode : public GenericConsNodeTy {
         : GenericConsNodeTy(i, 0), _isPWCNode(false), pag(pag),
           newExpand(false) {}
 
+    ConstraintNode() = default;
+
     virtual ~ConstraintNode() {}
 
     virtual const std::string toString() const;

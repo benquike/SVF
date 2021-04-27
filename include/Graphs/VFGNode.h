@@ -696,14 +696,13 @@ class IntraPHIVFGNode : public PHIVFGNode {
 
 class AddrVFGNode : public StmtVFGNode {
   private:
-    AddrVFGNode() = default;             ///< place holder
     AddrVFGNode(const AddrVFGNode &);    ///< place holder
     void operator=(const AddrVFGNode &); ///< place holder
 
   public:
     /// Constructor
     AddrVFGNode(NodeID id, const AddrPE *edge) : StmtVFGNode(id, edge, Addr) {}
-
+    AddrVFGNode() = default;
     virtual ~AddrVFGNode() {}
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:

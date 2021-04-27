@@ -45,10 +45,10 @@ class MRSVFGNode : public VFGNode {
 
     // This constructor can only be used by derived classes
     MRSVFGNode(NodeID id, VFGNodeK k) : VFGNode(id, k) {}
-    MRSVFGNode() = default;
 
   public:
     virtual ~MRSVFGNode() {}
+    MRSVFGNode() = default;
 
   public:
     /// Return points-to of the MR

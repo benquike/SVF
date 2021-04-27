@@ -350,10 +350,10 @@ class ObjPN : public PAGNode {
     /// Constructor
     ObjPN(const Value *val, NodeID i, const MemObj *m, PNODEK ty = ObjNode)
         : PAGNode(val, i, ty), mem(m) {}
-    ObjPN() = default;
 
   public:
     virtual ~ObjPN() {}
+    ObjPN() = default;
 
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:

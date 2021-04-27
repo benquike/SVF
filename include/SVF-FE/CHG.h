@@ -77,6 +77,7 @@ class CHNode : public GenericCHNodeTy {
 
     CHNode(const std::string name, NodeID i = 0, GNodeK k = 0)
         : GenericCHNodeTy(i, k), vtable(nullptr), className(name), flags(0) {}
+    CHNode() = default;
     virtual ~CHNode() {}
     std::string getName() const { return className; }
     /// Flags
@@ -150,6 +151,9 @@ class CHGraph : public CommonCHGraph, public GenericCHGraphTy {
         : CommonCHGraph(symInfo), vfID(0), buildingCHGTime(0) {
         this->kind = Standard;
     }
+
+    CHGraph() = default;
+
     virtual ~CHGraph();
 
     void buildCHG();

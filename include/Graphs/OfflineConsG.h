@@ -61,6 +61,8 @@ class OfflineConsG : public ConstraintGraph {
         buildOfflineCG();
     }
 
+    OfflineConsG() = default;
+
     virtual ~OfflineConsG() {}
 
     // Determine whether a node has a OCG rep node
