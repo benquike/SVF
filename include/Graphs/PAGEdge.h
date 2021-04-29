@@ -52,12 +52,14 @@ class PAGEdge : public GenericPAGEdgeTy {
     /// ThreadFork/ThreadJoin is to model parameter passings between thread
     /// spawners and spawnees.
     enum PEDGEK {
+        PagEdge,
         Addr,
         Copy,
         Store,
         Load,
         Call,
         Ret,
+        Gep,
         NormalGep,
         VariantGep,
         ThreadFork,
@@ -75,7 +77,10 @@ class PAGEdge : public GenericPAGEdgeTy {
 
     /// Constructor
     PAGEdge(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag, GEdgeFlag k);
-    PAGEdge() = default;
+    PAGEdge() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(PagEdge);
+    }
 
     /// Destructor
     virtual ~PAGEdge() {}
@@ -177,7 +182,10 @@ class AddrPE : public PAGEdge {
     /// constructor
     AddrPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag)
         : PAGEdge(s, d, id, pag, PAGEdge::Addr) {}
-    AddrPE() = default;
+    AddrPE() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(Addr);
+    }
 
     virtual ~AddrPE() {}
 
@@ -217,7 +225,10 @@ class CopyPE : public PAGEdge {
     /// constructor
     CopyPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag)
         : PAGEdge(s, d, id, pag, PAGEdge::Copy) {}
-    CopyPE() = default;
+    CopyPE() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(Copy);
+    }
 
     virtual ~CopyPE() {}
 
@@ -257,7 +268,10 @@ class CmpPE : public PAGEdge {
     /// constructor
     CmpPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag)
         : PAGEdge(s, d, id, pag, PAGEdge::Cmp) {}
-    CmpPE() = default;
+    CmpPE() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(Cmp);
+    }
 
     virtual ~CmpPE() {}
 
@@ -297,7 +311,10 @@ class BinaryOPPE : public PAGEdge {
     /// constructor
     BinaryOPPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag)
         : PAGEdge(s, d, id, pag, PAGEdge::BinaryOp) {}
-    BinaryOPPE() = default;
+    BinaryOPPE() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(BinaryOp);
+    }
 
     virtual ~BinaryOPPE() {}
 
@@ -337,7 +354,10 @@ class UnaryOPPE : public PAGEdge {
     /// constructor
     UnaryOPPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag)
         : PAGEdge(s, d, id, pag, PAGEdge::UnaryOp) {}
-    UnaryOPPE() = default;
+    UnaryOPPE() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(UnaryOp);
+    }
 
     virtual ~UnaryOPPE() {}
 
@@ -378,7 +398,11 @@ class StorePE : public PAGEdge {
     /// constructor
     StorePE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag,
             const IntraBlockNode *st);
-    StorePE() = default;
+    StorePE() {
+        setId(MAX_EDGEID);
+        // only save the Store, ignore other parts
+        setEdgeFlag(Store);
+    }
 
     virtual ~StorePE() {}
 
@@ -419,7 +443,10 @@ class LoadPE : public PAGEdge {
     /// constructor
     LoadPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag)
         : PAGEdge(s, d, id, pag, PAGEdge::Load) {}
-    LoadPE() = default;
+    LoadPE() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(Load);
+    }
 
     virtual ~LoadPE() {}
 
@@ -459,7 +486,10 @@ class GepPE : public PAGEdge {
     }
     //@}
 
-    GepPE() = default;
+    GepPE() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(Gep);
+    }
     virtual ~GepPE() {}
 
   protected:
@@ -509,10 +539,13 @@ class NormalGepPE : public GepPE {
     virtual ~NormalGepPE() {}
 
     /// constructor
-    NormalGepPE() = default;
     NormalGepPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag,
                 const LocationSet &l)
         : GepPE(s, d, id, pag, PAGEdge::NormalGep), ls(l) {}
+    NormalGepPE() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(NormalGep);
+    }
 
     /// offset of the gep edge
     inline u32_t getOffset() const { return ls.getOffset(); }
@@ -559,7 +592,12 @@ class VariantGepPE : public GepPE {
     /// constructor
     VariantGepPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag)
         : GepPE(s, d, id, pag, PAGEdge::VariantGep) {}
-    VariantGepPE() = default;
+    VariantGepPE() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(VariantGep);
+    }
+
+
     virtual ~VariantGepPE() {}
 
     virtual const std::string toString() const;
@@ -600,9 +638,12 @@ class CallPE : public PAGEdge {
     //@}
 
     /// constructor
-    CallPE() = default;
     CallPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag, const CallBlockNode *i,
            GEdgeKind k = PAGEdge::Call);
+    CallPE() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(Call);
+    }
 
     virtual ~CallPE() {}
 
@@ -651,9 +692,12 @@ class RetPE : public PAGEdge {
     //@}
 
     /// constructor
-    RetPE() = default;
     RetPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag, const CallBlockNode *i,
           GEdgeKind k = PAGEdge::Ret);
+    RetPE() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(Ret);
+    }
 
     virtual ~RetPE() {}
 
@@ -702,10 +746,14 @@ class TDForkPE : public CallPE {
     virtual ~TDForkPE() {}
 
     /// constructor
-    TDForkPE() = default;
     TDForkPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag,
              const CallBlockNode *i)
         : CallPE(s, d, id, pag, i, PAGEdge::ThreadFork) {}
+
+    TDForkPE() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(ThreadFork);
+    }
 
     virtual const std::string toString() const;
 

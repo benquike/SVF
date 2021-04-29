@@ -38,6 +38,8 @@ namespace SVF {
 
 class VFGNode;
 
+#define MAX_CSID (numeric_limits<CallSiteID>::max())
+
 /*!
  * Interprocedural control-flow and value-flow edge, representing the control-
  * and value-flow dependence between two nodes
@@ -46,14 +48,25 @@ using GenericVFGEdgeTy = GenericEdge<VFGNode>;
 class VFGEdge : public GenericVFGEdgeTy {
 
   public:
-    /// seven types of ICFG edge
-    /// four types of direct value-flow edges
+    /// seven types of VFG edge
+    /// four types of direct value-flow edges:
+    /// - CallDirVF
+    /// - RetDirVF
+    /// - IntraDirectVF
     /// three types of indirect value-flow edges
+    /// - CallIndVF
+    /// - RetIndVF
+    /// - ThreadMHPIndirectVF
+    /// FIXME: append 'E' to all the macro names
+    /// to indicate 'edge'
     enum VFGEdgeK {
+        VF,
         IntraDirectVF,
         IntraIndirectVF,
+        DirectVF,
         CallDirVF,
         RetDirVF,
+        IndirectVF,
         CallIndVF,
         RetIndVF,
         TheadMHPIndirectVF
@@ -65,7 +78,7 @@ class VFGEdge : public GenericVFGEdgeTy {
     /// Constructor
     VFGEdge(VFGNode *s, VFGNode *d, EdgeID id, GEdgeFlag k)
         : GenericVFGEdgeTy(s, d, id, k) {}
-    VFGEdge() = default;
+    VFGEdge() : VFGEdge(nullptr, nullptr, MAX_EDGEID, VF) {}
 
     /// Destructor
     virtual ~VFGEdge() {}
@@ -143,7 +156,7 @@ class DirectSVFGEdge : public VFGEdge {
     /// Constructor
     DirectSVFGEdge(VFGNode *s, VFGNode *d, EdgeID id, GEdgeFlag k)
         : VFGEdge(s, d, id, k) {}
-    DirectSVFGEdge() = default;
+    DirectSVFGEdge() : VFGEdge(nullptr, nullptr, MAX_EDGEID, DirectVF) {}
 
     virtual ~DirectSVFGEdge() {}
 
@@ -185,7 +198,8 @@ class IntraDirSVFGEdge : public DirectSVFGEdge {
     /// Constructor
     IntraDirSVFGEdge(VFGNode *s, VFGNode *d, EdgeID id)
         : DirectSVFGEdge(s, d, id, IntraDirectVF) {}
-    IntraDirSVFGEdge() = default;
+    IntraDirSVFGEdge()
+        : DirectSVFGEdge(nullptr, nullptr, MAX_EDGEID, IntraDirectVF) {}
 
     virtual ~IntraDirSVFGEdge() {}
 
@@ -231,7 +245,11 @@ class CallDirSVFGEdge : public DirectSVFGEdge {
     CallDirSVFGEdge(VFGNode *s, VFGNode *d, EdgeID eid, CallSiteID id)
         : DirectSVFGEdge(s, d, eid, makeEdgeFlagWithInvokeID(CallDirVF, id)),
           csId(id) {}
-    CallDirSVFGEdge() = default;
+    CallDirSVFGEdge()
+        : DirectSVFGEdge(nullptr, nullptr,
+                         MAX_EDGEID,
+                         makeEdgeFlagWithInvokeID(CallDirVF, MAX_CSID)) {}
+
     virtual ~CallDirSVFGEdge() {}
 
     /// Return callsite ID
@@ -280,7 +298,10 @@ class RetDirSVFGEdge : public DirectSVFGEdge {
     RetDirSVFGEdge(VFGNode *s, VFGNode *d, EdgeID eid, CallSiteID id)
         : DirectSVFGEdge(s, d, eid, makeEdgeFlagWithInvokeID(RetDirVF, id)),
           csId(id) {}
-    RetDirSVFGEdge() = default;
+    RetDirSVFGEdge()
+        : DirectSVFGEdge(nullptr, nullptr,
+                         MAX_EDGEID,
+                         makeEdgeFlagWithInvokeID(RetDirVF, MAX_CSID)) {}
 
     virtual ~RetDirSVFGEdge() {}
 

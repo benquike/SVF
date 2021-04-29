@@ -62,6 +62,7 @@ class PAGNode : public GenericPAGNodeTy {
     /// DummyValNode and DummyObjNode: for non-llvm-value node
     /// Clone*Node: objects created by TBHC.
     enum PNODEK {
+        PagNode, // abstract PAG Node
         ValNode,
         ObjNode,
         RetNode,
@@ -86,7 +87,7 @@ class PAGNode : public GenericPAGNodeTy {
   public:
     /// Constructor
     PAGNode(const Value *val, NodeID i, PNODEK k);
-    PAGNode() = default;
+    PAGNode() : GenericPAGNodeTy(MAX_NODEID, PagNode) {}
 
     /// Destructor
     virtual ~PAGNode() {}
@@ -314,7 +315,7 @@ class ValPN : public PAGNode {
     /// Constructor
     ValPN(const Value *val, NodeID i, PNODEK ty = ValNode)
         : PAGNode(val, i, ty) {}
-    ValPN() = default;
+    ValPN() : PAGNode(nullptr, MAX_NODEID, ValNode) {}
 
     virtual ~ValPN() {}
 
@@ -353,7 +354,7 @@ class ObjPN : public PAGNode {
 
   public:
     virtual ~ObjPN() {}
-    ObjPN() = default;
+    ObjPN() : PAGNode(nullptr, MAX_NODEID, ObjNode) {}
 
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
@@ -445,7 +446,7 @@ class GepValPN : public ValPN {
     GepValPN(const Value *val, NodeID i, const LocationSet &l, const Type *ty,
              u32_t idx)
         : ValPN(val, i, GepValNode), ls(l), gepValType(ty), fieldIdx(idx) {}
-    GepValPN() = default;
+    GepValPN() : ValPN(nullptr, MAX_NODEID, GepValNode) {}
 
     virtual ~GepValPN() {}
 
@@ -525,7 +526,7 @@ class GepObjPN : public ObjPN {
         base = mem->getSymId();
     }
 
-    GepObjPN() = default;
+    GepObjPN() : ObjPN(nullptr, MAX_NODEID, nullptr, GepObjNode) {}
 
     virtual ~GepObjPN() {}
 
@@ -587,26 +588,14 @@ class FIObjPN : public ObjPN {
   public:
     ///  Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const FIObjPN *) { return true; }
-    static inline bool classof(const ObjPN *node) {
-        return node->getNodeKind() == PAGNode::FIObjNode ||
-               node->getNodeKind() == PAGNode::CloneFIObjNode;
-    }
-    static inline bool classof(const PAGNode *node) {
-        return node->getNodeKind() == PAGNode::FIObjNode ||
-               node->getNodeKind() == PAGNode::CloneFIObjNode;
-    }
-    static inline bool classof(const GenericPAGNodeTy *node) {
-        return node->getNodeKind() == PAGNode::FIObjNode ||
-               node->getNodeKind() == PAGNode::CloneFIObjNode;
-    }
+    static bool classof(const GenericPAGNodeTy *node);
     //@}
 
     /// Constructor
     FIObjPN(const Value *val, NodeID i, const MemObj *mem,
             PNODEK ty = FIObjNode)
         : ObjPN(val, i, mem, ty) {}
-    FIObjPN() = default;
+    FIObjPN() : ObjPN(nullptr, MAX_NODEID, nullptr, FIObjNode) {}
 
     virtual ~FIObjPN() {}
 
@@ -651,7 +640,7 @@ class RetPN : public PAGNode {
     /// Constructor
     RetPN(const SVFFunction *val, NodeID i)
         : PAGNode(val->getLLVMFun(), i, RetNode) {}
-    RetPN() = default;
+    RetPN() : PAGNode(nullptr, MAX_NODEID, RetNode) {}
 
     virtual ~RetPN() {}
 
@@ -693,7 +682,7 @@ class VarArgPN : public PAGNode {
     /// Constructor
     VarArgPN(const SVFFunction *val, NodeID i)
         : PAGNode(val->getLLVMFun(), i, VarargNode) {}
-    VarArgPN() = default;
+    VarArgPN() : PAGNode(nullptr, MAX_NODEID, VarargNode) {}
 
     virtual ~VarArgPN() {}
 
@@ -734,7 +723,7 @@ class DummyValPN : public ValPN {
 
     /// Constructor
     DummyValPN(NodeID i) : ValPN(nullptr, i, DummyValNode) {}
-    DummyValPN() = default;
+    DummyValPN() : DummyValPN(MAX_NODEID) {}
 
     virtual ~DummyValPN() {}
 
@@ -764,21 +753,13 @@ class DummyObjPN : public ObjPN {
 
   public:
     //@{ Methods for support type inquiry through isa, cast, and dyn_cast:
-    static inline bool classof(const DummyObjPN *) { return true; }
-    static inline bool classof(const PAGNode *node) {
-        return node->getNodeKind() == PAGNode::DummyObjNode ||
-               node->getNodeKind() == PAGNode::CloneDummyObjNode;
-    }
-    static inline bool classof(const GenericPAGNodeTy *node) {
-        return node->getNodeKind() == PAGNode::DummyObjNode ||
-               node->getNodeKind() == PAGNode::CloneDummyObjNode;
-    }
+    static bool classof(const GenericPAGNodeTy *node);
     //@}
 
     /// Constructor
     DummyObjPN(NodeID i, const MemObj *m, PNODEK ty = DummyObjNode)
         : ObjPN(nullptr, i, m, ty) {}
-    DummyObjPN() = default;
+    DummyObjPN() : DummyObjPN(MAX_NODEID, nullptr) {}
 
     virtual ~DummyObjPN() {}
 
@@ -819,7 +800,7 @@ class CloneDummyObjPN : public DummyObjPN {
     /// Constructor
     CloneDummyObjPN(NodeID i, const MemObj *m, PNODEK ty = CloneDummyObjNode)
         : DummyObjPN(i, m, ty) {}
-    CloneDummyObjPN() = default;
+    CloneDummyObjPN() : CloneDummyObjPN(MAX_NODEID, nullptr) {}
 
     virtual ~CloneDummyObjPN() {}
 
@@ -861,7 +842,10 @@ class CloneGepObjPN : public GepObjPN {
     CloneGepObjPN(const MemObj *mem, NodeID i, const LocationSet &l,
                   SymbolTableInfo *symInfo, PNODEK ty = CloneGepObjNode)
         : GepObjPN(mem, i, l, symInfo, ty) {}
-    CloneGepObjPN() = default;
+    CloneGepObjPN() {
+        setId(MAX_NODEID);
+        setNodeKind(CloneGepObjNode);
+    }
 
     virtual ~CloneGepObjPN() {}
 
@@ -904,7 +888,7 @@ class CloneFIObjPN : public FIObjPN {
                  PNODEK ty = CloneFIObjNode)
         : FIObjPN(val, i, mem, ty) {}
 
-    CloneFIObjPN() = default;
+    CloneFIObjPN() : CloneFIObjPN(nullptr, MAX_NODEID, nullptr) {}
 
     virtual ~CloneFIObjPN() {}
 

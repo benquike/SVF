@@ -49,6 +49,7 @@ class ICFGEdge : public GenericICFGEdgeTy {
     /// three types of control-flow edges
     /// seven types of value-flow edges
     enum ICFGEdgeK {
+        AbstractEdge,
         IntraCF,
         CallCF,
         RetCF,
@@ -61,7 +62,10 @@ class ICFGEdge : public GenericICFGEdgeTy {
     ICFGEdge(ICFGNode *s, ICFGNode *d, EdgeID id, GEdgeFlag k)
         : GenericICFGEdgeTy(s, d, id, k) {}
 
-    ICFGEdge() = default;
+    ICFGEdge() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(AbstractEdge);
+    }
 
     /// Destructor
     virtual ~ICFGEdge() {}

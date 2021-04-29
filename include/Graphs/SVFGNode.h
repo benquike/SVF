@@ -48,7 +48,7 @@ class MRSVFGNode : public VFGNode {
 
   public:
     virtual ~MRSVFGNode() {}
-    MRSVFGNode() = default;
+    MRSVFGNode() : VFGNode(MAX_NODEID, MRS) {}
 
   public:
     /// Return points-to of the MR
@@ -100,8 +100,7 @@ class FormalINSVFGNode : public MRSVFGNode {
         : MRSVFGNode(id, FPIN), chi(entry) {
         cpts = entry->getMR()->getPointsTo();
     }
-
-    FormalINSVFGNode() = default;
+    FormalINSVFGNode() : MRSVFGNode(MAX_NODEID, FPIN) {}
 
     virtual ~FormalINSVFGNode() {}
 
@@ -145,7 +144,7 @@ class FormalOUTSVFGNode : public MRSVFGNode {
   public:
     /// Constructor
     FormalOUTSVFGNode(NodeID id, const MemSSA::RETMU *exit);
-    FormalOUTSVFGNode() = default;
+    FormalOUTSVFGNode() : MRSVFGNode(MAX_NODEID, FPOUT){}
     virtual ~FormalOUTSVFGNode() {}
 
     /// RetMU
@@ -191,7 +190,7 @@ class ActualINSVFGNode : public MRSVFGNode {
         : MRSVFGNode(id, APIN), mu(m), cs(c) {
         cpts = m->getMR()->getPointsTo();
     }
-    ActualINSVFGNode() = default;
+    ActualINSVFGNode() : MRSVFGNode(MAX_NODEID, APIN) {}
 
     virtual ~ActualINSVFGNode() {}
 
@@ -245,7 +244,7 @@ class ActualOUTSVFGNode : public MRSVFGNode {
         : MRSVFGNode(id, APOUT), chi(c), cs(cal) {
         cpts = c->getMR()->getPointsTo();
     }
-    ActualOUTSVFGNode() = default;
+    ActualOUTSVFGNode() : MRSVFGNode(MAX_NODEID, APOUT) {}
 
     virtual ~ActualOUTSVFGNode() {}
 
@@ -301,7 +300,7 @@ class MSSAPHISVFGNode : public MRSVFGNode {
         : MRSVFGNode(id, k), res(def) {
         cpts = def->getMR()->getPointsTo();
     }
-    MSSAPHISVFGNode() = default;
+    MSSAPHISVFGNode() : MRSVFGNode(MAX_NODEID, MPhi) {}
 
     virtual ~MSSAPHISVFGNode() {}
 
@@ -365,7 +364,7 @@ class IntraMSSAPHISVFGNode : public MSSAPHISVFGNode {
     /// Constructor
     IntraMSSAPHISVFGNode(NodeID id, const MemSSA::PHI *phi)
         : MSSAPHISVFGNode(id, phi, MIntraPhi) {}
-    IntraMSSAPHISVFGNode() = default;
+    IntraMSSAPHISVFGNode() : MSSAPHISVFGNode(MAX_NODEID, nullptr, MIntraPhi) {}
 
     virtual ~IntraMSSAPHISVFGNode() {}
 
@@ -416,7 +415,7 @@ class InterMSSAPHISVFGNode : public MSSAPHISVFGNode {
         : MSSAPHISVFGNode(id, ao->getCallCHI(), MInterPhi), fun(nullptr),
           callInst(ao->getCallSite()) {}
 
-    InterMSSAPHISVFGNode() = default;
+    InterMSSAPHISVFGNode() : MSSAPHISVFGNode(MAX_NODEID, nullptr, MInterPhi) {}
 
     virtual ~InterMSSAPHISVFGNode() {}
 

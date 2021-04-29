@@ -56,6 +56,8 @@ class VFGNode : public GenericVFGNodeTy {
     /// 24 kinds of ICFG node
     /// Gep represents offset edge for field sensitivity
     enum VFGNodeK {
+        Vfg,  // abstract VFGNode
+        Stmt, // abstract statement VFG node
         Addr,
         Copy,
         Gep,
@@ -72,9 +74,11 @@ class VFGNode : public GenericVFGNodeTy {
         MInterPhi,
         FRet,
         ARet,
+        Argument, // abstract argument VFG node
         AParm,
         FParm,
         FunRet,
+        MRS, // abstract MRSVFGNode
         APIN,
         APOUT,
         FPIN,
@@ -90,7 +94,7 @@ class VFGNode : public GenericVFGNodeTy {
   public:
     /// Constructor
     VFGNode(NodeID i, VFGNodeK k) : GenericVFGNodeTy(i, k), icfgNode(nullptr) {}
-    VFGNode() = default;
+    VFGNode() : GenericVFGNodeTy(MAX_NODEID, Vfg) {}
 
     virtual ~VFGNode() {}
 
@@ -141,7 +145,7 @@ class StmtVFGNode : public VFGNode {
     /// Constructor
     StmtVFGNode(NodeID id, const PAGEdge *e, VFGNodeK k)
         : VFGNode(id, k), pagEdge(e) {}
-    StmtVFGNode() = default;
+    StmtVFGNode() : VFGNode(MAX_NODEID, Stmt) {}
 
     virtual ~StmtVFGNode() {}
 
@@ -208,7 +212,7 @@ class LoadVFGNode : public StmtVFGNode {
   public:
     /// Constructor
     LoadVFGNode(NodeID id, const LoadPE *edge) : StmtVFGNode(id, edge, Load) {}
-    LoadVFGNode() = default;
+    LoadVFGNode() : StmtVFGNode(MAX_NODEID, nullptr, Load) {}
 
     virtual ~LoadVFGNode() {}
 
@@ -252,7 +256,7 @@ class StoreVFGNode : public StmtVFGNode {
     /// Constructor
     StoreVFGNode(NodeID id, const StorePE *edge)
         : StmtVFGNode(id, edge, Store) {}
-    StoreVFGNode() = default;
+    StoreVFGNode() : StmtVFGNode(MAX_NODEID, nullptr, Store) {}
 
     virtual ~StoreVFGNode() {}
 
@@ -295,7 +299,7 @@ class CopyVFGNode : public StmtVFGNode {
   public:
     /// Constructor
     CopyVFGNode(NodeID id, const CopyPE *copy) : StmtVFGNode(id, copy, Copy) {}
-    CopyVFGNode() = default;
+    CopyVFGNode() : StmtVFGNode(MAX_NODEID, nullptr, Copy) {}
 
     virtual ~CopyVFGNode() {}
 
@@ -349,7 +353,7 @@ class CmpVFGNode : public VFGNode {
         const auto *cmp = llvm::dyn_cast<CmpInst>(r->getValue());
         assert(cmp && "not a binary operator?");
     }
-    CmpVFGNode() = default;
+    CmpVFGNode() : VFGNode(MAX_NODEID, Cmp) {}
 
     virtual ~CmpVFGNode() {}
 
@@ -414,7 +418,7 @@ class BinaryOPVFGNode : public VFGNode {
         const auto *binary = llvm::dyn_cast<BinaryOperator>(r->getValue());
         assert(binary && "not a binary operator?");
     }
-    BinaryOPVFGNode() = default;
+    BinaryOPVFGNode() : VFGNode(MAX_NODEID, BinaryOp) {}
     virtual ~BinaryOPVFGNode() {}
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
@@ -480,7 +484,7 @@ class UnaryOPVFGNode : public VFGNode {
                      llvm::isa<BranchInst>(val) || llvm::isa<SwitchInst>(val));
         assert(unop && "not a unary operator or a BranchInst or a SwitchInst?");
     }
-    UnaryOPVFGNode() = default;
+    UnaryOPVFGNode() : VFGNode(MAX_NODEID, UnaryOp) {}
 
     virtual ~UnaryOPVFGNode() {}
 
@@ -535,7 +539,7 @@ class GepVFGNode : public StmtVFGNode {
   public:
     /// Constructor
     GepVFGNode(NodeID id, const GepPE *edge) : StmtVFGNode(id, edge, Gep) {}
-    GepVFGNode() = default;
+    GepVFGNode() : StmtVFGNode(MAX_NODEID, nullptr, Gep) {}
     virtual ~GepVFGNode() {}
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
@@ -582,7 +586,7 @@ class PHIVFGNode : public VFGNode {
   public:
     /// Constructor
     PHIVFGNode(NodeID id, const PAGNode *r, VFGNodeK k = TPhi);
-    PHIVFGNode() = default;
+    PHIVFGNode() : VFGNode(MAX_NODEID, TPhi) {}
 
     virtual ~PHIVFGNode() {}
 
@@ -649,8 +653,7 @@ class IntraPHIVFGNode : public PHIVFGNode {
     /// Constructor
     IntraPHIVFGNode(NodeID id, const PAGNode *r)
         : PHIVFGNode(id, r, TIntraPhi) {}
-
-    IntraPHIVFGNode() = default;
+    IntraPHIVFGNode() : PHIVFGNode(MAX_NODEID, nullptr, TIntraPhi) {}
     virtual ~IntraPHIVFGNode() {}
 
     inline const ICFGNode *getOpIncomingBB(u32_t pos) const {
@@ -702,7 +705,7 @@ class AddrVFGNode : public StmtVFGNode {
   public:
     /// Constructor
     AddrVFGNode(NodeID id, const AddrPE *edge) : StmtVFGNode(id, edge, Addr) {}
-    AddrVFGNode() = default;
+    AddrVFGNode() : StmtVFGNode(MAX_NODEID, nullptr, Addr) {}
     virtual ~AddrVFGNode() {}
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
@@ -742,8 +745,7 @@ class ArgumentVFGNode : public VFGNode {
     /// Constructor
     ArgumentVFGNode(NodeID id, const PAGNode *p, VFGNodeK k)
         : VFGNode(id, k), param(p) {}
-
-    ArgumentVFGNode() = default;
+    ArgumentVFGNode() : VFGNode(MAX_NODEID, Argument) {}
     virtual ~ArgumentVFGNode() {}
 
     /// Whether this argument node is of pointer type (used for pointer
@@ -789,7 +791,7 @@ class ActualParmVFGNode : public ArgumentVFGNode {
     /// Constructor
     ActualParmVFGNode(NodeID id, const PAGNode *n, const CallBlockNode *c)
         : ArgumentVFGNode(id, n, AParm), cs(c) {}
-    ActualParmVFGNode() = default;
+    ActualParmVFGNode() : ArgumentVFGNode(MAX_NODEID, nullptr, AParm) {}
     virtual ~ActualParmVFGNode() {}
 
     /// Return callsite
@@ -839,7 +841,7 @@ class FormalParmVFGNode : public ArgumentVFGNode {
     /// Constructor
     FormalParmVFGNode(NodeID id, const PAGNode *n, const SVFFunction *f)
         : ArgumentVFGNode(id, n, FParm), fun(f) {}
-    FormalParmVFGNode() = default;
+    FormalParmVFGNode() : ArgumentVFGNode(MAX_NODEID, nullptr, FParm) {}
 
     virtual ~FormalParmVFGNode() {}
 
@@ -910,7 +912,7 @@ class ActualRetVFGNode : public ArgumentVFGNode {
     /// Constructor
     ActualRetVFGNode(NodeID id, const PAGNode *n, const CallBlockNode *c)
         : ArgumentVFGNode(id, n, ARet), cs(c) {}
-    ActualRetVFGNode() = default;
+    ActualRetVFGNode() : ArgumentVFGNode(MAX_NODEID, nullptr, ARet) {}
 
     virtual ~ActualRetVFGNode() {}
 
@@ -963,7 +965,7 @@ class FormalRetVFGNode : public ArgumentVFGNode {
   public:
     /// Constructor
     FormalRetVFGNode(NodeID id, const PAGNode *n, const SVFFunction *f);
-    FormalRetVFGNode() = default;
+    FormalRetVFGNode() : ArgumentVFGNode(MAX_NODEID, nullptr, FRet) {}
     virtual ~FormalRetVFGNode() {}
 
     /// Return value at callee
@@ -1030,7 +1032,7 @@ class InterPHIVFGNode : public PHIVFGNode {
         : PHIVFGNode(id, ar->getRev(), TInterPhi), fun(ar->getCaller()),
           callInst(ar->getCallSite()) {}
 
-    InterPHIVFGNode() = default;
+    InterPHIVFGNode() : PHIVFGNode(MAX_NODEID, nullptr, TInterPhi) {}
 
     virtual ~InterPHIVFGNode() {}
 
@@ -1104,7 +1106,7 @@ class NullPtrVFGNode : public VFGNode {
   public:
     /// Constructor
     NullPtrVFGNode(NodeID id, const PAGNode *n) : VFGNode(id, NPtr), node(n) {}
-    NullPtrVFGNode() = default;
+    NullPtrVFGNode() : VFGNode(MAX_NODEID, NPtr) {}
 
     virtual ~NullPtrVFGNode() {}
 

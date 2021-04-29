@@ -54,7 +54,7 @@ class IndirectSVFGEdge : public VFGEdge {
     /// Constructor
     IndirectSVFGEdge(VFGNode *s, VFGNode *d, EdgeID id, GEdgeFlag k)
         : VFGEdge(s, d, id, k) {}
-    IndirectSVFGEdge() = default;
+    IndirectSVFGEdge() : VFGEdge(nullptr, nullptr, MAX_EDGEID, IndirectVF) {}
 
     virtual ~IndirectSVFGEdge() {}
 
@@ -112,7 +112,10 @@ class IntraIndSVFGEdge : public IndirectSVFGEdge {
   public:
     IntraIndSVFGEdge(VFGNode *s, VFGNode *d, EdgeID id)
         : IndirectSVFGEdge(s, d, id, IntraIndirectVF) {}
-    IntraIndSVFGEdge() = default;
+    IntraIndSVFGEdge()
+        : IndirectSVFGEdge(nullptr, nullptr,
+                           MAX_EDGEID,
+                           IntraIndirectVF) {}
 
     virtual ~IntraIndSVFGEdge() {}
 
@@ -156,7 +159,10 @@ class CallIndSVFGEdge : public IndirectSVFGEdge {
     CallIndSVFGEdge(VFGNode *s, VFGNode *d, EdgeID eid, CallSiteID id)
         : IndirectSVFGEdge(s, d, eid, makeEdgeFlagWithInvokeID(CallIndVF, id)),
           csId(id) {}
-    CallIndSVFGEdge() = default;
+        CallIndSVFGEdge() :
+            IndirectSVFGEdge(nullptr, nullptr, MAX_EDGEID,
+                             makeEdgeFlagWithInvokeID(CallIndVF,
+                                                      MAX_CSID)) {}
 
     virtual ~CallIndSVFGEdge() {}
 
@@ -202,7 +208,11 @@ class RetIndSVFGEdge : public IndirectSVFGEdge {
     RetIndSVFGEdge(VFGNode *s, VFGNode *d, EdgeID eid, CallSiteID id)
         : IndirectSVFGEdge(s, d, eid, makeEdgeFlagWithInvokeID(RetIndVF, id)),
           csId(id) {}
-    RetIndSVFGEdge() = default;
+    RetIndSVFGEdge()
+        : IndirectSVFGEdge(nullptr, nullptr,
+                           MAX_EDGEID,
+                           makeEdgeFlagWithInvokeID(RetIndVF,
+                                                    MAX_CSID)) {};
 
     virtual ~RetIndSVFGEdge() {}
 
@@ -244,7 +254,9 @@ class ThreadMHPIndSVFGEdge : public IndirectSVFGEdge {
   public:
     ThreadMHPIndSVFGEdge(VFGNode *s, VFGNode *d, EdgeID id)
         : IndirectSVFGEdge(s, d, id, TheadMHPIndirectVF) {}
-    ThreadMHPIndSVFGEdge() = default;
+        ThreadMHPIndSVFGEdge() : IndirectSVFGEdge(nullptr, nullptr,
+                                                  MAX_EDGEID,
+                                                  TheadMHPIndirectVF) {}
 
     virtual ~ThreadMHPIndSVFGEdge() {}
 

@@ -58,7 +58,9 @@ class ICFGNode : public GenericICFGNodeTy {
     /// 22 kinds of ICFG node
     /// Gep represents offset edge for field sensitivity
     enum ICFGNodeK {
+        AbstractNode,
         IntraBlock,
+        InterBlock,
         FunEntryBlock,
         FunExitBlock,
         FunCallBlock,
@@ -77,8 +79,7 @@ class ICFGNode : public GenericICFGNodeTy {
     /// Constructor
     ICFGNode(NodeID i, ICFGNodeK k)
         : GenericICFGNodeTy(i, k), fun(nullptr), bb(nullptr) {}
-
-    ICFGNode() = default;
+    ICFGNode() : GenericICFGNodeTy(MAX_NODEID, AbstractNode) {}
 
     virtual ~ICFGNode(){};
 
@@ -162,7 +163,9 @@ class GlobalBlockNode : public ICFGNode {
 
   public:
     GlobalBlockNode(NodeID id) : ICFGNode(id, GlobalBlock) { bb = nullptr; }
-    GlobalBlockNode() = default;
+    GlobalBlockNode() : GlobalBlockNode(MAX_NODEID)  {};
+    // GlobalBlockNode() = default;
+
 
     virtual ~GlobalBlockNode() {}
 
@@ -204,7 +207,7 @@ class IntraBlockNode : public ICFGNode {
         bb = inst->getParent();
     }
 
-    IntraBlockNode() = default;
+    IntraBlockNode() : ICFGNode(MAX_NODEID, IntraBlock) {}
 
     virtual ~IntraBlockNode() {}
 
@@ -248,7 +251,7 @@ class InterBlockNode : public ICFGNode {
   public:
     /// Constructor
     InterBlockNode(NodeID id, ICFGNodeK k) : ICFGNode(id, k) {}
-    InterBlockNode() = default;
+    InterBlockNode(): ICFGNode(MAX_NODEID, InterBlock) {}
 
     virtual ~InterBlockNode() {}
 
@@ -294,7 +297,8 @@ class FunEntryBlockNode : public InterBlockNode {
 
   public:
     FunEntryBlockNode(NodeID id, const SVFFunction *f);
-    FunEntryBlockNode() = default;
+    FunEntryBlockNode()
+        : InterBlockNode(MAX_NODEID, FunEntryBlock) {}
 
     virtual ~FunEntryBlockNode() {}
 
@@ -348,7 +352,8 @@ class FunExitBlockNode : public InterBlockNode {
 
   public:
     FunExitBlockNode(NodeID id, const SVFFunction *f);
-    FunExitBlockNode() = default;
+    FunExitBlockNode()
+        : InterBlockNode(MAX_NODEID, FunExitBlock) {}
 
     virtual ~FunExitBlockNode() {}
 
@@ -422,7 +427,8 @@ class CallBlockNode : public InterBlockNode {
         bb = cs->getParent();
     }
 
-    CallBlockNode() = default;
+    CallBlockNode()
+        : InterBlockNode(MAX_NODEID, FunCallBlock) {}
     virtual ~CallBlockNode() {}
 
     /// Return callsite
@@ -520,7 +526,8 @@ class RetBlockNode : public InterBlockNode {
         bb = cs->getParent();
     }
 
-    RetBlockNode() = default;
+    RetBlockNode()
+        : InterBlockNode(MAX_NODEID, FunRetBlock) {}
 
     virtual ~RetBlockNode() {}
 

@@ -50,7 +50,16 @@ class ConstraintEdge : public GenericConsEdgeTy {
   public:
     /// five kinds of constraint graph edges
     /// Gep edge is used for field sensitivity
-    enum ConstraintEdgeK { Addr, Copy, Store, Load, NormalGep, VariantGep };
+    enum ConstraintEdgeK {
+        AbstractEdge,
+        Addr,
+        Copy,
+        Store,
+        Load,
+        Gep,
+        NormalGep,
+        VariantGep
+    };
 
   private:
     EdgeID edgeId;
@@ -61,7 +70,10 @@ class ConstraintEdge : public GenericConsEdgeTy {
                    EdgeID id = 0)
         : GenericConsEdgeTy(s, d, id, k), edgeId(id) {}
 
-    ConstraintEdge() = default;
+    ConstraintEdge() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(AbstractEdge);
+    }
 
     /// Destructor
     virtual ~ConstraintEdge() {}
@@ -111,7 +123,11 @@ class AddrCGEdge : public ConstraintEdge {
 
     /// constructor
     AddrCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id, PAG *pag);
-    AddrCGEdge() = default;
+    AddrCGEdge() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(Addr);
+    }
+
     virtual ~AddrCGEdge() {}
 };
 
@@ -137,7 +153,10 @@ class CopyCGEdge : public ConstraintEdge {
     /// constructor
     CopyCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id)
         : ConstraintEdge(s, d, Copy, id) {}
-    CopyCGEdge() = default;
+    CopyCGEdge() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(Copy);
+    }
     virtual ~CopyCGEdge(){}
 };
 
@@ -164,7 +183,10 @@ class StoreCGEdge : public ConstraintEdge {
     /// constructor
     StoreCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id)
         : ConstraintEdge(s, d, Store, id) {}
-    StoreCGEdge() = default;
+    StoreCGEdge() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(Store);
+    }
     virtual ~StoreCGEdge() {}
 };
 
@@ -191,7 +213,10 @@ class LoadCGEdge : public ConstraintEdge {
     /// Constructor
     LoadCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id)
         : ConstraintEdge(s, d, Load, id) {}
-    LoadCGEdge() = default;
+    LoadCGEdge() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(Load);
+    }
     virtual ~LoadCGEdge() {}
 };
 
@@ -209,7 +234,10 @@ class GepCGEdge : public ConstraintEdge {
               EdgeID id)
         : ConstraintEdge(s, d, k, id) {}
   public:
-    GepCGEdge() = default;
+    GepCGEdge() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(Gep);
+    }
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
@@ -256,7 +284,10 @@ class NormalGepCGEdge : public GepCGEdge {
     NormalGepCGEdge(ConstraintNode *s, ConstraintNode *d, const LocationSet &l,
                     EdgeID id)
         : GepCGEdge(s, d, NormalGep, id), ls(l) {}
-    NormalGepCGEdge() = default;
+    NormalGepCGEdge() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(NormalGep);
+    }
 
     virtual ~NormalGepCGEdge() {}
 
@@ -293,8 +324,11 @@ class VariantGepCGEdge : public GepCGEdge {
     /// Constructor
     VariantGepCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id)
         : GepCGEdge(s, d, VariantGep, id) {}
-    VariantGepCGEdge() = default;
-    virtual ~VariantGepCGEdge(){}
+    VariantGepCGEdge() {
+        setId(MAX_EDGEID);
+        setEdgeFlag(VariantGep);
+    }
+    virtual ~VariantGepCGEdge() {}
 };
 
 } // End namespace SVF
