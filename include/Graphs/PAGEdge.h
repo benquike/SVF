@@ -87,22 +87,7 @@ class PAGEdge : public GenericPAGEdgeTy {
 
     /// ClassOf
     //@{
-    static inline bool classof(const PAGEdge *) { return true; }
-    static inline bool classof(const GenericPAGEdgeTy *edge) {
-        return edge->getEdgeKind() == PAGEdge::Addr ||
-               edge->getEdgeKind() == PAGEdge::Copy ||
-               edge->getEdgeKind() == PAGEdge::Store ||
-               edge->getEdgeKind() == PAGEdge::Load ||
-               edge->getEdgeKind() == PAGEdge::Call ||
-               edge->getEdgeKind() == PAGEdge::Ret ||
-               edge->getEdgeKind() == PAGEdge::NormalGep ||
-               edge->getEdgeKind() == PAGEdge::VariantGep ||
-               edge->getEdgeKind() == PAGEdge::ThreadFork ||
-               edge->getEdgeKind() == PAGEdge::ThreadJoin ||
-               edge->getEdgeKind() == PAGEdge::Cmp ||
-               edge->getEdgeKind() == PAGEdge::BinaryOp ||
-               edge->getEdgeKind() == PAGEdge::UnaryOp;
-    }
+    static bool classof(const GenericPAGEdgeTy *edge);
     ///@}
 
     /// Whether src and dst nodes are both of pointer type
@@ -170,10 +155,6 @@ class AddrPE : public PAGEdge {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const AddrPE *) { return true; }
-    static inline bool classof(const PAGEdge *edge) {
-        return edge->getEdgeKind() == PAGEdge::Addr;
-    }
     static inline bool classof(const GenericPAGEdgeTy *edge) {
         return edge->getEdgeKind() == PAGEdge::Addr;
     }
@@ -213,10 +194,6 @@ class CopyPE : public PAGEdge {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const CopyPE *) { return true; }
-    static inline bool classof(const PAGEdge *edge) {
-        return edge->getEdgeKind() == PAGEdge::Copy;
-    }
     static inline bool classof(const GenericPAGEdgeTy *edge) {
         return edge->getEdgeKind() == PAGEdge::Copy;
     }
@@ -256,10 +233,6 @@ class CmpPE : public PAGEdge {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const CmpPE *) { return true; }
-    static inline bool classof(const PAGEdge *edge) {
-        return edge->getEdgeKind() == PAGEdge::Cmp;
-    }
     static inline bool classof(const GenericPAGEdgeTy *edge) {
         return edge->getEdgeKind() == PAGEdge::Cmp;
     }
@@ -299,10 +272,6 @@ class BinaryOPPE : public PAGEdge {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const BinaryOPPE *) { return true; }
-    static inline bool classof(const PAGEdge *edge) {
-        return edge->getEdgeKind() == PAGEdge::BinaryOp;
-    }
     static inline bool classof(const GenericPAGEdgeTy *edge) {
         return edge->getEdgeKind() == PAGEdge::BinaryOp;
     }
@@ -342,10 +311,6 @@ class UnaryOPPE : public PAGEdge {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const UnaryOPPE *) { return true; }
-    static inline bool classof(const PAGEdge *edge) {
-        return edge->getEdgeKind() == PAGEdge::UnaryOp;
-    }
     static inline bool classof(const GenericPAGEdgeTy *edge) {
         return edge->getEdgeKind() == PAGEdge::UnaryOp;
     }
@@ -386,10 +351,6 @@ class StorePE : public PAGEdge {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const StorePE *) { return true; }
-    static inline bool classof(const PAGEdge *edge) {
-        return edge->getEdgeKind() == PAGEdge::Store;
-    }
     static inline bool classof(const GenericPAGEdgeTy *edge) {
         return edge->getEdgeKind() == PAGEdge::Store;
     }
@@ -431,10 +392,6 @@ class LoadPE : public PAGEdge {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const LoadPE *) { return true; }
-    static inline bool classof(const PAGEdge *edge) {
-        return edge->getEdgeKind() == PAGEdge::Load;
-    }
     static inline bool classof(const GenericPAGEdgeTy *edge) {
         return edge->getEdgeKind() == PAGEdge::Load;
     }
@@ -475,15 +432,7 @@ class GepPE : public PAGEdge {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const GepPE *) { return true; }
-    static inline bool classof(const PAGEdge *edge) {
-        return edge->getEdgeKind() == PAGEdge::NormalGep ||
-               edge->getEdgeKind() == PAGEdge::VariantGep;
-    }
-    static inline bool classof(const GenericPAGEdgeTy *edge) {
-        return edge->getEdgeKind() == PAGEdge::NormalGep ||
-               edge->getEdgeKind() == PAGEdge::VariantGep;
-    }
+    static bool classof(const GenericPAGEdgeTy *edge);
     //@}
 
     GepPE() {
@@ -523,13 +472,6 @@ class NormalGepPE : public GepPE {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const NormalGepPE *) { return true; }
-    static inline bool classof(const GepPE *edge) {
-        return edge->getEdgeKind() == PAGEdge::NormalGep;
-    }
-    static inline bool classof(const PAGEdge *edge) {
-        return edge->getEdgeKind() == PAGEdge::NormalGep;
-    }
     static inline bool classof(const GenericPAGEdgeTy *edge) {
         return edge->getEdgeKind() == PAGEdge::NormalGep;
     }
@@ -577,13 +519,6 @@ class VariantGepPE : public GepPE {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const VariantGepPE *) { return true; }
-    static inline bool classof(const GepPE *edge) {
-        return edge->getEdgeKind() == PAGEdge::VariantGep;
-    }
-    static inline bool classof(const PAGEdge *edge) {
-        return edge->getEdgeKind() == PAGEdge::VariantGep;
-    }
     static inline bool classof(const GenericPAGEdgeTy *edge) {
         return edge->getEdgeKind() == PAGEdge::VariantGep;
     }
@@ -626,15 +561,7 @@ class CallPE : public PAGEdge {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const CallPE *) { return true; }
-    static inline bool classof(const PAGEdge *edge) {
-        return edge->getEdgeKind() == PAGEdge::Call ||
-               edge->getEdgeKind() == PAGEdge::ThreadFork;
-    }
-    static inline bool classof(const GenericPAGEdgeTy *edge) {
-        return edge->getEdgeKind() == PAGEdge::Call ||
-               edge->getEdgeKind() == PAGEdge::ThreadFork;
-    }
+    static bool classof(const GenericPAGEdgeTy *edge);
     //@}
 
     /// constructor
@@ -680,15 +607,7 @@ class RetPE : public PAGEdge {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const RetPE *) { return true; }
-    static inline bool classof(const PAGEdge *edge) {
-        return edge->getEdgeKind() == PAGEdge::Ret ||
-               edge->getEdgeKind() == PAGEdge::ThreadJoin;
-    }
-    static inline bool classof(const GenericPAGEdgeTy *edge) {
-        return edge->getEdgeKind() == PAGEdge::Ret ||
-               edge->getEdgeKind() == PAGEdge::ThreadJoin;
-    }
+    static bool classof(const GenericPAGEdgeTy *edge);
     //@}
 
     /// constructor
@@ -733,10 +652,6 @@ class TDForkPE : public CallPE {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const TDForkPE *) { return true; }
-    static inline bool classof(const PAGEdge *edge) {
-        return edge->getEdgeKind() == PAGEdge::ThreadFork;
-    }
     static inline bool classof(const GenericPAGEdgeTy *edge) {
         return edge->getEdgeKind() == PAGEdge::ThreadFork;
     }

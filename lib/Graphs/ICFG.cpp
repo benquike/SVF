@@ -43,6 +43,24 @@
 using namespace SVF;
 using namespace SVFUtil;
 
+bool ICFGNode::classof(const GenericICFGNodeTy *node) {
+    return node->getNodeKind() == AbstractNode ||
+           GlobalBlockNode::classof(node) || IntraBlockNode::classof(node) ||
+           InterBlockNode::classof(node);
+}
+
+bool InterBlockNode::classof(const GenericICFGNodeTy *node) {
+    return node->getNodeKind() == InterBlock ||
+           FunEntryBlockNode::classof(node) ||
+           FunExitBlockNode::classof(node) || CallBlockNode::classof(node) ||
+           RetBlockNode::classof(node);
+}
+
+bool ICFGEdge::classof(const GenericICFGEdgeTy *edge) {
+    return edge->getEdgeKind() == AbstractEdge || IntraCFGEdge::classof(edge) ||
+           CallCFGEdge::classof(edge) || RetCFGEdge::classof(edge);
+}
+
 FunEntryBlockNode::FunEntryBlockNode(NodeID id, const SVFFunction *f)
     : InterBlockNode(id, FunEntryBlock) {
     fun = f;

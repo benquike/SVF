@@ -91,12 +91,7 @@ class ConstraintEdge : public GenericConsEdgeTy {
     virtual const std::string toString() const;
 
     /// ClassOf
-    static inline bool classof(const GenericConsEdgeTy *edge) {
-        return edge->getEdgeKind() == Addr || edge->getEdgeKind() == Copy ||
-               edge->getEdgeKind() == Store || edge->getEdgeKind() == Load ||
-               edge->getEdgeKind() == NormalGep ||
-               edge->getEdgeKind() == VariantGep;
-    }
+    static inline bool classof(const GenericConsEdgeTy *edge);
     /// Constraint edge type
     using ConstraintEdgeSetTy =
         GenericNode<ConstraintNode, ConstraintEdge>::GEdgeSetTy;
@@ -112,10 +107,6 @@ class AddrCGEdge : public ConstraintEdge {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const AddrCGEdge *) { return true; }
-    static inline bool classof(const ConstraintEdge *edge) {
-        return edge->getEdgeKind() == Addr;
-    }
     static inline bool classof(const GenericConsEdgeTy *edge) {
         return edge->getEdgeKind() == Addr;
     }
@@ -141,10 +132,6 @@ class CopyCGEdge : public ConstraintEdge {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const CopyCGEdge *) { return true; }
-    static inline bool classof(const ConstraintEdge *edge) {
-        return edge->getEdgeKind() == Copy;
-    }
     static inline bool classof(const GenericConsEdgeTy *edge) {
         return edge->getEdgeKind() == Copy;
     }
@@ -171,10 +158,6 @@ class StoreCGEdge : public ConstraintEdge {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const StoreCGEdge *) { return true; }
-    static inline bool classof(const ConstraintEdge *edge) {
-        return edge->getEdgeKind() == Store;
-    }
     static inline bool classof(const GenericConsEdgeTy *edge) {
         return edge->getEdgeKind() == Store;
     }
@@ -201,10 +184,6 @@ class LoadCGEdge : public ConstraintEdge {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const LoadCGEdge *) { return true; }
-    static inline bool classof(const ConstraintEdge *edge) {
-        return edge->getEdgeKind() == Load;
-    }
     static inline bool classof(const GenericConsEdgeTy *edge) {
         return edge->getEdgeKind() == Load;
     }
@@ -241,15 +220,7 @@ class GepCGEdge : public ConstraintEdge {
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const GepCGEdge *) { return true; }
-    static inline bool classof(const ConstraintEdge *edge) {
-        return edge->getEdgeKind() == NormalGep ||
-               edge->getEdgeKind() == VariantGep;
-    }
-    static inline bool classof(const GenericConsEdgeTy *edge) {
-        return edge->getEdgeKind() == NormalGep ||
-               edge->getEdgeKind() == VariantGep;
-    }
+    static bool classof(const GenericConsEdgeTy *edge);
     //@}
 
     virtual ~GepCGEdge() {}
@@ -268,13 +239,6 @@ class NormalGepCGEdge : public GepCGEdge {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const NormalGepCGEdge *) { return true; }
-    static inline bool classof(const GepCGEdge *edge) {
-        return edge->getEdgeKind() == NormalGep;
-    }
-    static inline bool classof(const ConstraintEdge *edge) {
-        return edge->getEdgeKind() == NormalGep;
-    }
     static inline bool classof(const GenericConsEdgeTy *edge) {
         return edge->getEdgeKind() == NormalGep;
     }
@@ -309,13 +273,6 @@ class VariantGepCGEdge : public GepCGEdge {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const VariantGepCGEdge *) { return true; }
-    static inline bool classof(const GepCGEdge *edge) {
-        return edge->getEdgeKind() == VariantGep;
-    }
-    static inline bool classof(const ConstraintEdge *edge) {
-        return edge->getEdgeKind() == VariantGep;
-    }
     static inline bool classof(const GenericConsEdgeTy *edge) {
         return edge->getEdgeKind() == VariantGep;
     }

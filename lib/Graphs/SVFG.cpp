@@ -30,12 +30,31 @@
 #include "Graphs/SVFG.h"
 #include "Graphs/SVFGOPT.h"
 #include "Graphs/SVFGStat.h"
+#include "Graphs/VFG.h"
 #include "SVF-FE/LLVMUtil.h"
 #include "Util/SVFModule.h"
 #include <llvm/Demangle/Demangle.h>
 
 using namespace SVF;
 using namespace SVFUtil;
+
+bool IndirectSVFGEdge::classof(const GenericVFGEdgeTy *edge) {
+    return edge->getEdgeKind() == VFGEdge::IndirectVF ||
+           IntraIndSVFGEdge::classof(edge) || CallIndSVFGEdge::classof(edge) ||
+           RetIndSVFGEdge::classof(edge) || ThreadMHPIndSVFGEdge::classof(edge);
+}
+
+bool MRSVFGNode::classof(const GenericVFGNodeTy *node) {
+    return node->getNodeKind() == MRS || FormalINSVFGNode::classof(node) ||
+           FormalOUTSVFGNode::classof(node) ||
+           ActualINSVFGNode::classof(node) ||
+           ActualOUTSVFGNode::classof(node) || MSSAPHISVFGNode::classof(node);
+}
+
+bool MSSAPHISVFGNode::classof(const GenericVFGNodeTy *node) {
+    return node->getNodeKind() == MPhi || IntraMSSAPHISVFGNode::classof(node) ||
+           InterMSSAPHISVFGNode::classof(node);
+}
 
 const std::string MRSVFGNode::toString() const {
     std::string str;

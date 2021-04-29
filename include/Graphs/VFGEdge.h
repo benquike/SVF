@@ -125,6 +125,10 @@ class VFGEdge : public GenericVFGEdgeTy {
         return (cs << EdgeKindMaskBits) | k;
     }
 
+    //@{ Methods for support type inquiry through isa, cast, and dyn_cast:
+    static bool classof(const GenericVFGEdgeTy *edge);
+    //@}
+
     /// Overloading operator << for dumping ICFG node ID
     //@{
     friend raw_ostream &operator<<(raw_ostream &o, const VFGEdge &edge) {
@@ -162,17 +166,7 @@ class DirectSVFGEdge : public VFGEdge {
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const DirectSVFGEdge *) { return true; }
-    static inline bool classof(const VFGEdge *edge) {
-        return edge->getEdgeKind() == IntraDirectVF ||
-               edge->getEdgeKind() == CallDirVF ||
-               edge->getEdgeKind() == RetDirVF;
-    }
-    static inline bool classof(const GenericVFGEdgeTy *edge) {
-        return edge->getEdgeKind() == IntraDirectVF ||
-               edge->getEdgeKind() == CallDirVF ||
-               edge->getEdgeKind() == RetDirVF;
-    }
+    static bool classof(const GenericVFGEdgeTy *edge);
     //@}
 
     const std::string toString() const override;
@@ -205,13 +199,6 @@ class IntraDirSVFGEdge : public DirectSVFGEdge {
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const IntraDirSVFGEdge *) { return true; }
-    static inline bool classof(const DirectSVFGEdge *edge) {
-        return edge->getEdgeKind() == IntraDirectVF;
-    }
-    static inline bool classof(const VFGEdge *edge) {
-        return edge->getEdgeKind() == IntraDirectVF;
-    }
     static inline bool classof(const GenericVFGEdgeTy *edge) {
         return edge->getEdgeKind() == IntraDirectVF;
     }
@@ -257,13 +244,6 @@ class CallDirSVFGEdge : public DirectSVFGEdge {
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const CallDirSVFGEdge *) { return true; }
-    static inline bool classof(const DirectSVFGEdge *edge) {
-        return edge->getEdgeKind() == CallDirVF;
-    }
-    static inline bool classof(const VFGEdge *edge) {
-        return edge->getEdgeKind() == CallDirVF;
-    }
     static inline bool classof(const GenericVFGEdgeTy *edge) {
         return edge->getEdgeKind() == CallDirVF;
     }
@@ -309,13 +289,6 @@ class RetDirSVFGEdge : public DirectSVFGEdge {
     inline CallSiteID getCallSiteId() const { return csId; }
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const RetDirSVFGEdge *) { return true; }
-    static inline bool classof(const DirectSVFGEdge *edge) {
-        return edge->getEdgeKind() == RetDirVF;
-    }
-    static inline bool classof(const VFGEdge *edge) {
-        return edge->getEdgeKind() == RetDirVF;
-    }
     static inline bool classof(const GenericVFGEdgeTy *edge) {
         return edge->getEdgeKind() == RetDirVF;
     }

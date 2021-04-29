@@ -37,6 +37,17 @@ using namespace SVFUtil;
 ConstraintNode::SCCEdgeFlag ConstraintNode::sccEdgeFlag =
     ConstraintNode::Direct;
 
+bool ConstraintEdge::classof(const GenericConsEdgeTy *edge) {
+    return edge->getEdgeKind() == AbstractEdge || AddrCGEdge::classof(edge) ||
+           CopyCGEdge::classof(edge) || StoreCGEdge::classof(edge) ||
+           LoadCGEdge::classof(edge) || GepCGEdge::classof(edge);
+}
+
+bool GepCGEdge::classof(const GenericConsEdgeTy *edge) {
+    return edge->getEdgeKind() == Gep || NormalGepCGEdge::classof(edge) ||
+           VariantGepCGEdge::classof(edge);
+}
+
 const std::string ConstraintNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);

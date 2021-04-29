@@ -98,6 +98,10 @@ class ICFGEdge : public GenericICFGEdgeTy {
 
     virtual const std::string toString() const;
 
+    //@{
+    static bool classof(const GenericICFGEdgeTy *edge);
+    //@}
+
   private:
     /// support for serialization
     /// @{
@@ -133,12 +137,6 @@ class IntraCFGEdge : public ICFGEdge {
     virtual ~IntraCFGEdge() {}
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const IntraCFGEdge *) { return true; }
-
-    static inline bool classof(const ICFGEdge *edge) {
-        return edge->getEdgeKind() == IntraCF;
-    }
-
     static inline bool classof(const GenericICFGEdgeTy *edge) {
         return edge->getEdgeKind() == IntraCF;
     }

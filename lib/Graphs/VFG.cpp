@@ -28,6 +28,7 @@
  */
 
 #include "Graphs/VFG.h"
+#include "Graphs/SVFG.h"
 #include "SVF-FE/LLVMUtil.h"
 #include "Util/Options.h"
 #include "Util/SVFModule.h"
@@ -35,6 +36,42 @@
 
 using namespace SVF;
 using namespace SVFUtil;
+
+bool VFGNode::classof(const GenericVFGNodeTy *node) {
+    return node->getNodeKind() == VFGNode::Vfg || StmtVFGNode::classof(node) ||
+           CmpVFGNode::classof(node) || BinaryOPVFGNode::classof(node) ||
+           UnaryOPVFGNode::classof(node) || PHIVFGNode::classof(node) ||
+           ArgumentVFGNode::classof(node) || NullPtrVFGNode::classof(node);
+}
+
+bool StmtVFGNode::classof(const GenericVFGNodeTy *node) {
+    return node->getNodeKind() == VFGNode::Stmt || LoadVFGNode::classof(node) ||
+           StoreVFGNode::classof(node) || CopyVFGNode::classof(node) ||
+           GepVFGNode::classof(node) || AddrVFGNode::classof(node);
+}
+
+bool PHIVFGNode::classof(const GenericVFGNodeTy *node) {
+    return node->getNodeKind() == TPhi || IntraPHIVFGNode::classof(node) ||
+           InterPHIVFGNode::classof(node);
+}
+
+bool ArgumentVFGNode::classof(const GenericVFGNodeTy *node) {
+    return node->getNodeKind() == VFGNode::Argument ||
+           ActualParmVFGNode::classof(node) ||
+           FormalParmVFGNode::classof(node) ||
+           ActualRetVFGNode::classof(node) || FormalRetVFGNode::classof(node);
+}
+
+bool VFGEdge::classof(const GenericVFGEdgeTy *edge) {
+    return edge->getEdgeKind() == VFGEdge::VF ||
+           DirectSVFGEdge::classof(edge) || IndirectSVFGEdge::classof(edge);
+}
+
+bool DirectSVFGEdge::classof(const GenericVFGEdgeTy *edge) {
+    return edge->getEdgeKind() == VFGEdge::DirectVF ||
+           IntraDirSVFGEdge::classof(edge) || CallDirSVFGEdge::classof(edge) ||
+           RetDirSVFGEdge::classof(edge);
+}
 
 const std::string VFGNode::toString() const {
     std::string str;

@@ -43,6 +43,61 @@
 using namespace SVF;
 using namespace SVFUtil;
 
+bool PAGNode::classof(const GenericPAGNodeTy *node) {
+    return node->getNodeKind() == PAGNode::PagNode || ValPN::classof(node) ||
+           ObjPN::classof(node) || RetPN::classof(node) ||
+           VarArgPN::classof(node);
+}
+
+bool ValPN::classof(const GenericPAGNodeTy *node) {
+    return node->getNodeKind() == PAGNode::ValNode || GepValPN::classof(node) ||
+           DummyValPN::classof(node);
+}
+
+bool FIObjPN::classof(const GenericPAGNodeTy *node) {
+    return node->getNodeKind() == PAGNode::FIObjNode ||
+           CloneFIObjPN::classof(node);
+}
+
+bool ObjPN::classof(const GenericPAGNodeTy *node) {
+    return node->getNodeKind() == PAGNode::ObjNode || GepObjPN::classof(node) ||
+           FIObjPN::classof(node) || DummyObjPN::classof(node) ||
+           CloneGepObjPN::classof(node) || CloneFIObjPN::classof(node) ||
+           CloneDummyObjPN::classof(node);
+}
+
+bool GepObjPN::classof(const GenericPAGNodeTy *node) {
+    return node->getNodeKind() == PAGNode::GepObjNode ||
+           CloneGepObjPN::classof(node);
+}
+
+bool DummyObjPN::classof(const GenericPAGNodeTy *node) {
+    return node->getNodeKind() == PAGNode::DummyObjNode ||
+           CloneDummyObjPN::classof(node);
+}
+
+bool PAGEdge::classof(const GenericPAGEdgeTy *edge) {
+    return edge->getEdgeKind() == PAGEdge::PagEdge || AddrPE::classof(edge) ||
+           CopyPE::classof(edge) || StorePE::classof(edge) ||
+           LoadPE::classof(edge) || CallPE::classof(edge) ||
+           RetPE::classof(edge) || GepPE::classof(edge) ||
+           CmpPE::classof(edge) || BinaryOPPE::classof(edge) ||
+           UnaryOPPE::classof(edge);
+}
+
+bool GepPE::classof(const GenericPAGEdgeTy *edge) {
+    return edge->getEdgeKind() == Gep || NormalGepPE::classof(edge) ||
+           VariantGepPE::classof(edge);
+}
+
+bool CallPE::classof(const GenericPAGEdgeTy *edge) {
+    return edge->getEdgeKind() == PAGEdge::Call || TDForkPE::classof(edge);
+}
+
+bool RetPE::classof(const GenericPAGEdgeTy *edge) {
+    return edge->getEdgeKind() == Ret || TDJoinPE::classof(edge);
+}
+
 llvm::cl::list<std::string> ExternalPAGArgs(
     "extpags",
     llvm::cl::desc("ExternalPAGs to use during PAG construction (format: "

@@ -253,6 +253,11 @@ class PAGNode : public GenericPAGNodeTy {
     /// Dump to console for debugging
     void dump() const;
 
+    /// Methods for support type inquiry through isa, cast, and dyn_cast:
+    //@{
+    static bool classof(const GenericPAGNodeTy *node);
+    //@}
+
     //@}
     /// Overloading operator << for dumping PAGNode value
     //@{
@@ -299,17 +304,7 @@ class ValPN : public PAGNode {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const ValPN *) { return true; }
-    static inline bool classof(const PAGNode *node) {
-        return node->getNodeKind() == PAGNode::ValNode ||
-               node->getNodeKind() == PAGNode::GepValNode ||
-               node->getNodeKind() == PAGNode::DummyValNode;
-    }
-    static inline bool classof(const GenericPAGNodeTy *node) {
-        return node->getNodeKind() == PAGNode::ValNode ||
-               node->getNodeKind() == PAGNode::GepValNode ||
-               node->getNodeKind() == PAGNode::DummyValNode;
-    }
+    static bool classof(const GenericPAGNodeTy *node);
     //@}
 
     /// Constructor
@@ -359,25 +354,7 @@ class ObjPN : public PAGNode {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const ObjPN *) { return true; }
-    static inline bool classof(const PAGNode *node) {
-        return node->getNodeKind() == PAGNode::ObjNode ||
-               node->getNodeKind() == PAGNode::GepObjNode ||
-               node->getNodeKind() == PAGNode::FIObjNode ||
-               node->getNodeKind() == PAGNode::DummyObjNode ||
-               node->getNodeKind() == PAGNode::CloneGepObjNode ||
-               node->getNodeKind() == PAGNode::CloneFIObjNode ||
-               node->getNodeKind() == PAGNode::CloneDummyObjNode;
-    }
-    static inline bool classof(const GenericPAGNodeTy *node) {
-        return node->getNodeKind() == PAGNode::ObjNode ||
-               node->getNodeKind() == PAGNode::GepObjNode ||
-               node->getNodeKind() == PAGNode::FIObjNode ||
-               node->getNodeKind() == PAGNode::DummyObjNode ||
-               node->getNodeKind() == PAGNode::CloneGepObjNode ||
-               node->getNodeKind() == PAGNode::CloneFIObjNode ||
-               node->getNodeKind() == PAGNode::CloneDummyObjNode;
-    }
+    static bool classof(const GenericPAGNodeTy *node);
     //@}
 
     /// Return memory object
@@ -430,13 +407,6 @@ class GepValPN : public ValPN {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const GepValPN *) { return true; }
-    static inline bool classof(const ValPN *node) {
-        return node->getNodeKind() == PAGNode::GepValNode;
-    }
-    static inline bool classof(const PAGNode *node) {
-        return node->getNodeKind() == PAGNode::GepValNode;
-    }
     static inline bool classof(const GenericPAGNodeTy *node) {
         return node->getNodeKind() == PAGNode::GepValNode;
     }
@@ -504,19 +474,7 @@ class GepObjPN : public ObjPN {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const GepObjPN *) { return true; }
-    static inline bool classof(const ObjPN *node) {
-        return node->getNodeKind() == PAGNode::GepObjNode ||
-               node->getNodeKind() == PAGNode::CloneGepObjNode;
-    }
-    static inline bool classof(const PAGNode *node) {
-        return node->getNodeKind() == PAGNode::GepObjNode ||
-               node->getNodeKind() == PAGNode::CloneGepObjNode;
-    }
-    static inline bool classof(const GenericPAGNodeTy *node) {
-        return node->getNodeKind() == PAGNode::GepObjNode ||
-               node->getNodeKind() == PAGNode::CloneGepObjNode;
-    }
+    static bool classof(const GenericPAGNodeTy *node);
     //@}
 
     /// Constructor
@@ -628,10 +586,6 @@ class RetPN : public PAGNode {
 
   public:
     //@{ Methods for support type inquiry through isa, cast, and dyn_cast:
-    static inline bool classof(const RetPN *) { return true; }
-    static inline bool classof(const PAGNode *node) {
-        return node->getNodeKind() == PAGNode::RetNode;
-    }
     static inline bool classof(const GenericPAGNodeTy *node) {
         return node->getNodeKind() == PAGNode::RetNode;
     }
@@ -670,10 +624,6 @@ class VarArgPN : public PAGNode {
 
   public:
     //@{ Methods for support type inquiry through isa, cast, and dyn_cast:
-    static inline bool classof(const VarArgPN *) { return true; }
-    static inline bool classof(const PAGNode *node) {
-        return node->getNodeKind() == PAGNode::VarargNode;
-    }
     static inline bool classof(const GenericPAGNodeTy *node) {
         return node->getNodeKind() == PAGNode::VarargNode;
     }
@@ -712,10 +662,6 @@ class DummyValPN : public ValPN {
 
   public:
     //@{ Methods for support type inquiry through isa, cast, and dyn_cast:
-    static inline bool classof(const DummyValPN *) { return true; }
-    static inline bool classof(const PAGNode *node) {
-        return node->getNodeKind() == PAGNode::DummyValNode;
-    }
     static inline bool classof(const GenericPAGNodeTy *node) {
         return node->getNodeKind() == PAGNode::DummyValNode;
     }
@@ -788,10 +734,6 @@ class DummyObjPN : public ObjPN {
 class CloneDummyObjPN : public DummyObjPN {
   public:
     //@{ Methods to support type inquiry through isa, cast, and dyn_cast:
-    static inline bool classof(const CloneDummyObjPN *) { return true; }
-    static inline bool classof(const PAGNode *node) {
-        return node->getNodeKind() == PAGNode::CloneDummyObjNode;
-    }
     static inline bool classof(const GenericPAGNodeTy *node) {
         return node->getNodeKind() == PAGNode::CloneDummyObjNode;
     }
@@ -829,10 +771,6 @@ class CloneDummyObjPN : public DummyObjPN {
 class CloneGepObjPN : public GepObjPN {
   public:
     //@{ Methods to support type inquiry through isa, cast, and dyn_cast:
-    static inline bool classof(const CloneGepObjPN *) { return true; }
-    static inline bool classof(const PAGNode *node) {
-        return node->getNodeKind() == PAGNode::CloneGepObjNode;
-    }
     static inline bool classof(const GenericPAGNodeTy *node) {
         return node->getNodeKind() == PAGNode::CloneGepObjNode;
     }
@@ -874,10 +812,6 @@ class CloneGepObjPN : public GepObjPN {
 class CloneFIObjPN : public FIObjPN {
   public:
     //@{ Methods to support type inquiry through isa, cast, and dyn_cast:
-    static inline bool classof(const CloneFIObjPN *) { return true; }
-    static inline bool classof(const PAGNode *node) {
-        return node->getNodeKind() == PAGNode::CloneFIObjNode;
-    }
     static inline bool classof(const GenericPAGNodeTy *node) {
         return node->getNodeKind() == PAGNode::CloneFIObjNode;
     }
