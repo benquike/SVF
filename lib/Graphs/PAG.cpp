@@ -1001,18 +1001,25 @@ PAGNode::PAGNode(const Value *val, NodeID i, PNODEK k)
     assert(ValNode <= k && k <= CloneDummyObjNode && "new PAG node kind?");
 
     switch (k) {
+    case PagNode:
+        break;
     case ValNode:
     case GepValNode: {
-        assert(val != nullptr && "value is nullptr for ValPN or GepValNode");
-        isTLPointer = val->getType()->isPointerTy();
-        isATPointer = false;
+        if (nullptr != val) {
+            isTLPointer = val->getType()->isPointerTy();
+            isATPointer = false;
+        }
+
         break;
     }
 
     case RetNode: {
-        assert(val != nullptr && "value is nullptr for RetNode");
-        isTLPointer = llvm::cast<Function>(val)->getReturnType()->isPointerTy();
-        isATPointer = false;
+        if (nullptr != val) {
+            isTLPointer =
+                llvm::cast<Function>(val)->getReturnType()->isPointerTy();
+            isATPointer = false;
+        }
+
         break;
     }
 
