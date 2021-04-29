@@ -35,6 +35,9 @@
 
 namespace SVF {
 
+#define MAX_NODEID (numeric_limits<NodeID>::max())
+#define MAX_EDGEID (numeric_limits<EdgeID>::max())
+
 /*!
  * Generic edge on the graph as base class
  */
@@ -63,7 +66,7 @@ template <class NodeTy> class GenericEdge {
   private:
     NodeTy *src = nullptr; ///< source node
     NodeTy *dst = nullptr; ///< destination node
-    EdgeID id = numeric_limits<EdgeID>::max();
+    EdgeID id = MAX_EDGEID;
     GEdgeFlag edgeFlag = 0; ///< edge kind
 
   protected:
@@ -163,7 +166,7 @@ template <class NodeTy, class EdgeTy> class GenericNode {
     }
 
   private:
-    NodeID id = numeric_limits<NodeID>::max();       ///< Node ID
+    NodeID id = MAX_NODEID;                          ///< Node ID
     GNodeK nodeKind = numeric_limits<GNodeK>::max(); ///< Node kind
 
     GEdgeSetTy InEdges;  ///< all incoming edge of this node
@@ -494,21 +497,15 @@ template <class NodeTy, class EdgeTy> class GenericGraph {
     /// ertain source and dest in the graph
     /// FIXME: we can drop those
     /// implmentations later on
-    inline NodeID getDummyNodeId() const {
-        return numeric_limits<NodeID>::max();
-    }
-    inline EdgeID getDummyEdgeId() const {
-        return numeric_limits<EdgeID>::max();
-    }
+    inline NodeID getDummyNodeId() const { return MAX_NODEID; }
+    inline EdgeID getDummyEdgeId() const { return MAX_EDGEID; }
 
     inline NodeID getNextNodeId() {
-        assert(currentNodeId < numeric_limits<NodeID>::max() &&
-               "node id overflow");
+        assert(currentNodeId < MAX_NODEID && "node id overflow");
         return currentNodeId++;
     }
     inline EdgeID getNextEdgeId() {
-        assert(currentEdgeId < numeric_limits<EdgeID>::max() &&
-               "edge id overflow");
+        assert(currentEdgeId < MAX_EDGEID && "edge id overflow");
         return currentEdgeId++;
     }
 
