@@ -66,6 +66,10 @@ template <class NodeTy> class GenericEdge {
     EdgeID id = numeric_limits<EdgeID>::max();
     GEdgeFlag edgeFlag = 0; ///< edge kind
 
+  protected:
+    inline void setId(EdgeID _id) { id = _id; }
+    inline void setEdgeFlag(GEdgeFlag flag) { edgeFlag = flag; }
+
   public:
     /// Constructor
     GenericEdge(NodeTy *s, NodeTy *d, EdgeID id, GEdgeFlag k)
@@ -164,6 +168,10 @@ template <class NodeTy, class EdgeTy> class GenericNode {
 
     GEdgeSetTy InEdges;  ///< all incoming edge of this node
     GEdgeSetTy OutEdges; ///< all outgoing edge of this node
+
+  protected:
+    inline void setNodeKind(GNodeK kind) { nodeKind = kind; }
+    inline void setId(NodeID _id) { id = _id; }
 
   public:
     /// Constructor
