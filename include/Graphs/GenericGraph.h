@@ -41,7 +41,8 @@ namespace SVF {
 /*!
  * Generic edge on the graph as base class
  */
-template <class NodeTy> class GenericEdge {
+template <class NodeTy>
+class GenericEdge {
   private:
     // Allow serialization to access non-public data members.
     friend class boost::serialization::access;
@@ -140,7 +141,8 @@ template <class NodeTy> class GenericEdge {
 /*!
  * Generic node on the graph as base class
  */
-template <class NodeTy, class EdgeTy> class GenericNode {
+template <class NodeTy, class EdgeTy>
+class GenericNode {
 
   public:
     using NodeType = NodeTy;
@@ -287,7 +289,8 @@ template <class NodeTy, class EdgeTy> class GenericNode {
  * Generic graph for program representation
  * It is base class and needs to be instantiated
  */
-template <class NodeTy, class EdgeTy> class GenericGraph {
+template <class NodeTy, class EdgeTy>
+class GenericGraph {
 
   public:
     using NodeType = NodeTy;
