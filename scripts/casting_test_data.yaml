@@ -1,0 +1,11 @@
+- GlobalBlockNode:
+  - ICFGNode
+  - GenericICFGNode
+- IntraBlockNode:
+  - ICFGNode
+  - IntraBlockNode
+  - GenericICFGNodeTy
+- InterBlockNode:
+  - GenericICFGNodeTy
+  - ICFGNode
+  - InterBlockNode
