@@ -55,7 +55,7 @@ class MRSVFGNode : public VFGNode {
     inline const PointsTo &getPointsTo() const { return cpts; }
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const GenericVFGNodeTy *node);
+    static bool classof(const GenericVFGNodeTy *node);
     //@}
 
     const std::string toString() const override;
@@ -268,7 +268,9 @@ class MSSAPHISVFGNode : public MRSVFGNode {
     /// Constructor
     MSSAPHISVFGNode(NodeID id, const MemSSA::MDEF *def, VFGNodeK k = MPhi)
         : MRSVFGNode(id, k), res(def) {
-        cpts = def->getMR()->getPointsTo();
+        if (nullptr != def) {
+            cpts = def->getMR()->getPointsTo();
+        }
     }
     MSSAPHISVFGNode() : MRSVFGNode(MAX_NODEID, MPhi) {}
 
@@ -290,7 +292,7 @@ class MSSAPHISVFGNode : public MRSVFGNode {
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const GenericVFGNodeTy *node);
+    static bool classof(const GenericVFGNodeTy *node);
     //@}
 
     const std::string toString() const override;
