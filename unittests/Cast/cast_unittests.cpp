@@ -200,6 +200,81 @@ TEST(CastTestSuite, ThreadMHPIndSVFGEdge_for_delete_redundant) {
     delete gVFGEdge;
 }
 
+TEST(CastTestSuite, PAGNodeToObjPN) {
+
+    {
+        PAGNode *pPAGNode = new ObjPN();
+        ObjPN *objPN = llvm::dyn_cast<ObjPN>(pPAGNode);
+        delete pPAGNode;
+    }
+
+    {
+        shared_ptr<PAGNode> pPAGNode = make_shared<ObjPN>();
+        shared_ptr<ObjPN> objPN = llvm::dyn_cast<ObjPN>(pPAGNode);
+    }
+
+    {
+        shared_ptr<GenericPAGNodeTy> pPAGNode = make_shared<ObjPN>();
+        shared_ptr<ObjPN> objPN = llvm::dyn_cast<ObjPN>(pPAGNode);
+    }
+}
+
+// #if 0
+TEST(CastTestSuite, shared_ptr_const) {
+    {
+        const shared_ptr<PAGNode> pPAGNode = make_shared<ObjPN>();
+        const shared_ptr<ObjPN> objPN = llvm::dyn_cast<ObjPN>(pPAGNode);
+    }
+}
+// #endif
+
+TEST(CastTestSuite, simple_type_test) {
+
+    /// This test show that llvm::is_simple_type treats
+    // all types except const X * const as simple types
+    // cout << std::boolalpha;
+    ASSERT_TRUE(llvm::is_simple_type<int>::value);
+    ASSERT_TRUE(llvm::is_simple_type<const volatile int>::value);
+    ASSERT_TRUE(llvm::is_simple_type<const int>::value);
+    ASSERT_TRUE(llvm::is_simple_type<int *>::value);
+    ASSERT_TRUE(llvm::is_simple_type<const int *>::value);
+    ASSERT_TRUE(llvm::is_simple_type<int &>::value);
+    ASSERT_TRUE(llvm::is_simple_type<const int &>::value);
+    ASSERT_TRUE(llvm::is_simple_type<shared_ptr<int>>::value);
+    ASSERT_TRUE(llvm::is_simple_type<unique_ptr<int>>::value);
+    ASSERT_TRUE(llvm::is_simple_type<shared_ptr<int> &>::value);
+    ASSERT_TRUE(llvm::is_simple_type<unique_ptr<int> &>::value);
+    ASSERT_TRUE(llvm::is_simple_type<shared_ptr<int> &&>::value);
+    ASSERT_TRUE(llvm::is_simple_type<unique_ptr<int> &&>::value);
+    ASSERT_TRUE(llvm::is_simple_type<const shared_ptr<int>>::value);
+    ASSERT_TRUE(llvm::is_simple_type<const unique_ptr<int>>::value);
+    ASSERT_TRUE(llvm::is_simple_type<const shared_ptr<int> &>::value);
+    ASSERT_TRUE(llvm::is_simple_type<const unique_ptr<int> &>::value);
+    ASSERT_TRUE(llvm::is_simple_type<const shared_ptr<int> &&>::value);
+    ASSERT_TRUE(llvm::is_simple_type<const unique_ptr<int> &&>::value);
+    ASSERT_TRUE(llvm::is_simple_type<ObjPN>::value);
+    ASSERT_TRUE(llvm::is_simple_type<const ObjPN>::value);
+    ASSERT_TRUE(llvm::is_simple_type<ObjPN *>::value);
+    ASSERT_TRUE(llvm::is_simple_type<const ObjPN *>::value);
+    ASSERT_TRUE(llvm::is_simple_type<shared_ptr<ObjPN>>::value);
+    ASSERT_TRUE(llvm::is_simple_type<unique_ptr<ObjPN>>::value);
+    ASSERT_TRUE(llvm::is_simple_type<shared_ptr<ObjPN> &>::value);
+    ASSERT_TRUE(llvm::is_simple_type<unique_ptr<ObjPN> &>::value);
+    ASSERT_TRUE(llvm::is_simple_type<shared_ptr<ObjPN> &&>::value);
+    ASSERT_TRUE(llvm::is_simple_type<unique_ptr<ObjPN> &&>::value);
+    ASSERT_TRUE(llvm::is_simple_type<const shared_ptr<ObjPN>>::value);
+    ASSERT_TRUE(llvm::is_simple_type<const unique_ptr<ObjPN>>::value);
+    ASSERT_TRUE(llvm::is_simple_type<const shared_ptr<ObjPN> &>::value);
+    ASSERT_TRUE(llvm::is_simple_type<const unique_ptr<ObjPN> &>::value);
+    ASSERT_TRUE(llvm::is_simple_type<const shared_ptr<ObjPN> &&>::value);
+    ASSERT_TRUE(llvm::is_simple_type<const unique_ptr<ObjPN> &&>::value);
+
+    //// this is not a simple type
+    ASSERT_FALSE(llvm::is_simple_type<const ObjPN *const>::value);
+    ASSERT_FALSE(llvm::is_simple_type<const int *const>::value);
+    ASSERT_FALSE(llvm::is_simple_type<const int *const>::value);
+}
+
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
