@@ -48,8 +48,31 @@ struct cast_retty_impl<To, std::shared_ptr<From>> {
     using ret_type = std::shared_ptr<ResultType>;
 };
 
+template <class To, class From>
+struct cast_retty_impl<To, const std::shared_ptr<From>> {
+  private:
+    using PointerType = typename cast_retty_impl<To, From *>::ret_type;
+    using ResultType = typename std::remove_pointer<PointerType>::type;
+
+  public:
+    using ret_type = const std::shared_ptr<ResultType>;
+};
+
 template <class To, class FromTy>
 struct cast_convert_val<To, std::shared_ptr<FromTy>, std::shared_ptr<FromTy>> {
+    using FromSPtr = std::shared_ptr<FromTy>;
+    using RetTypeWConst = typename cast_retty<To, FromSPtr>::ret_type;
+    using CastTo = typename std::remove_const<To>::type;
+    using RetType = typename std::remove_const<RetTypeWConst>::type;
+    static RetType doit(const FromSPtr &Val) {
+        RetType Res2 = std::dynamic_pointer_cast<CastTo>(Val);
+        return Res2;
+    }
+};
+
+template <class To, class FromTy>
+struct cast_convert_val<To, const std::shared_ptr<FromTy>,
+                        const std::shared_ptr<FromTy>> {
     using FromSPtr = std::shared_ptr<FromTy>;
     using RetTypeWConst = typename cast_retty<To, FromSPtr>::ret_type;
     using CastTo = typename std::remove_const<To>::type;
