@@ -101,21 +101,21 @@ class GenericEdge {
     //  comparison)
     //@{
     typedef struct {
-        bool operator()(const GenericEdge<NodeType> *lhs,
-                        const GenericEdge<NodeType> *rhs) const {
+        template <typename EdgePtrType>
+        bool operator()(const EdgePtrType lhs, const EdgePtrType rhs) const {
             // compare flags
             if (lhs->edgeFlag != rhs->edgeFlag) {
                 return lhs->edgeFlag < rhs->edgeFlag;
             }
 
-            NodeType *lsrc = lhs->getSrcNode();
-            NodeID lsrcId = lsrc == nullptr ? 0 : lsrc->getId();
-            NodeType *ldst = lhs->getDstNode();
-            NodeID ldstId = ldst == nullptr ? 0 : ldst->getId();
-            NodeType *rsrc = rhs->getSrcNode();
-            NodeID rsrcId = rsrc == nullptr ? 0 : rsrc->getId();
-            NodeType *rdst = rhs->getDstNode();
-            NodeID rdstId = rdst == nullptr ? 0 : rdst->getId();
+            auto lsrc = lhs->getSrcNode();
+            auto lsrcId = lsrc == nullptr ? 0 : lsrc->getId();
+            auto ldst = lhs->getDstNode();
+            auto ldstId = ldst == nullptr ? 0 : ldst->getId();
+            auto rsrc = rhs->getSrcNode();
+            auto rsrcId = rsrc == nullptr ? 0 : rsrc->getId();
+            auto rdst = rhs->getDstNode();
+            auto rdstId = rdst == nullptr ? 0 : rdst->getId();
 
             if (lsrcId != rsrcId) {
                 return lsrcId < rsrcId;
