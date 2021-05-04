@@ -396,9 +396,9 @@ class GenericGraph {
 
         assert(edge != nullptr && "edge is null");
 
-        NodeType *srcNode = edge->getSrcNode();
+        auto srcNode = edge->getSrcNode();
         assert(srcNode != nullptr && "source node is null");
-        NodeType *dstNode = edge->getDstNode();
+        auto dstNode = edge->getDstNode();
         assert(dstNode != nullptr && "dest node is null");
         assert(hasGNode(srcNode) && "source node not exists");
         assert(hasGNode(dstNode) && "dest node not exists");
@@ -469,9 +469,9 @@ class GenericGraph {
     inline void removeGEdge(EdgeType *edge) {
         assert(edge != nullptr && "edge is null");
 
-        NodeType *srcNode = edge->getSrcNode();
+        auto srcNode = edge->getSrcNode();
         assert(srcNode != nullptr && "source node is null");
-        NodeType *dstNode = edge->getDstNode();
+        auto dstNode = edge->getDstNode();
         assert(dstNode != nullptr && "dest node is null");
         assert(hasGNode(srcNode) && "source node not exists");
         assert(hasGNode(dstNode) && "dest node not exists");
