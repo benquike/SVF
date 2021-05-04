@@ -125,9 +125,6 @@ class DiffPTData : public PTData<Key, KeySet, Data, DataSet> {
 
     /// Methods to support type inquiry through isa, cast, and dyn_cast:
     ///@{
-    static inline bool classof(const DiffPTData<Key, KeySet, Data, DataSet> *) {
-        return true;
-    }
     static inline bool classof(const PTData<Key, KeySet, Data, DataSet> *ptd) {
         return ptd->getPTDTY() == PTDataTy::Diff ||
                ptd->getPTDTY() == PTDataTy::MutDiff;
@@ -208,10 +205,6 @@ class DFPTData : public PTData<Key, KeySet, Data, DataSet> {
 
     /// Methods to support type inquiry through isa, cast, and dyn_cast:
     ///@{
-    static inline bool classof(const DFPTData<Key, KeySet, Data, DataSet> *) {
-        return true;
-    }
-
     static inline bool classof(const PTData<Key, KeySet, Data, DataSet> *ptd) {
         return ptd->getPTDTY() == BasePTData::DataFlow ||
                ptd->getPTDTY() == BasePTData::MutDataFlow ||
@@ -253,12 +246,6 @@ class VersionedPTData : public PTData<Key, KeySet, Data, DataSet> {
 
     /// Methods to support type inquiry through isa, cast, and dyn_cast:
     ///@{
-    static inline bool
-    classof(const VersionedPTData<Key, KeySet, Data, DataSet, VersionedKey,
-                                  VersionedKeySet> *) {
-        return true;
-    }
-
     static inline bool classof(const PTData<Key, KeySet, Data, DataSet> *ptd) {
         return ptd->getPTDTY() == PTDataTy::Versioned ||
                ptd->getPTDTY() == PTDataTy::MutVersioned;

@@ -170,7 +170,6 @@ template <class Cond> class LoadMU : public MSSAMU<Cond> {
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const LoadMU *) { return true; }
     static inline bool classof(const MSSAMU<Cond> *mu) {
         return mu->getType() == MSSAMU<Cond>::LoadMSSAMU;
     }
@@ -212,7 +211,6 @@ template <class Cond> class CallMU : public MSSAMU<Cond> {
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const CallMU *) { return true; }
     static inline bool classof(const MSSAMU<Cond> *mu) {
         return mu->getType() == MSSAMU<Cond>::CallMSSAMU;
     }
@@ -248,7 +246,6 @@ template <class Cond> class RetMU : public MSSAMU<Cond> {
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const RetMU *) { return true; }
     static inline bool classof(const MSSAMU<Cond> *mu) {
         return mu->getType() == MSSAMU<Cond>::RetMSSAMU;
     }
@@ -365,7 +362,6 @@ template <class Cond> class MSSACHI : public MSSADEF {
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const MSSACHI *chi) { return true; }
     static inline bool classof(const MSSADEF *chi) {
         return chi->getType() == MSSADEF::EntryMSSACHI ||
                chi->getType() == MSSADEF::StoreMSSACHI ||
@@ -410,10 +406,6 @@ template <class Cond> class StoreCHI : public MSSACHI<Cond> {
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const StoreCHI *chi) { return true; }
-    static inline bool classof(const MSSACHI<Cond> *chi) {
-        return chi->getType() == MSSADEF::StoreMSSACHI;
-    }
     static inline bool classof(const MSSADEF *chi) {
         return chi->getType() == MSSADEF::StoreMSSACHI;
     }
@@ -459,10 +451,6 @@ template <class Cond> class CallCHI : public MSSACHI<Cond> {
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const CallCHI *chi) { return true; }
-    static inline bool classof(const MSSACHI<Cond> *chi) {
-        return chi->getType() == MSSADEF::CallMSSACHI;
-    }
     static inline bool classof(const MSSADEF *chi) {
         return chi->getType() == MSSADEF::CallMSSACHI;
     }
@@ -500,10 +488,6 @@ template <class Cond> class EntryCHI : public MSSACHI<Cond> {
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const EntryCHI *chi) { return true; }
-    static inline bool classof(const MSSACHI<Cond> *chi) {
-        return chi->getType() == MSSADEF::EntryMSSACHI;
-    }
     static inline bool classof(const MSSADEF *chi) {
         return chi->getType() == MSSADEF::EntryMSSACHI;
     }
@@ -572,7 +556,6 @@ template <class Cond> class MSSAPHI : public MSSADEF {
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const MSSAPHI *phi) { return true; }
     static inline bool classof(const MSSADEF *phi) {
         return phi->getType() == MSSADEF::SSAPHI;
     }

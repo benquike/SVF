@@ -81,7 +81,6 @@ class AndersenBase : public WPAConstraintSolver, public BVDataPTAImpl {
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const AndersenBase *) { return true; }
     static inline bool classof(const PointerAnalysis *pta) {
         return (pta->getAnalysisTy() == Andersen_BASE ||
                 pta->getAnalysisTy() == Andersen_WPA ||
@@ -162,7 +161,6 @@ class Andersen : public AndersenBase {
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const Andersen *) { return true; }
     static inline bool classof(const PointerAnalysis *pta) {
         return (pta->getAnalysisTy() == Andersen_WPA ||
                 pta->getAnalysisTy() == AndersenLCD_WPA ||

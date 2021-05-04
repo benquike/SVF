@@ -193,10 +193,6 @@ class CallCFGEdge : public ICFGEdge {
     inline const Instruction *getCallSite() const { return cs; }
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const CallCFGEdge *) { return true; }
-    static inline bool classof(const ICFGEdge *edge) {
-        return edge->getEdgeKind() == CallCF;
-    }
     static inline bool classof(const GenericICFGEdgeTy *edge) {
         return edge->getEdgeKind() == CallCF;
     }
@@ -244,10 +240,6 @@ class RetCFGEdge : public ICFGEdge {
     inline const Instruction *getCallSite() const { return cs; }
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const RetCFGEdge *) { return true; }
-    static inline bool classof(const ICFGEdge *edge) {
-        return edge->getEdgeKind() == RetCF;
-    }
     static inline bool classof(const GenericICFGEdgeTy *edge) {
         return edge->getEdgeKind() == RetCF;
     }

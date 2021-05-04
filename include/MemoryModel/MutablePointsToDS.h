@@ -94,11 +94,6 @@ class MutablePTData : public PTData<Key, KeySet, Data, DataSet> {
 
     /// Methods to support type inquiry through isa, cast, and dyn_cast:
     ///@{
-    static inline bool
-    classof(const MutablePTData<Key, KeySet, Data, DataSet> *) {
-        return true;
-    }
-
     static inline bool classof(const PTData<Key, KeySet, Data, DataSet> *ptd) {
         return ptd->getPTDTY() == PTDataTy::MutBase;
     }
@@ -226,11 +221,6 @@ class MutableDiffPTData : public DiffPTData<Key, KeySet, Data, DataSet> {
 
     /// Methods to support type inquiry through isa, cast, and dyn_cast:
     ///@{
-    static inline bool
-    classof(const MutableDiffPTData<Key, KeySet, Data, DataSet> *) {
-        return true;
-    }
-
     static inline bool classof(const PTData<Key, KeySet, Data, DataSet> *ptd) {
         return ptd->getPTDTY() == PTDataTy::MutDiff;
     }
@@ -420,10 +410,6 @@ class MutableDFPTData : public DFPTData<Key, KeySet, Data, DataSet> {
 
     /// Methods to support type inquiry through isa, cast, and dyn_cast:
     ///@{
-    static inline bool
-    classof(const MutableDFPTData<Key, KeySet, Data, DataSet> *) {
-        return true;
-    }
     static inline bool classof(const PTData<Key, KeySet, Data, DataSet> *ptd) {
         return ptd->getPTDTY() == BaseDFPTData::MutDataFlow ||
                ptd->getPTDTY() == BaseDFPTData::IncMutDataFlow;
@@ -646,11 +632,6 @@ class IncMutableDFPTData : public MutableDFPTData<Key, KeySet, Data, DataSet> {
 
     /// Methods to support type inquiry through isa, cast, and dyn_cast:
     ///@{
-    static inline bool
-    classof(const IncMutableDFPTData<Key, KeySet, Data, DataSet> *) {
-        return true;
-    }
-
     static inline bool classof(const PTData<Key, KeySet, Data, DataSet> *ptd) {
         return ptd->getPTDTY() == BasePTData::IncMutDataFlow;
     }
@@ -810,12 +791,6 @@ class MutableVersionedPTData
 
     /// Methods to support type inquiry through isa, cast, and dyn_cast:
     ///@{
-    static inline bool
-    classof(const MutableVersionedPTData<Key, KeySet, Data, DataSet,
-                                         VersionedKey, VersionedKeySet> *) {
-        return true;
-    }
-
     static inline bool classof(const PTData<Key, KeySet, Data, DataSet> *ptd) {
         return ptd->getPTDTY() == PTDataTy::MutVersioned;
     }
