@@ -37,7 +37,7 @@ using llvm::demangle;
 
 TEST(GLAnalysis, DumpVTargets) {
     string test_bc = SVF_SRC_DIR
-        "/unittests/glanalysis/webgl-ir/webgl_all_rendering_code.bc";
+        "tools/chrome-gl-analysis/chrome_webgl_ir/webgl_all_rendering_code.bc";
     SVFProject proj(test_bc);
     PAG *pag = proj.getPAG();
 
