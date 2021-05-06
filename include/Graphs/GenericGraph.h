@@ -32,6 +32,7 @@
 
 #include "Util/BasicTypes.h"
 #include "Util/Serialization.h"
+#include <type_traits>
 
 namespace SVF {
 
@@ -41,7 +42,7 @@ namespace SVF {
 /*!
  * Generic edge on the graph as base class
  */
-template <class NodeTy>
+template <typename NodeTy, typename NodePtr = NodeTy *>
 class GenericEdge {
   private:
     // Allow serialization to access non-public data members.
@@ -65,8 +66,8 @@ class GenericEdge {
     using GEdgeKind = s32_t;
 
   private:
-    NodeTy *src = nullptr; ///< source node
-    NodeTy *dst = nullptr; ///< destination node
+    NodePtr src = nullptr; ///< source node
+    NodePtr dst = nullptr; ///< destination node
     EdgeID id = MAX_EDGEID;
     GEdgeFlag edgeFlag = 0; ///< edge kind
 
@@ -76,7 +77,7 @@ class GenericEdge {
 
   public:
     /// Constructor
-    GenericEdge(NodeTy *s, NodeTy *d, EdgeID id, GEdgeFlag k)
+    GenericEdge(NodePtr s, NodePtr d, EdgeID id, GEdgeFlag k)
         : src(s), dst(d), id(id), edgeFlag(k) {}
 
     // to support serialization
@@ -91,8 +92,8 @@ class GenericEdge {
     inline NodeID getDstID() const { return dst->getId(); }
     inline EdgeID getId() const { return id; }
     inline GEdgeKind getEdgeKind() const { return (EdgeKindMask & edgeFlag); }
-    NodeType *getSrcNode() const { return src; }
-    NodeType *getDstNode() const { return dst; }
+    NodePtr getSrcNode() const { return src; }
+    NodePtr getDstNode() const { return dst; }
     //@}
 
     /// Add the hash function for std::set (we also can overload operator< to
@@ -141,7 +142,8 @@ class GenericEdge {
 /*!
  * Generic node on the graph as base class
  */
-template <class NodeTy, class EdgeTy>
+template <typename NodeTy, typename EdgeTy, typename NodePtr = NodeTy *,
+          typename EdgePtr = EdgeTy *>
 class GenericNode {
 
   public:
@@ -149,7 +151,7 @@ class GenericNode {
     using EdgeType = EdgeTy;
     /// Edge kind
     using GNodeK = s32_t;
-    using GEdgeSetTy = OrderedSet<EdgeType *, typename EdgeType::equalGEdge>;
+    using GEdgeSetTy = OrderedSet<EdgePtr, typename EdgeType::equalGEdge>;
     /// Edge iterator
     ///@{
     using iterator = typename GEdgeSetTy::iterator;
@@ -242,22 +244,22 @@ class GenericNode {
 
     /// Add incoming and outgoing edges
     //@{
-    inline bool addIncomingEdge(EdgeType *inEdge) {
+    inline bool addIncomingEdge(EdgePtr inEdge) {
         return InEdges.insert(inEdge).second;
     }
-    inline bool addOutgoingEdge(EdgeType *outEdge) {
+    inline bool addOutgoingEdge(EdgePtr outEdge) {
         return OutEdges.insert(outEdge).second;
     }
     //@}
 
     /// Remove incoming and outgoing edges
     ///@{
-    inline Size_t removeIncomingEdge(EdgeType *edge) {
+    inline Size_t removeIncomingEdge(EdgePtr edge) {
         iterator it = InEdges.find(edge);
         assert(it != InEdges.end() && "can not find in edge in SVFG node");
         return InEdges.erase(edge);
     }
-    inline Size_t removeOutgoingEdge(EdgeType *edge) {
+    inline Size_t removeOutgoingEdge(EdgePtr edge) {
         iterator it = OutEdges.find(edge);
         assert(it != OutEdges.end() && "can not find out edge in SVFG node");
         return OutEdges.erase(edge);
@@ -266,7 +268,7 @@ class GenericNode {
 
     /// Find incoming and outgoing edges
     //@{
-    inline EdgeType *hasIncomingEdge(EdgeType *edge) const {
+    inline EdgePtr hasIncomingEdge(EdgePtr edge) const {
         const_iterator it = InEdges.find(edge);
         if (it != InEdges.end()) {
             return *it;
@@ -274,7 +276,7 @@ class GenericNode {
 
         return nullptr;
     }
-    inline EdgeType *hasOutgoingEdge(EdgeType *edge) const {
+    inline EdgePtr hasOutgoingEdge(EdgePtr edge) const {
         const_iterator it = OutEdges.find(edge);
         if (it != OutEdges.end()) {
             return *it;
@@ -285,21 +287,38 @@ class GenericNode {
     //@}
 };
 
+/// this function handles id map using shared pointers
+template <typename ID, typename Value>
+void cleanIDMap(
+    Map<ID, Value> &m,
+    typename enable_if<!is_pointer<Value>::value>::type *d = nullptr) {}
+
+/// this function handles id map using raw pointers
+template <typename ID, typename Value>
+void cleanIDMap(
+    Map<ID, Value> &m,
+    typename enable_if<is_pointer<Value>::value>::type *d = nullptr) {
+    for (auto &it : m) {
+        delete it.second;
+    }
+}
+
 /*
  * Generic graph for program representation
  * It is base class and needs to be instantiated
  */
-template <class NodeTy, class EdgeTy>
+template <typename NodeTy, typename EdgeTy, typename NodePtr = NodeTy *,
+          typename EdgePtr = EdgeTy *>
 class GenericGraph {
 
   public:
     using NodeType = NodeTy;
     using EdgeType = EdgeTy;
     /// NodeID to GenericNode map
-    using IDToNodeMapTy = Map<NodeID, NodeType *>;
-    using NodeToIDMapTy = Map<NodeType *, NodeID>;
-    using IDToEdgeMapTy = Map<EdgeID, EdgeType *>;
-    using EdgeToIDMapTy = Map<EdgeType *, EdgeID>;
+    using IDToNodeMapTy = Map<NodeID, NodePtr>;
+    using NodeToIDMapTy = Map<NodePtr, NodeID>;
+    using IDToEdgeMapTy = Map<EdgeID, EdgePtr>;
+    using EdgeToIDMapTy = Map<EdgePtr, EdgeID>;
     /// Node Iterators
     //@{
     using iterator = typename IDToNodeMapTy::iterator;
@@ -316,17 +335,8 @@ class GenericGraph {
 
     /// Release memory
     void destroy() {
-        for (iterator I = IDToNodeMap.begin(), E = IDToNodeMap.end(); I != E;
-             ++I) {
-            // NodeType* node = I->second;
-            // for(typename NodeType::iterator it = node->InEdgeBegin(), eit =
-            // node->InEdgeEnd(); it!=eit; ++it)
-            //         delete *it;
-        }
-        for (iterator I = IDToNodeMap.begin(), E = IDToNodeMap.end(); I != E;
-             ++I) {
-            delete I->second;
-        }
+        cleanIDMap(IDToNodeMap);
+        cleanIDMap(IDToEdgeMap);
     }
     /// Iterators
     //@{
@@ -338,7 +348,7 @@ class GenericGraph {
 
     /// APIs for handling nodes @{
     /// add a node with a specified id
-    inline bool addGNode(NodeID id, NodeType *node) {
+    inline bool addGNode(NodeID id, NodePtr node) {
         assert(IDToNodeMap.find(id) == IDToNodeMap.end() && "node exists");
         assert(NodeToIDMap.find(node) == NodeToIDMap.end() && "node exists");
 
@@ -349,7 +359,7 @@ class GenericGraph {
     }
 
     /// Add a Node
-    inline bool addGNode(NodeType *node) {
+    inline bool addGNode(NodePtr node) {
 
         if (node != nullptr) {
             auto id = node->getId();
@@ -360,7 +370,7 @@ class GenericGraph {
     }
 
     /// Get a node
-    inline NodeType *getGNode(NodeID id) const {
+    inline NodePtr getGNode(NodeID id) const {
         const_iterator it = IDToNodeMap.find(id);
         assert(it != IDToNodeMap.end() && "Node not found!");
         return it->second;
@@ -371,12 +381,12 @@ class GenericGraph {
         return IDToNodeMap.find(id) != IDToNodeMap.end();
     }
 
-    inline bool hasGNode(NodeType *node) const {
+    inline bool hasGNode(NodePtr node) const {
         return NodeToIDMap.find(node) != NodeToIDMap.end();
     }
 
     /// Delete a node
-    inline void removeGNode(NodeType *node) {
+    inline void removeGNode(NodePtr node) {
         assert(node->hasIncomingEdge() == false &&
                node->hasOutgoingEdge() == false &&
                "node which have edges can't be deleted");
@@ -392,7 +402,7 @@ class GenericGraph {
 
     /// APIs for handling nodes @{
     /// add edge
-    inline bool addGEdge(EdgeType *edge) {
+    inline bool addGEdge(EdgePtr edge) {
 
         assert(edge != nullptr && "edge is null");
 
@@ -417,7 +427,7 @@ class GenericGraph {
         return true;
     }
 
-    inline bool hasGEdge(EdgeType *edge) {
+    inline bool hasGEdge(EdgePtr edge) {
         return EdgeToIDMap.find(edge) != EdgeToIDMap.end();
     }
 
@@ -425,7 +435,7 @@ class GenericGraph {
         return IDToEdgeMap.find(id) != IDToEdgeMap.end();
     }
 
-    inline bool hasGEdge(NodeType *src, NodeType *dst,
+    inline bool hasGEdge(NodePtr src, NodePtr dst,
                          typename EdgeType::GEdgeKind kind) {
         if (src == nullptr || dst == nullptr) {
             return false;
@@ -438,13 +448,13 @@ class GenericGraph {
         return false;
     }
 
-    inline EdgeType *getGEdge(NodeType *src, NodeType *dst,
-                              typename EdgeType::GEdgeKind kind) {
+    inline EdgePtr getGEdge(NodePtr src, NodePtr dst,
+                            typename EdgeType::GEdgeKind kind) {
         if (src == nullptr || dst == nullptr) {
             return nullptr;
         }
         Size_t n = 0;
-        EdgeType *ret = nullptr;
+        EdgePtr ret = nullptr;
         for (auto oe : src->getOutEdges()) {
             if (oe->getDstNode() == dst && oe->getEdgeKind() == kind) {
                 n++;
@@ -458,7 +468,7 @@ class GenericGraph {
         return ret;
     }
 
-    inline EdgeType *getGEdge(EdgeID id) {
+    inline EdgePtr getGEdge(EdgeID id) {
         assert(IDToEdgeMap.find(id) != IDToEdgeMap.end() &&
                "edge id not exists");
         return IDToEdgeMap[id];
@@ -466,7 +476,7 @@ class GenericGraph {
 
     inline void removeGEdge(EdgeID id) { return removeGEdge(getGEdge(id)); }
 
-    inline void removeGEdge(EdgeType *edge) {
+    inline void removeGEdge(EdgePtr edge) {
         assert(edge != nullptr && "edge is null");
 
         auto srcNode = edge->getSrcNode();
