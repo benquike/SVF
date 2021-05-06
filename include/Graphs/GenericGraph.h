@@ -32,6 +32,7 @@
 
 #include "Util/BasicTypes.h"
 #include "Util/Serialization.h"
+#include <functional>
 #include <type_traits>
 
 namespace SVF {
@@ -560,108 +561,128 @@ class GenericGraph {
  */
 namespace llvm {
 
-template <class EdgeTy, class NodeTy> struct edge_unary_function {
-    NodeTy operator()(EdgeTy edge) const { return edge->getDstNode(); }
+// /// this functor returns a
+template <typename EdgePtr, typename NodePtr>
+struct GetEdgeDest {
+    NodePtr operator()(EdgePtr edge) const { return edge->getDstNode(); }
 };
 
-template <class PairTy, class NodeTy> struct pair_unary_function {
-    NodeTy operator()(PairTy pair) const { return pair.second; }
+template <typename ID, typename NodePtr, typename RetNodeType = NodePtr>
+struct GetNodeFromIDPair {
+    RetNodeType operator()(
+        std::pair<ID, NodePtr> pair,
+        typename std::enable_if<is_same<RetNodeType, NodePtr>::value>::type *d =
+            nullptr) const {
+        return pair.second;
+    }
+    //// TODO: handle other situations
 };
+
+// template <class PairTy, class NodeTy>
+// struct pair_unary_function {
+//     NodeTy operator()(PairTy pair) const { return pair.second; }
+// };
+
+// using GetEdgeDest = std::function<typename _Signature>
+/// template <typename EdgePtr, typename NodePtr>
+// using GetEdgeDst = std::function<NodePtr(EdgePtr)>;
+
+/// template <typename EdgePtr, typename NodePtr>
+/// using GetEdgeDst = std::function<NodePtr(EdgePtr)>;
 
 /*!
  * GraphTraits for nodes
  */
-template <class NodeTy, class EdgeTy>
-struct GraphTraits<SVF::GenericNode<NodeTy, EdgeTy> *> {
+template <typename NodeTy, typename EdgeTy, typename NodePtr, typename EdgePtr>
+struct GraphTraits<SVF::GenericNode<NodeTy, EdgeTy, NodePtr, EdgePtr> *> {
     using NodeType = NodeTy;
     using EdgeType = EdgeTy;
-
-    using DerefEdge = edge_unary_function<EdgeType *, NodeType *>;
+    using MapEdgeDest = GetEdgeDest<EdgePtr, NodePtr>;
 
     // nodes_iterator/begin/end - Allow iteration over all nodes in the graph
+    using GNodeType =
+        typename SVF::GenericNode<NodeTy, EdgeTy, NodePtr, EdgePtr>;
     using ChildIteratorType =
-        mapped_iterator<typename SVF::GenericNode<NodeTy, EdgeTy>::iterator,
-                        DerefEdge>;
+        mapped_iterator<typename GNodeType::iterator, MapEdgeDest>;
 
-    static NodeType *getEntryNode(NodeType *pagN) { return pagN; }
+    static NodePtr getEntryNode(NodePtr pagN) { return pagN; }
 
-    static inline ChildIteratorType child_begin(const NodeType *N) {
-        return map_iterator(N->OutEdgeBegin(), DerefEdge());
+    static inline ChildIteratorType child_begin(const NodePtr N) {
+        return map_iterator(N->OutEdgeBegin(), MapEdgeDest());
     }
-    static inline ChildIteratorType child_end(const NodeType *N) {
-        return map_iterator(N->OutEdgeEnd(), DerefEdge());
+    static inline ChildIteratorType child_end(const NodePtr N) {
+        return map_iterator(N->OutEdgeEnd(), MapEdgeDest());
     }
-    static inline ChildIteratorType direct_child_begin(const NodeType *N) {
-        return map_iterator(N->directOutEdgeBegin(), DerefEdge());
+    static inline ChildIteratorType direct_child_begin(const NodePtr N) {
+        return map_iterator(N->directOutEdgeBegin(), MapEdgeDest());
     }
-    static inline ChildIteratorType direct_child_end(const NodeType *N) {
-        return map_iterator(N->directOutEdgeEnd(), DerefEdge());
+    static inline ChildIteratorType direct_child_end(const NodePtr N) {
+        return map_iterator(N->directOutEdgeEnd(), MapEdgeDest());
     }
 };
 
 /*!
  * Inverse GraphTraits for node which is used for inverse traversal.
  */
-template <class NodeTy, class EdgeTy>
-struct GraphTraits<Inverse<SVF::GenericNode<NodeTy, EdgeTy> *>> {
+template <typename NodeTy, typename EdgeTy, typename NodePtr, typename EdgePtr>
+struct GraphTraits<
+    Inverse<SVF::GenericNode<NodeTy, EdgeTy, NodePtr, EdgePtr> *>> {
     using NodeType = NodeTy;
     using EdgeType = EdgeTy;
 
-    using DerefEdge = edge_unary_function<EdgeType *, NodeType *>;
+    using MapEdgeDest = GetEdgeDest<EdgePtr, NodePtr>;
 
     // nodes_iterator/begin/end - Allow iteration over all nodes in the graph
+    using GNodeType =
+        typename SVF::GenericNode<NodeTy, EdgeTy, NodePtr, EdgePtr>;
     using ChildIteratorType =
-        mapped_iterator<typename SVF::GenericNode<NodeTy, EdgeTy>::iterator,
-                        DerefEdge>;
+        mapped_iterator<typename GNodeType::iterator, MapEdgeDest>;
 
-    static inline NodeType *getEntryNode(Inverse<NodeType *> G) {
-        return G.Graph;
+    static inline NodePtr getEntryNode(Inverse<NodePtr> G) { return G.Graph; }
+
+    static inline ChildIteratorType child_begin(const NodePtr N) {
+        return map_iterator(N->InEdgeBegin(), MapEdgeDest());
+    }
+    static inline ChildIteratorType child_end(const NodePtr N) {
+        return map_iterator(N->InEdgeEnd(), MapEdgeDest());
     }
 
-    static inline ChildIteratorType child_begin(const NodeType *N) {
-        return map_iterator(N->InEdgeBegin(), DerefEdge());
-    }
-    static inline ChildIteratorType child_end(const NodeType *N) {
-        return map_iterator(N->InEdgeEnd(), DerefEdge());
-    }
-
-    static inline unsigned getNodeID(const NodeType *N) { return N->getId(); }
+    static inline unsigned getNodeID(const NodePtr N) { return N->getId(); }
 };
 
 /*!
  * GraphTraints
  */
-template <class NodeTy, class EdgeTy>
-struct GraphTraits<SVF::GenericGraph<NodeTy, EdgeTy> *>
-    : public GraphTraits<SVF::GenericNode<NodeTy, EdgeTy> *> {
-    using GenericGraphTy = SVF::GenericGraph<NodeTy, EdgeTy>;
+
+template <typename NodeTy, typename EdgeTy, typename NodePtr, typename EdgePtr>
+struct GraphTraits<SVF::GenericGraph<NodeTy, EdgeTy, NodePtr, EdgePtr> *>
+    : public GraphTraits<SVF::GenericNode<NodeTy, EdgeTy, NodePtr, EdgePtr> *> {
+    using GGraph = SVF::GenericGraph<NodeTy, EdgeTy, NodePtr, EdgePtr>;
+    using GGraphPtr = SVF::GenericGraph<NodeTy, EdgeTy, NodePtr, EdgePtr> *;
     using NodeType = NodeTy;
     using EdgeType = EdgeTy;
 
-    static NodeType *getEntryNode(GenericGraphTy *pag) {
+    static NodePtr getEntryNode(GGraphPtr pag) {
         return nullptr; // return null here, maybe later we could create a dummy
                         // node
     }
-    using PairTy = std::pair<SVF::NodeID, NodeType *>;
-    using DerefVal = pair_unary_function<PairTy, NodeType *>;
+    using MapIDNodePair = GetNodeFromIDPair<SVF::NodeID, NodePtr>;
 
     // nodes_iterator/begin/end - Allow iteration over all nodes in the graph
     using nodes_iterator =
-        mapped_iterator<typename GenericGraphTy::iterator, DerefVal>;
+        mapped_iterator<typename GGraph::iterator, MapIDNodePair>;
 
-    static nodes_iterator nodes_begin(GenericGraphTy *G) {
-        return map_iterator(G->begin(), DerefVal());
+    static nodes_iterator nodes_begin(GGraphPtr G) {
+        return map_iterator(G->begin(), MapIDNodePair());
     }
-    static nodes_iterator nodes_end(GenericGraphTy *G) {
-        return map_iterator(G->end(), DerefVal());
-    }
-
-    static unsigned graphSize(GenericGraphTy *G) {
-        return G->getTotalNodeNum();
+    static nodes_iterator nodes_end(GGraphPtr G) {
+        return map_iterator(G->end(), MapIDNodePair());
     }
 
-    static inline unsigned getNodeID(NodeType *N) { return N->getId(); }
-    static NodeType *getNode(GenericGraphTy *G, SVF::NodeID id) {
+    static unsigned graphSize(GGraphPtr G) { return G->getTotalNodeNum(); }
+
+    static inline unsigned getNodeID(NodePtr N) { return N->getId(); }
+    static NodePtr getNode(GGraphPtr G, SVF::NodeID id) {
         return G->getGNode(id);
     }
 };
