@@ -938,8 +938,8 @@ void PAG::destroy() {
         }
     }
 
-    // delete icfg;
-    // icfg = nullptr;
+    delete icfg;
+    icfg = nullptr;
 }
 
 /*!
