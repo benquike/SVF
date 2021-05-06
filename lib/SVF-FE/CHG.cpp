@@ -316,8 +316,7 @@ void CHGraph::addEdge(const string &className, const string &baseClassName,
 
     if (!hasEdge(srcNode, dstNode, edgeType)) {
         auto *edge = new CHEdge(srcNode, dstNode, getNextEdgeId(), edgeType);
-        srcNode->addOutgoingEdge(edge);
-        dstNode->addIncomingEdge(edge);
+        addGEdge(edge);
     }
 }
 
