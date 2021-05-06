@@ -316,16 +316,13 @@ class GenericGraph {
 
     /// Release memory
     void destroy() {
-        for (iterator I = IDToNodeMap.begin(), E = IDToNodeMap.end(); I != E;
-             ++I) {
-            // NodeType* node = I->second;
-            // for(typename NodeType::iterator it = node->InEdgeBegin(), eit =
-            // node->InEdgeEnd(); it!=eit; ++it)
-            //         delete *it;
+        // delete nodes
+        for (auto it : IDToNodeMap) {
+            delete it.second;
         }
-        for (iterator I = IDToNodeMap.begin(), E = IDToNodeMap.end(); I != E;
-             ++I) {
-            delete I->second;
+        // delete edges
+        for (auto it : IDToEdgeMap) {
+            delete it.second;
         }
     }
     /// Iterators
