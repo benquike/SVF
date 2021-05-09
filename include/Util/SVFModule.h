@@ -114,6 +114,15 @@ class SVFModule {
 
     /// Iterators
     ///@{
+    ///
+
+    string &getMduleIdentifier() { return moduleIdentifier; }
+    FunctionSetType &getFunctionSet() { return FunctionSet; }
+    LLVMFunctionSetType &getLLVMFunctionSet() { return LLVMFunctionSet; }
+    GlobalSetType &getGlobalSet() { return GlobalSet; }
+    AliasSetType &getAliasSet() { return AliasSet; }
+    LLVMFun2SVFFunMap &getLLVMFuncToSVFFuncMap() { return LLVMFunc2SVFFunc; }
+
     llvm_iterator llvmFunBegin() { return LLVMFunctionSet.begin(); }
     llvm_const_iterator llvmFunBegin() const { return LLVMFunctionSet.begin(); }
     llvm_iterator llvmFunEnd() { return LLVMFunctionSet.end(); }
