@@ -256,7 +256,8 @@ class LocationSet {
 
 } // End namespace SVF
 
-template <> struct std::hash<SVF::LocationSet> {
+template <>
+struct std::hash<SVF::LocationSet> {
     size_t operator()(const SVF::LocationSet &ls) const {
         std::hash<std::pair<SVF::Size_t, SVF::Size_t>> h;
         return h(std::make_pair(ls.getOffset(), ls.getByteOffset()));

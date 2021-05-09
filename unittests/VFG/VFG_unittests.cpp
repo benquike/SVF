@@ -91,6 +91,7 @@ class VFGTestSuite : public ::testing::Test {
         }
 #endif
         delete ander;
+        delete ander2;
     }
 };
 

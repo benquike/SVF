@@ -91,7 +91,8 @@ TEST(MapTestSuite, BasicTest_3) {
     }
 }
 
-template <typename NodeType> class TestClass2 {
+template <typename NodeType>
+class TestClass2 {
   public:
     TestClass2() = default;
     virtual ~TestClass2() = default;

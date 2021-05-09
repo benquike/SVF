@@ -87,7 +87,7 @@ class MemSSA {
     //@}
 
     /// For SSA renaming
-    using MemRegToVerStackMap = Map<const MemRegion *, std::vector<MRVer *>>;
+    using MemRegToVerStackMap = Map<const MemRegion *, std::vector<MRVerSPtr>>;
     using MemRegToCounterMap = Map<const MemRegion *, MRVERSION>;
 
     /// PAG edge list
@@ -146,11 +146,11 @@ class MemSSA {
     void destroy();
 
     /// Get a new SSA name of a memory region
-    MRVer *newSSAName(const MemRegion *mr, MSSADEF *def);
+    MRVerSPtr newSSAName(const MemRegion *mr, MSSADEF *def);
 
     /// Get the last version of the SSA ver of memory region
-    inline MRVer *getTopStackVer(const MemRegion *mr) {
-        std::vector<MRVer *> &stack = mr2VerStackMap[mr];
+    inline MRVerSPtr getTopStackVer(const MemRegion *mr) {
+        std::vector<MRVerSPtr> &stack = mr2VerStackMap[mr];
         assert(!stack.empty() && "stack is empty!!");
         return stack.back();
     }

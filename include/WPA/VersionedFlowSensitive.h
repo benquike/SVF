@@ -67,7 +67,6 @@ class VersionedFlowSensitive : public FlowSensitive {
 
     /// Methods to support type inquiry through isa, cast, and dyn_cast
     //@{
-    static inline bool classof(const VersionedFlowSensitive *) { return true; }
     static inline bool classof(const PointerAnalysis *pta) {
         return pta->getAnalysisTy() == VFS_WPA;
     }

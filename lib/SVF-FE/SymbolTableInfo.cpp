@@ -245,7 +245,7 @@ void SymbolTableInfo::collectTypeID(const Value *val) {
 }
 
 void SymbolTableInfo::collectTypeID(const Type *type) {
-    if (Type2IdMap.find(type) != Type2IdMap.end()) {
+    if (typeToIdMap.find(type) != typeToIdMap.end()) {
         return;
     }
 
@@ -457,22 +457,22 @@ void SymbolTableInfo::buildMemModel() {
 
     // Object #0 is black hole the object that may point to any object
     assert(totalSymNum == BlackHole && "Something changed!");
-    symTyMap.insert(std::make_pair(totalSymNum++, BlackHole));
+    symIdToTyMap.insert(std::make_pair(totalSymNum++, BlackHole));
     createBlkOrConstantObj(BlackHole);
 
     // Object #1 always represents the constant
     assert(totalSymNum == ConstantObj && "Something changed!");
-    symTyMap.insert(std::make_pair(totalSymNum++, ConstantObj));
+    symIdToTyMap.insert(std::make_pair(totalSymNum++, ConstantObj));
     createBlkOrConstantObj(ConstantObj);
 
     // Pointer #2 always represents the pointer points-to black hole.
     assert(totalSymNum == BlkPtr && "Something changed!");
-    symTyMap.insert(std::make_pair(totalSymNum++, BlkPtr));
+    symIdToTyMap.insert(std::make_pair(totalSymNum++, BlkPtr));
     // no object for BlkPtr?
 
     // Pointer #3 always represents the null pointer.
     assert(totalSymNum == NullPtr && "Something changed!");
-    symTyMap.insert(std::make_pair(totalSymNum++, NullPtr));
+    symIdToTyMap.insert(std::make_pair(totalSymNum++, NullPtr));
     // no object for NullPtr?
 
     // Add symbols for all the globals .
@@ -589,7 +589,7 @@ void SymbolTableInfo::collectInst(const Instruction *inst) {
  */
 void SymbolTableInfo::destroy() {
 
-    for (auto &iter : Id2MemMap) {
+    for (auto &iter : idToMemObjMap) {
         if (iter.second) {
             delete iter.second;
         }
@@ -636,16 +636,17 @@ void SymbolTableInfo::collectSym(const Value *val) {
 void SymbolTableInfo::collectVal(const Value *val) {
     collectTypeID(val);
 
-    auto iter = valSymMap.find(val);
-    if (iter == valSymMap.end()) {
+    auto iter = valSymToIdMap.find(val);
+    if (iter == valSymToIdMap.end()) {
         // create val sym and sym type
         SymID id = nodeIDAllocator.allocateValueId();
-        valSymMap.insert(std::make_pair(val, id));
+        // llvm::outs() << "adding val, id=" << id << "\n";
+        valSymToIdMap.insert(std::make_pair(val, id));
 
         // add it to the id->val map
-        idValueMap.insert(std::make_pair(id, val));
+        idToValSymMap.insert(std::make_pair(id, val));
 
-        symTyMap.insert(std::make_pair(id, ValSym));
+        symIdToTyMap.insert(std::make_pair(id, ValSym));
         DBOUT(DMemModel, outs() << "create a new value sym " << id << "\n");
         ///  handle global constant expression here
         if (const auto *globalVar = llvm::dyn_cast<GlobalVariable>(val)) {
@@ -664,26 +665,28 @@ void SymbolTableInfo::collectVal(const Value *val) {
 void SymbolTableInfo::collectObj(const Value *val) {
     collectTypeID(val);
 
-    auto iter = objSymMap.find(val);
-    if (iter == objSymMap.end()) {
+    auto iter = objSymToIdMap.find(val);
+    if (iter == objSymToIdMap.end()) {
         // if the object pointed by the pointer is a constant data (e.g., i32 0)
         // or a global constant object (e.g. string) then we treat them as one
         // ConstantObj
         if (isConstantData(val) ||
             (isConstantObjSym(val) && !getModelConstants())) {
-            objSymMap.insert(std::make_pair(val, constantSymID()));
+            objSymToIdMap.insert(std::make_pair(val, constantSymID()));
+            idToObjSymMap.insert(std::make_pair(constantSymID(), val));
         }
         // otherwise, we will create an object for each abstract memory location
         else {
             // create obj sym and sym type
             SymID id = nodeIDAllocator.allocateObjectId();
-            objSymMap.insert(std::make_pair(val, id));
-            symTyMap.insert(std::make_pair(id, ObjSym));
+            objSymToIdMap.insert(std::make_pair(val, id));
+            idToObjSymMap.insert(std::make_pair(id, val));
+            symIdToTyMap.insert(std::make_pair(id, ObjSym));
             DBOUT(DMemModel, outs() << "create a new obj sym " << id << "\n");
 
             // create a memory object
             auto *mem = new MemObj(val, id, this);
-            assert(Id2MemMap.find(id) == Id2MemMap.end());
+            assert(idToMemObjMap.find(id) == idToMemObjMap.end());
             addMemObj(mem, id);
         }
     }
@@ -693,11 +696,12 @@ void SymbolTableInfo::collectObj(const Value *val) {
  * Create unique return sym, if not available create a new one
  */
 void SymbolTableInfo::collectRet(const Function *val) {
-    auto iter = returnSymMap.find(val);
-    if (iter == returnSymMap.end()) {
+    auto iter = retSymToIdMap.find(val);
+    if (iter == retSymToIdMap.end()) {
         SymID id = nodeIDAllocator.allocateValueId();
-        returnSymMap.insert(std::make_pair(val, id));
-        symTyMap.insert(std::make_pair(id, RetSym));
+        retSymToIdMap.insert(std::make_pair(val, id));
+        idToRetSymMap.insert(std::make_pair(id, val));
+        symIdToTyMap.insert(std::make_pair(id, RetSym));
         DBOUT(DMemModel, outs() << "create a return sym " << id << "\n");
     }
 }
@@ -706,11 +710,12 @@ void SymbolTableInfo::collectRet(const Function *val) {
  * Create vararg sym, if not available create a new one
  */
 void SymbolTableInfo::collectVararg(const Function *val) {
-    auto iter = varargSymMap.find(val);
-    if (iter == varargSymMap.end()) {
+    auto iter = varargSymToIdMap.find(val);
+    if (iter == varargSymToIdMap.end()) {
         SymID id = nodeIDAllocator.allocateValueId();
-        varargSymMap.insert(std::make_pair(val, id));
-        symTyMap.insert(std::make_pair(id, VarargSym));
+        varargSymToIdMap.insert(std::make_pair(val, id));
+        idToVarargSymMap.insert(std::make_pair(id, val));
+        symIdToTyMap.insert(std::make_pair(id, VarargSym));
         DBOUT(DMemModel, outs() << "create a vararg sym " << id << "\n");
     }
 }
@@ -1000,29 +1005,29 @@ std::string SymbolTableInfo::toString(SYMTYPE symtype) {
 void SymbolTableInfo::dump() {
     OrderedMap<SymID, Value *> idmap;
     SymID maxid = 0;
-    for (ValueToIDMapTy::iterator iter = valSymMap.begin();
-         iter != valSymMap.end(); ++iter) {
+    for (ValueToIDMapTy::iterator iter = valSymToIdMap.begin();
+         iter != valSymToIdMap.end(); ++iter) {
         const SymID i = iter->second;
         maxid = max(i, maxid);
         Value *val = (Value *)iter->first;
         idmap[i] = val;
     }
-    for (ValueToIDMapTy::iterator iter = objSymMap.begin();
-         iter != objSymMap.end(); ++iter) {
+    for (ValueToIDMapTy::iterator iter = objSymToIdMap.begin();
+         iter != objSymToIdMap.end(); ++iter) {
         const SymID i = iter->second;
         maxid = max(i, maxid);
         Value *val = (Value *)iter->first;
         idmap[i] = val;
     }
-    for (FunToIDMapTy::iterator iter = returnSymMap.begin();
-         iter != returnSymMap.end(); ++iter) {
+    for (FunToIDMapTy::iterator iter = retSymToIdMap.begin();
+         iter != retSymToIdMap.end(); ++iter) {
         const SymID i = iter->second;
         maxid = max(i, maxid);
         Value *val = (Value *)iter->first;
         idmap[i] = val;
     }
-    for (FunToIDMapTy::iterator iter = varargSymMap.begin();
-         iter != varargSymMap.end(); ++iter) {
+    for (FunToIDMapTy::iterator iter = varargSymToIdMap.begin();
+         iter != varargSymToIdMap.end(); ++iter) {
         const SymID i = iter->second;
         maxid = max(i, maxid);
         Value *val = (Value *)iter->first;
@@ -1030,7 +1035,7 @@ void SymbolTableInfo::dump() {
     }
     outs() << "{SymbolTableInfo \n";
     for (SymID symid = 0; symid <= maxid; ++symid) {
-        SYMTYPE symtype = this->symTyMap.at(symid);
+        SYMTYPE symtype = this->symIdToTyMap.at(symid);
         string typestring = toString(symtype);
         outs() << "  " << typestring << symid;
         if (symtype < SYMTYPE::ValSym) {

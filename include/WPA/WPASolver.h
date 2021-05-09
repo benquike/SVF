@@ -38,7 +38,8 @@ namespace SVF {
 /*
  * Generic graph solver for whole program pointer analysis
  */
-template <class GraphType> class WPASolver {
+template <class GraphType>
+class WPASolver {
 
   public:
     /// Define the GTraits and node iterator for printing
@@ -160,7 +161,7 @@ template <class GraphType> class WPASolver {
     GraphType _graph;
 
     /// SCC
-    SCC *scc;
+    SCC *scc = nullptr;
 
     /// Worklist for resolution
     WorkList worklist;

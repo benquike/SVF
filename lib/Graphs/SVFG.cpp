@@ -367,7 +367,7 @@ void SVFG::connectIndirectSVFGEdges() {
                                    retMu->getVer()->getMR()->getPointsTo());
         } else if (const auto *actualIn =
                        llvm::dyn_cast<ActualINSVFGNode>(node)) {
-            const MRVer *ver = actualIn->getCallMU()->getVer();
+            auto ver = actualIn->getCallMU()->getVer();
             NodeID def = getDef(ver);
             addIntraIndirectVFEdge(def, nodeId, ver->getMR()->getPointsTo());
         } else if (llvm::isa<ActualOUTSVFGNode>(node)) {
@@ -377,7 +377,7 @@ void SVFG::connectIndirectSVFGEdges() {
                        llvm::dyn_cast<MSSAPHISVFGNode>(node)) {
             for (auto it = phiNode->opVerBegin(), eit = phiNode->opVerEnd();
                  it != eit; it++) {
-                const MRVer *op = it->second;
+                auto op = it->second;
                 NodeID def = getDef(op);
                 addIntraIndirectVFEdge(def, nodeId, op->getMR()->getPointsTo());
             }
@@ -729,7 +729,8 @@ void SVFG::performStat() { stat->performStat(); }
  * GraphTraits specialization
  */
 namespace llvm {
-template <> struct DOTGraphTraits<SVFG *> : public DOTGraphTraits<PAG *> {
+template <>
+struct DOTGraphTraits<SVFG *> : public DOTGraphTraits<PAG *> {
 
     using NodeType = SVFGNode;
     DOTGraphTraits(bool isSimple = false) : DOTGraphTraits<PAG *>(isSimple) {}

@@ -81,7 +81,8 @@ template <typename Key, typename Value, typename Compare = std::less<Key>,
           typename Allocator = std::allocator<std::pair<const Key, Value>>>
 using OrderedMap = std::map<Key, Value, Compare, Allocator>;
 
-template <typename T, unsigned N> using SmallVector = llvm::SmallVector<T, N>;
+template <typename T, unsigned N>
+using SmallVector = llvm::SmallVector<T, N>;
 
 using NodePair = std::pair<NodeID, NodeID>;
 using VersionedVar = std::pair<NodeID, Version>;
@@ -194,7 +195,8 @@ class SVFValue {
 } // End namespace SVF
 
 /// Specialise hash for pairs.
-template <typename T, typename U> struct std::hash<std::pair<T, U>> {
+template <typename T, typename U>
+struct std::hash<std::pair<T, U>> {
     // Pairing function from: http://szudzik.com/ElegantPairing.pdf
     static size_t szudzik(size_t a, size_t b) {
         return a > b ? b * b + a : a * a + a + b;
@@ -208,7 +210,8 @@ template <typename T, typename U> struct std::hash<std::pair<T, U>> {
 };
 
 /// Specialise hash for SmallVectors.
-template <typename T, unsigned N> struct std::hash<SVF::SmallVector<T, N>> {
+template <typename T, unsigned N>
+struct std::hash<SVF::SmallVector<T, N>> {
     size_t operator()(const SVF::SmallVector<T, N> &sv) const {
         if (sv.empty()) {
             return 0;

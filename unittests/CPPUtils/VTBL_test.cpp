@@ -23,6 +23,7 @@
 #include "SVF-FE/DCHG.h"
 #include "SVF-FE/LLVMUtil.h"
 #include "gtest/gtest.h"
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -38,15 +39,17 @@ using namespace cppUtil;
 
 using llvm::demangle;
 
+using namespace std;
+
 class VTblParseTesting : public ::testing::Test {
   protected:
-    SVFProject *proj;
+    shared_ptr<SVFProject> proj;
 
     void SetUp() override {}
 
-    void TearDown() override { delete proj; }
+    void TearDown() override {}
 
-    void init(string &ll_file) { proj = new SVFProject(ll_file); }
+    void init(string &ll_file) { proj = make_shared<SVFProject>(ll_file); }
 
     void dump_vtbls_from_globalvariable() {
         Module *mod = proj->getLLVMModSet()->getMainLLVMModule();
@@ -65,8 +68,8 @@ class VTblParseTesting : public ::testing::Test {
         }
     }
 
-    void dump_targets_for_cs(CommonCHGraph *chg, CallSite cs, int indent,
-                             string &graphName) {
+    void dump_targets_for_cs(shared_ptr<CommonCHGraph> chg, CallSite cs,
+                             int indent, string &graphName) {
 
         auto &vfuncSet = chg->getCSVFsBasedonCHA(cs);
 
@@ -86,7 +89,7 @@ class VTblParseTesting : public ::testing::Test {
 
     void check_chgraph() {
         SymbolTableInfo *symbolTableInfo = proj->getSymbolTableInfo();
-        CHGraph *chg = new CHGraph(symbolTableInfo);
+        shared_ptr<CHGraph> chg = make_shared<CHGraph>(symbolTableInfo);
         chg->buildCHG();
         // DCHGraph *dchg = new DCHGraph(svfMod);
         // dchg->buildCHG(true);
@@ -143,7 +146,7 @@ TEST_F(VTblParseTesting, PureVirtual) {
 
 TEST_F(VTblParseTesting, VirtualInheritance) {
     string ll_file =
-        SVF_BUILD_DIR "tests/CPPUtils/Vtable/VirtualInheritance_cpp_dbg.ll";
+        SVF_BUILD_DIR "tests/CPPUtils/Vtable/VirtualInheritance_cpp.ll";
     init(ll_file);
     // dump_vtbls_from_globalvariable();
     check_chgraph();

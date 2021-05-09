@@ -61,7 +61,6 @@ class TypeAnalysis : public AndersenBase {
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const TypeAnalysis *) { return true; }
     static inline bool classof(const PointerAnalysis *pta) {
         return (pta->getAnalysisTy() == TypeCPP_WPA);
     }

@@ -233,8 +233,7 @@ class CallDirSVFGEdge : public DirectSVFGEdge {
         : DirectSVFGEdge(s, d, eid, makeEdgeFlagWithInvokeID(CallDirVF, id)),
           csId(id) {}
     CallDirSVFGEdge()
-        : DirectSVFGEdge(nullptr, nullptr,
-                         MAX_EDGEID,
+        : DirectSVFGEdge(nullptr, nullptr, MAX_EDGEID,
                          makeEdgeFlagWithInvokeID(CallDirVF, MAX_CSID)) {}
 
     virtual ~CallDirSVFGEdge() {}
@@ -279,8 +278,7 @@ class RetDirSVFGEdge : public DirectSVFGEdge {
         : DirectSVFGEdge(s, d, eid, makeEdgeFlagWithInvokeID(RetDirVF, id)),
           csId(id) {}
     RetDirSVFGEdge()
-        : DirectSVFGEdge(nullptr, nullptr,
-                         MAX_EDGEID,
+        : DirectSVFGEdge(nullptr, nullptr, MAX_EDGEID,
                          makeEdgeFlagWithInvokeID(RetDirVF, MAX_CSID)) {}
 
     virtual ~RetDirSVFGEdge() {}

@@ -48,10 +48,6 @@ class Steensgaard : public AndersenBase {
 
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const Steensgaard *) { return true; }
-    static inline bool classof(const AndersenBase *pta) {
-        return (pta->getAnalysisTy() == Steensgaard_WPA);
-    }
     static inline bool classof(const PointerAnalysis *pta) {
         return (pta->getAnalysisTy() == Steensgaard_WPA);
     }

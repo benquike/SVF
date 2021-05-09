@@ -46,6 +46,8 @@ int main(int argc, char **argv) {
     cl::ParseCommandLineOptions(arg_num, arg_value,
                                 "Whole Program Points-to Analysis\n");
 
+    delete[] arg_value;
+
     if (moduleNameVec.empty()) {
         outs() << "Please provide llvm IR files\n";
         exit(-1);
@@ -55,6 +57,8 @@ int main(int argc, char **argv) {
 
     WPAPass *wpa = new WPAPass();
     wpa->runOnModule(&proj);
+
+    delete wpa;
 
     return 0;
 }

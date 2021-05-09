@@ -148,8 +148,8 @@ class SymbolTableInfoTest : public ::testing::Test {
         // TODO: more tests on other values,
         // e.g., global variables, internal values etc.
 
-        auto &symId2TypeMap_1 = symInfo->symIDToTypeMap();
-        auto &symId2TypeMap_2 = symInfo2->symIDToTypeMap();
+        auto &symId2TypeMap_1 = symInfo->symIDToType();
+        auto &symId2TypeMap_2 = symInfo2->symIDToType();
         // # of symbols should be the same
         ASSERT_EQ(symId2TypeMap_1.size(), symId2TypeMap_2.size());
         // check the type of each symbol
@@ -159,10 +159,10 @@ class SymbolTableInfoTest : public ::testing::Test {
         }
 
         // check the value symbols
-        auto &valSyms_1 = symInfo->valSyms();
-        auto &idToVal_1 = symInfo->idToValueMap();
-        auto &valSyms_2 = symInfo2->valSyms();
-        auto &idToVal_2 = symInfo2->idToValueMap();
+        auto &valSyms_1 = symInfo->valSymToId();
+        auto &idToVal_1 = symInfo->idToValSym();
+        auto &valSyms_2 = symInfo2->valSymToId();
+        auto &idToVal_2 = symInfo2->idToValSym();
         ASSERT_EQ(valSyms_1.size(), valSyms_2.size());
         ASSERT_EQ(valSyms_1.size(), idToVal_1.size());
         ASSERT_EQ(valSyms_2.size(), idToVal_2.size());
@@ -173,10 +173,10 @@ class SymbolTableInfoTest : public ::testing::Test {
             ASSERT_NE(pvalue, idToVal_2[id]);
         }
 
-        auto &objSyms_1 = symInfo->objSyms();
-        auto &idToObj_1 = symInfo->idToObjMap();
-        auto &objSyms_2 = symInfo2->objSyms();
-        auto &idToObj_2 = symInfo2->idToObjMap();
+        auto &objSyms_1 = symInfo->objSymToId();
+        auto &idToObj_1 = symInfo->idToMemObj();
+        auto &objSyms_2 = symInfo2->objSymToId();
+        auto &idToObj_2 = symInfo2->idToMemObj();
         ASSERT_EQ(objSyms_1.size(), objSyms_2.size());
         ASSERT_EQ(idToObj_1.size(), idToObj_2.size());
 
@@ -185,12 +185,12 @@ class SymbolTableInfoTest : public ::testing::Test {
             ASSERT_NE(idToObj_2.find(id), idToObj_2.end());
         }
 
-        auto &retSyms_1 = symInfo->retSyms();
-        auto &retSyms_2 = symInfo2->retSyms();
+        auto &retSyms_1 = symInfo->retSymToId();
+        auto &retSyms_2 = symInfo2->retSymToId();
         ASSERT_EQ(retSyms_1.size(), retSyms_2.size());
 
-        auto &varargSyms_1 = symInfo->varargSyms();
-        auto &varargSyms_2 = symInfo2->varargSyms();
+        auto &varargSyms_1 = symInfo->varargSymToId();
+        auto &varargSyms_2 = symInfo2->varargSymToId();
         ASSERT_EQ(varargSyms_1.size(), varargSyms_2.size());
 
         // Test type info
@@ -240,7 +240,14 @@ TEST_F(SymbolTableInfoTest, Construction_2) {
     cmp_symtableid_and_pagid(ll_file);
 }
 
-TEST_F(SymbolTableInfoTest, Construction_WebGL_IR) {
+TEST_F(SymbolTableInfoTest, Construction_WebGL_IR_0) {
+    string ll_file = SVF_SRC_DIR
+        "tools/chrome-gl-analysis/chrome_webgl_ir/webgl_all_rendering_code.bc";
+    common_symbol_table_tests(ll_file);
+    cmp_symtableid_and_pagid(ll_file);
+}
+
+TEST_F(SymbolTableInfoTest, Construction_WebGL_IR_1) {
     string ll_file = SVF_SRC_DIR
         "tools/chrome-gl-analysis/chrome_webgl_ir/webgl_all_rendering_code.bc";
     common_symbol_table_tests(ll_file);

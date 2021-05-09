@@ -128,7 +128,6 @@ class PTACallGraphEdge : public GenericCallGraphEdgeTy {
 
     /// ClassOf
     //@{
-    static inline bool classof(const PTACallGraphEdge *) { return true; }
     static inline bool classof(const GenericCallGraphEdgeTy *edge) {
         return edge->getEdgeKind() == PTACallGraphEdge::CallRetEdge ||
                edge->getEdgeKind() == PTACallGraphEdge::TDForkEdge ||
@@ -437,12 +436,6 @@ class PTACallGraph : public GenericCallGraphTy {
         return it->second.end();
     }
     //@}
-    /// Add call graph edge
-    inline void addEdge(PTACallGraphEdge *edge) {
-        edge->getDstNode()->addIncomingEdge(edge);
-        edge->getSrcNode()->addOutgoingEdge(edge);
-    }
-
     /// Add direct/indirect call edges
     //@{
     void addDirectCallGraphEdge(const CallBlockNode *call,

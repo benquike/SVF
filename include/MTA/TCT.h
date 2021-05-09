@@ -36,7 +36,6 @@ class TCTEdge : public GenericTCTEdgeTy {
     virtual ~TCTEdge() {}
     /// Classof
     //@{
-    static inline bool classof(const TCTEdge *edge) { return true; }
     static inline bool classof(const GenericTCTEdgeTy *edge) {
         return edge->getEdgeKind() == TCTEdge::ThreadCreateEdge;
     }

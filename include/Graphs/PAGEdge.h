@@ -74,7 +74,6 @@ class PAGEdge : public GenericPAGEdgeTy {
     const BasicBlock *basicBlock = nullptr; ///< LLVM BasicBlock
     ICFGNode *icfgNode = nullptr;           ///< ICFGNode
   public:
-
     /// Constructor
     PAGEdge(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag, GEdgeFlag k);
     PAGEdge() {
@@ -532,7 +531,6 @@ class VariantGepPE : public GepPE {
         setEdgeFlag(VariantGep);
     }
 
-
     virtual ~VariantGepPE() {}
 
     virtual const std::string toString() const;
@@ -695,10 +693,6 @@ class TDJoinPE : public RetPE {
   public:
     /// Methods for support type inquiry through isa, cast, and dyn_cast:
     //@{
-    static inline bool classof(const TDJoinPE *) { return true; }
-    static inline bool classof(const PAGEdge *edge) {
-        return edge->getEdgeKind() == PAGEdge::ThreadJoin;
-    }
     static inline bool classof(const GenericPAGEdgeTy *edge) {
         return edge->getEdgeKind() == PAGEdge::ThreadJoin;
     }

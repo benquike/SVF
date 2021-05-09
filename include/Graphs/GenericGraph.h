@@ -101,21 +101,21 @@ class GenericEdge {
     //  comparison)
     //@{
     typedef struct {
-        bool operator()(const GenericEdge<NodeType> *lhs,
-                        const GenericEdge<NodeType> *rhs) const {
+        template <typename EdgePtrType>
+        bool operator()(const EdgePtrType lhs, const EdgePtrType rhs) const {
             // compare flags
             if (lhs->edgeFlag != rhs->edgeFlag) {
                 return lhs->edgeFlag < rhs->edgeFlag;
             }
 
-            NodeType *lsrc = lhs->getSrcNode();
-            NodeID lsrcId = lsrc == nullptr ? 0 : lsrc->getId();
-            NodeType *ldst = lhs->getDstNode();
-            NodeID ldstId = ldst == nullptr ? 0 : ldst->getId();
-            NodeType *rsrc = rhs->getSrcNode();
-            NodeID rsrcId = rsrc == nullptr ? 0 : rsrc->getId();
-            NodeType *rdst = rhs->getDstNode();
-            NodeID rdstId = rdst == nullptr ? 0 : rdst->getId();
+            auto lsrc = lhs->getSrcNode();
+            auto lsrcId = lsrc == nullptr ? 0 : lsrc->getId();
+            auto ldst = lhs->getDstNode();
+            auto ldstId = ldst == nullptr ? 0 : ldst->getId();
+            auto rsrc = rhs->getSrcNode();
+            auto rsrcId = rsrc == nullptr ? 0 : rsrc->getId();
+            auto rdst = rhs->getDstNode();
+            auto rdstId = rdst == nullptr ? 0 : rdst->getId();
 
             if (lsrcId != rsrcId) {
                 return lsrcId < rsrcId;
@@ -316,16 +316,13 @@ class GenericGraph {
 
     /// Release memory
     void destroy() {
-        for (iterator I = IDToNodeMap.begin(), E = IDToNodeMap.end(); I != E;
-             ++I) {
-            // NodeType* node = I->second;
-            // for(typename NodeType::iterator it = node->InEdgeBegin(), eit =
-            // node->InEdgeEnd(); it!=eit; ++it)
-            //         delete *it;
+        // delete nodes
+        for (auto it : IDToNodeMap) {
+            delete it.second;
         }
-        for (iterator I = IDToNodeMap.begin(), E = IDToNodeMap.end(); I != E;
-             ++I) {
-            delete I->second;
+        // delete edges
+        for (auto it : IDToEdgeMap) {
+            delete it.second;
         }
     }
     /// Iterators
@@ -396,9 +393,9 @@ class GenericGraph {
 
         assert(edge != nullptr && "edge is null");
 
-        NodeType *srcNode = edge->getSrcNode();
+        auto srcNode = edge->getSrcNode();
         assert(srcNode != nullptr && "source node is null");
-        NodeType *dstNode = edge->getDstNode();
+        auto dstNode = edge->getDstNode();
         assert(dstNode != nullptr && "dest node is null");
         assert(hasGNode(srcNode) && "source node not exists");
         assert(hasGNode(dstNode) && "dest node not exists");
@@ -469,9 +466,9 @@ class GenericGraph {
     inline void removeGEdge(EdgeType *edge) {
         assert(edge != nullptr && "edge is null");
 
-        NodeType *srcNode = edge->getSrcNode();
+        auto srcNode = edge->getSrcNode();
         assert(srcNode != nullptr && "source node is null");
-        NodeType *dstNode = edge->getDstNode();
+        auto dstNode = edge->getDstNode();
         assert(dstNode != nullptr && "dest node is null");
         assert(hasGNode(srcNode) && "source node not exists");
         assert(hasGNode(dstNode) && "dest node not exists");
@@ -550,11 +547,13 @@ class GenericGraph {
  */
 namespace llvm {
 
-template <class EdgeTy, class NodeTy> struct edge_unary_function {
+template <class EdgeTy, class NodeTy>
+struct edge_unary_function {
     NodeTy operator()(EdgeTy edge) const { return edge->getDstNode(); }
 };
 
-template <class PairTy, class NodeTy> struct pair_unary_function {
+template <class PairTy, class NodeTy>
+struct pair_unary_function {
     NodeTy operator()(PairTy pair) const { return pair.second; }
 };
 

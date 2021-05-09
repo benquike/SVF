@@ -217,7 +217,8 @@ class BVDataPTAImpl : public PointerAnalysis {
  * Pointer analysis implementation which uses conditional points-to map data
  * structure (context/path sensitive analysis)
  */
-template <class Cond> class CondPTAImpl : public PointerAnalysis {
+template <class Cond>
+class CondPTAImpl : public PointerAnalysis {
 
   public:
     using CVar = CondVar<Cond>;

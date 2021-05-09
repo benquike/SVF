@@ -37,12 +37,12 @@ using llvm::demangle;
 
 TEST(GLAnalysis, DumpVTargets) {
     string test_bc = SVF_SRC_DIR
-        "/unittests/glanalysis/webgl-ir/webgl_all_rendering_code.bc";
+        "tools/chrome-gl-analysis/chrome_webgl_ir/webgl_all_rendering_code.bc";
     SVFProject proj(test_bc);
     PAG *pag = proj.getPAG();
 
     ASSERT_TRUE(pag != nullptr);
-    CHGraph *chg = new CHGraph(pag->getSymbolTableInfo());
+    auto chg = make_unique<CHGraph>(pag->getSymbolTableInfo());
     ASSERT_TRUE(chg != nullptr);
 
     chg->buildCHG();

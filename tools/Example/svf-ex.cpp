@@ -142,6 +142,7 @@ int main(int argc, char **argv) {
     cl::ParseCommandLineOptions(arg_num, arg_value,
                                 "Whole Program Points-to Analysis\n");
 
+    delete[] arg_value;
     if (moduleNameVec.empty()) {
         outs() << "Please provide llvm IR files\n";
         exit(-1);

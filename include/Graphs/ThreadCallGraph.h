@@ -52,7 +52,6 @@ class ThreadForkEdge : public PTACallGraphEdge {
 
     /// ClassOf
     //@{
-    static inline bool classof(const ThreadForkEdge *) { return true; }
     static inline bool classof(const PTACallGraphEdge *edge) {
         return edge->getEdgeKind() == PTACallGraphEdge::TDForkEdge;
     }
@@ -87,7 +86,6 @@ class ThreadJoinEdge : public PTACallGraphEdge {
     /// Destructor
     virtual ~ThreadJoinEdge() {}
 
-    static inline bool classof(const ThreadJoinEdge *) { return true; }
     static inline bool classof(const PTACallGraphEdge *edge) {
         return edge->getEdgeKind() == PTACallGraphEdge::TDJoinEdge;
     }
@@ -124,7 +122,6 @@ class HareParForEdge : public PTACallGraphEdge {
 
     /// ClassOf
     //@{
-    static inline bool classof(const HareParForEdge *) { return true; }
     static inline bool classof(const PTACallGraphEdge *edge) {
         return edge->getEdgeKind() == PTACallGraphEdge::HareParForEdge;
     }
@@ -161,7 +158,6 @@ class ThreadCallGraph : public PTACallGraph {
 
     /// ClassOf
     //@{
-    static inline bool classof(const ThreadCallGraph *) { return true; }
     static inline bool classof(const PTACallGraph *g) {
         return g->getKind() == PTACallGraph::ThdCallGraph;
     }
@@ -374,9 +370,9 @@ class ThreadCallGraph : public PTACallGraph {
 
   private:
     ThreadAPI *tdAPI = nullptr; ///< Thread API
-    CallSiteSet forksites;   ///< all thread fork sites
-    CallSiteSet joinsites;   ///< all thread fork sites
-    CallSiteSet parForSites; ///< all parallel for sites
+    CallSiteSet forksites;      ///< all thread fork sites
+    CallSiteSet joinsites;      ///< all thread fork sites
+    CallSiteSet parForSites;    ///< all parallel for sites
     CallInstToForkEdgesMap
         callinstToThreadForkEdgesMap; ///< Map a call instruction to its
                                       ///< corresponding fork edges

@@ -30,7 +30,8 @@ namespace SVF {
 template <typename GEdge>
 void edge_eq_extra_test(const GEdge *e1, const GEdge *e2) {}
 
-template <typename GEdge> void edge_eq_test(const GEdge *e1, const GEdge *e2) {
+template <typename GEdge>
+void edge_eq_test(const GEdge *e1, const GEdge *e2) {
     ASSERT_NE(e1, e2);
     ASSERT_EQ(e1->getEdgeKind(), e2->getEdgeKind());
     ASSERT_EQ(e1->getSrcID(), e2->getSrcID());
@@ -41,7 +42,8 @@ template <typename GEdge> void edge_eq_test(const GEdge *e1, const GEdge *e2) {
 template <typename GNode>
 void node_eq_extra_test(const GNode *n1, const GNode *n2) {}
 
-template <typename GNode> void node_eq_test(const GNode *n1, const GNode *n2) {
+template <typename GNode>
+void node_eq_test(const GNode *n1, const GNode *n2) {
 
     ASSERT_NE(n1, n2);
     ASSERT_EQ(n1->getId(), n2->getId());
@@ -84,7 +86,8 @@ template <typename GNode> void node_eq_test(const GNode *n1, const GNode *n2) {
 template <typename Graph>
 void graph_eq_extra_test(const Graph *g1, const Graph *g2) {}
 
-template <typename Graph> void graph_eq_test(const Graph *g1, const Graph *g2) {
+template <typename Graph>
+void graph_eq_test(const Graph *g1, const Graph *g2) {
     ASSERT_NE(g1, g2);
     ASSERT_EQ(g1->getTotalEdgeNum(), g2->getTotalEdgeNum());
     ASSERT_EQ(g1->getTotalNodeNum(), g2->getTotalNodeNum());
@@ -92,8 +95,10 @@ template <typename Graph> void graph_eq_test(const Graph *g1, const Graph *g2) {
     auto it1 = g1->begin();
     auto it2 = g2->begin();
     for (; it1 != g1->end() && it2 != g2->end(); it1++, it2++) {
+        // check the node id
         ASSERT_EQ(it1->first, it2->first);
 
+        // check the node content
         auto *n1 = it1->second;
         auto *n2 = it2->second;
         node_eq_test(n1, n2);

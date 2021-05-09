@@ -202,40 +202,40 @@ void PAGBuilder::initialiseNodes() {
     ///
     /// For each sym value in the symtable, add a PAG node
     ///
-    for (auto iter = symTable->valSyms().begin();
-         iter != symTable->valSyms().end(); ++iter) {
+    auto idToVal = symTable->idToValSym();
+    for (auto iter = idToVal.begin(); iter != idToVal.end(); ++iter) {
         DBOUT(DPAGBuild, outs() << "add val node " << iter->second << "\n");
 
-        if (iter->second == symTable->blkPtrSymID() ||
-            iter->second == symTable->nullPtrSymID()) {
+        if (iter->first == symTable->blkPtrSymID() ||
+            iter->first == symTable->nullPtrSymID()) {
             continue;
         }
-        pag->addValNode(iter->first, iter->second);
+        pag->addValNode(iter->second, iter->first);
     }
 
     ///
     /// for each object value in the symtable, add a PAG node
     ///
-    for (auto iter = symTable->objSyms().begin();
-         iter != symTable->objSyms().end(); ++iter) {
+    for (auto iter = symTable->idToObjSym().begin();
+         iter != symTable->idToObjSym().end(); ++iter) {
         DBOUT(DPAGBuild, outs() << "add obj node " << iter->second << "\n");
 
-        if (iter->second == symTable->blackholeSymID() ||
-            iter->second == symTable->constantSymID()) {
+        if (iter->first == symTable->blackholeSymID() ||
+            iter->first == symTable->constantSymID()) {
             continue;
         }
-        pag->addObjNode(iter->first, iter->second);
+        pag->addObjNode(iter->second, iter->first);
     }
 
     /// hanlding functions
     /// for each function, we add a PAG return node
     /// TODO: how about external function with only
     /// declaration
-    for (auto iter = symTable->retSyms().begin();
-         iter != symTable->retSyms().end(); ++iter) {
+    for (auto iter = symTable->idToRetSym().begin();
+         iter != symTable->idToRetSym().end(); ++iter) {
         DBOUT(DPAGBuild, outs() << "add ret node " << iter->second << "\n");
-        const SVFFunction *fun = modSet->getSVFFunction(iter->first);
-        pag->addRetNode(fun, iter->second);
+        const SVFFunction *fun = modSet->getSVFFunction(iter->second);
+        pag->addRetNode(fun, iter->first);
     }
 
     ///
@@ -243,11 +243,11 @@ void PAGBuilder::initialiseNodes() {
     /// for each vararg sym in the symbol table,
     /// add a PAG node for it
     ///
-    for (auto iter = symTable->varargSyms().begin();
-         iter != symTable->varargSyms().end(); ++iter) {
+    for (auto iter = symTable->idToVarargSym().begin();
+         iter != symTable->idToVarargSym().end(); ++iter) {
         DBOUT(DPAGBuild, outs() << "add vararg node " << iter->second << "\n");
-        const SVFFunction *fun = modSet->getSVFFunction(iter->first);
-        pag->addVarargNode(fun, iter->second);
+        const SVFFunction *fun = modSet->getSVFFunction(iter->second);
+        pag->addVarargNode(fun, iter->first);
     }
 
     /// add address edges for constant nodes.
@@ -260,8 +260,8 @@ void PAGBuilder::initialiseNodes() {
     /// object node with an AddrEdge.
     ///
     /// FIXME: why put this code here?
-    for (auto iter = symTable->objSyms().begin();
-         iter != symTable->objSyms().end(); ++iter) {
+    for (auto iter = symTable->objSymToId().begin();
+         iter != symTable->objSymToId().end(); ++iter) {
         DBOUT(DPAGBuild, outs() << "add address edges for constant node "
                                 << iter->second << "\n");
         const Value *val = iter->first;
@@ -1455,9 +1455,8 @@ NodeID PAGBuilder::getGepValNode(const Value *val, const LocationSet &ls,
         const BasicBlock *cbb = getCurrentBB();
         setCurrentLocation(curVal, nullptr);
         NodeID gepNode = pag->addGepValNode(
-            curVal, val, ls,
-            pag->getNodeIDAllocator().allocateValueId(),
-            type, fieldidx);
+            curVal, val, ls, pag->getNodeIDAllocator().allocateValueId(), type,
+            fieldidx);
         addGepEdge(base, gepNode, ls, true);
         setCurrentLocation(cval, cbb);
         return gepNode;

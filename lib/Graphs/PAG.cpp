@@ -938,8 +938,8 @@ void PAG::destroy() {
         }
     }
 
-    // delete icfg;
-    // icfg = nullptr;
+    delete icfg;
+    icfg = nullptr;
 }
 
 /*!
@@ -1440,7 +1440,8 @@ namespace llvm {
 /*!
  * Write value flow graph into dot file for debugging
  */
-template <> struct DOTGraphTraits<PAG *> : public DefaultDOTGraphTraits {
+template <>
+struct DOTGraphTraits<PAG *> : public DefaultDOTGraphTraits {
 
     using NodeType = PAGNode;
     using ChildIteratorType = NodeType::iterator;

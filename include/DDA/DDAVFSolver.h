@@ -19,7 +19,8 @@ namespace SVF {
 /*!
  * Value-Flow Based Demand-Driven Points-to Analysis
  */
-template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
+template <class CVar, class CPtSet, class DPIm>
+class DDAVFSolver {
     friend class DDAStat;
 
   public:
@@ -43,23 +44,11 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
           _callGraphSCC(nullptr), _svfgSCC(nullptr), ddaStat(nullptr) {}
     /// Destructor
     virtual ~DDAVFSolver() {
-        if (_ander != nullptr) {
-            // AndersenWaveDiff::releaseAndersenWaveDiff();
-            _ander = nullptr;
-        }
-
-        if (_svfg != nullptr) {
-            // DDASVFGBuilder::releaseDDASVFG();
-            _svfg = nullptr;
-        }
-
-        if (_svfgSCC != nullptr) {
-            delete _svfgSCC;
-        }
-        _svfgSCC = nullptr;
-
+        delete _ander;
+        _ander = nullptr;
+        delete _svfg;
+        _svfg = nullptr;
         _callGraph = nullptr;
-        _callGraphSCC = nullptr;
     }
     /// Return candidate pointers for DDA
     inline NodeBS &getCandidateQueries() { return candidateQueries; }
@@ -567,7 +556,7 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
     /// SVFG SCC detection
     inline void SVFGSCCDetection() {
         if (_svfgSCC == nullptr) {
-            _svfgSCC = new SVFGSCC(getSVFG());
+            _svfgSCC = make_shared<SVFGSCC>(getSVFG());
         }
         _svfgSCC->find();
     }
@@ -709,18 +698,17 @@ template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
         }
     }
 
-    bool
-        outOfBudgetQuery{}; ///< Whether the current query is out of step limits
-    PAG *_pag{};            ///< PAG
-    SVFG *_svfg{};          ///< SVFG
-    AndersenWaveDiff *_ander{}; ///< Andersen's analysis
-    SVFProject *proj;
+    bool outOfBudgetQuery; ///< Whether the current query is out of step limits
+    PAG *_pag = nullptr;   ///< PAG
+    SVFG *_svfg = nullptr; ///< SVFG
+    AndersenWaveDiff *_ander = nullptr; ///< Andersen's analysis
+    SVFProject *proj = nullptr;
 
-    NodeBS candidateQueries;       ///< candidate pointers;
-    PTACallGraph *_callGraph{};    ///< CallGraph
-    CallGraphSCC *_callGraphSCC{}; ///< SCC for CallGraph
-    SVFGSCC *_svfgSCC{};           ///< SCC for SVFG
-    DPTItemSet backwardVisited;    ///< visited map during backward traversing
+    NodeBS candidateQueries;               ///< candidate pointers;
+    PTACallGraph *_callGraph = nullptr;    ///< CallGraph
+    CallGraphSCC *_callGraphSCC = nullptr; ///< SCC for CallGraph
+    SVFGSCC *_svfgSCC = nullptr;           ///< SCC for SVFG
+    DPTItemSet backwardVisited; ///< visited map during backward traversing
     DPImToCPtSetMap
         dpmToTLCPtSetMap; ///< points-to caching map for top-level vars
     DPImToCPtSetMap

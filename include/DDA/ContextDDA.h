@@ -186,8 +186,8 @@ class ContextDDA : public CondPTAImpl<ContextCond>,
 
   private:
     ConstSVFGEdgeSet insensitveEdges; ///< insensitive call-return edges
-    FlowDDA *flowDDA;                 ///< downgrade to flowDDA if out-of-budget
-    DDAClient *_client;               ///< DDA client
+    FlowDDA *flowDDA = nullptr;       ///< downgrade to flowDDA if out-of-budget
+    DDAClient *_client = nullptr;     ///< DDA client
     PTACFInfoBuilder loopInfoBuilder; ///< LoopInfo
 };
 

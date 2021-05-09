@@ -272,7 +272,8 @@ raw_ostream &operator<<(raw_ostream &o, const std::pair<F, S> &var) {
 } // End namespace SVF
 
 /// Specialise hash for CallSites.
-template <> struct std::hash<SVF::CallSite> {
+template <>
+struct std::hash<SVF::CallSite> {
     size_t operator()(const SVF::CallSite &cs) const {
         std::hash<SVF::Instruction *> h;
         return h(cs.getInstruction());
@@ -280,7 +281,8 @@ template <> struct std::hash<SVF::CallSite> {
 };
 
 /// Specialise hash for SparseBitVectors.
-template <> struct std::hash<llvm::SparseBitVector<>> {
+template <>
+struct std::hash<llvm::SparseBitVector<>> {
     size_t operator()(const llvm::SparseBitVector<> &sbv) const {
         std::hash<std::pair<std::pair<size_t, size_t>, size_t>> h;
         return h(std::make_pair(std::make_pair(sbv.count(), sbv.find_first()),

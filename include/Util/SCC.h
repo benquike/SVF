@@ -49,7 +49,8 @@ namespace SVF {
 
 class GNodeSCCInfo;
 
-template <class GraphType> class SCCDetection {
+template <class GraphType>
+class SCCDetection {
 
   private:
     /// Define the GTraits and node iterator for printing

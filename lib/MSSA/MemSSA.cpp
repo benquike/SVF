@@ -318,7 +318,7 @@ void MemSSA::SSARenameBB(const BasicBlock &bb) {
     }
 }
 
-MRVer *MemSSA::newSSAName(const MemRegion *mr, MSSADEF *def) {
+MRVerSPtr MemSSA::newSSAName(const MemRegion *mr, MSSADEF *def) {
     assert(0 != mr2CounterMap.count(mr) &&
            "did not find initial version in map? ");
     assert(0 != mr2VerStackMap.count(mr) &&
@@ -326,7 +326,7 @@ MRVer *MemSSA::newSSAName(const MemRegion *mr, MSSADEF *def) {
 
     MRVERSION version = mr2CounterMap[mr];
     mr2CounterMap[mr] = version + 1;
-    auto *mrVer = new MRVer(mr, version, def);
+    auto mrVer = make_shared<MRVer>(mr, version, def);
     mr2VerStackMap[mr].push_back(mrVer);
     return mrVer;
 }

@@ -26,10 +26,9 @@ ContextDDA::ContextDDA(SVFProject *proj, DDAClient *client)
  * Destructor
  */
 ContextDDA::~ContextDDA() {
-    if (flowDDA != nullptr) {
-        delete flowDDA;
-    }
+    delete flowDDA;
     flowDDA = nullptr;
+    delete stat;
 }
 
 /*!

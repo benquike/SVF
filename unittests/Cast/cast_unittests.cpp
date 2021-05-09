@@ -19,61 +19,58 @@
  *     2021-04-26
  *****************************************************************************/
 
-#include <memory>
-#include <iostream>
 #include "gtest/gtest.h"
+#include <iostream>
+#include <memory>
 
-#include "Util/Casting.h"
-#include "Graphs/ICFG.h"
 #include "Graphs/ConsG.h"
+#include "Graphs/ICFG.h"
+#include "Graphs/OfflineConsG.h"
 #include "Graphs/PAG.h"
-#include "Graphs/VFG.h"
+#include "Graphs/PTACallGraph.h"
 #include "Graphs/SVFG.h"
 #include "Graphs/SVFGOPT.h"
-#include "Graphs/PTACallGraph.h"
-#include "Graphs/OfflineConsG.h"
 #include "Graphs/ThreadCallGraph.h"
+#include "Graphs/VFG.h"
 #include "SVF-FE/CHG.h"
 #include "SVF-FE/DCHG.h"
+#include "Util/Casting.h"
 
 using namespace SVF;
 using namespace std;
 
-
-#define define_cast_test(FROM_TYPE, TO_TYPE)    \
-    {                                           \
-        auto *_p = new FROM_TYPE();             \
-        ASSERT_TRUE(llvm::isa<TO_TYPE>(_p));    \
-        auto *_q = llvm::dyn_cast<TO_TYPE>(_p); \
-        auto *_r = llvm::cast<TO_TYPE>(_p);     \
-        delete _p;                              \
-    }                                           \
-    {                                           \
-        auto _p = make_unique<FROM_TYPE>();     \
-        ASSERT_TRUE(llvm::isa<TO_TYPE>(_p));    \
-        auto _q = llvm::dyn_cast<TO_TYPE>(_p);  \
-        auto _r = llvm::cast<TO_TYPE>(_p);      \
-    }                                           \
-    {                                           \
-        auto _p = make_shared<FROM_TYPE>();     \
-        ASSERT_TRUE(llvm::isa<TO_TYPE>(_p));    \
-        auto _q = llvm::dyn_cast<TO_TYPE>(_p);  \
-        auto _r = llvm::cast<TO_TYPE>(_p);      \
+#define define_cast_test(FROM_TYPE, TO_TYPE)                                   \
+    {                                                                          \
+        auto *_p = new FROM_TYPE();                                            \
+        ASSERT_TRUE(llvm::isa<TO_TYPE>(_p));                                   \
+        auto *_q = llvm::dyn_cast<TO_TYPE>(_p);                                \
+        auto *_r = llvm::cast<TO_TYPE>(_p);                                    \
+        delete _p;                                                             \
+    }                                                                          \
+    {                                                                          \
+        auto _p = make_unique<FROM_TYPE>();                                    \
+        ASSERT_TRUE(llvm::isa<TO_TYPE>(_p));                                   \
+        auto _q = llvm::dyn_cast<TO_TYPE>(_p);                                 \
+        auto _r = llvm::cast<TO_TYPE>(_p);                                     \
+    }                                                                          \
+    {                                                                          \
+        auto _p = make_shared<FROM_TYPE>();                                    \
+        ASSERT_TRUE(llvm::isa<TO_TYPE>(_p));                                   \
+        auto _q = llvm::dyn_cast<TO_TYPE>(_p);                                 \
+        auto _r = llvm::cast<TO_TYPE>(_p);                                     \
     }
 
-
-TEST(CastTestSuite, auto_raw_ptr) {
-    #include "casting_test_rawptr.h"
+TEST(CastTestSuite, auto_raw_ptr){
+#include "casting_test_rawptr.h"
 }
 
 TEST(CastTestSuite, auto_uinque_ptr) {
     // #include "casting_test_unique_ptr.h"
 }
 
-TEST(CastTestSuite, auto_shared_ptr) {
-    #include "casting_test_shared_ptr.h"
+TEST(CastTestSuite, auto_shared_ptr){
+#include "casting_test_shared_ptr.h"
 }
-
 
 TEST(CastTestSuite, raw_ptr_basic_0) {
     ICFGNode *globalNode = new GlobalBlockNode();
@@ -135,29 +132,32 @@ TEST(CastTestSuite, unique_ptr_basic_0) {
     n2 = std::move(ep);
     ASSERT_NE(n2.get(), addr1);
 
-
     {
         unique_ptr<ICFGNode> globalNode = make_unique<GlobalBlockNode>();
-        unique_ptr<ICFGNode> funEntryNode  = make_unique<FunEntryBlockNode>();
+        unique_ptr<ICFGNode> funEntryNode = make_unique<FunEntryBlockNode>();
         unique_ptr<ICFGNode> funExitNode = make_unique<FunExitBlockNode>();
 
-        unique_ptr<GlobalBlockNode> g_c = llvm::dyn_cast<GlobalBlockNode>(globalNode);
+        unique_ptr<GlobalBlockNode> g_c =
+            llvm::dyn_cast<GlobalBlockNode>(globalNode);
         ASSERT_NE(g_c.get(), nullptr);
 
-        unique_ptr<FunEntryBlockNode> fentry = llvm::dyn_cast<FunEntryBlockNode>(funEntryNode);
+        unique_ptr<FunEntryBlockNode> fentry =
+            llvm::dyn_cast<FunEntryBlockNode>(funEntryNode);
         ASSERT_NE(fentry.get(), nullptr);
 
-        unique_ptr<FunExitBlockNode> fexit = llvm::dyn_cast<FunExitBlockNode>(funExitNode);
+        unique_ptr<FunExitBlockNode> fexit =
+            llvm::dyn_cast<FunExitBlockNode>(funExitNode);
         ASSERT_NE(fexit.get(), nullptr);
 
-        unique_ptr<FunEntryBlockNode> fc = llvm::dyn_cast<FunEntryBlockNode>(globalNode);
+        unique_ptr<FunEntryBlockNode> fc =
+            llvm::dyn_cast<FunEntryBlockNode>(globalNode);
         ASSERT_EQ(fc.get(), nullptr);
     }
 }
 
 TEST(CastTestSuite, shared_ptr_basic_0) {
     shared_ptr<ICFGNode> globalNode = make_shared<GlobalBlockNode>();
-    shared_ptr<ICFGNode> funEntryNode  = make_shared<FunEntryBlockNode>();
+    shared_ptr<ICFGNode> funEntryNode = make_shared<FunEntryBlockNode>();
     shared_ptr<ICFGNode> funExitNode = make_shared<FunExitBlockNode>();
 
     ASSERT_TRUE(llvm::isa<GlobalBlockNode>(globalNode));
@@ -170,13 +170,16 @@ TEST(CastTestSuite, shared_ptr_basic_0) {
     ASSERT_TRUE(llvm::isa<InterBlockNode>(funEntryNode));
     ASSERT_TRUE(llvm::isa<ICFGNode>(funEntryNode));
 
-    shared_ptr<GlobalBlockNode> g_c = llvm::dyn_cast<GlobalBlockNode>(globalNode);
+    shared_ptr<GlobalBlockNode> g_c =
+        llvm::dyn_cast<GlobalBlockNode>(globalNode);
     ASSERT_NE(g_c.get(), nullptr);
 
-    shared_ptr<FunEntryBlockNode> fentry = llvm::dyn_cast<FunEntryBlockNode>(funEntryNode);
+    shared_ptr<FunEntryBlockNode> fentry =
+        llvm::dyn_cast<FunEntryBlockNode>(funEntryNode);
     ASSERT_NE(fentry.get(), nullptr);
 
-    shared_ptr<FunExitBlockNode> fexit = llvm::dyn_cast<FunExitBlockNode>(funExitNode);
+    shared_ptr<FunExitBlockNode> fexit =
+        llvm::dyn_cast<FunExitBlockNode>(funExitNode);
     ASSERT_NE(fexit.get(), nullptr);
 
     ASSERT_NE(g_c.get(), nullptr);
@@ -190,12 +193,14 @@ TEST(CastTestSuite, ThreadMHPIndSVFGEdge_for_delete_redundant) {
     ASSERT_NE(gVFGEdge, nullptr);
     // VFGEdge *vfgEdge = llvm::dyn_cast<VFGEdge>(gVFGEdge);
     IndirectSVFGEdge *indSVFGEdge = llvm::dyn_cast<IndirectSVFGEdge>(gVFGEdge);
-    ThreadMHPIndSVFGEdge *tmhpEdge = llvm::dyn_cast<ThreadMHPIndSVFGEdge>(gVFGEdge);
+    ThreadMHPIndSVFGEdge *tmhpEdge =
+        llvm::dyn_cast<ThreadMHPIndSVFGEdge>(gVFGEdge);
     // VFGEdge *tmhpEdge2 = llvm::dyn_cast<ThreadMHPIndSVFGEdge>(VFGEdge);
     cout << indSVFGEdge << endl;
     cout << tmhpEdge << endl;
     ASSERT_NE(indSVFGEdge, nullptr);
-    ThreadMHPIndSVFGEdge *tmhpEdge2 = llvm::dyn_cast<ThreadMHPIndSVFGEdge>(indSVFGEdge);
+    ThreadMHPIndSVFGEdge *tmhpEdge2 =
+        llvm::dyn_cast<ThreadMHPIndSVFGEdge>(indSVFGEdge);
 
     delete gVFGEdge;
 }
@@ -230,6 +235,7 @@ TEST(CastTestSuite, shared_ptr_const) {
 
 TEST(CastTestSuite, simple_type_test) {
 
+#if 0
     /// This test show that llvm::is_simple_type treats
     // all types except const X * const as simple types
     // cout << std::boolalpha;

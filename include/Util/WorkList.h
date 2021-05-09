@@ -50,7 +50,8 @@ namespace SVF {
  * New nodes pushed at back and popped from front.
  * Elements in the list are unique as they're recorded by Set.
  */
-template <class Data> class List {
+template <class Data>
+class List {
     class ListNode {
       public:
         explicit ListNode(Data d) {
@@ -122,7 +123,8 @@ template <class Data> class List {
  * New nodes will be pushed at back and popped from front.
  * Elements in the list are unique as they're recorded by Set.
  */
-template <class Data> class FIFOWorkList {
+template <class Data>
+class FIFOWorkList {
     using DataSet = Set<Data>;
     using DataDeque = std::deque<Data>;
 
@@ -179,7 +181,8 @@ template <class Data> class FIFOWorkList {
  * New nodes will be pushed at back and popped from back.
  * Elements in the list are unique as they're recorded by Set.
  */
-template <class Data> class FILOWorkList {
+template <class Data>
+class FILOWorkList {
     using DataSet = Set<Data>;
     using DataVector = std::vector<Data>;
 

@@ -71,7 +71,7 @@ class SVFG : public VFG {
   public:
     using SVFGNodeIDToNodeMapTy = VFGNodeIDToNodeMapTy;
     using PAGNodeToDefMapTy = Map<const PAGNode *, NodeID>;
-    using MSSAVarToDefMapTy = Map<const MRVer *, NodeID>;
+    using MSSAVarToDefMapTy = Map<MRVerSPtr, NodeID>;
     using ActualINSVFGNodeSet = NodeBS;
     using ActualOUTSVFGNodeSet = NodeBS;
     using FormalINSVFGNodeSet = NodeBS;
@@ -369,7 +369,7 @@ class SVFG : public VFG {
     /// Given a MSSADef, set/get its def SVFG node (definition of address-taken
     /// variables)
     //@{
-    inline void setDef(const MRVer *mvar, const SVFGNode *node) {
+    inline void setDef(MRVerSPtr mvar, const SVFGNode *node) {
         auto it = MSSAVarToDefMap.find(mvar);
         if (it == MSSAVarToDefMap.end()) {
             MSSAVarToDefMap[mvar] = node->getId();
@@ -380,7 +380,7 @@ class SVFG : public VFG {
         }
     }
 
-    inline NodeID getDef(const MRVer *mvar) const {
+    inline NodeID getDef(MRVerSPtr mvar) const {
         auto it = MSSAVarToDefMap.find(mvar);
         assert(it != MSSAVarToDefMap.end() &&
                "memory SSA does not have a definition??");

@@ -688,6 +688,8 @@ bool Andersen::mergeSrcToTgt(NodeID nodeId, NodeID newRepId) {
 
     consCG->removeGNode(node);
 
+    delete node;
+
     return gepInsideScc;
 }
 /*
@@ -696,12 +698,13 @@ bool Andersen::mergeSrcToTgt(NodeID nodeId, NodeID newRepId) {
 void Andersen::mergeNodeToRep(NodeID nodeId, NodeID newRepId) {
 
     ConstraintNode *node = consCG->getConstraintNode(nodeId);
+    bool isPWCNode = node->isPWCNode();
     bool gepInsideScc = mergeSrcToTgt(nodeId, newRepId);
     /// 1. if find gep edges inside SCC cycle, the rep node will become a PWC
     /// node and its pts should be collapsed later.
     /// 2. if the node to be merged is already a PWC node, the rep node will
     /// also become a PWC node as it will have a self-cycle gep edge.
-    if (gepInsideScc || node->isPWCNode())
+    if (gepInsideScc || isPWCNode)
         consCG->setPWCNode(newRepId);
 }
 

@@ -149,7 +149,7 @@ void ThreadCallGraph::addDirectForkEdge(const CallBlockNode *cs) {
         auto *edge = new ThreadForkEdge(caller, callee, getNextEdgeId(), csId);
         edge->addDirectCallSite(cs);
 
-        addEdge(edge);
+        addGEdge(edge);
         addThreadForkEdgeSetMap(cs, edge);
     }
 }
@@ -171,7 +171,7 @@ void ThreadCallGraph::addIndirectForkEdge(const CallBlockNode *cs,
         auto *edge = new ThreadForkEdge(caller, callee, getNextEdgeId(), csId);
         edge->addInDirectCallSite(cs, proj);
 
-        addEdge(edge);
+        addGEdge(edge);
         addThreadForkEdgeSetMap(cs, edge);
     }
 }
@@ -235,7 +235,7 @@ void ThreadCallGraph::addDirectParForEdge(const CallBlockNode *cs) {
         auto *edge = new HareParForEdge(caller, callee, getNextEdgeId(), csId);
         edge->addDirectCallSite(cs);
 
-        addEdge(edge);
+        addGEdge(edge);
         addHareParForEdgeSetMap(cs, edge);
     }
 }
@@ -258,7 +258,7 @@ void ThreadCallGraph::addIndirectParForEdge(const CallBlockNode *cs,
         auto *edge = new HareParForEdge(caller, callee, getNextEdgeId(), csId);
         edge->addInDirectCallSite(cs, proj);
 
-        addEdge(edge);
+        addGEdge(edge);
         addHareParForEdgeSetMap(cs, edge);
     }
 }

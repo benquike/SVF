@@ -47,9 +47,6 @@ class FlowSensitiveTBHC : public FlowSensitive, public TypeBasedHeapCloning {
     const std::string PTAName() const override { return "FSTBHC"; }
 
     /// For LLVM RTTI.
-    static inline bool classof(const FlowSensitiveTBHC *) { return true; }
-
-    /// For LLVM RTTI.
     static inline bool classof(const PointerAnalysis *pta) {
         return pta->getAnalysisTy() == FSTBHC_WPA;
     }
