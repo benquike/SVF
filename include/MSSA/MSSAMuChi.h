@@ -32,10 +32,16 @@
 
 #include "MSSA/MemRegion.h"
 #include "Util/Serialization.h"
+#include <memory>
+
+using namespace std;
 
 namespace SVF {
 
 class MSSADEF;
+
+class MRVer;
+using MRVerSPtr = shared_ptr<MRVer>;
 
 /*!
  * Memory SSA Variable (in the form of SSA versions of each memory region )
@@ -106,7 +112,7 @@ class MSSAMU {
   protected:
     MUTYPE type;
     const MemRegion *mr = nullptr;
-    MRVer *ver = nullptr;
+    MRVerSPtr ver;
     Cond cond;
 
   public:
@@ -122,12 +128,12 @@ class MSSAMU {
     /// Return type
     inline MUTYPE getType() const { return type; }
     /// Set Ver
-    inline void setVer(MRVer *v) {
+    inline void setVer(MRVerSPtr v) {
         assert(v->getMR() == mr && "inserting different memory region?");
         ver = v;
     }
     /// Get Ver
-    inline MRVer *getVer() const {
+    inline MRVerSPtr getVer() const {
         assert(ver != nullptr && "version is nullptr, did not rename?");
         return ver;
     }
@@ -278,7 +284,7 @@ class MSSADEF {
   protected:
     DEFTYPE type;
     const MemRegion *mr = nullptr;
-    MRVer *resVer = nullptr;
+    MRVerSPtr resVer;
 
   public:
     /// Constructor/Destructer for MSSADEF
@@ -296,13 +302,13 @@ class MSSADEF {
     inline DEFTYPE getType() const { return type; }
 
     /// Set result operand ver
-    inline void setResVer(MRVer *v) {
+    inline void setResVer(MRVerSPtr v) {
         assert(v->getMR() == mr && "inserting different memory region?");
         resVer = v;
     }
 
     /// Set operand vers
-    inline MRVer *getResVer() const {
+    inline MRVerSPtr getResVer() const {
         assert(resVer != nullptr && "version is nullptr, did not rename?");
         return resVer;
     }
@@ -337,7 +343,7 @@ template <class Cond>
 class MSSACHI : public MSSADEF {
 
   private:
-    MRVer *opVer = nullptr;
+    MRVerSPtr opVer;
     Cond cond;
 
   public:
@@ -350,14 +356,14 @@ class MSSACHI : public MSSADEF {
     //@}
 
     /// Set operand ver
-    inline void setOpVer(MRVer *v) {
+    inline void setOpVer(MRVerSPtr v) {
         assert(v->getMR() == this->getMR() &&
                "inserting different memory region?");
         opVer = v;
     }
 
     /// Get operand ver
-    inline MRVer *getOpVer() const {
+    inline MRVerSPtr getOpVer() const {
         assert(opVer != nullptr && "version is nullptr, did not rename?");
         return opVer;
     }
@@ -518,7 +524,7 @@ template <class Cond>
 class MSSAPHI : public MSSADEF {
 
   public:
-    using OPVers = Map<u32_t, const MRVer *>;
+    using OPVers = Map<u32_t, MRVerSPtr>;
 
   private:
     const BasicBlock *bb = nullptr;
@@ -535,14 +541,14 @@ class MSSAPHI : public MSSADEF {
     //@}
 
     /// Set operand ver
-    inline void setOpVer(const MRVer *v, u32_t pos) {
+    inline void setOpVer(MRVerSPtr v, u32_t pos) {
         assert(v->getMR() == this->getMR() &&
                "inserting different memory region?");
         opVers[pos] = v;
     }
 
     /// Get operand ver
-    inline const MRVer *getOpVer(u32_t pos) const {
+    inline const MRVerSPtr getOpVer(u32_t pos) const {
         auto it = opVers.find(pos);
         assert(it != opVers.end() && "version is nullptr, did not rename?");
         return it->second;

@@ -258,7 +258,7 @@ class ActualOUTSVFGNode : public MRSVFGNode {
  */
 class MSSAPHISVFGNode : public MRSVFGNode {
   public:
-    using OPVers = Map<u32_t, const MRVer *>;
+    using OPVers = Map<u32_t, MRVerSPtr>;
 
   protected:
     const MemSSA::MDEF *res = nullptr;
@@ -278,12 +278,14 @@ class MSSAPHISVFGNode : public MRSVFGNode {
 
     /// MSSA phi operands
     //@{
-    inline const MRVer *getOpVer(u32_t pos) const {
+    inline const MRVerSPtr getOpVer(u32_t pos) const {
         auto it = opVers.find(pos);
         assert(it != opVers.end() && "version is nullptr, did not rename?");
         return it->second;
     }
-    inline void setOpVer(u32_t pos, const MRVer *node) { opVers[pos] = node; }
+    inline void setOpVer(u32_t pos, const MRVerSPtr node) {
+        opVers[pos] = node;
+    }
     inline const MemSSA::MDEF *getRes() const { return res; }
     inline u32_t getOpVerNum() const { return opVers.size(); }
     inline OPVers::const_iterator opVerBegin() const { return opVers.begin(); }
