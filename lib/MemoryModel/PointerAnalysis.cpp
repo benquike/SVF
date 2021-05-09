@@ -98,6 +98,9 @@ PointerAnalysis::~PointerAnalysis() {
 }
 
 void PointerAnalysis::destroy() {
+    delete chgraph;
+    chgraph = nullptr;
+
     delete ptaCallGraph;
     ptaCallGraph = nullptr;
 
