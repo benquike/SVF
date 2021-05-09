@@ -107,8 +107,8 @@ void PointerAnalysis::destroy() {
     delete callGraphSCC;
     callGraphSCC = nullptr;
 
-    delete stat;
-    stat = nullptr;
+    // delete stat;
+    // stat = nullptr;
 
     delete typeSystem;
     typeSystem = nullptr;

@@ -65,6 +65,9 @@ FlowSensitive::~FlowSensitive() {
 
     delete ander;
     ander = nullptr;
+
+    delete stat;
+    stat = nullptr;
 }
 
 /*!

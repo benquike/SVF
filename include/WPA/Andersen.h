@@ -63,6 +63,8 @@ class AndersenBase : public WPAConstraintSolver, public BVDataPTAImpl {
     ~AndersenBase() override {
         delete consCG;
         consCG = nullptr;
+        delete stat;
+        stat = nullptr;
     }
 
     /// Andersen analysis
@@ -359,6 +361,9 @@ class Andersen : public AndersenBase {
 /**
  * Wave propagation with diff points-to set.
  */
+class AndersenWaveDiff;
+using AndersenWaveDiffSPtr = shared_ptr<AndersenWaveDiff>;
+
 class AndersenWaveDiff : public Andersen {
 
   public:

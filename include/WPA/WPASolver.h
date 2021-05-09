@@ -161,7 +161,7 @@ class WPASolver {
     GraphType _graph;
 
     /// SCC
-    SCC *scc;
+    SCC *scc = nullptr;
 
     /// Worklist for resolution
     WorkList worklist;

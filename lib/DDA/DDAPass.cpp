@@ -23,10 +23,11 @@ char DDAPass::ID = 0;
 static llvm::RegisterPass<DDAPass> DDAPA("dda",
                                          "Demand-driven Pointer Analysis Pass");
 DDAPass::~DDAPass() {
-    // _pta->dumpStat();
-    if (_client != nullptr) {
-        delete _client;
-    }
+
+    delete _client;
+    _client = nullptr;
+    delete _pta;
+    _pta = nullptr;
 }
 
 void DDAPass::runOnModule(SVFProject *proj) {

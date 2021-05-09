@@ -32,7 +32,7 @@ class FlowDDA : public BVDataPTAImpl,
         : BVDataPTAImpl(proj, PointerAnalysis::FlowS_DDA),
           DDAVFSolver<NodeID, PointsTo, LocDPItem>(proj), _client(client) {}
     /// Destructor
-    inline virtual ~FlowDDA() {}
+    inline virtual ~FlowDDA() { delete stat; }
     /// dummy analyze method
     virtual void analyze() override {}
 
