@@ -698,17 +698,17 @@ class DDAVFSolver {
         }
     }
 
-    bool outOfBudgetQuery;  ///< Whether the current query is out of step limits
-    PAG *_pag{};            ///< PAG
-    SVFG *_svfg{};          ///< SVFG
+    bool outOfBudgetQuery; ///< Whether the current query is out of step limits
+    PAG *_pag = nullptr;   ///< PAG
+    SVFG *_svfg = nullptr; ///< SVFG
     AndersenWaveDiff *_ander = nullptr; ///< Andersen's analysis
     SVFProject *proj = nullptr;
 
-    NodeBS candidateQueries;       ///< candidate pointers;
-    PTACallGraph *_callGraph{};    ///< CallGraph
+    NodeBS candidateQueries;               ///< candidate pointers;
+    PTACallGraph *_callGraph = nullptr;    ///< CallGraph
     CallGraphSCC *_callGraphSCC = nullptr; ///< SCC for CallGraph
     SVFGSCC *_svfgSCC = nullptr;           ///< SCC for SVFG
-    DPTItemSet backwardVisited;    ///< visited map during backward traversing
+    DPTItemSet backwardVisited; ///< visited map during backward traversing
     DPImToCPtSetMap
         dpmToTLCPtSetMap; ///< points-to caching map for top-level vars
     DPImToCPtSetMap
