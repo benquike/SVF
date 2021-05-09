@@ -673,13 +673,14 @@ void SymbolTableInfo::collectObj(const Value *val) {
         if (isConstantData(val) ||
             (isConstantObjSym(val) && !getModelConstants())) {
             objSymToIdMap.insert(std::make_pair(val, constantSymID()));
-
+            idToObjSymMap.insert(std::make_pair(constantSymID(), val));
         }
         // otherwise, we will create an object for each abstract memory location
         else {
             // create obj sym and sym type
             SymID id = nodeIDAllocator.allocateObjectId();
             objSymToIdMap.insert(std::make_pair(val, id));
+            idToObjSymMap.insert(std::make_pair(id, val));
             symIdToTyMap.insert(std::make_pair(id, ObjSym));
             DBOUT(DMemModel, outs() << "create a new obj sym " << id << "\n");
 
@@ -699,6 +700,7 @@ void SymbolTableInfo::collectRet(const Function *val) {
     if (iter == retSymToIdMap.end()) {
         SymID id = nodeIDAllocator.allocateValueId();
         retSymToIdMap.insert(std::make_pair(val, id));
+        idToRetSymMap.insert(std::make_pair(id, val));
         symIdToTyMap.insert(std::make_pair(id, RetSym));
         DBOUT(DMemModel, outs() << "create a return sym " << id << "\n");
     }
@@ -712,6 +714,7 @@ void SymbolTableInfo::collectVararg(const Function *val) {
     if (iter == varargSymToIdMap.end()) {
         SymID id = nodeIDAllocator.allocateValueId();
         varargSymToIdMap.insert(std::make_pair(val, id));
+        idToVarargSymMap.insert(std::make_pair(id, val));
         symIdToTyMap.insert(std::make_pair(id, VarargSym));
         DBOUT(DMemModel, outs() << "create a vararg sym " << id << "\n");
     }

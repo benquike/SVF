@@ -55,6 +55,7 @@ class SymbolTableInfo {
 
     /// function to sym id map
     using FunToIDMapTy = OrderedMap<const Function *, SymID>;
+    using IDToFunMapTy = OrderedMap<SymID, const Function *>;
     /// sym id to sym type map
     using IDToSymTyMapTy = OrderedMap<SymID, SYMTYPE>;
     /// struct type to struct info map
@@ -74,13 +75,20 @@ class SymbolTableInfo {
     ValueToIDMapTy valSymToIdMap;   ///< map a value to its sym id
     IDToValueMapTy idToValSymMap;   ///< map from its id to the pointer
     ValueToIDMapTy objSymToIdMap;   ///< map a obj reference to its sym id
-    IDToValueMapTy idToObjValueMap; ///< map from its id to obj symbol
+    IDToValueMapTy idToObjSymMap;   ///< map from its id to obj symbol
     IDToMemMapTy idToMemObjMap;     ///< map a memory sym id to its obj
     MemToIDMapTy memObjToIdMap;
-    IDToSymTyMapTy symIdToTyMap;   /// < map a sym id to its type
-    FunToIDMapTy retSymToIdMap;    ///< return  map
-    FunToIDMapTy varargSymToIdMap; ///< vararg map
 
+    /// map a sym Id to its SVF symbol type,
+    /// i.e., valsym or obj sym
+    IDToSymTyMapTy symIdToTyMap;   /// < map a sym id to its type
+
+    FunToIDMapTy retSymToIdMap;    ///< return  map
+    IDToFunMapTy idToRetSymMap;
+    FunToIDMapTy varargSymToIdMap; ///< vararg map
+    IDToFunMapTy idToVarargSymMap;
+
+    // map id to its llvm type
     IDToTypeMapTy idToTypeMap;
     TypeToIDMapTy typeToIdMap;
 
