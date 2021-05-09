@@ -350,13 +350,14 @@ class SymbolTableInfo {
     inline ValueToIDMapTy &valSymToId() { return valSymToIdMap; }
 
     inline ValueToIDMapTy &objSymToId() { return objSymToIdMap; }
-
+    inline IDToValueMapTy &idToObjSym() { return idToObjSymMap; }
     inline IDToMemMapTy &idToMemObj() { return idToMemObjMap; }
     inline IDToValueMapTy &idToValSym() { return idToValSymMap; }
 
     inline FunToIDMapTy &retSymToId() { return retSymToIdMap; }
-
+    inline IDToFunMapTy &idToRetSym() { return idToRetSymMap; }
     inline FunToIDMapTy &varargSymToId() { return varargSymToIdMap; }
+    inline IDToFunMapTy &idToVarargSym() { return idToVarargSymMap; }
 
     inline IDToSymTyMapTy &symIDToType() { return symIdToTyMap; }
 
