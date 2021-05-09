@@ -38,6 +38,8 @@ using namespace boost::archive;
 
 #include "Util/boost_classes_export.h"
 
+#if 0
+
 TEST(ICFGSerializationTestSuite, ICFGNodeTest_0) {
     stringstream ss;
     ICFGNode icfgnode;
@@ -82,6 +84,7 @@ TEST(ICFGSerializationTestSuite, GlobalBlockNodeTest_0) {
         llvm::outs() << e.what() << "\n";
     }
 }
+#endif
 
 TEST(ICFGSerializationTestSuite, AllNodes_0) {
     string test_bc = SVF_BUILD_DIR "tests/ICFG/static_call_test_cpp.ll";
@@ -119,6 +122,7 @@ TEST(ICFGSerializationTestSuite, AllNodes_0) {
     // }
 }
 
+#if 0
 TEST(ICFGSerializationTestSuite, Test_0) {
     string test_bc = SVF_BUILD_DIR "tests/ICFG/static_call_test_cpp.ll";
     SVFProject proj(test_bc);
@@ -156,6 +160,7 @@ TEST(ICFGSerializationTestSuite, Test_0) {
         ASSERT_NE(loaded_icfg, nullptr);
     }
 }
+#endif
 
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);

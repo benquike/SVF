@@ -42,7 +42,7 @@ TEST(GLAnalysis, DumpVTargets) {
     PAG *pag = proj.getPAG();
 
     ASSERT_TRUE(pag != nullptr);
-    CHGraph *chg = new CHGraph(pag->getSymbolTableInfo());
+    auto chg = make_unique<CHGraph>(pag->getSymbolTableInfo());
     ASSERT_TRUE(chg != nullptr);
 
     chg->buildCHG();

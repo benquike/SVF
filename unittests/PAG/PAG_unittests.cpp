@@ -90,6 +90,19 @@ TEST_F(PAGTestSuite, VirtTest_1) {
     graph_eq_test(pag, pag2.get());
 }
 
+TEST_F(PAGTestSuite, WebGL_PAG_Test_1) {
+    string test_bc = SVF_SRC_DIR
+        "tools/chrome-gl-analysis/chrome_webgl_ir/webgl_all_rendering_code.bc";
+    init(test_bc);
+
+    PAG *pag = p_proj->getPAG();
+    ASSERT_TRUE(pag != nullptr);
+
+    unique_ptr<PAG> pag2 = make_unique<PAG>(p_proj.get());
+    ASSERT_EQ(pag->getSymbolTableInfo(), pag2->getSymbolTableInfo());
+    graph_eq_test(pag, pag2.get());
+}
+
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
     llvm::cl::ParseCommandLineOptions(argc, argv, "PAG unittests\n");

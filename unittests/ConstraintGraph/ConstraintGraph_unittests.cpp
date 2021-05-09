@@ -45,6 +45,8 @@ class ConsGraphTestSuite : public ::testing::Test {
 
     void cmp_test() {
         {
+            ASSERT_EQ(p_proj->getPAG(), p_proj->getPAG());
+
             unique_ptr<ConstraintGraph> cg1 =
                 make_unique<ConstraintGraph>(p_proj->getPAG());
             unique_ptr<ConstraintGraph> cg2 =

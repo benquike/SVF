@@ -240,7 +240,14 @@ TEST_F(SymbolTableInfoTest, Construction_2) {
     cmp_symtableid_and_pagid(ll_file);
 }
 
-TEST_F(SymbolTableInfoTest, Construction_WebGL_IR) {
+TEST_F(SymbolTableInfoTest, Construction_WebGL_IR_0) {
+    string ll_file = SVF_SRC_DIR
+        "tools/chrome-gl-analysis/chrome_webgl_ir/webgl_all_rendering_code.bc";
+    common_symbol_table_tests(ll_file);
+    cmp_symtableid_and_pagid(ll_file);
+}
+
+TEST_F(SymbolTableInfoTest, Construction_WebGL_IR_1) {
     string ll_file = SVF_SRC_DIR
         "tools/chrome-gl-analysis/chrome_webgl_ir/webgl_all_rendering_code.bc";
     common_symbol_table_tests(ll_file);

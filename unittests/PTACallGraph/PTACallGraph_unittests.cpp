@@ -42,11 +42,16 @@ class PTACGTestSuite : public ::testing::Test {
 TEST_F(PTACGTestSuite, StaticCallTest_0) {
     string test_bc = SVF_BUILD_DIR "tests/ICFG/static_call_test_cpp.ll";
     init(test_bc);
-    FlowSensitive *fs_pta1 = FlowSensitive::createFSWPA(p_proj.get(), true);
+    auto fs_pta1 = unique_ptr<FlowSensitive>(
+        FlowSensitive::createFSWPA(p_proj.get(), true));
+
     PTACallGraph *callgraph1 = fs_pta1->getPTACallGraph();
 
     SVFProject proj2(test_bc);
-    FlowSensitive *fs_pta2 = FlowSensitive::createFSWPA(&proj2, true);
+
+    auto fs_pta2 =
+        unique_ptr<FlowSensitive>(FlowSensitive::createFSWPA(&proj2, true));
+
     PTACallGraph *callgraph2 = fs_pta2->getPTACallGraph();
 
     graph_eq_test(callgraph1, callgraph2);
@@ -56,11 +61,13 @@ TEST_F(PTACGTestSuite, FPtrTest_0) {
     string test_bc = SVF_BUILD_DIR "tests/ICFG/fptr_test_cpp.ll";
 
     init(test_bc);
-    FlowSensitive *fs_pta1 = FlowSensitive::createFSWPA(p_proj.get(), true);
+    auto fs_pta1 = unique_ptr<FlowSensitive>(
+        FlowSensitive::createFSWPA(p_proj.get(), true));
     PTACallGraph *callgraph1 = fs_pta1->getPTACallGraph();
 
     SVFProject proj2(test_bc);
-    FlowSensitive *fs_pta2 = FlowSensitive::createFSWPA(&proj2, true);
+    auto fs_pta2 =
+        unique_ptr<FlowSensitive>(FlowSensitive::createFSWPA(&proj2, true));
     PTACallGraph *callgraph2 = fs_pta2->getPTACallGraph();
 
     graph_eq_test(callgraph1, callgraph2);
@@ -70,11 +77,13 @@ TEST_F(PTACGTestSuite, VirtTest_0) {
     string test_bc = SVF_BUILD_DIR "tests/ICFG/virt_call_test_cpp.ll";
 
     init(test_bc);
-    FlowSensitive *fs_pta1 = FlowSensitive::createFSWPA(p_proj.get(), true);
+    auto fs_pta1 = unique_ptr<FlowSensitive>(
+        FlowSensitive::createFSWPA(p_proj.get(), true));
     PTACallGraph *callgraph1 = fs_pta1->getPTACallGraph();
 
     SVFProject proj2(test_bc);
-    FlowSensitive *fs_pta2 = FlowSensitive::createFSWPA(&proj2, true);
+    auto fs_pta2 =
+        unique_ptr<FlowSensitive>(FlowSensitive::createFSWPA(&proj2, true));
     PTACallGraph *callgraph2 = fs_pta2->getPTACallGraph();
 
     graph_eq_test(callgraph1, callgraph2);
@@ -83,11 +92,14 @@ TEST_F(PTACGTestSuite, VirtTest_0) {
 TEST_F(PTACGTestSuite, VirtTest_1) {
     string test_bc = SVF_BUILD_DIR "/tests/CHG/callsite_cpp.ll";
     init(test_bc);
-    FlowSensitive *fs_pta1 = FlowSensitive::createFSWPA(p_proj.get(), true);
+    auto fs_pta1 = unique_ptr<FlowSensitive>(
+        FlowSensitive::createFSWPA(p_proj.get(), true));
+
     PTACallGraph *callgraph1 = fs_pta1->getPTACallGraph();
 
     SVFProject proj2(test_bc);
-    FlowSensitive *fs_pta2 = FlowSensitive::createFSWPA(&proj2, true);
+    auto fs_pta2 =
+        unique_ptr<FlowSensitive>(FlowSensitive::createFSWPA(&proj2, true));
     PTACallGraph *callgraph2 = fs_pta2->getPTACallGraph();
 
     graph_eq_test(callgraph1, callgraph2);
