@@ -345,12 +345,14 @@ class VFG : public GenericVFGTy {
 
     /// Remove a SVFG edge
     inline void removeVFGEdge(VFGEdge *edge) {
-        edge->getDstNode()->removeIncomingEdge(edge);
-        edge->getSrcNode()->removeOutgoingEdge(edge);
+        removeGEdge(edge);
         delete edge;
     }
     /// Remove a VFGNode
-    inline void removeVFGNode(VFGNode *node) { removeGNode(node); }
+    inline void removeVFGNode(VFGNode *node) {
+        removeGNode(node);
+        delete node;
+    }
 
     /// Whether we has a SVFG edge
     //@{
@@ -363,12 +365,7 @@ class VFG : public GenericVFGTy {
     //@}
 
     /// Add VFG edge
-    inline bool addVFGEdge(VFGEdge *edge) {
-        bool added1 = edge->getDstNode()->addIncomingEdge(edge);
-        bool added2 = edge->getSrcNode()->addOutgoingEdge(edge);
-        assert(added1 && added2 && "edge not added??");
-        return true;
-    }
+    inline bool addVFGEdge(VFGEdge *edge) { return addGEdge(edge); }
 
   protected:
     /// sanitize Intra edges, verify that both nodes belong to the same
