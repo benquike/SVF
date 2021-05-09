@@ -64,6 +64,7 @@ int main(int argc, char **argv) {
     cl::ParseCommandLineOptions(arg_num, arg_value,
                                 "Source-Sink Bug Detector\n");
 
+    delete[] arg_value;
     if (moduleNameVec.empty()) {
         outs() << "Please provide llvm IR files\n";
         exit(-1);
@@ -83,6 +84,8 @@ int main(int argc, char **argv) {
         saber = new LeakChecker(&proj); // if no checker is specified, we use
                                         // leak checker as the default one.
     saber->runOnModule(proj.getSVFModule());
+
+    delete saber;
 
     return 0;
 }
