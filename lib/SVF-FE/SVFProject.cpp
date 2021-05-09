@@ -204,7 +204,7 @@ const Value *getValueByIdFromCurrentProject(SymID id) {
     SVFProject *currProject = SVFProject::getCurrentProject();
     assert(currProject != nullptr && "current project is null");
     auto *symTable = currProject->getSymbolTableInfo();
-    auto &id2Val = symTable->idToValueMap();
+    auto &id2Val = symTable->idToValSym();
     assert(id2Val.find(id) != id2Val.end() && "id does not exist");
     return id2Val[id];
 }

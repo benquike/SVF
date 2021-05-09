@@ -504,10 +504,10 @@ class PAG : public GenericPAGTy {
     inline Size_t getPAGNodeNum() const { return getTotalNodeNum(); }
     inline Size_t getPAGEdgeNum() const { return getTotalEdgeNum(); }
     inline Size_t getValueNodeNum() const {
-        return symbolTableInfo->valSyms().size();
+        return symbolTableInfo->valSymToId().size();
     }
     inline Size_t getObjectNodeNum() const {
-        return symbolTableInfo->idToObjMap().size();
+        return symbolTableInfo->idToMemObj().size();
     }
     inline Size_t getFieldValNodeNum() const { return GepValNodeMap.size(); }
     inline Size_t getFieldObjNodeNum() const { return GepObjNodeMap.size(); }

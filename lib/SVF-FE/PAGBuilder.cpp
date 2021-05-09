@@ -202,8 +202,8 @@ void PAGBuilder::initialiseNodes() {
     ///
     /// For each sym value in the symtable, add a PAG node
     ///
-    for (auto iter = symTable->valSyms().begin();
-         iter != symTable->valSyms().end(); ++iter) {
+    auto idToVal = symTable->valSymToId();
+    for (auto iter = idToVal.begin(); iter != idToVal.end(); ++iter) {
         DBOUT(DPAGBuild, outs() << "add val node " << iter->second << "\n");
 
         if (iter->second == symTable->blkPtrSymID() ||
@@ -216,8 +216,8 @@ void PAGBuilder::initialiseNodes() {
     ///
     /// for each object value in the symtable, add a PAG node
     ///
-    for (auto iter = symTable->objSyms().begin();
-         iter != symTable->objSyms().end(); ++iter) {
+    for (auto iter = symTable->objSymToId().begin();
+         iter != symTable->objSymToId().end(); ++iter) {
         DBOUT(DPAGBuild, outs() << "add obj node " << iter->second << "\n");
 
         if (iter->second == symTable->blackholeSymID() ||
@@ -231,8 +231,8 @@ void PAGBuilder::initialiseNodes() {
     /// for each function, we add a PAG return node
     /// TODO: how about external function with only
     /// declaration
-    for (auto iter = symTable->retSyms().begin();
-         iter != symTable->retSyms().end(); ++iter) {
+    for (auto iter = symTable->retSymToId().begin();
+         iter != symTable->retSymToId().end(); ++iter) {
         DBOUT(DPAGBuild, outs() << "add ret node " << iter->second << "\n");
         const SVFFunction *fun = modSet->getSVFFunction(iter->first);
         pag->addRetNode(fun, iter->second);
@@ -243,8 +243,8 @@ void PAGBuilder::initialiseNodes() {
     /// for each vararg sym in the symbol table,
     /// add a PAG node for it
     ///
-    for (auto iter = symTable->varargSyms().begin();
-         iter != symTable->varargSyms().end(); ++iter) {
+    for (auto iter = symTable->varargSymToId().begin();
+         iter != symTable->varargSymToId().end(); ++iter) {
         DBOUT(DPAGBuild, outs() << "add vararg node " << iter->second << "\n");
         const SVFFunction *fun = modSet->getSVFFunction(iter->first);
         pag->addVarargNode(fun, iter->second);
@@ -260,8 +260,8 @@ void PAGBuilder::initialiseNodes() {
     /// object node with an AddrEdge.
     ///
     /// FIXME: why put this code here?
-    for (auto iter = symTable->objSyms().begin();
-         iter != symTable->objSyms().end(); ++iter) {
+    for (auto iter = symTable->objSymToId().begin();
+         iter != symTable->objSymToId().end(); ++iter) {
         DBOUT(DPAGBuild, outs() << "add address edges for constant node "
                                 << iter->second << "\n");
         const Value *val = iter->first;
