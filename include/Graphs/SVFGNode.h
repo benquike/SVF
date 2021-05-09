@@ -126,7 +126,7 @@ class FormalOUTSVFGNode : public MRSVFGNode {
   public:
     /// Constructor
     FormalOUTSVFGNode(NodeID id, const MemSSA::RETMU *exit);
-    FormalOUTSVFGNode() : MRSVFGNode(MAX_NODEID, FPOUT){}
+    FormalOUTSVFGNode() : MRSVFGNode(MAX_NODEID, FPOUT) {}
     virtual ~FormalOUTSVFGNode() {}
 
     /// RetMU

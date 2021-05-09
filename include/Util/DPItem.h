@@ -81,7 +81,8 @@ class DPItem {
 /*!
  * FlowSensitive DPItem
  */
-template <class LocCond> class StmtDPItem : public DPItem {
+template <class LocCond>
+class StmtDPItem : public DPItem {
 
   protected:
     const LocCond *curloc;
@@ -262,7 +263,8 @@ class ContextCond {
 using CxtVar = CondVar<ContextCond>;
 using CxtPtSet = CondStdSet<CxtVar>;
 
-template <class LocCond> class CxtStmtDPItem : public StmtDPItem<LocCond> {
+template <class LocCond>
+class CxtStmtDPItem : public StmtDPItem<LocCond> {
   private:
     ContextCond context;
 
@@ -482,7 +484,8 @@ class VFPathCond : public ContextCond {
 using VFPathVar = CondVar<VFPathCond>;
 using VFPathPtSet = CondStdSet<VFPathVar>;
 
-template <class LocCond> class PathStmtDPItem : public StmtDPItem<LocCond> {
+template <class LocCond>
+class PathStmtDPItem : public StmtDPItem<LocCond> {
   private:
     VFPathCond vfpath;
 
@@ -615,7 +618,8 @@ class CxtDPItem : public DPItem {
 } // End namespace SVF
 
 /// Specialise hash for CxtDPItem.
-template <> struct std::hash<SVF::CxtDPItem> {
+template <>
+struct std::hash<SVF::CxtDPItem> {
     size_t operator()(const SVF::CxtDPItem &cdpi) const {
         std::hash<std::pair<SVF::NodeID, SVF::ContextCond>> h;
         return h(std::make_pair(cdpi.getCurNodeID(), cdpi.getContexts()));
@@ -623,7 +627,8 @@ template <> struct std::hash<SVF::CxtDPItem> {
 };
 
 /// Specialise hash for StmtDPItem.
-template <typename LocCond> struct std::hash<SVF::StmtDPItem<LocCond>> {
+template <typename LocCond>
+struct std::hash<SVF::StmtDPItem<LocCond>> {
     size_t operator()(const SVF::StmtDPItem<LocCond> &sdpi) const {
         std::hash<std::pair<SVF::NodeID, const LocCond *>> h;
         return h(std::make_pair(sdpi.getCurNodeID(), sdpi.getLoc()));
@@ -631,7 +636,8 @@ template <typename LocCond> struct std::hash<SVF::StmtDPItem<LocCond>> {
 };
 
 /// Specialise hash for CxtStmtDPItem.
-template <class LocCond> struct std::hash<SVF::CxtStmtDPItem<LocCond>> {
+template <class LocCond>
+struct std::hash<SVF::CxtStmtDPItem<LocCond>> {
     size_t operator()(const SVF::CxtStmtDPItem<LocCond> &csdpi) const {
         std::hash<std::pair<SVF::NodeID,
                             std::pair<const LocCond *, SVF::ContextCond>>>
@@ -644,14 +650,16 @@ template <class LocCond> struct std::hash<SVF::CxtStmtDPItem<LocCond>> {
 };
 
 /// Specialise hash for ContextCond.
-template <> struct std::hash<const SVF::ContextCond> {
+template <>
+struct std::hash<const SVF::ContextCond> {
     size_t operator()(const SVF::ContextCond &cc) const {
         std::hash<SVF::CallStrCxt> h;
         return h(cc.getContexts());
     }
 };
 
-template <> struct std::hash<SVF::ContextCond> {
+template <>
+struct std::hash<SVF::ContextCond> {
     size_t operator()(const SVF::ContextCond &cc) const {
         std::hash<SVF::CallStrCxt> h;
         return h(cc.getContexts());

@@ -876,7 +876,8 @@ namespace llvm {
 /*!
  * Write value flow graph into dot file for debugging
  */
-template <> struct DOTGraphTraits<CHGraph *> : public DefaultDOTGraphTraits {
+template <>
+struct DOTGraphTraits<CHGraph *> : public DefaultDOTGraphTraits {
 
     using NodeType = CHNode;
     DOTGraphTraits(bool isSimple = false) : DefaultDOTGraphTraits(isSimple) {}

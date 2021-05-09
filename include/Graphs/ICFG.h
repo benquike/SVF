@@ -71,7 +71,7 @@ class ICFG : public GenericICFGTy {
     CSToCallNodeMapTy CSToCallNodeMap; ///< map a callsite to its CallBlockNode
     CSToRetNodeMapTy CSToRetNodeMap;   ///< map a callsite to its RetBlockNode
     InstToBlockNodeMapTy
-        InstToBlockNodeMap;           ///< map a basic block to its ICFGNode
+        InstToBlockNodeMap; ///< map a basic block to its ICFGNode
     GlobalBlockNode *globalBlockNode =
         nullptr; ///< unique basic block for all globals
     PAG *pag = nullptr;

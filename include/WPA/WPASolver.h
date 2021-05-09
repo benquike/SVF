@@ -38,7 +38,8 @@ namespace SVF {
 /*
  * Generic graph solver for whole program pointer analysis
  */
-template <class GraphType> class WPASolver {
+template <class GraphType>
+class WPASolver {
 
   public:
     /// Define the GTraits and node iterator for printing

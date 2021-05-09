@@ -72,18 +72,18 @@ class SymbolTableInfo {
     // node id allocator
     NodeIDAllocator nodeIDAllocator;
 
-    ValueToIDMapTy valSymToIdMap;   ///< map a value to its sym id
-    IDToValueMapTy idToValSymMap;   ///< map from its id to the pointer
-    ValueToIDMapTy objSymToIdMap;   ///< map a obj reference to its sym id
-    IDToValueMapTy idToObjSymMap;   ///< map from its id to obj symbol
-    IDToMemMapTy idToMemObjMap;     ///< map a memory sym id to its obj
+    ValueToIDMapTy valSymToIdMap; ///< map a value to its sym id
+    IDToValueMapTy idToValSymMap; ///< map from its id to the pointer
+    ValueToIDMapTy objSymToIdMap; ///< map a obj reference to its sym id
+    IDToValueMapTy idToObjSymMap; ///< map from its id to obj symbol
+    IDToMemMapTy idToMemObjMap;   ///< map a memory sym id to its obj
     MemToIDMapTy memObjToIdMap;
 
     /// map a sym Id to its SVF symbol type,
     /// i.e., valsym or obj sym
-    IDToSymTyMapTy symIdToTyMap;   /// < map a sym id to its type
+    IDToSymTyMapTy symIdToTyMap; /// < map a sym id to its type
 
-    FunToIDMapTy retSymToIdMap;    ///< return  map
+    FunToIDMapTy retSymToIdMap; ///< return  map
     IDToFunMapTy idToRetSymMap;
     FunToIDMapTy varargSymToIdMap; ///< vararg map
     IDToFunMapTy idToVarargSymMap;

@@ -471,7 +471,8 @@ RetBlockNode *ICFG::addRetICFGNode(const Instruction *cs) {
  * GraphTraits specialization
  */
 namespace llvm {
-template <> struct DOTGraphTraits<ICFG *> : public DOTGraphTraits<PAG *> {
+template <>
+struct DOTGraphTraits<ICFG *> : public DOTGraphTraits<PAG *> {
 
     using NodeType = ICFGNode;
     DOTGraphTraits(bool isSimple = false) : DOTGraphTraits<PAG *>(isSimple) {}

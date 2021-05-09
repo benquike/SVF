@@ -42,7 +42,8 @@ namespace SVF {
 /*!
  * Flow-sensitive Solver
  */
-template <class GraphType> class WPAFSSolver : public WPASolver<GraphType> {
+template <class GraphType>
+class WPAFSSolver : public WPASolver<GraphType> {
   public:
     /// Constructor
     WPAFSSolver() : WPASolver<GraphType>() {}
@@ -90,7 +91,8 @@ template <class GraphType> class WPAFSSolver : public WPASolver<GraphType> {
 /*!
  * Solver based on SCC cycles.
  */
-template <class GraphType> class WPASCCSolver : public WPAFSSolver<GraphType> {
+template <class GraphType>
+class WPASCCSolver : public WPAFSSolver<GraphType> {
   public:
     using GTraits = typename WPASolver<GraphType>::GTraits;
     using GNODE = typename WPASolver<GraphType>::GNODE;

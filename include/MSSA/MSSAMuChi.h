@@ -97,7 +97,8 @@ class MRVer {
  * 2) CallMU at callsite
  * 3) RetMU at function return
  */
-template <class Cond> class MSSAMU {
+template <class Cond>
+class MSSAMU {
 
   public:
     enum MUTYPE { LoadMSSAMU, CallMSSAMU, RetMSSAMU };
@@ -147,7 +148,8 @@ template <class Cond> class MSSAMU {
  * LoadMU is annotated at each load instruction, representing a memory object is
  * read here
  */
-template <class Cond> class LoadMU : public MSSAMU<Cond> {
+template <class Cond>
+class LoadMU : public MSSAMU<Cond> {
 
   private:
     const LoadPE *inst = nullptr;
@@ -187,7 +189,8 @@ template <class Cond> class LoadMU : public MSSAMU<Cond> {
  * CallMU is annotated at callsite, representing a memory object is indirect
  * read by callee
  */
-template <class Cond> class CallMU : public MSSAMU<Cond> {
+template <class Cond>
+class CallMU : public MSSAMU<Cond> {
 
   private:
     const CallBlockNode *callsite = nullptr;
@@ -228,7 +231,8 @@ template <class Cond> class CallMU : public MSSAMU<Cond> {
  * RetMU is annotated at function return, representing memory objects returns to
  * callers
  */
-template <class Cond> class RetMU : public MSSAMU<Cond> {
+template <class Cond>
+class RetMU : public MSSAMU<Cond> {
   private:
     const SVFFunction *fun = nullptr;
 
@@ -329,7 +333,8 @@ class MSSADEF {
 /*!
  * Indirect Memory Write
  */
-template <class Cond> class MSSACHI : public MSSADEF {
+template <class Cond>
+class MSSACHI : public MSSADEF {
 
   private:
     MRVer *opVer = nullptr;
@@ -384,7 +389,8 @@ template <class Cond> class MSSACHI : public MSSADEF {
  *  StoreCHI is annotated at each store instruction,
  *  representing a memory object is modified here
  */
-template <class Cond> class StoreCHI : public MSSACHI<Cond> {
+template <class Cond>
+class StoreCHI : public MSSACHI<Cond> {
   private:
     const BasicBlock *bb = nullptr;
     const StorePE *inst = nullptr;
@@ -427,7 +433,8 @@ template <class Cond> class StoreCHI : public MSSACHI<Cond> {
  *  representing a memory object is modified here
  *
  */
-template <class Cond> class CallCHI : public MSSACHI<Cond> {
+template <class Cond>
+class CallCHI : public MSSACHI<Cond> {
   private:
     const CallBlockNode *callsite = nullptr;
 
@@ -470,7 +477,8 @@ template <class Cond> class CallCHI : public MSSACHI<Cond> {
  * EntryCHI is annotated at function entry,
  * representing receiving memory objects from callers
  */
-template <class Cond> class EntryCHI : public MSSACHI<Cond> {
+template <class Cond>
+class EntryCHI : public MSSACHI<Cond> {
   private:
     const SVFFunction *fun = nullptr;
 
@@ -506,7 +514,8 @@ template <class Cond> class EntryCHI : public MSSACHI<Cond> {
 /*
  * Memory SSA Select, similar to PHINode
  */
-template <class Cond> class MSSAPHI : public MSSADEF {
+template <class Cond>
+class MSSAPHI : public MSSADEF {
 
   public:
     using OPVers = Map<u32_t, const MRVer *>;

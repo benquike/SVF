@@ -144,7 +144,7 @@ class CopyCGEdge : public ConstraintEdge {
         setId(MAX_EDGEID);
         setEdgeFlag(Copy);
     }
-    virtual ~CopyCGEdge(){}
+    virtual ~CopyCGEdge() {}
 };
 
 /*!
@@ -212,6 +212,7 @@ class GepCGEdge : public ConstraintEdge {
     GepCGEdge(ConstraintNode *s, ConstraintNode *d, ConstraintEdgeK k,
               EdgeID id)
         : ConstraintEdge(s, d, k, id) {}
+
   public:
     GepCGEdge() {
         setId(MAX_EDGEID);

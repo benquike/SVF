@@ -40,7 +40,8 @@ namespace SVF {
  * PAG, VFG, ThreadVFG) Extend this class for sophisticated CFL-reachability
  * resolution (e.g. field, flow, path)
  */
-template <class GraphType, class DPIm = DPItem> class CFLSolver {
+template <class GraphType, class DPIm = DPItem>
+class CFLSolver {
 
   public:
     /// Define the GTraits and node iterator

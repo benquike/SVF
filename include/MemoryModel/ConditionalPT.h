@@ -41,7 +41,8 @@ namespace SVF {
  * A context/path condition
  * A variable NodeID
  */
-template <class Cond> class CondVar {
+template <class Cond>
+class CondVar {
   public:
     /// Constructor
     CondVar(const Cond &cond, NodeID id) : m_cond(cond), m_id(id) {}
@@ -105,7 +106,8 @@ template <class Cond> class CondVar {
 /*!
  * Conditional variable set
  */
-template <class Element> class CondStdSet {
+template <class Element>
+class CondStdSet {
     using ElementSet = OrderedSet<Element>;
 
   public:
@@ -227,7 +229,8 @@ template <class Element> class CondStdSet {
 /*!
  * Conditional Points-to set
  */
-template <class Cond> class CondPointsToSet {
+template <class Cond>
+class CondPointsToSet {
   public:
     using CondPts = Map<Cond, PointsTo>;
     using CondPtsIter = typename CondPts::iterator;
@@ -670,14 +673,16 @@ template <class Cond> class CondPointsToSet {
 } // End namespace SVF
 
 /// Specialise hash for CondVar
-template <typename Cond> struct std::hash<const SVF::CondVar<Cond>> {
+template <typename Cond>
+struct std::hash<const SVF::CondVar<Cond>> {
     size_t operator()(const SVF::CondVar<Cond> &cv) const {
         std::hash<Cond> h;
         return h(cv.get_cond());
     }
 };
 
-template <typename Cond> struct std::hash<SVF::CondVar<Cond>> {
+template <typename Cond>
+struct std::hash<SVF::CondVar<Cond>> {
     size_t operator()(const SVF::CondVar<Cond> &cv) const {
         std::hash<Cond> h;
         return h(cv.get_cond());

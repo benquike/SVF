@@ -729,7 +729,8 @@ void SVFG::performStat() { stat->performStat(); }
  * GraphTraits specialization
  */
 namespace llvm {
-template <> struct DOTGraphTraits<SVFG *> : public DOTGraphTraits<PAG *> {
+template <>
+struct DOTGraphTraits<SVFG *> : public DOTGraphTraits<PAG *> {
 
     using NodeType = SVFGNode;
     DOTGraphTraits(bool isSimple = false) : DOTGraphTraits<PAG *>(isSimple) {}

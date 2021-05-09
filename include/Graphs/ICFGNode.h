@@ -168,9 +168,8 @@ class GlobalBlockNode : public ICFGNode {
 
   public:
     GlobalBlockNode(NodeID id) : ICFGNode(id, GlobalBlock) { bb = nullptr; }
-    GlobalBlockNode() : GlobalBlockNode(MAX_NODEID)  {};
+    GlobalBlockNode() : GlobalBlockNode(MAX_NODEID){};
     // GlobalBlockNode() = default;
-
 
     virtual ~GlobalBlockNode() {}
 
@@ -244,7 +243,7 @@ class InterBlockNode : public ICFGNode {
   public:
     /// Constructor
     InterBlockNode(NodeID id, ICFGNodeK k) : ICFGNode(id, k) {}
-    InterBlockNode(): ICFGNode(MAX_NODEID, InterBlock) {}
+    InterBlockNode() : ICFGNode(MAX_NODEID, InterBlock) {}
 
     virtual ~InterBlockNode() {}
 
@@ -276,8 +275,7 @@ class FunEntryBlockNode : public InterBlockNode {
 
   public:
     FunEntryBlockNode(NodeID id, const SVFFunction *f);
-    FunEntryBlockNode()
-        : InterBlockNode(MAX_NODEID, FunEntryBlock) {}
+    FunEntryBlockNode() : InterBlockNode(MAX_NODEID, FunEntryBlock) {}
 
     virtual ~FunEntryBlockNode() {}
 
@@ -321,8 +319,7 @@ class FunExitBlockNode : public InterBlockNode {
 
   public:
     FunExitBlockNode(NodeID id, const SVFFunction *f);
-    FunExitBlockNode()
-        : InterBlockNode(MAX_NODEID, FunExitBlock) {}
+    FunExitBlockNode() : InterBlockNode(MAX_NODEID, FunExitBlock) {}
 
     virtual ~FunExitBlockNode() {}
 
@@ -386,8 +383,7 @@ class CallBlockNode : public InterBlockNode {
         bb = cs->getParent();
     }
 
-    CallBlockNode()
-        : InterBlockNode(MAX_NODEID, FunCallBlock) {}
+    CallBlockNode() : InterBlockNode(MAX_NODEID, FunCallBlock) {}
     virtual ~CallBlockNode() {}
 
     /// Return callsite
@@ -475,8 +471,7 @@ class RetBlockNode : public InterBlockNode {
         bb = cs->getParent();
     }
 
-    RetBlockNode()
-        : InterBlockNode(MAX_NODEID, FunRetBlock) {}
+    RetBlockNode() : InterBlockNode(MAX_NODEID, FunRetBlock) {}
 
     virtual ~RetBlockNode() {}
 

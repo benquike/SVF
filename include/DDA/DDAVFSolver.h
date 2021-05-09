@@ -19,7 +19,8 @@ namespace SVF {
 /*!
  * Value-Flow Based Demand-Driven Points-to Analysis
  */
-template <class CVar, class CPtSet, class DPIm> class DDAVFSolver {
+template <class CVar, class CPtSet, class DPIm>
+class DDAVFSolver {
     friend class DDAStat;
 
   public:

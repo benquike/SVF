@@ -370,9 +370,9 @@ class ThreadCallGraph : public PTACallGraph {
 
   private:
     ThreadAPI *tdAPI = nullptr; ///< Thread API
-    CallSiteSet forksites;   ///< all thread fork sites
-    CallSiteSet joinsites;   ///< all thread fork sites
-    CallSiteSet parForSites; ///< all parallel for sites
+    CallSiteSet forksites;      ///< all thread fork sites
+    CallSiteSet joinsites;      ///< all thread fork sites
+    CallSiteSet parForSites;    ///< all parallel for sites
     CallInstToForkEdgesMap
         callinstToThreadForkEdgesMap; ///< Map a call instruction to its
                                       ///< corresponding fork edges

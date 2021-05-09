@@ -956,7 +956,8 @@ const SVFFunction *VFG::isFunEntryVFGNode(const VFGNode *node) const {
  * GraphTraits specialization
  */
 namespace llvm {
-template <> struct DOTGraphTraits<VFG *> : public DOTGraphTraits<PAG *> {
+template <>
+struct DOTGraphTraits<VFG *> : public DOTGraphTraits<PAG *> {
 
     using NodeType = VFGNode;
     DOTGraphTraits(bool isSimple = false) : DOTGraphTraits<PAG *>(isSimple) {}

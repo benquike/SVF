@@ -571,7 +571,8 @@ namespace llvm {
 /*!
  * Write value flow graph into dot file for debugging
  */
-template <> struct DOTGraphTraits<TCT *> : public DefaultDOTGraphTraits {
+template <>
+struct DOTGraphTraits<TCT *> : public DefaultDOTGraphTraits {
 
     using NodeType = TCTNode;
     using ChildIteratorType = NodeType::iterator;

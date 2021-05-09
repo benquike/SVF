@@ -547,11 +547,13 @@ class GenericGraph {
  */
 namespace llvm {
 
-template <class EdgeTy, class NodeTy> struct edge_unary_function {
+template <class EdgeTy, class NodeTy>
+struct edge_unary_function {
     NodeTy operator()(EdgeTy edge) const { return edge->getDstNode(); }
 };
 
-template <class PairTy, class NodeTy> struct pair_unary_function {
+template <class PairTy, class NodeTy>
+struct pair_unary_function {
     NodeTy operator()(PairTy pair) const { return pair.second; }
 };
 

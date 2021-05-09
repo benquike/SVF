@@ -74,7 +74,6 @@ class PAGEdge : public GenericPAGEdgeTy {
     const BasicBlock *basicBlock = nullptr; ///< LLVM BasicBlock
     ICFGNode *icfgNode = nullptr;           ///< ICFGNode
   public:
-
     /// Constructor
     PAGEdge(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag, GEdgeFlag k);
     PAGEdge() {
@@ -531,7 +530,6 @@ class VariantGepPE : public GepPE {
         setId(MAX_EDGEID);
         setEdgeFlag(VariantGep);
     }
-
 
     virtual ~VariantGepPE() {}
 
