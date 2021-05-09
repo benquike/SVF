@@ -59,6 +59,14 @@ void FlowSensitive::initialize() {
     stat = new FlowSensitiveStat(this);
 }
 
+FlowSensitive::~FlowSensitive() {
+    delete svfg;
+    svfg = nullptr;
+
+    delete ander;
+    ander = nullptr;
+}
+
 /*!
  * Start analysis
  */

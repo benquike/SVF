@@ -75,13 +75,7 @@ class FlowSensitive : public WPASVFGFSSolver, public BVDataPTAImpl {
     }
 
     /// Destructor
-    ~FlowSensitive() override {
-        if (svfg != nullptr) {
-            delete svfg;
-        }
-
-        svfg = nullptr;
-    }
+    ~FlowSensitive() override;
 
     /// Create signle instance of flow-sensitive pointer analysis
     static FlowSensitive *createFSWPA(SVFProject *proj,
@@ -239,7 +233,7 @@ class FlowSensitive : public WPASVFGFSSolver, public BVDataPTAImpl {
     virtual void countAliases(Set<std::pair<NodeID, NodeID>> cmp,
                               unsigned *mayAliases, unsigned *noAliases);
 
-    SVFG *svfg;
+    SVFG *svfg = nullptr;
     /// Get points-to set for a node from data flow IN/OUT set at a statement.
     //@{
     inline const PointsTo &getDFInPtsSet(const SVFGNode *stmt,
@@ -264,7 +258,7 @@ class FlowSensitive : public WPASVFGFSSolver, public BVDataPTAImpl {
     ///@}
 
     SVFGBuilder svfgBuilder;
-    AndersenWaveDiff *ander;
+    AndersenWaveDiff *ander = nullptr;
 
     /// Statistics.
     //@{
