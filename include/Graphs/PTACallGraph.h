@@ -436,12 +436,6 @@ class PTACallGraph : public GenericCallGraphTy {
         return it->second.end();
     }
     //@}
-    /// Add call graph edge
-    inline void addEdge(PTACallGraphEdge *edge) {
-        edge->getDstNode()->addIncomingEdge(edge);
-        edge->getSrcNode()->addOutgoingEdge(edge);
-    }
-
     /// Add direct/indirect call edges
     //@{
     void addDirectCallGraphEdge(const CallBlockNode *call,

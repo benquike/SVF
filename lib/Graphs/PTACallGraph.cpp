@@ -179,7 +179,7 @@ void PTACallGraph::addDirectCallGraphEdge(const CallBlockNode *cs,
         auto *edge = new PTACallGraphEdge(caller, callee, getNextEdgeId(),
                                           PTACallGraphEdge::CallRetEdge, csId);
         edge->addDirectCallSite(cs);
-        addEdge(edge);
+        addGEdge(edge);
         callinstToCallGraphEdgesMap[cs].insert(edge);
     }
 }
@@ -202,7 +202,7 @@ void PTACallGraph::addIndirectCallGraphEdge(const CallBlockNode *cs,
         auto *edge = new PTACallGraphEdge(caller, callee, getNextEdgeId(),
                                           PTACallGraphEdge::CallRetEdge, csId);
         edge->addInDirectCallSite(cs, proj);
-        addEdge(edge);
+        addGEdge(edge);
         callinstToCallGraphEdgesMap[cs].insert(edge);
     }
 }
