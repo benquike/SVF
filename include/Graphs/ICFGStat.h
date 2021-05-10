@@ -97,12 +97,10 @@ class ICFGStat : public PTAStat {
     }
 
     void countStat() {
-        ICFG::ICFGNodeIDToNodeMapTy::iterator it = icfg->begin();
-        ICFG::ICFGNodeIDToNodeMapTy::iterator eit = icfg->end();
-        for (; it != eit; ++it) {
+        for (auto it : *icfg) {
             numOfNodes++;
 
-            ICFGNode *node = it->second;
+            ICFGNode *node = it.second;
 
             if (llvm::isa<IntraBlockNode>(node)) {
                 numOfIntraNodes++;
@@ -116,10 +114,8 @@ class ICFGStat : public PTAStat {
                 numOfExitNodes++;
             }
 
-            ICFGEdge::ICFGEdgeSetTy::iterator edgeIt =
-                it->second->OutEdgeBegin();
-            ICFGEdge::ICFGEdgeSetTy::iterator edgeEit =
-                it->second->OutEdgeEnd();
+            auto edgeIt = node->OutEdgeBegin();
+            auto edgeEit = node->OutEdgeEnd();
             for (; edgeIt != edgeEit; ++edgeIt) {
                 const ICFGEdge *edge = *edgeIt;
                 numOfEdges++;
@@ -139,11 +135,9 @@ class ICFGStat : public PTAStat {
         std::cout << "\n************ " << statname << " ***************\n";
         std::cout.flags(std::ios::left);
         unsigned field_width = 20;
-        for (NUMStatMap::iterator it = PTNumStatMap.begin(),
-                                  eit = PTNumStatMap.end();
-             it != eit; ++it) {
+        for (auto it : PTNumStatMap) {
             // format out put with width 20 space
-            std::cout << std::setw(field_width) << it->first << it->second
+            std::cout << std::setw(field_width) << it.first << it.second
                       << "\n";
         }
         PTNumStatMap.clear();

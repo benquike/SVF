@@ -69,7 +69,6 @@ class SVFG : public VFG {
     friend class RcSvfgBuilder;
 
   public:
-    using SVFGNodeIDToNodeMapTy = VFGNodeIDToNodeMapTy;
     using PAGNodeToDefMapTy = Map<const PAGNode *, NodeID>;
     using MSSAVarToDefMapTy = Map<MRVerSPtr, NodeID>;
     using ActualINSVFGNodeSet = NodeBS;

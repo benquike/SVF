@@ -51,10 +51,9 @@ using GenericICFGTy = GenericGraph<ICFGNode, ICFGEdge>;
 class ICFG : public GenericICFGTy {
 
   public:
-    using ICFGNodeIDToNodeMapTy = Map<NodeID, ICFGNode *>;
     using ICFGEdgeSetTy = ICFGEdge::ICFGEdgeSetTy;
-    using iterator = ICFGNodeIDToNodeMapTy::iterator;
-    using const_iterator = ICFGNodeIDToNodeMapTy::const_iterator;
+    using iterator = IDToNodeMapTy::iterator;
+    using const_iterator = IDToNodeMapTy::const_iterator;
 
     using FunToFunEntryNodeMapTy =
         Map<const SVFFunction *, FunEntryBlockNode *>;

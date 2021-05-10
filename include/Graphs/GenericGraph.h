@@ -297,9 +297,9 @@ class GenericGraph {
     using NodeType = NodeTy;
     using EdgeType = EdgeTy;
     /// NodeID to GenericNode map
-    using IDToNodeMapTy = Map<NodeID, NodeType *>;
+    using IDToNodeMapTy = OrderedMap<NodeID, NodeType *>;
     using NodeToIDMapTy = Map<NodeType *, NodeID>;
-    using IDToEdgeMapTy = Map<EdgeID, EdgeType *>;
+    using IDToEdgeMapTy = OrderedMap<EdgeID, EdgeType *>;
     using EdgeToIDMapTy = Map<EdgeType *, EdgeID>;
     /// Node Iterators
     //@{

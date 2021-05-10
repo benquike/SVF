@@ -75,8 +75,6 @@ class VFG : public GenericVFGTy {
     using VFGEdgeSetTy = VFGEdge::VFGEdgeSetTy;
     using SVFGEdgeSetTy = VFGEdge::SVFGEdgeSetTy;
     using VFGNodeIter = VFGEdge::VFGEdgeSetTy::iterator;
-    using iterator = VFGNodeIDToNodeMapTy::iterator;
-    using const_iterator = VFGNodeIDToNodeMapTy::const_iterator;
     using PAGEdgeSet = PAG::PAGEdgeSet;
     using GlobalVFGNodeSet = Set<const VFGNode *>;
     using PAGNodeSet = Set<const PAGNode *>;

@@ -91,9 +91,8 @@ SVFGEdge *SVFGOPT::addRetIndirectSVFGEdge(NodeID srcId, NodeID dstId,
  */
 void SVFGOPT::handleInterValueFlow() {
     SVFGNodeSet candidates;
-    for (SVFGNodeIDToNodeMapTy::iterator it = SVFG::begin(), eit = SVFG::end();
-         it != eit; ++it) {
-        SVFGNode *node = it->second;
+    for (auto it : *this) {
+        SVFGNode *node = it.second;
         if (llvm::isa<ActualParmSVFGNode>(node) ||
             llvm::isa<ActualRetSVFGNode>(node) ||
             llvm::isa<FormalParmSVFGNode>(node) ||
