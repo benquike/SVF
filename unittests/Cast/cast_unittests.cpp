@@ -235,7 +235,6 @@ TEST(CastTestSuite, shared_ptr_const) {
 
 TEST(CastTestSuite, simple_type_test) {
 
-#if 0
     /// This test show that llvm::is_simple_type treats
     // all types except const X * const as simple types
     // cout << std::boolalpha;
