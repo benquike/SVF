@@ -51,6 +51,7 @@ class GenericEdge {
     void serialize(Archive &ar, const unsigned int version) {
         ar &src;
         ar &dst;
+        ar &id;
         ar &edgeFlag;
     }
 
