@@ -331,6 +331,9 @@ class GenericGraph {
     inline iterator end() { return IDToNodeMap.end(); }
     inline const_iterator begin() const { return IDToNodeMap.begin(); }
     inline const_iterator end() const { return IDToNodeMap.end(); }
+
+    inline auto edge_begin() const { return IDToEdgeMap.begin(); }
+    inline auto edge_end() const { return IDToEdgeMap.end(); }
     //}@
 
     /// APIs for handling nodes @{
