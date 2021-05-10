@@ -122,6 +122,7 @@ TEST_F(ICFGTestSuite, VirtTest_1) {
     // icfg->view();
 }
 
+#if 0
 TEST_F(ICFGTestSuite, WebGL_TEST_0) {
     string test_bc = SVF_SRC_DIR
         "tools/chrome-gl-analysis/chrome_webgl_ir/webgl_all_rendering_code.bc";
@@ -189,6 +190,7 @@ TEST_F(ICFGTestSuite, WebGL_TEST_0) {
 
     // graph_eq_test(icfg2.get(), icfg);
 }
+#endif
 
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);

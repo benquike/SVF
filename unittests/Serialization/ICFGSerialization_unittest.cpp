@@ -84,7 +84,6 @@ TEST(ICFGSerializationTestSuite, GlobalBlockNodeTest_0) {
         llvm::outs() << e.what() << "\n";
     }
 }
-#endif
 
 TEST(ICFGSerializationTestSuite, AllNodes_0) {
     string test_bc = SVF_BUILD_DIR "tests/ICFG/static_call_test_cpp.ll";
@@ -122,7 +121,6 @@ TEST(ICFGSerializationTestSuite, AllNodes_0) {
     // }
 }
 
-#if 0
 TEST(ICFGSerializationTestSuite, Test_0) {
     string test_bc = SVF_BUILD_DIR "tests/ICFG/static_call_test_cpp.ll";
     SVFProject proj(test_bc);
