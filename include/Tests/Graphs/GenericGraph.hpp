@@ -86,11 +86,35 @@ void node_eq_test(const GNode *n1, const GNode *n2) {
 template <typename Graph>
 void graph_eq_extra_test(const Graph *g1, const Graph *g2) {}
 
+// This template function tests whether
+// the ids in the id field of nodes(edges)
+// are the same as the id in the graph
+template <typename Graph>
+void node_and_edge_id_test(Graph *g) {
+    for (auto it : *g) {
+        auto id1 = it.first;
+        auto node = it.second;
+        ASSERT_EQ(id1, node->getId());
+    }
+
+    for (auto it = g->edge_begin(); it != g->edge_end(); it++) {
+        auto id1 = it->first;
+        auto edge = it->second;
+        ASSERT_EQ(id1, edge->getId());
+    }
+}
+
 template <typename Graph>
 void graph_eq_test(const Graph *g1, const Graph *g2) {
     ASSERT_NE(g1, g2);
     ASSERT_EQ(g1->getTotalEdgeNum(), g2->getTotalEdgeNum());
     ASSERT_EQ(g1->getTotalNodeNum(), g2->getTotalNodeNum());
+
+    ASSERT_GT(g1->getTotalEdgeNum(), 0);
+    ASSERT_GT(g1->getTotalNodeNum(), 0);
+
+    node_and_edge_id_test(g1);
+    node_and_edge_id_test(g2);
 
     auto it1 = g1->begin();
     auto it2 = g2->begin();
