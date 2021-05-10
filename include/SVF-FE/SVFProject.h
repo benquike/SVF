@@ -58,6 +58,7 @@ class SVFProject {
     explicit SVFProject(Module &module);
 
     static SVFProject *getCurrentProject() { return currentProject; }
+    static void setCurrentProject(SVFProject *proj) { currentProject = proj; }
 
     virtual ~SVFProject();
 

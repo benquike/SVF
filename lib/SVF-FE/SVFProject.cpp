@@ -88,6 +88,8 @@ SVFProject::~SVFProject() {
     delete pag;
     delete symTableInfo;
     delete svfModule;
+
+    currentProject = nullptr;
 }
 
 /// Return true if this is a thread creation call
