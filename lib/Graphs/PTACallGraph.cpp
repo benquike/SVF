@@ -45,7 +45,11 @@ using namespace SVFUtil;
 void PTACallGraphEdge::addDirectCallSite(const CallBlockNode *call) {
     const Instruction *callInst = call->getCallSite();
     llvm::ImmutableCallSite cs(callInst);
-    assert(cs.getCalledFunction() && "not a direct callsite??");
+    // handle pointer cast
+    // same as in getCallee
+    auto *sf = cs.getCalledValue()->stripPointerCasts();
+    assert((cs.getCalledFunction() || llvm::isa<Function>(sf)) &&
+           "not a direct callsite??");
 
     directCalls.insert(call);
 }
