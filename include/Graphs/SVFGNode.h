@@ -33,6 +33,7 @@
 
 #include "Graphs/SVFGEdge.h"
 #include "Graphs/VFGNode.h"
+#include "Util/Serialization.h"
 
 namespace SVF {
 
@@ -191,14 +192,24 @@ class ActualINSVFGNode : public MRSVFGNode {
     /// @{
     friend class boost::serialization::access;
 
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
     // ignore mu
     template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
+    void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<MRSVFGNode>(*this);
 
         // TODO: investigate mu
 
-        ar &cs;
+        SAVE_ICFGNode(ar, cs);
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<MRSVFGNode>(*this);
+
+        // TODO: investigate mu
+
+        LOAD_ICFGNode(ar, cs);
     }
     /// @}
 };
@@ -241,14 +252,24 @@ class ActualOUTSVFGNode : public MRSVFGNode {
     /// @{
     friend class boost::serialization::access;
 
-    // ignore chi
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+    // ignore mu
     template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
+    void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<MRSVFGNode>(*this);
 
-        // TODO: investatigate chi
+        // TODO: investigate mu
 
-        ar &cs;
+        SAVE_ICFGNode(ar, cs);
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<MRSVFGNode>(*this);
+
+        // TODO: investigate mu
+
+        LOAD_ICFGNode(ar, cs);
     }
     /// @}
 };
@@ -308,8 +329,9 @@ class MSSAPHISVFGNode : public MRSVFGNode {
     template <typename Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<MRSVFGNode>(*this);
-        ar &res;
-        ar &opVers;
+        /// FIXME: look into the following fields
+        /// ar &res;
+        /// ar &opVers;
     }
     /// @}
 };
@@ -409,14 +431,14 @@ class InterMSSAPHISVFGNode : public MSSAPHISVFGNode {
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<MSSAPHISVFGNode>(*this);
         SAVE_SVFFunction(ar, fun);
-        ar &callInst;
+        SAVE_ICFGNode(ar, callInst);
     }
 
     template <typename Archive>
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<MSSAPHISVFGNode>(*this);
         LOAD_SVFFunction(ar, fun);
-        ar &callInst;
+        LOAD_ICFGNode(ar, callInst);
     }
     /// @}
 };

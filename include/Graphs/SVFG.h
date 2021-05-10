@@ -69,16 +69,15 @@ class SVFG : public VFG {
     friend class RcSvfgBuilder;
 
   public:
-    using PAGNodeToDefMapTy = Map<const PAGNode *, NodeID>;
+    using PAGNodeToDefMapTy = Map<PAGNodeID, NodeID>;
     using MSSAVarToDefMapTy = Map<MRVerSPtr, NodeID>;
     using ActualINSVFGNodeSet = NodeBS;
     using ActualOUTSVFGNodeSet = NodeBS;
     using FormalINSVFGNodeSet = NodeBS;
     using FormalOUTSVFGNodeSet = NodeBS;
-    using CallSiteToActualINsMapTy =
-        Map<const CallBlockNode *, ActualINSVFGNodeSet>;
+    using CallSiteToActualINsMapTy = Map<ICFGCallBlockID, ActualINSVFGNodeSet>;
     using CallSiteToActualOUTsMapTy =
-        Map<const CallBlockNode *, ActualOUTSVFGNodeSet>;
+        Map<ICFGCallBlockID, ActualOUTSVFGNodeSet>;
     using FunctionToFormalINsMapTy =
         Map<const SVFFunction *, FormalINSVFGNodeSet>;
     using FunctionToFormalOUTsMapTy =
@@ -195,11 +194,13 @@ class SVFG : public VFG {
     /// Has a SVFGNode
     //@{
     inline bool hasActualINSVFGNodes(const CallBlockNode *cs) const {
-        return callSiteToActualINMap.find(cs) != callSiteToActualINMap.end();
+        return callSiteToActualINMap.find(cs->getId()) !=
+               callSiteToActualINMap.end();
     }
 
     inline bool hasActualOUTSVFGNodes(const CallBlockNode *cs) const {
-        return callSiteToActualOUTMap.find(cs) != callSiteToActualOUTMap.end();
+        return callSiteToActualOUTMap.find(cs->getId()) !=
+               callSiteToActualOUTMap.end();
     }
 
     inline bool hasFormalINSVFGNodes(const SVFFunction *fun) const {
@@ -214,12 +215,12 @@ class SVFG : public VFG {
     /// Get SVFGNode set
     //@{
     inline ActualINSVFGNodeSet &getActualINSVFGNodes(const CallBlockNode *cs) {
-        return callSiteToActualINMap[cs];
+        return callSiteToActualINMap[cs->getId()];
     }
 
     inline ActualOUTSVFGNodeSet &
     getActualOUTSVFGNodes(const CallBlockNode *cs) {
-        return callSiteToActualOUTMap[cs];
+        return callSiteToActualOUTMap[cs->getId()];
     }
 
     inline FormalINSVFGNodeSet &getFormalINSVFGNodes(const SVFFunction *fun) {
@@ -422,7 +423,7 @@ class SVFG : public VFG {
             new ActualINSVFGNode(getNextNodeId(), mu, mu->getCallSite());
         addSVFGNode(sNode, pag->getICFG()->getCallBlockNode(
                                mu->getCallSite()->getCallSite()));
-        callSiteToActualINMap[mu->getCallSite()].set(sNode->getId());
+        callSiteToActualINMap[mu->getCallSite()->getId()].set(sNode->getId());
     }
     /// Add memory callsite chi SVFG node
     inline void addActualOUTSVFGNode(const MemSSA::CALLCHI *chi) {
@@ -431,7 +432,7 @@ class SVFG : public VFG {
         addSVFGNode(sNode, pag->getICFG()->getRetBlockNode(
                                chi->getCallSite()->getCallSite()));
         setDef(chi->getResVer(), sNode);
-        callSiteToActualOUTMap[chi->getCallSite()].set(sNode->getId());
+        callSiteToActualOUTMap[chi->getCallSite()->getId()].set(sNode->getId());
     }
     /// Add memory SSA PHI SVFG node
     inline void addIntraMSSAPHISVFGNode(const MemSSA::PHI *phi) {
@@ -454,11 +455,12 @@ class SVFG : public VFG {
         return (funToFormalOUTMap.find(func) != funToFormalOUTMap.end());
     }
     inline bool hasCallSiteChi(const CallBlockNode *cs) const {
-        return (callSiteToActualOUTMap.find(cs) !=
+        return (callSiteToActualOUTMap.find(cs->getId()) !=
                 callSiteToActualOUTMap.end());
     }
     inline bool hasCallSiteMu(const CallBlockNode *cs) const {
-        return (callSiteToActualINMap.find(cs) != callSiteToActualINMap.end());
+        return (callSiteToActualINMap.find(cs->getId()) !=
+                callSiteToActualINMap.end());
     }
     //@}
 };

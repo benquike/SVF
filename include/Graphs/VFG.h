@@ -52,22 +52,34 @@ class VFG : public GenericVFGTy {
     /// VFG kind
     enum VFGK { FULLSVFG, PTRONLYSVFG, FULLSVFG_OPT, PTRONLYSVFG_OPT };
 
-    using VFGNodeIDToNodeMapTy = Map<NodeID, VFGNode *>;
+    /// A set of VFGNode IDs
+    using PAGNodeID = NodeID;
+    using VFGNodeID = NodeID;
     using VFGNodeSet = Set<VFGNode *>;
-    using PAGNodeToDefMapTy = Map<const PAGNode *, NodeID>;
+    using ICFGNodeID = NodeID;
+    using ICFGCallBlockID = ICFGNodeID;
+    // using ActualParmVFGNodeID = VFGNodeID;
+    // using ActualRetVFGNodeID = VFGNodeID;
+    // using FormalParmVFGNodeID = VFGNodeID;
+    // using FormalRetVFGNodeID = VFGNodeID;
+
+    using PAGEdgeID = EdgeID;
+
+    /// PAG Node ID -> VFG Node ID
+    using PAGNodeToDefMapTy = Map<PAGNodeID, VFGNodeID>;
+
     using PAGNodeToActualParmMapTy =
-        Map<std::pair<NodeID, const CallBlockNode *>, ActualParmVFGNode *>;
+        Map<std::pair<NodeID, ICFGCallBlockID>, ActualParmVFGNode *>;
 
-    using PAGNodeToActualRetMapTy = Map<const PAGNode *, ActualRetVFGNode *>;
+    using PAGNodeToActualRetMapTy = Map<PAGNodeID, ActualRetVFGNode *>;
 
-    using PAGNodeToFormalParmMapTy = Map<const PAGNode *, FormalParmVFGNode *>;
-    using PAGNodeToFormalRetMapTy = Map<const PAGNode *, FormalRetVFGNode *>;
-    using PAGEdgeToStmtVFGNodeMapTy = Map<const PAGEdge *, StmtVFGNode *>;
-    using PAGNodeToPHIVFGNodeMapTy = Map<const PAGNode *, IntraPHIVFGNode *>;
-    using PAGNodeToBinaryOPVFGNodeMapTy =
-        Map<const PAGNode *, BinaryOPVFGNode *>;
-    using PAGNodeToUnaryOPVFGNodeMapTy = Map<const PAGNode *, UnaryOPVFGNode *>;
-    using PAGNodeToCmpVFGNodeMapTy = Map<const PAGNode *, CmpVFGNode *>;
+    using PAGNodeToFormalParmMapTy = Map<PAGNodeID, FormalParmVFGNode *>;
+    using PAGNodeToFormalRetMapTy = Map<PAGNodeID, FormalRetVFGNode *>;
+    using PAGEdgeToStmtVFGNodeMapTy = Map<PAGEdgeID, StmtVFGNode *>;
+    using PAGNodeToPHIVFGNodeMapTy = Map<PAGNodeID, IntraPHIVFGNode *>;
+    using PAGNodeToBinaryOPVFGNodeMapTy = Map<PAGNodeID, BinaryOPVFGNode *>;
+    using PAGNodeToUnaryOPVFGNodeMapTy = Map<PAGNodeID, UnaryOPVFGNode *>;
+    using PAGNodeToCmpVFGNodeMapTy = Map<PAGNodeID, CmpVFGNode *>;
     using FunToVFGNodesMapTy = Map<const SVFFunction *, VFGNodeSet>;
 
     using CallPESet = FormalParmVFGNode::CallPESet;
@@ -131,10 +143,12 @@ class VFG : public GenericVFGTy {
         ar &PAGEdgeToStmtVFGNodeMap;
         ar &globalVFGNodes;
         ar &kind;
-        ar &callgraph;
-        ar &pag;
 
-        boost::serialization::save_map(ar, funToVFGNodesMap);
+        /// these fields are left as it is now
+        // ar &callgraph;
+        // ar &pag;
+
+        /// boost::serialization::save_map(ar, funToVFGNodesMap);
     }
 
     template <typename Archive>
@@ -152,10 +166,11 @@ class VFG : public GenericVFGTy {
         ar &PAGEdgeToStmtVFGNodeMap;
         ar &globalVFGNodes;
         ar &kind;
-        ar &callgraph;
-        ar &pag;
 
-        boost::serialization::load_map(ar, funToVFGNodesMap);
+        /// ar &callgraph;
+        /// ar &pag;
+
+        /// boost::serialization::load_map(ar, funToVFGNodesMap);
     }
     /// @}
 
@@ -226,60 +241,60 @@ class VFG : public GenericVFGTy {
     /// Get an VFGNode
     //@{
     inline StmtVFGNode *getStmtVFGNode(const PAGEdge *pagEdge) const {
-        auto it = PAGEdgeToStmtVFGNodeMap.find(pagEdge);
+        auto it = PAGEdgeToStmtVFGNodeMap.find(pagEdge->getId());
         assert(it != PAGEdgeToStmtVFGNodeMap.end() &&
                "StmtVFGNode can not be found??");
         return it->second;
     }
     inline IntraPHIVFGNode *getIntraPHIVFGNode(const PAGNode *pagNode) const {
-        auto it = PAGNodeToIntraPHIVFGNodeMap.find(pagNode);
+        auto it = PAGNodeToIntraPHIVFGNodeMap.find(pagNode->getId());
         assert(it != PAGNodeToIntraPHIVFGNodeMap.end() &&
                "PHIVFGNode can not be found??");
         return it->second;
     }
 
     inline BinaryOPVFGNode *getBinaryOPVFGNode(const PAGNode *pagNode) const {
-        auto it = PAGNodeToBinaryOPVFGNodeMap.find(pagNode);
+        auto it = PAGNodeToBinaryOPVFGNodeMap.find(pagNode->getId());
         assert(it != PAGNodeToBinaryOPVFGNodeMap.end() &&
                "BinaryOPVFGNode can not be found??");
         return it->second;
     }
     inline UnaryOPVFGNode *getUnaryOPVFGNode(const PAGNode *pagNode) const {
-        auto it = PAGNodeToUnaryOPVFGNodeMap.find(pagNode);
+        auto it = PAGNodeToUnaryOPVFGNodeMap.find(pagNode->getId());
         assert(it != PAGNodeToUnaryOPVFGNodeMap.end() &&
                "UnaryOPVFGNode can not be found??");
         return it->second;
     }
     inline CmpVFGNode *getCmpVFGNode(const PAGNode *pagNode) const {
-        auto it = PAGNodeToCmpVFGNodeMap.find(pagNode);
+        auto it = PAGNodeToCmpVFGNodeMap.find(pagNode->getId());
         assert(it != PAGNodeToCmpVFGNodeMap.end() &&
                "CmpVFGNode can not be found??");
         return it->second;
     }
     inline ActualParmVFGNode *
     getActualParmVFGNode(const PAGNode *aparm, const CallBlockNode *cs) const {
-        auto it =
-            PAGNodeToActualParmMap.find(std::make_pair(aparm->getId(), cs));
+        auto it = PAGNodeToActualParmMap.find(
+            std::make_pair(aparm->getId(), cs->getId()));
         assert(it != PAGNodeToActualParmMap.end() &&
                "acutal parameter VFG node can not be found??");
         return it->second;
     }
 
     inline ActualRetVFGNode *getActualRetVFGNode(const PAGNode *aret) const {
-        auto it = PAGNodeToActualRetMap.find(aret);
+        auto it = PAGNodeToActualRetMap.find(aret->getId());
         assert(it != PAGNodeToActualRetMap.end() &&
                "actual return VFG node can not be found??");
         return it->second;
     }
 
     inline FormalParmVFGNode *getFormalParmVFGNode(const PAGNode *fparm) const {
-        auto it = PAGNodeToFormalParmMap.find(fparm);
+        auto it = PAGNodeToFormalParmMap.find(fparm->getId());
         assert(it != PAGNodeToFormalParmMap.end() &&
                "formal parameter VFG node can not be found??");
         return it->second;
     }
     inline FormalRetVFGNode *getFormalRetVFGNode(const PAGNode *fret) const {
-        auto it = PAGNodeToFormalRetMap.find(fret);
+        auto it = PAGNodeToFormalRetMap.find(fret->getId());
         assert(it != PAGNodeToFormalRetMap.end() &&
                "formal return VFG node can not be found??");
         return it->second;
@@ -435,9 +450,9 @@ class VFG : public GenericVFGTy {
     /// pointers)
     //@{
     inline void setDef(const PAGNode *pagNode, const VFGNode *node) {
-        auto it = PAGNodeToDefMap.find(pagNode);
+        auto it = PAGNodeToDefMap.find(pagNode->getId());
         if (it == PAGNodeToDefMap.end()) {
-            PAGNodeToDefMap[pagNode] = node->getId();
+            PAGNodeToDefMap[pagNode->getId()] = node->getId();
             assert(hasVFGNode(node->getId()) && "not in the map!!");
         } else {
             assert((it->second == node->getId()) &&
@@ -445,13 +460,14 @@ class VFG : public GenericVFGTy {
         }
     }
     inline NodeID getDef(const PAGNode *pagNode) const {
-        auto it = PAGNodeToDefMap.find(pagNode);
+        auto it = PAGNodeToDefMap.find(pagNode->getId());
         assert(it != PAGNodeToDefMap.end() &&
                "PAG node does not have a definition??");
         return it->second;
     }
     inline bool hasDef(const PAGNode *pagNode) const {
-        return (PAGNodeToDefMap.find(pagNode) != PAGNodeToDefMap.end());
+        return (PAGNodeToDefMap.find(pagNode->getId()) !=
+                PAGNodeToDefMap.end());
     }
     //@}
 
@@ -499,10 +515,10 @@ class VFG : public GenericVFGTy {
 
     /// Add a VFG node for program statement
     inline void addStmtVFGNode(StmtVFGNode *node, const PAGEdge *pagEdge) {
-        assert(PAGEdgeToStmtVFGNodeMap.find(pagEdge) ==
+        assert(PAGEdgeToStmtVFGNodeMap.find(pagEdge->getId()) ==
                    PAGEdgeToStmtVFGNodeMap.end() &&
                "should not insert twice!");
-        PAGEdgeToStmtVFGNodeMap[pagEdge] = node;
+        PAGEdgeToStmtVFGNodeMap[pagEdge->getId()] = node;
         addVFGNode(node, pagEdge->getICFGNode());
     }
     /// Add a Dummy VFG node for null pointer definition
@@ -553,7 +569,8 @@ class VFG : public GenericVFGTy {
                                      const CallBlockNode *cs) {
         auto *sNode = new ActualParmVFGNode(getNextNodeId(), aparm, cs);
         addVFGNode(sNode, pag->getICFG()->getCallBlockNode(cs->getCallSite()));
-        PAGNodeToActualParmMap[std::make_pair(aparm->getId(), cs)] = sNode;
+        PAGNodeToActualParmMap[std::make_pair(aparm->getId(), cs->getId())] =
+            sNode;
         /// do not set def here, this node is not a variable definition
     }
 
@@ -569,7 +586,7 @@ class VFG : public GenericVFGTy {
         }
 
         setDef(fparm, sNode);
-        PAGNodeToFormalParmMap[fparm] = sNode;
+        PAGNodeToFormalParmMap[fparm->getId()] = sNode;
     }
     /// Add a callee Return VFG node
     /// To be noted that here we assume returns of a procedure have already been
@@ -584,7 +601,7 @@ class VFG : public GenericVFGTy {
             sNode->addRetPE(retPE);
         }
 
-        PAGNodeToFormalRetMap[uniqueFunRet] = sNode;
+        PAGNodeToFormalRetMap[uniqueFunRet->getId()] = sNode;
         /// if this uniqueFunRet is a phi node, which means it will receive
         /// values from multiple return instructions of fun we will set this phi
         /// node's def later Ideally, every function uniqueFunRet should be a
@@ -602,7 +619,7 @@ class VFG : public GenericVFGTy {
         auto *sNode = new ActualRetVFGNode(getNextNodeId(), ret, cs);
         addVFGNode(sNode, pag->getICFG()->getRetBlockNode(cs->getCallSite()));
         setDef(ret, sNode);
-        PAGNodeToActualRetMap[ret] = sNode;
+        PAGNodeToActualRetMap[ret->getId()] = sNode;
     }
 
     /// Add an llvm PHI VFG node
@@ -619,7 +636,7 @@ class VFG : public GenericVFGTy {
         assert(edge && "edge not found?");
         addVFGNode(sNode, edge->getICFGNode());
         setDef(phiResNode, sNode);
-        PAGNodeToIntraPHIVFGNodeMap[phiResNode] = sNode;
+        PAGNodeToIntraPHIVFGNodeMap[phiResNode->getId()] = sNode;
     }
     /// Add a Compare VFG node
     inline void addCmpVFGNode(const PAGNode *resNode, PAG::CmpPEList &oplist) {
@@ -634,7 +651,7 @@ class VFG : public GenericVFGTy {
         assert(edge && "edge not found?");
         addVFGNode(sNode, edge->getICFGNode());
         setDef(resNode, sNode);
-        PAGNodeToCmpVFGNodeMap[resNode] = sNode;
+        PAGNodeToCmpVFGNodeMap[resNode->getId()] = sNode;
     }
     /// Add a BinaryOperator VFG node
     inline void addBinaryOPVFGNode(const PAGNode *resNode,
@@ -651,7 +668,7 @@ class VFG : public GenericVFGTy {
         assert(edge && "edge not found?");
         addVFGNode(sNode, edge->getICFGNode());
         setDef(resNode, sNode);
-        PAGNodeToBinaryOPVFGNodeMap[resNode] = sNode;
+        PAGNodeToBinaryOPVFGNodeMap[resNode->getId()] = sNode;
     }
     /// Add a UnaryOperator VFG node
     inline void addUnaryOPVFGNode(const PAGNode *resNode,
@@ -668,7 +685,7 @@ class VFG : public GenericVFGTy {
         assert(edge && "edge not found?");
         addVFGNode(sNode, edge->getICFGNode());
         setDef(resNode, sNode);
-        PAGNodeToUnaryOPVFGNodeMap[resNode] = sNode;
+        PAGNodeToUnaryOPVFGNodeMap[resNode->getId()] = sNode;
     }
 };
 

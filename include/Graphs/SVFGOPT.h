@@ -256,10 +256,10 @@ class SVFGOPT : public SVFG {
     }
 
     inline void resetDef(const PAGNode *pagNode, const SVFGNode *node) {
-        auto it = PAGNodeToDefMap.find(pagNode);
+        auto it = PAGNodeToDefMap.find(pagNode->getId());
         assert(it != PAGNodeToDefMap.end() &&
                "a PAG node doesn't have definition before");
-        PAGNodeToDefMap[pagNode] = node->getId();
+        PAGNodeToDefMap[pagNode->getId()] = node->getId();
     }
 
     /// Set def-site of actual-in/formal-out.

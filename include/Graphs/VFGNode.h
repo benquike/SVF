@@ -129,11 +129,18 @@ class VFGNode : public GenericVFGNodeTy {
     /// support for serialization
     /// @{
     friend class boost::serialization::access;
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
 
     template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
+    void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<GenericVFGNodeTy>(*this);
-        ar &icfgNode;
+        SAVE_ICFGNode(ar, icfgNode);
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<GenericVFGNodeTy>(*this);
+        LOAD_ICFGNode(ar, icfgNode);
     }
     /// @}
 };
@@ -189,11 +196,20 @@ class StmtVFGNode : public VFGNode {
     /// @{
     friend class boost::serialization::access;
 
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
     template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
+    void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<VFGNode>(*this);
-        ar &pagEdge;
+        SAVE_PAGEdge(ar, pagEdge);
     }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFGNode>(*this);
+        LOAD_PAGEdge(ar, pagEdge);
+    }
+
     /// @}
 };
 
@@ -358,12 +374,26 @@ class CmpVFGNode : public VFGNode {
     /// @{
     friend class boost::serialization::access;
 
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
     template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
+    void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<VFGNode>(*this);
-        ar &res;
-        ar &opVers;
+        SAVE_PAGNode(ar, res);
+
+        /// TODO: confirm this works or not
+        /// ar &opVers;
     }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFGNode>(*this);
+        // ar &res;
+        LOAD_PAGNode(ar, res);
+        /// TODO: confirm this works or not
+        /// ar &opVers;
+    }
+
     /// @}
 };
 
@@ -419,11 +449,22 @@ class BinaryOPVFGNode : public VFGNode {
     /// @{
     friend class boost::serialization::access;
 
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
     template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
+    void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<VFGNode>(*this);
-        ar &res;
-        ar &opVers;
+        /// ar &res;
+        SAVE_PAGNode(ar, res);
+        // ar &opVers;
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFGNode>(*this);
+        /// ar &res;
+        LOAD_PAGNode(ar, res);
+        // ar &opVers;
     }
     /// @}
 };
@@ -481,12 +522,22 @@ class UnaryOPVFGNode : public VFGNode {
     /// support for serialization
     /// @{
     friend class boost::serialization::access;
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
 
     template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
+    void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<VFGNode>(*this);
-        ar &res;
-        ar &opVers;
+        /// ar &res;
+        SAVE_PAGNode(ar, res);
+        // ar &opVers;
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFGNode>(*this);
+        /// ar &res;
+        LOAD_PAGNode(ar, res);
+        // ar &opVers;
     }
     /// @}
 };
@@ -575,11 +626,22 @@ class PHIVFGNode : public VFGNode {
     /// @{
     friend class boost::serialization::access;
 
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
     template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
+    void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<VFGNode>(*this);
-        ar &res;
-        ar &opVers;
+        /// ar &res;
+        SAVE_PAGNode(ar, res);
+        // ar &opVers;
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFGNode>(*this);
+        /// ar &res;
+        LOAD_PAGNode(ar, res);
+        // ar &opVers;
     }
     /// @}
 };
@@ -631,7 +693,9 @@ class IntraPHIVFGNode : public PHIVFGNode {
     template <typename Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<PHIVFGNode>(*this);
-        ar &opIncomingBBs;
+
+        /// TODO: check whether this is needed
+        /// ar &opIncomingBBs;
     }
     /// @}
 };
@@ -696,11 +760,29 @@ class ArgumentVFGNode : public VFGNode {
     /// @{
     friend class boost::serialization::access;
 
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
     template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
+    void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<VFGNode>(*this);
-        ar &param;
+        /// ar &res;
+        SAVE_PAGNode(ar, param);
+        // ar &opVers;
     }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFGNode>(*this);
+        /// ar &res;
+        LOAD_PAGNode(ar, param);
+        // ar &opVers;
+    }
+
+    // template <typename Archive>
+    // void serialize(Archive &ar, const unsigned int version) {
+    //     ar &boost::serialization::base_object<VFGNode>(*this);
+    //     ar &param;
+    // }
     /// @}
 };
 
@@ -738,11 +820,29 @@ class ActualParmVFGNode : public ArgumentVFGNode {
     /// @{
     friend class boost::serialization::access;
 
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
     template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<ArgumentVFGNode>(*this);
-        ar &cs;
+    void save(Archive &ar, const unsigned int version) const {
+        ar &boost::serialization::base_object<VFGNode>(*this);
+        /// ar &res;
+        SAVE_ICFGNode(ar, cs);
+        // ar &opVers;
     }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFGNode>(*this);
+        /// ar &res;
+        LOAD_ICFGNode(ar, cs);
+        // ar &opVers;
+    }
+
+    // template <typename Archive>
+    // void serialize(Archive &ar, const unsigned int version) {
+    //     ar &boost::serialization::base_object<ArgumentVFGNode>(*this);
+    //     ar &cs;
+    // }
     /// @}
 };
 
@@ -796,14 +896,15 @@ class FormalParmVFGNode : public ArgumentVFGNode {
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<ArgumentVFGNode>(*this);
         SAVE_SVFFunction(ar, fun);
-        ar &callPEs;
+        /// TODO: check whether this is needed
+        /// ar &callPEs;
     }
 
     template <typename Archive>
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<ArgumentVFGNode>(*this);
         LOAD_SVFFunction(ar, fun);
-        ar &callPEs;
+        /// ar &callPEs;
     }
     /// @}
 };
@@ -846,10 +947,19 @@ class ActualRetVFGNode : public ArgumentVFGNode {
     /// @{
     friend class boost::serialization::access;
 
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+
     template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
+    void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<ArgumentVFGNode>(*this);
-        ar &cs;
+        // ar &cs;
+        SAVE_ICFGNode(ar, cs);
+    }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<ArgumentVFGNode>(*this);
+        LOAD_ICFGNode(ar, cs);
     }
     /// @}
 };
@@ -901,14 +1011,14 @@ class FormalRetVFGNode : public ArgumentVFGNode {
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<ArgumentVFGNode>(*this);
         SAVE_SVFFunction(ar, fun);
-        ar &retPEs;
+        // ar &retPEs;
     }
 
     template <typename Archive>
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<ArgumentVFGNode>(*this);
         LOAD_SVFFunction(ar, fun);
-        ar &retPEs;
+        // ar &retPEs;
     }
     /// @}
 };
@@ -973,14 +1083,15 @@ class InterPHIVFGNode : public PHIVFGNode {
     void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<PHIVFGNode>(*this);
         SAVE_SVFFunction(ar, fun);
-        ar &callInst;
+        SAVE_ICFGNode(ar, callInst);
     }
 
     template <typename Archive>
     void load(Archive &ar, const unsigned int version) {
         ar &boost::serialization::base_object<PHIVFGNode>(*this);
         LOAD_SVFFunction(ar, fun);
-        ar &callInst;
+        // ar &callInst;
+        LOAD_ICFGNode(ar, callInst);
     }
     /// @}
 };
@@ -1015,12 +1126,20 @@ class NullPtrVFGNode : public VFGNode {
     /// support for serialization
     /// @{
     friend class boost::serialization::access;
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
 
     template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
+    void save(Archive &ar, const unsigned int version) const {
         ar &boost::serialization::base_object<VFGNode>(*this);
-        ar &node;
+        SAVE_PAGNode(ar, node);
     }
+
+    template <typename Archive>
+    void load(Archive &ar, const unsigned int version) {
+        ar &boost::serialization::base_object<VFGNode>(*this);
+        LOAD_PAGNode(ar, node);
+    }
+
     /// @}
 };
 

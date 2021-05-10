@@ -151,6 +151,79 @@ BOOST_SERIALIZATION_SPLIT_FREE(Set<const SVFFunction *>)
         }                                                                      \
     } while (0)
 
+#define SAVE_Node_Or_Edge(ar, nore)                                            \
+    do {                                                                       \
+        if (nore) {                                                            \
+            auto id = nore->getId();                                           \
+            ar &id;                                                            \
+        } else {                                                               \
+            ar &numeric_limits<NodeID>::max();                                 \
+        }                                                                      \
+    } while (0)
+
+#define SAVE_ICFGNode(ar, node) SAVE_Node_Or_Edge(ar, node)
+#define SAVE_ICFGEdge(ar, edge) SAVE_Node_Or_Edge(ar, edge)
+
+#define LOAD_ICFGNode(ar, node)                                                \
+    do {                                                                       \
+        NodeID id;                                                             \
+        ar &id;                                                                \
+        if (id < numeric_limits<NodeID>::max()) {                              \
+            auto g = SVFProject::getCurrentProject()->getICFG();               \
+            using Type1 = std::remove_pointer<decltype(node)>::type;           \
+            using Type = std::remove_const<Type1>::type;                       \
+            node = llvm::dyn_cast<Type>(g->getGNode(id));                      \
+        } else {                                                               \
+            node = nullptr;                                                    \
+        }                                                                      \
+    } while (0)
+
+#define LOAD_ICFGEdge(ar, edge)                                                \
+    do {                                                                       \
+        NodeID id;                                                             \
+        ar &id;                                                                \
+        if (id < numeric_limits<NodeID>::max()) {                              \
+            auto g = SVFProject::getCurrentProject()->getICFG();               \
+            using Type1 = std::remove_pointer<decltype(edge)>::type;           \
+            using Type = std::remove_const<Type1>::type;                       \
+            edge = llvm::dyn_cast<Type>(g->getGEdge(id));                      \
+        } else {                                                               \
+            edge = nullptr;                                                    \
+        }                                                                      \
+    } while (0)
+
+#define SAVE_PAGEdge(ar, edge) SAVE_Node_Or_Edge(ar, edge)
+
+#define SAVE_PAGNode(ar, node) SAVE_Node_Or_Edge(ar, node)
+
+#define LOAD_PAGNode(ar, node)                                                 \
+    do {                                                                       \
+        NodeID id;                                                             \
+        ar &id;                                                                \
+        if (id < numeric_limits<NodeID>::max()) {                              \
+            auto g = SVFProject::getCurrentProject()->getPAG();                \
+            using Type1 = std::remove_pointer<decltype(node)>::type;           \
+            using Type = std::remove_const<Type1>::type;                       \
+            node = llvm::dyn_cast<Type>(g->getGNode(id));                      \
+        } else {                                                               \
+            node = nullptr;                                                    \
+        }                                                                      \
+    } while (0)
+
+#define LOAD_PAGEdge(ar, edge)                                                 \
+    do {                                                                       \
+        NodeID id;                                                             \
+        ar &id;                                                                \
+        if (id < numeric_limits<NodeID>::max()) {                              \
+            auto g = SVFProject::getCurrentProject()->getPAG();                \
+            using Type1 = std::remove_pointer<decltype(edge)>::type;           \
+            using Type = std::remove_const<Type1>::type;                       \
+            edge = llvm::dyn_cast<Type>(g->getGEdge(id));                      \
+        } else {                                                               \
+            edge = nullptr;                                                    \
+        }                                                                      \
+    } while (0)
+
 namespace boost {
 namespace serialization {
 
