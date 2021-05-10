@@ -55,8 +55,6 @@ class ICFGEdge : public GenericICFGEdgeTy {
         RetCF,
     };
 
-    using SVFGEdgeK = ICFGEdgeK;
-
   public:
     /// Constructor
     ICFGEdge(ICFGNode *s, ICFGNode *d, EdgeID id, GEdgeFlag k)
@@ -81,7 +79,7 @@ class ICFGEdge : public GenericICFGEdgeTy {
     inline bool isIntraCFGEdge() const { return getEdgeKind() == IntraCF; }
     //@}
     using ICFGEdgeSetTy = GenericNode<ICFGNode, ICFGEdge>::GEdgeSetTy;
-    using SVFGEdgeSetTy = ICFGEdgeSetTy;
+
     /// Compute the unique edgeFlag value from edge kind and CallSiteID.
     static inline GEdgeFlag makeEdgeFlagWithInvokeID(GEdgeKind k,
                                                      CallSiteID cs) {
