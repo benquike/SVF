@@ -226,42 +226,6 @@ class ICFG : public GenericICFGTy {
     }
 
     inline RetBlockNode *addRetICFGNode(const Instruction *cs);
-
-    /// support for serialization
-    /// @ {
-    friend class boost::serialization::access;
-
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-    template <typename Archive>
-    void save(Archive &ar, const unsigned int version) const {
-        ar &boost::serialization::base_object<GenericICFGTy>(*this);
-
-        boost::serialization::save_map(ar, FunToFunEntryNodeMap);
-        boost::serialization::save_map(ar, FunToFunExitNodeMap);
-
-        boost::serialization::save_map(ar, CSToCallNodeMap);
-        boost::serialization::save_map(ar, CSToRetNodeMap);
-        boost::serialization::save_map(ar, InstToBlockNodeMap);
-
-        ar &globalBlockNode;
-        ar &pag;
-    }
-
-    template <typename Archive>
-    void load(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<GenericICFGTy>(*this);
-
-        boost::serialization::load_map(ar, FunToFunEntryNodeMap);
-        boost::serialization::load_map(ar, FunToFunExitNodeMap);
-        boost::serialization::load_map(ar, CSToCallNodeMap);
-        boost::serialization::load_map(ar, CSToRetNodeMap);
-        boost::serialization::load_map(ar, InstToBlockNodeMap);
-
-        ar &globalBlockNode;
-        ar &pag;
-    }
-    /// @}
 };
 
 } // End namespace SVF

@@ -266,34 +266,6 @@ class PAGNode : public GenericPAGNodeTy {
         return o;
     }
     //@}
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-    template <typename Archive>
-    void save(Archive &ar, const unsigned int version) const {
-        ar &boost::serialization::base_object<GenericPAGNodeTy>(*this);
-        SAVE_Value(ar, value);
-
-        ar &InEdgeKindToSetMap;
-        ar &OutEdgeKindToSetMap;
-        ar &isTLPointer;
-        ar &isATPointer;
-    }
-
-    template <typename Archive>
-    void load(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<GenericPAGNodeTy>(*this);
-        LOAD_Value(ar, Value, value);
-        ar &InEdgeKindToSetMap;
-        ar &OutEdgeKindToSetMap;
-        ar &isTLPointer;
-        ar &isATPointer;
-    }
-    /// @}
 };
 
 /*
@@ -323,17 +295,6 @@ class ValPN : public PAGNode {
     }
 
     const std::string toString() const override;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<PAGNode>(*this);
-    }
-    /// @}
 };
 
 /*
@@ -371,25 +332,6 @@ class ObjPN : public PAGNode {
     inline const llvm::Type *getType() const override { return mem->getType(); }
 
     const std::string toString() const override;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-    template <typename Archive>
-    void save(Archive &ar, const unsigned int version) const {
-        ar &boost::serialization::base_object<PAGNode>(*this);
-        SAVE_MemObj(ar, mem);
-    }
-
-    template <typename Archive>
-    void load(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<PAGNode>(*this);
-        LOAD_MemObj(ar, mem);
-    }
-    /// @}
 };
 
 /*
@@ -436,29 +378,6 @@ class GepValPN : public ValPN {
     u32_t getFieldIdx() const { return fieldIdx; }
 
     const std::string toString() const override;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-    template <typename Archive>
-    void save(Archive &ar, const unsigned int version) const {
-        ar &boost::serialization::base_object<ValPN>(*this);
-        ar &ls;
-        SAVE_Type(ar, gepValType);
-        ar &fieldIdx;
-    }
-
-    template <typename Archive>
-    void load(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<ValPN>(*this);
-        ar &ls;
-        LOAD_Type(ar, gepValType);
-        ar &fieldIdx;
-    }
-    /// @}
 };
 
 /*
@@ -512,29 +431,6 @@ class GepObjPN : public ObjPN {
     }
 
     const std::string toString() const override;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-    template <typename Archive>
-    void save(Archive &ar, const unsigned int version) const {
-        ar &boost::serialization::base_object<ObjPN>(*this);
-        ar &ls;
-        ar &base;
-    }
-
-    template <typename Archive>
-    void load(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<ObjPN>(*this);
-        ar &ls;
-        ar &base;
-
-        symbolTableInfo = SVFProject::getCurrentProject()->getSymbolTableInfo();
-    }
-    /// @}
 };
 
 /*
@@ -566,17 +462,6 @@ class FIObjPN : public ObjPN {
     }
 
     const std::string toString() const override;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<ObjPN>(*this);
-    }
-    /// @}
 };
 
 /*
@@ -604,17 +489,6 @@ class RetPN : public PAGNode {
     }
 
     const std::string toString() const override;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<PAGNode>(*this);
-    }
-    /// @}
 };
 
 /*
@@ -642,17 +516,6 @@ class VarArgPN : public PAGNode {
     }
 
     const std::string toString() const override;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<PAGNode>(*this);
-    }
-    /// @}
 };
 
 /*
@@ -679,17 +542,6 @@ class DummyValPN : public ValPN {
     }
 
     const std::string toString() const override;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<ValPN>(*this);
-    }
-    /// @}
 };
 
 /*
@@ -715,17 +567,6 @@ class DummyObjPN : public ObjPN {
     }
 
     const std::string toString() const override;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<ObjPN>(*this);
-    }
-    /// @}
 };
 
 /*
@@ -752,17 +593,6 @@ class CloneDummyObjPN : public DummyObjPN {
     }
 
     const std::string toString() const override;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<DummyObjPN>(*this);
-    }
-    /// @}
 };
 
 /*
@@ -793,17 +623,6 @@ class CloneGepObjPN : public GepObjPN {
     }
 
     const std::string toString() const override;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<GepObjPN>(*this);
-    }
-    /// @}
 };
 
 /*
@@ -832,17 +651,6 @@ class CloneFIObjPN : public FIObjPN {
     }
 
     const std::string toString() const override;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<FIObjPN>(*this);
-    }
-    /// @}
 };
 
 } // End namespace SVF

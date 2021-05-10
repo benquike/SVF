@@ -99,17 +99,6 @@ class ICFGEdge : public GenericICFGEdgeTy {
     //@{
     static bool classof(const GenericICFGEdgeTy *edge);
     //@}
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<GenericICFGEdgeTy>(*this);
-    }
-    /// @}
 };
 
 /*!
@@ -150,24 +139,6 @@ class IntraCFGEdge : public ICFGEdge {
 
   private:
     BranchCondition brCondition;
-
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-    template <typename Archive>
-    void save(Archive &ar, const unsigned int version) const {
-        ar &boost::serialization::base_object<ICFGEdge>(*this);
-        boost::serialization::save_pair(ar, brCondition);
-    }
-
-    template <typename Archive>
-    void load(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<ICFGEdge>(*this);
-        boost::serialization::load_pair(ar, brCondition);
-    }
-    /// @}
 };
 
 /*!
@@ -196,25 +167,6 @@ class CallCFGEdge : public ICFGEdge {
     }
     //@}
     virtual const std::string toString() const;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-    template <typename Archive>
-    void save(Archive &ar, const unsigned int version) const {
-        ar &boost::serialization::base_object<ICFGEdge>(*this);
-        SAVE_Value(ar, cs);
-    }
-
-    template <typename Archive>
-    void load(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<ICFGEdge>(*this);
-        LOAD_Value(ar, Instruction, cs);
-    }
-    /// @}
 };
 
 /*!
@@ -243,25 +195,6 @@ class RetCFGEdge : public ICFGEdge {
     }
     //@}
     virtual const std::string toString() const;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-    template <typename Archive>
-    void save(Archive &ar, const unsigned int version) const {
-        ar &boost::serialization::base_object<ICFGEdge>(*this);
-        SAVE_Value(ar, cs);
-    }
-
-    template <typename Archive>
-    void load(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<ICFGEdge>(*this);
-        LOAD_Value(ar, Instruction, cs);
-    }
-    /// @}
 };
 
 } // End namespace SVF

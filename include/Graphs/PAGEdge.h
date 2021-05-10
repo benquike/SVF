@@ -119,29 +119,6 @@ class PAGEdge : public GenericPAGEdgeTy {
     using PAGEdgeSetTy = GenericNode<PAGNode, PAGEdge>::GEdgeSetTy;
     using PAGEdgeToSetMapTy = Map<EdgeID, PAGEdgeSetTy>;
     using PAGKindToEdgeSetMapTy = PAGEdgeToSetMapTy;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-    template <typename Archive>
-    void save(Archive &ar, const unsigned int version) const {
-        ar &boost::serialization::base_object<GenericPAGEdgeTy>(*this);
-        SAVE_Value(ar, value);
-        SAVE_Value(ar, basicBlock);
-        ar &icfgNode;
-    }
-
-    template <typename Archive>
-    void load(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<GenericPAGEdgeTy>(*this);
-        LOAD_Value(ar, Value, value);
-        LOAD_Value(ar, BasicBlock, basicBlock);
-        ar &icfgNode;
-    }
-    /// @}
 };
 
 /*!
@@ -170,17 +147,6 @@ class AddrPE : public PAGEdge {
     virtual ~AddrPE() {}
 
     virtual const std::string toString() const;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<PAGEdge>(*this);
-    }
-    /// @}
 };
 
 /*!
@@ -209,17 +175,6 @@ class CopyPE : public PAGEdge {
     virtual ~CopyPE() {}
 
     virtual const std::string toString() const;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<PAGEdge>(*this);
-    }
-    /// @}
 };
 
 /*!
@@ -248,17 +203,6 @@ class CmpPE : public PAGEdge {
     virtual ~CmpPE() {}
 
     virtual const std::string toString() const;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<PAGEdge>(*this);
-    }
-    /// @}
 };
 
 /*!
@@ -287,17 +231,6 @@ class BinaryOPPE : public PAGEdge {
     virtual ~BinaryOPPE() {}
 
     virtual const std::string toString() const;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<PAGEdge>(*this);
-    }
-    /// @}
 };
 
 /*!
@@ -326,17 +259,6 @@ class UnaryOPPE : public PAGEdge {
     virtual ~UnaryOPPE() {}
 
     virtual const std::string toString() const;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<PAGEdge>(*this);
-    }
-    /// @}
 };
 
 /*!
@@ -367,17 +289,6 @@ class StorePE : public PAGEdge {
     virtual ~StorePE() {}
 
     virtual const std::string toString() const;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<PAGEdge>(*this);
-    }
-    /// @}
 };
 
 /*!
@@ -407,17 +318,6 @@ class LoadPE : public PAGEdge {
     virtual ~LoadPE() {}
 
     virtual const std::string toString() const;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<PAGEdge>(*this);
-    }
-    /// @}
 };
 
 /*!
@@ -445,17 +345,6 @@ class GepPE : public PAGEdge {
     GepPE(PAGNode *s, PAGNode *d, EdgeID id, PAG *pag, PEDGEK k)
         : PAGEdge(s, d, id, pag, k) {}
     virtual const std::string toString() const;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<PAGEdge>(*this);
-    }
-    /// @}
 };
 
 /*!
@@ -493,18 +382,6 @@ class NormalGepPE : public GepPE {
     inline const LocationSet &getLocationSet() const { return ls; }
 
     virtual const std::string toString() const;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<GepPE>(*this);
-        ar &ls;
-    }
-    /// @}
 };
 
 /*!
@@ -534,17 +411,6 @@ class VariantGepPE : public GepPE {
     virtual ~VariantGepPE() {}
 
     virtual const std::string toString() const;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<GepPE>(*this);
-    }
-    /// @}
 };
 
 /*!
@@ -579,18 +445,6 @@ class CallPE : public PAGEdge {
     //@}
 
     virtual const std::string toString() const;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<PAGEdge>(*this);
-        ar &inst;
-    }
-    /// @}
 };
 
 /*!
@@ -625,18 +479,6 @@ class RetPE : public PAGEdge {
     //@}
 
     virtual const std::string toString() const;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<PAGEdge>(*this);
-        ar &inst;
-    }
-    /// @}
 };
 
 /*!
@@ -669,17 +511,6 @@ class TDForkPE : public CallPE {
     }
 
     virtual const std::string toString() const;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<CallPE>(*this);
-    }
-    /// @}
 };
 
 /*!
@@ -707,17 +538,6 @@ class TDJoinPE : public RetPE {
         : RetPE(s, d, id, pag, i, PAGEdge::ThreadJoin) {}
 
     virtual const std::string toString() const;
-
-  private:
-    /// support for serialization
-    /// @{
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<RetPE>(*this);
-    }
-    /// @}
 };
 
 } // End namespace SVF

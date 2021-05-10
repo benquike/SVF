@@ -127,38 +127,6 @@ class ICFGNode : public GenericICFGNodeTy {
     const BasicBlock *bb = nullptr;
     VFGNodeList VFGNodes; //< a list of VFGNodes
     PAGEdgeList pagEdges; //< a list of PAGEdges
-
-  private:
-    friend class boost::serialization::access;
-
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-    template <typename Archive>
-    void save(Archive &ar, const unsigned int version) const {
-        // save parent object
-        ar &boost::serialization::base_object<GenericICFGNodeTy>(*this);
-
-        SAVE_SVFFunction(ar, fun);
-        SAVE_Value(ar, bb);
-
-        ar &VFGNodes;
-        ar &pagEdges;
-    }
-
-    template <typename Archive>
-    void load(Archive &ar, const unsigned int version) {
-        // save parent object
-        ar &boost::serialization::base_object<GenericICFGNodeTy>(*this);
-
-        SVFProject *currProject = SVFProject::getCurrentProject();
-        assert(currProject != nullptr && "current project is null");
-
-        LOAD_SVFFunction(ar, fun);
-        LOAD_Value(ar, BasicBlock, bb);
-
-        ar &VFGNodes;
-        ar &pagEdges;
-    }
 };
 
 /*!
@@ -181,14 +149,6 @@ class GlobalBlockNode : public ICFGNode {
     //@}
 
     virtual const std::string toString() const;
-
-  private:
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<ICFGNode>(*this);
-    }
 };
 
 /*!
@@ -219,23 +179,6 @@ class IntraBlockNode : public ICFGNode {
     //@}
 
     const std::string toString() const;
-
-  private:
-    friend class boost::serialization::access;
-
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-    template <typename Archive>
-    void save(Archive &ar, const unsigned int version) const {
-        ar &boost::serialization::base_object<ICFGNode>(*this);
-        SAVE_Value(ar, inst);
-    }
-
-    template <typename Archive>
-    void load(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<ICFGNode>(*this);
-        LOAD_Value(ar, Instruction, inst);
-    }
 };
 
 class InterBlockNode : public ICFGNode {
@@ -251,14 +194,6 @@ class InterBlockNode : public ICFGNode {
     //@{
     static bool classof(const GenericICFGNodeTy *node);
     //@}
-
-  private:
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<ICFGNode>(*this);
-    }
 };
 
 /*!
@@ -296,15 +231,6 @@ class FunEntryBlockNode : public InterBlockNode {
     //@}
 
     const virtual std::string toString() const;
-
-  private:
-    friend class boost::serialization::access;
-
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<InterBlockNode>(*this);
-        ar &FPNodes;
-    }
 };
 
 /*!
@@ -340,25 +266,6 @@ class FunExitBlockNode : public InterBlockNode {
     //@}
 
     virtual const std::string toString() const;
-
-  private:
-    friend class boost::serialization::access;
-
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-    template <typename Archive>
-    void save(Archive &ar, const unsigned int version) const {
-        ar &boost::serialization::base_object<InterBlockNode>(*this);
-        SAVE_SVFFunction(ar, fun);
-        ar &formalRet;
-    }
-
-    template <typename Archive>
-    void load(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<InterBlockNode>(*this);
-        LOAD_SVFFunction(ar, fun);
-        ar &formalRet;
-    }
 };
 
 /*!
@@ -427,29 +334,6 @@ class CallBlockNode : public InterBlockNode {
     //@}
 
     virtual const std::string toString() const;
-
-  private:
-    friend class boost::serialization::access;
-
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-    template <typename Archive>
-    void save(Archive &ar, const unsigned int version) const {
-        ar &boost::serialization::base_object<InterBlockNode>(*this);
-        SAVE_Value(ar, cs);
-        ar &ret;
-        ar &APNodes;
-    }
-
-    template <typename Archive>
-    void load(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<InterBlockNode>(*this);
-        LOAD_Value(ar, Instruction, cs);
-        ar &ret;
-        ar &APNodes;
-
-        svfMod = SVFProject::getCurrentProject()->getSVFModule();
-    }
 };
 
 /*!
@@ -495,27 +379,6 @@ class RetBlockNode : public InterBlockNode {
     //@}
 
     virtual const std::string toString() const;
-
-  private:
-    friend class boost::serialization::access;
-
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-    template <typename Archive>
-    void save(Archive &ar, const unsigned int version) const {
-        ar &boost::serialization::base_object<InterBlockNode>(*this);
-        SAVE_Value(ar, cs);
-        ar &actualRet;
-        ar &callBlockNode;
-    }
-
-    template <typename Archive>
-    void load(Archive &ar, const unsigned int version) {
-        ar &boost::serialization::base_object<InterBlockNode>(*this);
-        LOAD_Value(ar, Instruction, cs);
-        ar &actualRet;
-        ar &callBlockNode;
-    }
 };
 
 } // End namespace SVF
