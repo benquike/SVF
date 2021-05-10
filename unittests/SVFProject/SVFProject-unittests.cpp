@@ -46,6 +46,21 @@ TEST(SVFProjectTests, Test0) {
     ASSERT_NE(proj.getThreadAPI(), nullptr);
 }
 
+TEST(SVFProjectTests, ResetTest) {
+    string ll_file = SVF_BUILD_DIR "tests/simple/simple_cpp.ll";
+    SVFProject proj1(ll_file);
+    ASSERT_EQ(SVFProject::getCurrentProject(), &proj1);
+
+    {
+        SVFProject proj(ll_file);
+        ASSERT_EQ(SVFProject::getCurrentProject(), &proj);
+    }
+
+    ASSERT_EQ(SVFProject::getCurrentProject(), nullptr);
+    SVFProject::setCurrentProject(&proj1);
+    ASSERT_EQ(SVFProject::getCurrentProject(), &proj1);
+}
+
 void pag_and_icfg_eq_test(SVFProject *proj1, SVFProject *proj2) {
     ASSERT_NE(proj1, proj2);
 
