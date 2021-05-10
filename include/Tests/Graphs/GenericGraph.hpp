@@ -52,30 +52,27 @@ void node_eq_test(const GNode *n1, const GNode *n2) {
     ASSERT_EQ(n1->getOutEdges().size(), n2->getOutEdges().size());
 
     {
-        auto e_it1 = n1->InEdgeBegin();
-        auto e_it2 = n2->InEdgeBegin();
-        for (; e_it1 != n1->InEdgeEnd() && e_it2 != n2->InEdgeEnd();
-             e_it1++, e_it2++) {
+
+        for (auto e_it1 = n1->InEdgeBegin(); e_it1 != n1->InEdgeEnd();
+             e_it1++) {
             auto *e1 = *e_it1;
-            auto *e2 = *e_it2;
+            auto pos = n2->getInEdges().find(e1);
+            ASSERT_NE(pos, n2->getInEdges().end());
+            auto *e2 = *pos;
             edge_eq_test(e1, e2);
         }
-
-        ASSERT_EQ(e_it1, n1->InEdgeEnd());
-        ASSERT_EQ(e_it2, n2->InEdgeEnd());
     }
 
     {
-        auto e_it1 = n1->OutEdgeBegin();
-        auto e_it2 = n2->OutEdgeBegin();
-        for (; e_it1 != n1->OutEdgeEnd() && e_it2 != n2->OutEdgeEnd();
-             e_it1++, e_it2++) {
+
+        for (auto e_it1 = n1->OutEdgeBegin(); e_it1 != n1->OutEdgeEnd();
+             e_it1++) {
             auto *e1 = *e_it1;
-            auto *e2 = *e_it2;
+            auto pos = n2->getOutEdges().find(e1);
+            ASSERT_NE(pos, n2->getOutEdges().end());
+            auto *e2 = *pos;
             edge_eq_test(e1, e2);
         }
-        ASSERT_EQ(e_it1, n1->OutEdgeEnd());
-        ASSERT_EQ(e_it2, n2->OutEdgeEnd());
     }
 
     node_eq_extra_test(n1, n2);
