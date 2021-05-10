@@ -49,10 +49,10 @@ class GenericEdge {
 
     template <typename Archive>
     void serialize(Archive &ar, const unsigned int version) {
-        ar &src;
-        ar &dst;
         ar &id;
         ar &edgeFlag;
+        ar &src;
+        ar &dst;
     }
 
   public:
