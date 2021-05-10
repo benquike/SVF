@@ -1,1 +1,3 @@
 leak:realloc
+leak:doesnt_have_new_operator::invoke_new
+leak:basic_iarchive::load_object
