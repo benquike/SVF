@@ -236,13 +236,11 @@ class PAGNode : public GenericPAGNodeTy {
     inline void addInEdge(PAGEdge *inEdge) {
         GNodeK kind = inEdge->getEdgeKind();
         InEdgeKindToSetMap[kind].insert(inEdge);
-        addIncomingEdge(inEdge);
     }
 
     inline void addOutEdge(PAGEdge *outEdge) {
         GNodeK kind = outEdge->getEdgeKind();
         OutEdgeKindToSetMap[kind].insert(outEdge);
-        addOutgoingEdge(outEdge);
     }
 
     virtual const std::string toString() const;

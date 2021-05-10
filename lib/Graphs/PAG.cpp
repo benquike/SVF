@@ -827,6 +827,8 @@ bool PAG::addEdge(PAGNode *src, PAGNode *dst, PAGEdge *edge) {
                             << " kind :" << dst->getNodeKind() << "\n");
     src->addOutEdge(edge);
     dst->addInEdge(edge);
+    addGEdge(edge);
+
     bool added = PAGEdgeKindToSetMap[edge->getEdgeKind()].insert(edge).second;
     assert(added && "duplicated edge, not added!!!");
     if (edge->isPTAEdge()) {
@@ -932,11 +934,14 @@ LocationSet PAG::getLocationSetFromBaseNode(NodeID nodeId) {
  * Clean up memory
  */
 void PAG::destroy() {
-    for (auto &I : PAGEdgeKindToSetMap) {
-        for (auto *edgeIt : I.second) {
-            delete edgeIt;
-        }
-    }
+
+    /// all edges are managed by GenericGraph
+    /// no need to free then here
+    // for (auto &I : PAGEdgeKindToSetMap) {
+    //     for (auto *edgeIt : I.second) {
+    //         delete edgeIt;
+    //     }
+    // }
 
     delete icfg;
     icfg = nullptr;
