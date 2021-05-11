@@ -27,7 +27,7 @@
 #include "Graphs/ICFG.h"
 #include "Graphs/PAG.h"
 
-#include "Tests/Graphs/GenericGraph.hpp"
+#include "Tests/Graphs/GraphTest_Routines.hpp"
 #include "config.h"
 #include "gtest/gtest.h"
 

@@ -26,7 +26,7 @@
 #include "config.h"
 #include "gtest/gtest.h"
 
-#include "Tests/Graphs/GenericGraph.hpp"
+#include "Tests/Graphs/GraphTest_Routines.hpp"
 #include "Tests/Graphs/ICFG.hpp"
 
 using namespace std;

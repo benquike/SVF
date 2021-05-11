@@ -23,7 +23,7 @@
 #define __TESTS_GRAPHS_ICFG_H__
 
 #include "Graphs/ICFG.h"
-#include "Tests/Graphs/GenericGraph.hpp"
+#include "Tests/Graphs/GraphTest_Routines.hpp"
 
 namespace SVF {
 

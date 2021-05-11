@@ -25,7 +25,7 @@
 #include "Graphs/SVFGOPT.h"
 #include "Graphs/VFG.h"
 #include "SVF-FE/SVFProject.h"
-#include "Tests/Graphs/GenericGraph.hpp"
+#include "Tests/Graphs/GraphTest_Routines.hpp"
 #include "Util/Serialization.h"
 
 #include "WPA/Andersen.h"

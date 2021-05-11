@@ -19,8 +19,8 @@
  *     2021-04-17
  *****************************************************************************/
 
-#ifndef __TESTS_GRAPHS_GENERICGRAPH_H__
-#define __TESTS_GRAPHS_GENERICGRAPH_H__
+#ifndef __TESTS_GRAPHS_GRAPHTEST_ROUTINES_H__
+#define __TESTS_GRAPHS_GRAPHTEST_ROUTINES_H__
 
 #include "Graphs/GenericGraph.h"
 #include "gtest/gtest.h"
@@ -133,4 +133,4 @@ void graph_eq_test(const Graph *g1, const Graph *g2) {
 
 } /* end of namespace SVF */
 
-#endif /* __TESTS_GRAPHS_GENERICGRAPH_H__ */
+#endif /* __TESTS_GRAPHS_GRAPHTEST_ROUTINES_H__ */
