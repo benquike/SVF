@@ -39,19 +39,25 @@ PTACallGraph *CallGraphBuilder::buildCallGraph() {
     /// create nodes
     SVFModule *svfModule = proj->getSVFModule();
     LLVMModuleSet *modSet = svfModule->getLLVMModSet();
-    for (auto F = svfModule->llvmFunBegin(), E = svfModule->llvmFunEnd();
-         F != E; ++F) {
+
+    /// Step 1. add all functions in the module as nodes to the callgraph
+    auto E = svfModule->llvmFunEnd();
+    for (auto F = svfModule->llvmFunBegin(); F != E; ++F) {
         const SVFFunction *fun = modSet->getSVFFunction(*F);
         callgraph->addCallGraphNode(fun);
     }
 
-    /// create edges
-    for (auto F = svfModule->llvmFunBegin(), E = svfModule->llvmFunEnd();
-         F != E; ++F) {
+    /// Step 2. create edges by looking through the direct
+    /// call edges
+    ThreadAPI *tdAPI = proj->getThreadAPI();
+    for (auto F = svfModule->llvmFunBegin(); F != E; ++F) {
         Function *fun = *F;
-        for (inst_iterator I = inst_begin(*fun), J = inst_end(*fun); I != J;
-             ++I) {
+        auto J = inst_end(*fun);
+        for (inst_iterator I = inst_begin(*fun); I != J; ++I) {
             const Instruction *inst = &*I;
+
+            /// how to handle if it is both a thread API
+            /// and a normal function
             if (SVFUtil::isNonInstricCallSite(inst)) {
                 if (const SVFFunction *callee = getCallee(modSet, inst)) {
                     const CallBlockNode *callBlockNode =
@@ -61,68 +67,40 @@ PTACallGraph *CallGraphBuilder::buildCallGraph() {
                                                       callee);
                 }
             }
+            /// merge the ThreadCallGraphBuilder logic here
+            if (includeThreadCall) {
+                auto *cg = llvm::dyn_cast<ThreadCallGraph>(callgraph);
+                if (tdAPI->isTDFork(inst)) {
+                    const CallBlockNode *cs = icfg->getCallBlockNode(inst);
+                    cg->addForksite(cs);
+                    const auto *forkee =
+                        llvm::dyn_cast<Function>(tdAPI->getForkedFun(inst));
+                    if (forkee) {
+                        cg->addDirectForkEdge(cs);
+                    }
+                    // indirect call to the start routine function
+                    else {
+                        cg->addThreadForkEdgeSetMap(cs, nullptr);
+                    }
+                } else if (tdAPI->isHareParFor(inst)) {
+                    const CallBlockNode *cs = icfg->getCallBlockNode(inst);
+                    cg->addParForSite(cs);
+                    const auto *taskFunc = llvm::dyn_cast<Function>(
+                        tdAPI->getTaskFuncAtHareParForSite(inst));
+                    if (taskFunc) {
+                        cg->addDirectParForEdge(cs);
+                    }
+                    // indirect call to the start routine function
+                    else {
+                        cg->addHareParForEdgeSetMap(cs, nullptr);
+                    }
+                } else if (tdAPI->isTDJoin(inst)) {
+                    const CallBlockNode *cs = icfg->getCallBlockNode(inst);
+                    cg->addJoinsite(cs);
+                }
+            }
         }
     }
 
     return callgraph;
-}
-
-PTACallGraph *ThreadCallGraphBuilder::buildThreadCallGraph() {
-
-    SVFModule *svfModule = proj->getSVFModule();
-
-    buildCallGraph();
-
-    auto *cg = llvm::dyn_cast<ThreadCallGraph>(callgraph);
-    assert(cg && "not a thread callgraph?");
-
-    ThreadAPI *tdAPI = proj->getThreadAPI();
-    for (auto fi = svfModule->llvmFunBegin(), efi = svfModule->llvmFunEnd();
-         fi != efi; ++fi) {
-        const Function *fun = *fi;
-        for (const_inst_iterator II = inst_begin(*fun), E = inst_end(*fun);
-             II != E; ++II) {
-            const Instruction *inst = &*II;
-            if (tdAPI->isTDFork(inst)) {
-                const CallBlockNode *cs = icfg->getCallBlockNode(inst);
-                cg->addForksite(cs);
-                const auto *forkee =
-                    llvm::dyn_cast<Function>(tdAPI->getForkedFun(inst));
-                if (forkee) {
-                    cg->addDirectForkEdge(cs);
-                }
-                // indirect call to the start routine function
-                else {
-                    cg->addThreadForkEdgeSetMap(cs, nullptr);
-                }
-            } else if (tdAPI->isHareParFor(inst)) {
-                const CallBlockNode *cs = icfg->getCallBlockNode(inst);
-                cg->addParForSite(cs);
-                const auto *taskFunc = llvm::dyn_cast<Function>(
-                    tdAPI->getTaskFuncAtHareParForSite(inst));
-                if (taskFunc) {
-                    cg->addDirectParForEdge(cs);
-                }
-                // indirect call to the start routine function
-                else {
-                    cg->addHareParForEdgeSetMap(cs, nullptr);
-                }
-            }
-        }
-    }
-    // record join sites
-    for (auto fi = svfModule->llvmFunBegin(), efi = svfModule->llvmFunEnd();
-         fi != efi; ++fi) {
-        const Function *fun = *fi;
-        for (const_inst_iterator II = inst_begin(*fun), E = inst_end(*fun);
-             II != E; ++II) {
-            const Instruction *inst = &*II;
-            if (tdAPI->isTDJoin(inst)) {
-                const CallBlockNode *cs = icfg->getCallBlockNode(inst);
-                cg->addJoinsite(cs);
-            }
-        }
-    }
-
-    return cg;
 }

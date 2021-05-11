@@ -157,16 +157,19 @@ void PointerAnalysis::initialize() {
         pag->print();
     }
 
-    /// initialise pta call graph for every pointer analysis instance
-    if (Options::EnableThreadCallGraph) {
-        auto *cg = new ThreadCallGraph(proj);
-        ThreadCallGraphBuilder bd(proj, cg);
-        ptaCallGraph = bd.buildThreadCallGraph();
+    /// initialise pta call graph
+    /// for every pointer analysis instance
+    bool includeThreadCall = Options::EnableThreadCallGraph || threadCallGraph;
+    if (includeThreadCall) {
+        ptaCallGraph = new ThreadCallGraph(proj);
     } else {
-        auto *cg = new PTACallGraph(proj);
-        CallGraphBuilder bd(proj, cg);
-        ptaCallGraph = bd.buildCallGraph();
+        ptaCallGraph = new PTACallGraph(proj);
     }
+    /// build the callgraph with direct calls now
+    /// indirect calls will be resolved in analyze method
+    CallGraphBuilder bd(proj, ptaCallGraph, includeThreadCall);
+    ptaCallGraph = bd.buildCallGraph();
+
     /// initialize the  Strong-Connected-Component
     /// module for building the callgraph
     callGraphSCCDetection();
