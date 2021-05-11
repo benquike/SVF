@@ -59,8 +59,13 @@ class FlowSensitive : public WPASVFGFSSolver, public BVDataPTAImpl {
     using PtsMap = BVDataPTAImpl::MutDFPTDataTy::PtsMap;
 
     /// Constructor
-    explicit FlowSensitive(SVFProject *proj, PTATY type = FSSPARSE_WPA)
-        : WPASVFGFSSolver(), BVDataPTAImpl(proj, type) {
+    explicit FlowSensitive(SVFProject *proj, PTATY type = FSSPARSE_WPA,
+                           bool alias_check = true,
+                           bool enableVirtualCallAnalysis = false,
+                           bool threadCallGraph = false)
+        : WPASVFGFSSolver(),
+          BVDataPTAImpl(proj, type, alias_check, enableVirtualCallAnalysis,
+                        threadCallGraph) {
         svfg = nullptr;
         solveTime = sccTime = processTime = propagationTime = updateTime = 0;
         addrTime = copyTime = gepTime = loadTime = storeTime = phiTime = 0;
@@ -79,10 +84,15 @@ class FlowSensitive : public WPASVFGFSSolver, public BVDataPTAImpl {
 
     /// Create signle instance of flow-sensitive pointer analysis
     static FlowSensitive *createFSWPA(SVFProject *proj,
-                                      bool vcall_cha = false) {
+                                      bool virtualCallAnalaysis = false,
+                                      bool threadCallGraph = false) {
         FlowSensitive *fspta = new FlowSensitive(proj);
-        if (vcall_cha) {
-            fspta->connectCPPVirtualOnCHA();
+        if (virtualCallAnalaysis) {
+            fspta->enableVirtualCallAnalysis();
+        }
+
+        if (threadCallGraph) {
+            fspta->buildThreadCallGraph();
         }
 
         fspta->analyze();

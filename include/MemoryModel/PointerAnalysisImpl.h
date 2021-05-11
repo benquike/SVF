@@ -57,7 +57,9 @@ class BVDataPTAImpl : public PointerAnalysis {
 
     /// Constructor
     BVDataPTAImpl(SVFProject *proj, PointerAnalysis::PTATY type,
-                  bool alias_check = true);
+                  bool alias_check = true,
+                  bool enableVirtualCallAnalysis = false,
+                  bool threadCallGraph = false);
 
     /// Destructor
     virtual ~BVDataPTAImpl() { destroy(); }

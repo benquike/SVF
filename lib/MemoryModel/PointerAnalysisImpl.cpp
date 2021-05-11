@@ -21,8 +21,10 @@ using namespace std;
  * Constructor
  */
 BVDataPTAImpl::BVDataPTAImpl(SVFProject *proj, PointerAnalysis::PTATY type,
-                             bool alias_check)
-    : PointerAnalysis(proj, type, alias_check) {
+                             bool alias_check, bool enableVirtualCallAnalysis,
+                             bool threadCallGraph)
+    : PointerAnalysis(proj, type, alias_check, enableVirtualCallAnalysis,
+                      threadCallGraph) {
     if (type == Andersen_BASE || type == Andersen_WPA ||
         type == AndersenWaveDiff_WPA || type == AndersenHCD_WPA ||
         type == AndersenHLCD_WPA || type == AndersenLCD_WPA ||

@@ -78,9 +78,12 @@ const std::string PointerAnalysis::aliasTestFailNoAliasMangled =
 /*!
  * Constructor
  */
-PointerAnalysis::PointerAnalysis(SVFProject *proj, PTATY ty, bool alias_check)
+PointerAnalysis::PointerAnalysis(SVFProject *proj, PTATY ty, bool alias_check,
+                                 bool enableVirtualCallAnalysis,
+                                 bool threadCallGraph)
     : ptaTy(ty), stat(nullptr), ptaCallGraph(nullptr), callGraphSCC(nullptr),
-      typeSystem(nullptr), proj(proj) {
+      typeSystem(nullptr), proj(proj), vcall_cha(enableVirtualCallAnalysis),
+      threadCallGraph(threadCallGraph) {
     OnTheFlyIterBudgetForStat = Options::StatBudget;
     print_stat = Options::PStat;
     ptaImplTy = BaseImpl;

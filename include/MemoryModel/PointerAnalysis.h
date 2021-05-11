@@ -134,9 +134,6 @@ class PointerAnalysis {
     u32_t OnTheFlyIterBudgetForStat;
     //@}
 
-    // add virtual call analysis results
-    bool vcall_cha;
-
     /// Pointer analysis Type
     PTATY ptaTy;
     /// PTA implementation type.
@@ -155,6 +152,13 @@ class PointerAnalysis {
 
     SVFProject *proj = nullptr;
 
+    // Whether use virtual function analysis on
+    // virtual call sites (for cpp code)
+    bool vcall_cha = false;
+
+    /// whether build ThreadCallGraph or a simple PTACallGraph
+    bool threadCallGraph = false;
+
   public:
     /// Return number of resolved indirect call edges
     inline Size_t getNumOfResolvedIndCallEdge() const {
@@ -167,7 +171,9 @@ class PointerAnalysis {
 
     /// Constructor
     PointerAnalysis(SVFProject *proj, PTATY ty = Default_PTA,
-                    bool alias_check = true);
+                    bool alias_check = true,
+                    bool enableVirtualCallAnalysis = false,
+                    bool threadCallGraph = false);
 
     /// Type of pointer analysis
     inline PTATY getAnalysisTy() const { return ptaTy; }
@@ -227,7 +233,10 @@ class PointerAnalysis {
     /// Clear points-to data
     virtual void clearPts() {}
 
-    virtual void connectCPPVirtualOnCHA() { vcall_cha = true; }
+    /// enable analysis of virtual callsites
+    /// in building PTACallGraph
+    void enableVirtualCallAnalysis() { vcall_cha = true; }
+    void buildThreadCallGraph() { threadCallGraph = true; }
 
     /// Print targets of a function pointer
     void printIndCSTargets(const CallBlockNode *cs, const FunctionSet &targets);
