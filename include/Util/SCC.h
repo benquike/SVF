@@ -58,7 +58,6 @@ class SCCDetection {
     using GNODE = typename GTraits::NodeRef;
     using node_iterator = typename GTraits::nodes_iterator;
     using child_iterator = typename GTraits::ChildIteratorType;
-    using NodeID = unsigned int;
 
   public:
     using GNodeStack = std::stack<NodeID>;
