@@ -42,11 +42,10 @@ using namespace SVFUtil;
 void AndersenHCD::initialize() {
     Andersen::initialize();
     // Build offline constraint graph and solve its constraints
-    oCG = new OfflineConsG(pag);
-    OSCC *oscc = new OSCC(oCG);
-    oscc->find();
-    oCG->solveOfflineSCC(oscc);
-    delete oscc;
+    oCG = new OfflineConsG(getPAG());
+    OSCC oscc(oCG);
+    oscc.find();
+    oCG->solveOfflineSCC(&oscc);
 }
 
 /*!

@@ -150,8 +150,6 @@ class TypeBasedHeapCloning {
   private:
     /// PTA extending this class.
     BVDataPTAImpl *pta;
-    /// PAG the PTA uses. Just a shortcut for getPAG().
-    PAG *ppag = nullptr;
 
     /// Object -> its type.
     Map<NodeID, const DIType *> objToType;

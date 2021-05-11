@@ -79,9 +79,8 @@ const std::string PointerAnalysis::aliasTestFailNoAliasMangled =
  * Constructor
  */
 PointerAnalysis::PointerAnalysis(SVFProject *proj, PTATY ty, bool alias_check)
-    : pag(proj->getPAG()), svfMod(proj->getSVFModule()), ptaTy(ty),
-      stat(nullptr), ptaCallGraph(nullptr), callGraphSCC(nullptr),
-      icfg(proj->getICFG()), typeSystem(nullptr), proj(proj) {
+    : ptaTy(ty), stat(nullptr), ptaCallGraph(nullptr), callGraphSCC(nullptr),
+      typeSystem(nullptr), proj(proj) {
     OnTheFlyIterBudgetForStat = Options::StatBudget;
     print_stat = Options::PStat;
     ptaImplTy = BaseImpl;
@@ -123,10 +122,11 @@ void PointerAnalysis::destroy() {
  */
 void PointerAnalysis::initialize() {
 
+    auto pag = getPAG();
     assert(pag && "PAG has not been built!");
 
     if (chgraph == nullptr) {
-        if (svfMod->getLLVMModSet()->allCTir()) {
+        if (getSVFModule()->getLLVMModSet()->allCTir()) {
             DCHGraph *dchg = new DCHGraph(proj->getSymbolTableInfo());
             // TODO: we might want to have an option for extending.
             dchg->buildCHG(true);
@@ -138,8 +138,6 @@ void PointerAnalysis::initialize() {
         }
     }
 
-    svfMod = pag->getModule();
-
     // dump PAG
     if (dumpGraph()) {
         pag->dump("pag_initial");
@@ -148,7 +146,7 @@ void PointerAnalysis::initialize() {
     // dump ICFG
 
     if (Options::DumpICFG) {
-        pag->getICFG()->dump("icfg_initial");
+        getSVFProject()->getICFG()->dump("icfg_initial");
     }
 
     // print to command line of the PAG graph
@@ -181,12 +179,13 @@ void PointerAnalysis::initialize() {
  */
 bool PointerAnalysis::isLocalVarInRecursiveFun(NodeID id) const {
 
-    const MemObj *obj = pag->getObject(id);
+    const MemObj *obj = getPAG()->getObject(id);
     assert(obj && "object not found!!");
     if (obj->isStack()) {
         if (const auto *local = llvm::dyn_cast<AllocaInst>(obj->getRefVal())) {
+            auto *llvmModSet = getSVFModule()->getLLVMModSet();
             const SVFFunction *fun =
-                svfMod->getLLVMModSet()->getSVFFunction(local->getFunction());
+                llvmModSet->getSVFFunction(local->getFunction());
             return callGraphSCC->isInCycle(
                 getPTACallGraph()->getCallGraphNode(fun)->getId());
         }
@@ -198,6 +197,7 @@ bool PointerAnalysis::isLocalVarInRecursiveFun(NodeID id) const {
  * Reset field sensitivity
  */
 void PointerAnalysis::resetObjFieldSensitive() {
+    auto pag = getPAG();
     for (auto &nIter : *pag) {
         if (auto *node = llvm::dyn_cast<ObjPN>(nIter.second)) {
             const_cast<MemObj *>(node->getMemObj())->setFieldSensitive();
@@ -227,6 +227,8 @@ void PointerAnalysis::dumpStat() {
  * check functions
  */
 void PointerAnalysis::finalize() {
+
+    auto pag = getPAG();
 
     /// Print statistics
     dumpStat();
@@ -325,6 +327,8 @@ void PointerAnalysis::dumpAllTypes() {
  * Dump points-to of top-level pointers (ValPN)
  */
 void PointerAnalysis::dumpPts(NodeID ptr, const PointsTo &pts) {
+
+    auto pag = getPAG();
 
     const PAGNode *node = pag->getGNode(ptr);
     /// print the points-to set of node which has the maximum pts size.
@@ -430,6 +434,8 @@ void PointerAnalysis::printIndCSTargets() {
 void PointerAnalysis::resolveIndCalls(const CallBlockNode *cs,
                                       const PointsTo &target,
                                       CallEdgeMap &newEdges, LLVMCallGraph *) {
+    auto pag = getPAG();
+    auto svfMod = getSVFModule();
     assert(pag->isIndirectCallSites(cs) && "not an indirect callsite?");
     /// discover indirect pointer target
     for (const auto &ii : target) {
@@ -531,7 +537,7 @@ void PointerAnalysis::connectVCallToVFns(const CallBlockNode *cs,
                                          const VFunSet &vfns,
                                          CallEdgeMap &newEdges) {
     //// connect all valid functions
-    LLVMModuleSet *modSet = svfMod->getLLVMModSet();
+    LLVMModuleSet *modSet = getSVFModule()->getLLVMModSet();
     for (const auto *callee : vfns) {
         callee = getDefFunForMultipleModule(modSet, callee->getLLVMFun());
         if (getIndCallMap()[cs].count(callee) > 0) {
@@ -584,7 +590,7 @@ void PointerAnalysis::validateSuccessTests(std::string fun) {
 
     // check for must alias cases, whether our alias analysis produce the
     // correct results
-    LLVMModuleSet *modSet = svfMod->getLLVMModSet();
+    LLVMModuleSet *modSet = getSVFModule()->getLLVMModSet();
     if (const SVFFunction *checkFun = getFunction(modSet, fun)) {
         if (!checkFun->getLLVMFun()->use_empty()) {
             outs() << "[" << this->PTAName() << "] Checking " << fun << "\n";
@@ -631,8 +637,8 @@ void PointerAnalysis::validateSuccessTests(std::string fun) {
                     assert(false && "not supported alias check!!");
                 }
 
-                NodeID id1 = pag->getValueNode(V1);
-                NodeID id2 = pag->getValueNode(V2);
+                NodeID id1 = getPAG()->getValueNode(V1);
+                NodeID id2 = getPAG()->getValueNode(V2);
 
                 if (checkSuccessful) {
                     outs() << sucMsg("\t SUCCESS :") << fun
@@ -657,7 +663,7 @@ void PointerAnalysis::validateSuccessTests(std::string fun) {
  */
 void PointerAnalysis::validateExpectedFailureTests(std::string fun) {
 
-    LLVMModuleSet *modSet = svfMod->getLLVMModSet();
+    LLVMModuleSet *modSet = getSVFModule()->getLLVMModSet();
     if (const SVFFunction *checkFun = getFunction(modSet, fun)) {
         if (!checkFun->getLLVMFun()->use_empty()) {
             outs() << "[" << this->PTAName() << "] Checking " << fun << "\n";
@@ -692,8 +698,8 @@ void PointerAnalysis::validateExpectedFailureTests(std::string fun) {
                     assert(false && "not supported alias check!!");
                 }
 
-                NodeID id1 = pag->getValueNode(V1);
-                NodeID id2 = pag->getValueNode(V2);
+                NodeID id1 = getPAG()->getValueNode(V1);
+                NodeID id2 = getPAG()->getValueNode(V2);
 
                 if (expectedFailure) {
                     outs() << sucMsg("\t EXPECTED-FAILURE :") << fun

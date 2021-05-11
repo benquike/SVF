@@ -6,6 +6,7 @@ using namespace SVFUtil;
 
 /// process "bitcast" CopyCGEdge
 void AndersenWaveDiffWithType::processCast(const ConstraintEdge *edge) {
+    auto pag = getPAG();
     NodeID srcId = edge->getSrcID();
     NodeID dstId = edge->getDstID();
     if (pag->hasNonlabeledEdge(pag->getGNode(srcId), pag->getGNode(dstId),
@@ -84,6 +85,7 @@ bool AndersenWaveDiffWithType::matchType(NodeID ptrid, NodeID objid,
 /// add type for newly created GepObjNode
 void AndersenWaveDiffWithType::addTypeForGepObjNode(
     NodeID id, const NormalGepCGEdge *normalGepEdge) {
+    auto pag = getPAG();
     NodeID srcId = normalGepEdge->getSrcID();
     NodeID dstId = normalGepEdge->getDstID();
     if (pag->hasNonlabeledEdge(pag->getGNode(srcId), pag->getGNode(dstId),

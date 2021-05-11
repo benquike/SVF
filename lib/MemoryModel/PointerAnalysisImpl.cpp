@@ -50,11 +50,10 @@ BVDataPTAImpl::BVDataPTAImpl(SVFProject *proj, PointerAnalysis::PTATY type,
  */
 void BVDataPTAImpl::expandFIObjs(const PointsTo &pts, PointsTo &expandedPts) {
     expandedPts = pts;
-    ;
-    for (PointsTo::iterator pit = pts.begin(), epit = pts.end(); pit != epit;
-         ++pit) {
-        if (pag->getBaseObjNode(*pit) == *pit || isFieldInsensitive(*pit)) {
-            expandedPts |= pag->getAllFieldsObjNode(*pit);
+    auto pag = getPAG();
+    for (auto pit : pts) {
+        if (pag->getBaseObjNode(pit) == pit || isFieldInsensitive(pit)) {
+            expandedPts |= pag->getAllFieldsObjNode(pit);
         }
     }
 }
@@ -66,6 +65,8 @@ void BVDataPTAImpl::expandFIObjs(const PointsTo &pts, PointsTo &expandedPts) {
  */
 void BVDataPTAImpl::writeToFile(const string &filename) {
     outs() << "Storing pointer analysis results to '" << filename << "'...";
+
+    auto pag = getPAG();
 
     error_code err;
     ToolOutputFile F(filename.c_str(), err, llvm::sys::fs::F_None);
@@ -117,6 +118,8 @@ void BVDataPTAImpl::writeToFile(const string &filename) {
  */
 bool BVDataPTAImpl::readFromFile(const string &filename) {
     outs() << "Loading pointer analysis results from '" << filename << "'...";
+
+    auto pag = getPAG();
 
     ifstream F(filename.c_str());
     if (!F.is_open()) {
@@ -215,7 +218,7 @@ void BVDataPTAImpl::dumpTopLevelPtsTo() {
  */
 void BVDataPTAImpl::dumpAllPts() {
     OrderedNodeSet pagNodes;
-    for (auto &it : *pag) {
+    for (auto &it : *getPAG()) {
         pagNodes.insert(it.first);
     }
 
@@ -241,6 +244,7 @@ void BVDataPTAImpl::dumpAllPts() {
  */
 void BVDataPTAImpl::onTheFlyCallGraphSolve(const CallSiteToFunPtrMap &callsites,
                                            CallEdgeMap &newEdges) {
+    auto pag = getPAG();
     for (auto callsite : callsites) {
         const CallBlockNode *cs = callsite.first;
         CallSite llvmCS = SVFUtil::getLLVMCallSite(cs->getCallSite());
@@ -268,6 +272,7 @@ AliasResult BVDataPTAImpl::alias(const MemoryLocation &LocA,
  * Return alias results based on our points-to/alias analysis
  */
 AliasResult BVDataPTAImpl::alias(const Value *V1, const Value *V2) {
+    auto pag = getPAG();
     return alias(pag->getValueNode(V1), pag->getValueNode(V2));
 }
 

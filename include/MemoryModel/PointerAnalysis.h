@@ -137,12 +137,7 @@ class PointerAnalysis {
     // add virtual call analysis results
     bool vcall_cha;
 
-    /// PAG
-    PAG *pag = nullptr;
-    /// Module
-    SVFModule *svfMod = nullptr;
     /// Pointer analysis Type
-
     PTATY ptaTy;
     /// PTA implementation type.
     PTAImplTy ptaImplTy;
@@ -152,9 +147,6 @@ class PointerAnalysis {
     PTACallGraph *ptaCallGraph = nullptr;
     /// SCC for CallGraph
     CallGraphSCC *callGraphSCC = nullptr;
-    /// Interprocedural control-flow graph
-
-    ICFG *icfg = nullptr;
 
     /// CHGraph
     CommonCHGraph *chgraph = nullptr;
@@ -183,17 +175,14 @@ class PointerAnalysis {
     /// Return implementation type of the pointer analysis.
     inline PTAImplTy getImplTy() const { return ptaImplTy; }
 
-    /// Get/set PAG
-    ///@{
-    inline PAG *getPAG() const { return proj->getPAG(); }
-    //@}
-
     SVFProject *getSVFProject() { return proj; }
+
+    inline PAG *getPAG() const { return proj->getPAG(); }
+    inline SVFModule *getSVFModule() const { return proj->getSVFModule(); }
 
     /// Get PTA stat
     inline PTAStat *getStat() const { return stat; }
-    /// Module
-    inline SVFModule *getModule() const { return proj->getSVFModule(); }
+
     /// Get all Valid Pointers for resolution
     inline OrderedNodeSet &getAllValidPtrs() {
         return getPAG()->getAllValidPtrs();

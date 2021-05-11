@@ -60,7 +60,7 @@ void AndersenBase::initialize() {
     /// Build PAG
     PointerAnalysis::initialize();
     /// Build Constraint Graph
-    consCG = new ConstraintGraph(pag);
+    consCG = new ConstraintGraph(getPAG());
     setGraph(consCG);
     /// Create statistic class
     stat = new AndersenStat(this);
@@ -245,7 +245,7 @@ bool Andersen::processLoad(NodeID node, const ConstraintEdge *load) {
     ///       make gcc in spec 2000 pass the flow-sensitive analysis.
     ///       Try to handle black hole obj in an appropiate way.
     //	if (pag->isBlkObjOrConstantObj(node) || isNonPointerObj(node))
-    if (pag->isConstantObj(node) || isNonPointerObj(node))
+    if (getPAG()->isConstantObj(node) || isNonPointerObj(node))
         return false;
 
     numOfProcessedLoad++;
@@ -264,7 +264,7 @@ bool Andersen::processStore(NodeID node, const ConstraintEdge *store) {
     ///       make gcc in spec 2000 pass the flow-sensitive analysis.
     ///       Try to handle black hole obj in an appropiate way
     //	if (pag->isBlkObjOrConstantObj(node) || isNonPointerObj(node))
-    if (pag->isConstantObj(node) || isNonPointerObj(node))
+    if (getPAG()->isConstantObj(node) || isNonPointerObj(node))
         return false;
 
     numOfProcessedStore++;
@@ -543,7 +543,8 @@ bool Andersen::updateCallGraph(const CallSiteToFunPtrMap &callsites) {
 }
 
 void Andersen::heapAllocatorViaIndCall(CallSite cs, NodePairSet &cpySrcNodes) {
-    LLVMModuleSet *modSet = getModule()->getLLVMModSet();
+    auto pag = getPAG();
+    auto modSet = getSVFModule()->getLLVMModSet();
     assert(SVFUtil::getCallee(modSet, cs) == nullptr &&
            "not an indirect callsite?");
     RetBlockNode *retBlockNode =
@@ -576,6 +577,8 @@ void Andersen::heapAllocatorViaIndCall(CallSite cs, NodePairSet &cpySrcNodes) {
 void Andersen::connectCaller2CalleeParams(CallSite cs, const SVFFunction *F,
                                           NodePairSet &cpySrcNodes) {
     assert(F);
+
+    auto pag = getPAG();
 
     DBOUT(DAndersen, outs() << "connect parameters from indirect callsite "
                             << *cs.getInstruction() << " to callee " << *F

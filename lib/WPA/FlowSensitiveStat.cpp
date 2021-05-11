@@ -272,7 +272,7 @@ void FlowSensitiveStat::performStat() {
 }
 
 void FlowSensitiveStat::statNullPtr() {
-    SVFModule *svfMod = getPTA()->getModule();
+    SVFModule *svfMod = getPTA()->getSVFModule();
     _NumOfNullPtr = 0;
     for (auto &iter : *fspta->getPAG()) {
         NodeID pagNodeId = iter.first;

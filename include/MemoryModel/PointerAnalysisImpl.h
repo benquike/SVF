@@ -167,8 +167,9 @@ class BVDataPTAImpl : public PointerAnalysis {
     /// Normalize points-to information for field-sensitive analysis,
     /// i.e., replace fieldObj with baseObj if it is field-insensitive
     virtual void normalizePointsTo() {
-        for (auto nIter = pag->begin(); nIter != pag->end(); ++nIter) {
-            const PointsTo tmpPts = getPts(nIter->first);
+        auto *pag = getPAG();
+        for (auto nIter : *pag) {
+            const PointsTo tmpPts = getPts(nIter.first);
             for (NodeID obj : tmpPts) {
                 NodeID baseObj = pag->getBaseObjNode(obj);
                 if (baseObj == obj) {
@@ -177,8 +178,8 @@ class BVDataPTAImpl : public PointerAnalysis {
 
                 const MemObj *memObj = pag->getObject(obj);
                 if (memObj && memObj->isFieldInsensitive()) {
-                    clearPts(nIter->first, obj);
-                    addPts(nIter->first, baseObj);
+                    clearPts(nIter.first, obj);
+                    addPts(nIter.first, baseObj);
                 }
             }
         }
@@ -305,15 +306,12 @@ class CondPTAImpl : public PointerAnalysis {
     /// Expand all fields of an aggregate in all points-to sets
     void expandFIObjs(const CPtSet &cpts, CPtSet &expandedCpts) {
         expandedCpts = cpts;
-        ;
-        for (typename CPtSet::const_iterator cit = cpts.begin(),
-                                             ecit = cpts.end();
-             cit != ecit; ++cit) {
-            if (pag->getBaseObjNode(cit->get_id()) == cit->get_id()) {
-                NodeBS &fields = pag->getAllFieldsObjNode(cit->get_id());
-                for (NodeBS::iterator it = fields.begin(), eit = fields.end();
-                     it != eit; ++it) {
-                    CVar cvar(cit->get_cond(), *it);
+        auto pag = getPAG();
+        for (auto cit : cpts) {
+            if (pag->getBaseObjNode(cit.get_id()) == cit.get_id()) {
+                NodeBS &fields = pag->getAllFieldsObjNode(cit.get_id());
+                for (auto it : fields) {
+                    CVar cvar(cit.get_cond(), it);
                     expandedCpts.set(cvar);
                 }
             }
@@ -439,10 +437,8 @@ class CondPTAImpl : public PointerAnalysis {
     /// Given a conditional pts return its bit vector points-to
     virtual inline PointsTo getBVPointsTo(const CPtSet &cpts) const {
         PointsTo pts;
-        for (typename CPtSet::const_iterator cit = cpts.begin(),
-                                             ecit = cpts.end();
-             cit != ecit; ++cit) {
-            pts.set(cit->get_id());
+        for (auto cit : cpts) {
+            pts.set(cit.get_id());
         }
         return pts;
     }
@@ -475,7 +471,7 @@ class CondPTAImpl : public PointerAnalysis {
     }
     /// Interface expose to users of our pointer analysis, given Value infos
     inline AliasResult alias(const Value *V1, const Value *V2) override {
-        return alias(pag->getValueNode(V1), pag->getValueNode(V2));
+        return alias(getPAG()->getValueNode(V1), getPAG()->getValueNode(V2));
     }
     /// Interface expose to users of our pointer analysis, given two pointers
     inline AliasResult alias(NodeID node1, NodeID node2) override {
@@ -510,10 +506,8 @@ class CondPTAImpl : public PointerAnalysis {
     }
     /// Test blk node for cpts
     inline bool containBlackHoleNode(const CPtSet &cpts) {
-        for (typename CPtSet::const_iterator cit = cpts.begin(),
-                                             ecit = cpts.end();
-             cit != ecit; ++cit) {
-            if (cit->get_id() == pag->getBlackHoleNodeID()) {
+        for (auto cit : cpts) {
+            if (cit.get_id() == getPAG()->getBlackHoleNodeID()) {
                 return true;
             }
         }
@@ -521,10 +515,8 @@ class CondPTAImpl : public PointerAnalysis {
     }
     /// Test constant node for cpts
     inline bool containConstantNode(const CPtSet &cpts) {
-        for (typename CPtSet::const_iterator cit = cpts.begin(),
-                                             ecit = cpts.end();
-             cit != ecit; ++cit) {
-            if (cit->get_id() == pag->getConstantNodeID()) {
+        for (auto cit : cpts) {
+            if (cit->get_id() == getPAG()->getConstantNodeID()) {
                 return true;
             }
         }

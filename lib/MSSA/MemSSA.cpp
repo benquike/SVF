@@ -501,7 +501,7 @@ void MemSSA::dumpMSSA(raw_ostream &Out) {
     PAG *pag = pta->getPAG();
 
     SVFModule *svfMod = pag->getModule();
-    for (const auto *fun : *pta->getModule()) {
+    for (const auto *fun : *pta->getSVFModule()) {
         if (Options::MSSAFun != "" && Options::MSSAFun != fun->getName())
             continue;
 

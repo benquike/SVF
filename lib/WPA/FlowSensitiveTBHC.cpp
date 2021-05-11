@@ -39,7 +39,6 @@ void FlowSensitiveTBHC::initialize() {
     assert(dchg != nullptr && "FSTBHC: DCHGraph required!");
 
     TypeBasedHeapCloning::setDCHG(dchg);
-    TypeBasedHeapCloning::setPAG(pag);
 
     // Populates loadGeps.
     determineWhichGepsAreLoads();
@@ -52,10 +51,11 @@ void FlowSensitiveTBHC::finalize(void) {
     dumpStats();
     // getDFPTDataTy()->dumpPTData();
 
-    validateTBHCTests(svfMod);
+    validateTBHCTests(getSVFModule());
 }
 
 void FlowSensitiveTBHC::backPropagate(NodeID clone) {
+    auto pag = getPAG();
     PAGNode *cloneObj = pag->getGNode(clone);
     assert(cloneObj && "FSTBHC: clone does not exist in PAG?");
     PAGNode *originalObj = pag->getGNode(getOriginalObj(clone));
@@ -123,7 +123,7 @@ bool FlowSensitiveTBHC::propAlongIndirectEdge(const IndirectSVFGEdge *edge) {
             }
         }
 
-        if (auto *gep = llvm::dyn_cast<GepObjPN>(pag->getGNode(o))) {
+        if (auto *gep = llvm::dyn_cast<GepObjPN>(getPAG()->getGNode(o))) {
             // Want the geps which are at the same "level" as this one (same mem
             // obj, same offset).
             const NodeBS &geps = getGepObjsFromMemObj(
@@ -205,7 +205,7 @@ bool FlowSensitiveTBHC::processAddr(const AddrSVFGNode *addr) {
     const DIType *objType;
     if (isHeapMemObj(srcID)) {
         objType = undefType;
-    } else if (pag->isConstantObj(srcID)) {
+    } else if (getPAG()->isConstantObj(srcID)) {
         // Probably constants that have been merged into one.
         // We make it undefined even though it's technically a global
         // to keep in line with SVF's design.
@@ -345,6 +345,7 @@ bool FlowSensitiveTBHC::processLoad(const LoadSVFGNode *load) {
     const PointsTo &filterSet = getFilterSet(load->getId());
     // unionPtsFromIn is going to call getOriginalObj on ptd anyway.
     // This results in fewer loop iterations. o_t, o_s --> o.
+    auto pag = getPAG();
     PointsTo srcOriginalObjs;
     for (NodeID s : srcPts) {
         if (filterSet.test(s))
@@ -409,6 +410,7 @@ bool FlowSensitiveTBHC::processStore(const StoreSVFGNode *store) {
 
     changed = false;
     const PointsTo &filterSet = getFilterSet(store->getId());
+    auto pag = getPAG();
     if (getPts(store->getPAGSrcNodeID()).empty() == false) {
         for (NodeID ptd : dstPts) {
             if (filterSet.test(ptd))
@@ -593,7 +595,7 @@ void FlowSensitiveTBHC::expandFIObjs(const PointsTo &pts,
     for (NodeID o : pts) {
         expandedPts |= getAllFieldsObjNode(o);
         while (const auto *gepObj =
-                   llvm::dyn_cast<GepObjPN>(pag->getGNode(o))) {
+                   llvm::dyn_cast<GepObjPN>(getPAG()->getGNode(o))) {
             expandedPts |= getAllFieldsObjNode(o);
             o = gepObj->getBaseNode();
         }

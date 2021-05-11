@@ -439,6 +439,7 @@ bool FlowSensitive::processGep(const GepSVFGNode *edge) {
 bool FlowSensitive::processLoad(const LoadSVFGNode *load) {
     double start = stat->getClk();
     bool changed = false;
+    auto pag = getPAG();
 
     NodeID dstVar = load->getPAGDstNodeID();
 
@@ -487,7 +488,7 @@ bool FlowSensitive::processStore(const StoreSVFGNode *store) {
 
     double start = stat->getClk();
     bool changed = false;
-
+    auto pag = getPAG();
     if (getPts(store->getPAGSrcNodeID()).empty() == false) {
         for (const auto &ptd : dstPts) {
             if (pag->isConstantObj(ptd) || pag->isNonPointerObj(ptd))
@@ -526,6 +527,7 @@ bool FlowSensitive::processStore(const StoreSVFGNode *store) {
  */
 bool FlowSensitive::isStrongUpdate(const SVFGNode *node, NodeID &singleton) {
     bool isSU = false;
+    auto pag = getPAG();
     if (const auto *store = llvm::dyn_cast<StoreSVFGNode>(node)) {
         const PointsTo &dstCPSet = getPts(store->getPAGDstNodeID());
         if (dstCPSet.count() == 1) {

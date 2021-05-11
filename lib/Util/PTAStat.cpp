@@ -337,7 +337,7 @@ void PTAStat::printStat(string statname) {
 }
 
 void PTAStat::bitcastInstStat() {
-    SVFModule *module = pta->getModule();
+    SVFModule *module = pta->getSVFModule();
     u32_t numberOfBitCast = 0;
     for (auto funIter = module->llvmFunBegin(), funEiter = module->llvmFunEnd();
          funIter != funEiter; ++funIter) {
@@ -356,7 +356,7 @@ void PTAStat::bitcastInstStat() {
 }
 
 void PTAStat::branchStat() {
-    SVFModule *module = pta->getModule();
+    SVFModule *module = pta->getSVFModule();
     u32_t numOfBB_2Succ = 0;
     u32_t numOfBB_3Succ = 0;
     for (auto funIter = module->llvmFunBegin(), funEiter = module->llvmFunEnd();

@@ -372,6 +372,7 @@ bool VersionedFlowSensitive::processLoad(const LoadSVFGNode *load) {
     NodeID q = load->getPAGSrcNodeID();
 
     const PointsTo &qpt = getPts(q);
+    auto pag = getPAG();
     for (NodeID o : qpt) {
         if (pag->isConstantObj(o) || pag->isNonPointerObj(o))
             continue;
@@ -416,7 +417,7 @@ bool VersionedFlowSensitive::processStore(const StoreSVFGNode *store) {
     bool changed = false;
     // The version for these objects would be y_l(o).
     NodeBS changedObjects;
-
+    auto pag = getPAG();
     if (!qpt.empty()) {
         for (NodeID o : ppt) {
             if (pag->isConstantObj(o) || pag->isNonPointerObj(o))

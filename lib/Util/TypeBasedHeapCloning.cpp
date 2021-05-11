@@ -26,13 +26,11 @@ TypeBasedHeapCloning::TypeBasedHeapCloning(BVDataPTAImpl *pta)
 
 void TypeBasedHeapCloning::setDCHG(DCHGraph *dchg) { this->dchg = dchg; }
 
-void TypeBasedHeapCloning::setPAG(PAG *pag) { ppag = pag; }
-
 bool TypeBasedHeapCloning::isBlkObjOrConstantObj(NodeID o) const {
+    auto pag = pta->getPAG();
     if (isClone(o))
         o = cloneToOriginalObj.at(o);
-    return llvm::isa<ObjPN>(ppag->getGNode(o)) &&
-           ppag->isBlkObjOrConstantObj(o);
+    return llvm::isa<ObjPN>(pag->getGNode(o)) && pag->isBlkObjOrConstantObj(o);
 }
 
 bool TypeBasedHeapCloning::isBase(const DIType *a, const DIType *b) const {
@@ -101,7 +99,7 @@ PointsTo &TypeBasedHeapCloning::getFilterSet(NodeID loc) {
 void TypeBasedHeapCloning::addGepToObj(NodeID gep, NodeID base,
                                        unsigned offset) {
     objToGeps[base].set(gep);
-    const PAGNode *baseNode = ppag->getGNode(base);
+    const PAGNode *baseNode = pta->getPAG()->getGNode(base);
     assert(baseNode && "TBHC: given bad base node?");
     const auto *baseObj = llvm::dyn_cast<ObjPN>(baseNode);
     assert(baseObj && "TBHC: non-object given for base?");
@@ -124,10 +122,11 @@ const NodeBS &TypeBasedHeapCloning::getGepObjs(NodeID base) {
 const NodeBS TypeBasedHeapCloning::getGepObjClones(NodeID base,
                                                    unsigned offset) {
     assert(dchg && "TBHC: DCHG not set!");
+    auto pag = pta->getPAG();
     // Set of GEP objects we will return.
     NodeBS geps;
 
-    PAGNode *node = ppag->getGNode(base);
+    PAGNode *node = pag->getGNode(base);
     assert(node && "TBHC: base object node does not exist.");
     auto *baseNode = llvm::dyn_cast<ObjPN>(node);
     assert(baseNode && "TBHC: base \"object\" node is not an object.");
@@ -160,7 +159,7 @@ const NodeBS TypeBasedHeapCloning::getGepObjClones(NodeID base,
     // Caching on offset would improve performance but it seems minimal.
     const NodeBS &gepObjs = getGepObjs(base);
     for (NodeID gep : gepObjs) {
-        PAGNode *node = ppag->getGNode(gep);
+        PAGNode *node = pag->getGNode(gep);
         assert(node && "TBHC: expected gep node doesn't exist.");
         assert((llvm::isa<GepObjPN>(node) || llvm::isa<FIObjPN>(node)) &&
                "TBHC: expected a GEP or FI object.");
@@ -191,10 +190,10 @@ const NodeBS TypeBasedHeapCloning::getGepObjClones(NodeID base,
             // object have the same memory object which is the key PAG uses.
             newGep = addCloneGepObjNode(baseNode->getMemObj(), newLS);
         } else {
-            newGep = ppag->getGepObjNode(base, newLS);
+            newGep = pag->getGepObjNode(base, newLS);
         }
 
-        if (auto *gep = llvm::dyn_cast<GepObjPN>(ppag->getGNode(newGep))) {
+        if (auto *gep = llvm::dyn_cast<GepObjPN>(pag->getGNode(newGep))) {
             gep->setBaseNode(base);
         }
 
@@ -229,7 +228,7 @@ const NodeBS TypeBasedHeapCloning::getGepObjClones(NodeID base,
         // We call the object created in the non-TBHC analysis the original
         // object.
         setOriginalObj(newGep,
-                       ppag->getGepObjNode(baseNode->getMemObj(), offset));
+                       pag->getGepObjNode(baseNode->getMemObj(), offset));
         setAllocationSite(newGep, 0);
 
         geps.set(newGep);
@@ -247,13 +246,15 @@ bool TypeBasedHeapCloning::init(NodeID loc, NodeID p, const DIType *tildet,
     // The points-to set we will populate in the loop to fill pPt.
     PointsTo pNewPt;
 
+    auto pag = pta->getPAG();
+
     PointsTo &filterSet = getFilterSet(loc);
     for (NodeID o : pPt) {
         // If it's been filtered before, it'll be filtered again.
         if (filterSet.test(o))
             continue;
 
-        PAGNode *obj = ppag->getGNode(o);
+        PAGNode *obj = pag->getGNode(o);
         assert(obj && "TBHC: pointee object does not exist in PAG?");
         const DIType *tp = getType(o); // tp is t'
 
@@ -262,7 +263,7 @@ bool TypeBasedHeapCloning::init(NodeID loc, NodeID p, const DIType *tildet,
         // object of the base/struct type if that object is field-insensitive.
         bool fieldInsensitive = false;
         std::vector<const DIType *> fieldTypes;
-        if (ObjPN *obj = llvm::dyn_cast<ObjPN>(ppag->getGNode(o))) {
+        if (ObjPN *obj = llvm::dyn_cast<ObjPN>(pag->getGNode(o))) {
             fieldInsensitive = obj->getMemObj()->isFieldInsensitive();
             if (tp != nullptr &&
                 (tp->getTag() == dwarf::DW_TAG_structure_type ||
@@ -376,7 +377,7 @@ bool TypeBasedHeapCloning::init(NodeID loc, NodeID p, const DIType *tildet,
 
 NodeID TypeBasedHeapCloning::cloneObject(NodeID o, const DIType *type, bool) {
     NodeID clone;
-    const PAGNode *obj = ppag->getGNode(o);
+    const PAGNode *obj = pta->getPAG()->getGNode(o);
     if (const GepObjPN *gepObj = llvm::dyn_cast<GepObjPN>(obj)) {
         const NodeBS &clones = getGepObjClones(
             gepObj->getBaseNode(), gepObj->getLocationSet().getOffset());
@@ -402,7 +403,7 @@ NodeID TypeBasedHeapCloning::cloneObject(NodeID o, const DIType *type, bool) {
         // offset).
         setOriginalObj(clone, getOriginalObj(o));
         auto *cloneGepObj =
-            llvm::dyn_cast<CloneGepObjPN>(ppag->getGNode(clone));
+            llvm::dyn_cast<CloneGepObjPN>(pta->getPAG()->getGNode(clone));
         cloneGepObj->setBaseNode(gepObj->getBaseNode());
     } else if (llvm::isa<FIObjPN>(obj) || llvm::isa<DummyObjPN>(obj)) {
         o = getOriginalObj(o);
@@ -454,22 +455,22 @@ const MDNode *TypeBasedHeapCloning::getRawCTirMetadata(const Value *v) {
 
 NodeID TypeBasedHeapCloning::addCloneDummyObjNode(const MemObj *mem) {
     NodeID id = nodeIdAllocator.allocateObjectId();
-    return ppag->addObjNode(nullptr, new CloneDummyObjPN(id, mem), id);
+    return pta->getPAG()->addObjNode(nullptr, new CloneDummyObjPN(id, mem), id);
 }
 
 NodeID TypeBasedHeapCloning::addCloneGepObjNode(const MemObj *mem,
                                                 const LocationSet &l) {
     SymbolTableInfo *symInfo = mem->getSymbolTableInfo();
     NodeID id = nodeIdAllocator.allocateObjectId();
-    return ppag->addObjNode(mem->getRefVal(),
-                            new CloneGepObjPN(mem, id, l, symInfo), id);
+    return pta->getPAG()->addObjNode(
+        mem->getRefVal(), new CloneGepObjPN(mem, id, l, symInfo), id);
 }
 
 NodeID TypeBasedHeapCloning::addCloneFIObjNode(const MemObj *mem) {
     SymbolTableInfo *symInfo = mem->getSymbolTableInfo();
     NodeID id = nodeIdAllocator.allocateObjectId();
-    return ppag->addObjNode(mem->getRefVal(),
-                            new CloneFIObjPN(mem->getRefVal(), id, mem), id);
+    return pta->getPAG()->addObjNode(
+        mem->getRefVal(), new CloneFIObjPN(mem->getRefVal(), id, mem), id);
 }
 
 const DIType *TypeBasedHeapCloning::getTypeFromCTirMetadata(const Value *v) {
@@ -511,9 +512,9 @@ static bool isAliasTestFunction(std::string name) {
 }
 
 void TypeBasedHeapCloning::validateTBHCTests(SVFModule *) {
-    const LLVMModuleSet *llvmModuleSet = pta->getModule()->getLLVMModSet();
+    const LLVMModuleSet *llvmModuleSet = pta->getSVFModule()->getLLVMModSet();
     for (u32_t i = 0; i < llvmModuleSet->getModuleNum(); ++i) {
-        const PAG::CallSiteSet &callSites = ppag->getCallSiteSet();
+        const PAG::CallSiteSet &callSites = pta->getPAG()->getCallSiteSet();
         for (const CallBlockNode *cbn : callSites) {
             const CallSite &cs = SVFUtil::getLLVMCallSite(cbn->getCallSite());
             const Function *fn = cs.getCalledFunction();
@@ -573,8 +574,9 @@ void TypeBasedHeapCloning::validateTBHCTests(SVFModule *) {
 
             assert(ps != nullptr && qs != nullptr &&
                    "TBHC: malformed alias test?");
-            NodeID p = ppag->getValueNode(ps->getPointerOperand());
-            NodeID q = ppag->getValueNode(qs->getPointerOperand());
+            auto pag = pta->getPAG();
+            NodeID p = pag->getValueNode(ps->getPointerOperand());
+            NodeID q = pag->getValueNode(qs->getPointerOperand());
             const DIType *pt = getTypeFromCTirMetadata(ps);
             const DIType *qt = getTypeFromCTirMetadata(qs);
 
@@ -707,9 +709,11 @@ void TypeBasedHeapCloning::dumpStats() {
         SVFUtil::outs() << " ]\n";
     }
 
+    auto pag = pta->getPAG();
+
     indent = "  ";
     SVFUtil::outs() << indent << "Total: "
-                    << ppag->getObjectNodeNum() + ppag->getFieldObjNodeNum() +
+                    << pag->getObjectNodeNum() + pag->getFieldObjNodeNum() +
                            totalClones
                     << " (" << totalClones << " clones)\n";
     SVFUtil::outs() << indent << "==================================\n";

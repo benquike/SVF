@@ -207,7 +207,7 @@ void AndersenStat::constraintGraphStat() {
  */
 void AndersenStat::statNullPtr() {
 
-    SVFModule *svfMod = getPTA()->getModule();
+    SVFModule *svfMod = getPTA()->getSVFModule();
 
     _NumOfNullPtr = 0;
     for (auto &iter : *pta->getPAG()) {

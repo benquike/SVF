@@ -45,7 +45,7 @@ using namespace std;
 void TypeAnalysis::initialize() {
     AndersenBase::initialize();
     if (Options::GenICFG) {
-        icfg = pag->getICFG();
+        auto icfg = getPAG()->getICFG();
         icfg->dump("icfg_initial");
         icfg->dump("vfg_initial");
         if (print_stat) {
@@ -77,7 +77,7 @@ void TypeAnalysis::callGraphSolveBasedOnCHA(
         if (isVirtualCallSite(cs, getPAG()->getModule()->getLLVMModSet())) {
             virtualCallSites.insert(cs);
             const Value *vtbl = getVCallVtblPtr(cs);
-            assert(pag->hasValueNode(vtbl));
+            assert(getPAG()->hasValueNode(vtbl));
             VFunSet vfns;
             getVFnsFromCHA(cbn, vfns);
             connectVCallToVFns(cbn, vfns, newEdges);

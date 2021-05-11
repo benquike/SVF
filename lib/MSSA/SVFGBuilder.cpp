@@ -103,7 +103,7 @@ MemSSA *SVFGBuilder::buildMSSA(BVDataPTAImpl *pta, bool ptrOnlyMSSA) {
     DominatorTree dt;
     MemSSADF df;
 
-    SVFModule *svfModule = mssa->getPTA()->getModule();
+    SVFModule *svfModule = mssa->getPTA()->getSVFModule();
     for (const auto *fun : *svfModule) {
 
         if (isExtCall(fun))
