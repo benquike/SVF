@@ -214,7 +214,7 @@ const llvm::cl::opt<bool>
                               llvm::cl::desc("Enable alias check functions"));
 
 const llvm::cl::opt<bool> Options::EnableThreadCallGraph(
-    "enable-tcg", llvm::cl::init(true),
+    "enable-tcg", llvm::cl::init(false),
     llvm::cl::desc("Enable pointer analysis to use thread call graph"));
 
 const llvm::cl::opt<bool> Options::ConnectVCallOnCHA(
