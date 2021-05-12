@@ -97,7 +97,7 @@ class SCCDetection {
         return _NodeSCCAuxInfo;
     }
 
-    /// get the rep node if not found return itself
+    /// get the rep node, if not found, return itself
     inline NodeID repNode(NodeID n) const {
         typename GNODESCCInfoMap::const_iterator it = _NodeSCCAuxInfo.find(n);
         assert(it != _NodeSCCAuxInfo.end() && "scc rep not found");
@@ -106,6 +106,8 @@ class SCCDetection {
     }
 
     /// whether the node is in a cycle
+    /// (a strongly connected component containing
+    /// more than 1 node)
     inline bool isInCycle(NodeID n) const {
         NodeID rep = repNode(n);
         // multi-node cycle
@@ -125,7 +127,7 @@ class SCCDetection {
         return false;
     }
 
-    /// get all subnodes in one scc, if size is empty insert itself into the set
+    /// get all subnodes in one scc
     inline const NodeBS &subNodes(NodeID n) const {
         typename GNODESCCInfoMap::const_iterator it = _NodeSCCAuxInfo.find(n);
         assert(it != _NodeSCCAuxInfo.end() && "scc rep not found");
@@ -138,13 +140,15 @@ class SCCDetection {
     const inline GraphType &graph() { return _graph; }
 
   private:
-    GNODESCCInfoMap _NodeSCCAuxInfo;
+    GNODESCCInfoMap _NodeSCCAuxInfo; /// NodeID -> GNodeSCCInfo
 
     const GraphType &_graph;
-    NodeID _I;
-    NodeToNodeMap _D;
-    GNodeStack _SS;
-    GNodeStack _T;
+    NodeID _I;        /// timestamp variable
+    NodeToNodeMap _D; /// this map is used to save
+                      /// the timestamp of a node when it is visited
+    GNodeStack _SS;   /// the internal stack for saving the nodes
+                      /// in a strongly connected components
+    GNodeStack _T;    /// all the representative nodes
     NodeBS repNodes;
 
     inline bool visited(NodeID n) { return _NodeSCCAuxInfo[n].visited(); }
@@ -199,18 +203,19 @@ class SCCDetection {
                 // (the dest is still in the stack)
                 // set the root (representative) of v as the one with the
                 // lowest timestamp
-                NodeID rep;
-                rep = _D[this->rep(v)] < _D[this->rep(w)] ? this->rep(v)
-                                                          : this->rep(w);
-                this->rep(v, rep);
+                NodeID _rep = _D[rep(v)] < _D[rep(w)] ? rep(v) : rep(w);
+                rep(v, _rep);
             }
         }
+
         if (rep(v) == v) {
             // this is a root (representative)
             // of a strongly-connected component
             setInSCC(v, true);
             while (!_SS.empty()) {
                 NodeID w = _SS.top();
+                // only nodes with timestamp greater than _D[v]
+                // belong to the current SCC_
                 if (_D[w] <= _D[v]) {
                     break;
                 }
@@ -224,6 +229,8 @@ class SCCDetection {
             // strongly-connected component to the stack
             _T.push(v);
         } else {
+            /// The node is one node in a SCC (not the SCC root),
+            /// save it in the internal stack
             _SS.push(v);
         }
     }
@@ -259,11 +266,8 @@ class SCCDetection {
                 // merging optimizations.  Any such node should have no
                 // outgoing edges and therefore should no longer be a member
                 // of an SCC.
-                if (this->rep(node) == UINT_MAX || this->rep(node) == node) {
+                if (rep(node) == UINT_MAX || rep(node) == node) {
                     visit(node);
-                } else {
-                    // what is the point of the else branch????
-                    visited(node);
                 }
             }
         }
@@ -276,9 +280,6 @@ class SCCDetection {
             if (!visited(node)) {
                 if (rep(node) == UINT_MAX || rep(node) == node) {
                     visit(node);
-                } else {
-                    // what is the point of the else branch????
-                    visited(node);
                 }
             }
         }
