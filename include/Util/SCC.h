@@ -165,8 +165,6 @@ class SCCDetection {
         _NodeSCCAuxInfo[r].addSubNodes(n);
         if (n != r) {
             _NodeSCCAuxInfo[n].subNodes().clear();
-            repNodes.reset(n);
-            repNodes.set(r);
         }
     }
 
@@ -232,6 +230,7 @@ class SCCDetection {
             // Save the root (representative) of each
             // strongly-connected component to the stack
             _T.push(v);
+            repNodes.set(v);
         } else {
             /// The node is one node in a SCC (not the SCC root),
             /// save it in the internal stack
