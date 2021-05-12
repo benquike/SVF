@@ -140,9 +140,12 @@ else()
     message(WARNING "Z3_DIR is not set in env")
 endif()
 
+add_subdirectory(external/spdlog)
+include_directories(external/spdlog/include)
+
 add_subdirectory(lib)
 
-set(TOOL_LIBS Svf Cudd ${llvm_libs} ${Boost_LIBRARIES})
+set(TOOL_LIBS Svf Cudd spdlog ${llvm_libs} ${Boost_LIBRARIES})
 set(TEST_LIBS ${TOOL_LIBS} SvfTest gtest)
 
 add_subdirectory(tools)

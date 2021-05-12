@@ -14,3 +14,6 @@
 	path = Test-Suite
 	url = https://github.com/SVF-tools/Test-Suite.git
 	branch = master
+[submodule "external/spdlog"]
+	path = external/spdlog
+	url = https://github.com/gabime/spdlog.git
