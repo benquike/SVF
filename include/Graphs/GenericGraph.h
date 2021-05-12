@@ -506,11 +506,19 @@ class GenericGraph {
     inline EdgeID getDummyEdgeId() const { return MAX_EDGEID; }
 
     inline NodeID getNextNodeId() {
-        assert(currentNodeId < MAX_NODEID && "node id overflow");
+        while (IDToNodeMap.find(currentNodeId) != IDToNodeMap.end()) {
+            currentNodeId++;
+            assert(currentNodeId < MAX_NODEID && "node id overflow");
+        }
+
         return currentNodeId++;
     }
     inline EdgeID getNextEdgeId() {
-        assert(currentEdgeId < MAX_EDGEID && "edge id overflow");
+        while (IDToEdgeMap.find(currentEdgeId) != IDToEdgeMap.end()) {
+            currentEdgeId++;
+            assert(currentEdgeId < MAX_EDGEID && "edge id overflow");
+        }
+
         return currentEdgeId++;
     }
 
