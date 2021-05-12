@@ -17,3 +17,7 @@ file (GLOB SOURCES
 
 # add_llvm_library(Svf STATIC ${SOURCES} LINK_LIBS Cudd)
 add_library(Svf SHARED ${SOURCES})
+
+file(GLOB TEST_SOURCES Tests/**/*.cpp)
+
+add_library(SvfTest SHARED ${TEST_SOURCES})

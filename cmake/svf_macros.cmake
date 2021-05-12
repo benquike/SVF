@@ -9,11 +9,7 @@ function(add_unittest test_name)
 
     target_link_libraries(${test}
         LINK_PUBLIC
-        gtest
-        Svf
-        Cudd
-        ${llvm_libs}
-        ${Boost_LIBRARIES}
+        ${TEST_LIBS}
         ${ARGN})
 
     add_test(NAME "${test}"

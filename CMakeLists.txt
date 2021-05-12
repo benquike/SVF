@@ -143,6 +143,7 @@ endif()
 add_subdirectory(lib)
 
 set(TOOL_LIBS Svf Cudd ${llvm_libs} ${Boost_LIBRARIES})
+set(TEST_LIBS ${TOOL_LIBS} SvfTest gtest)
 
 add_subdirectory(tools)
 
