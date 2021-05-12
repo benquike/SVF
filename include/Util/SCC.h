@@ -44,6 +44,7 @@
 #include <climits>
 #include <map>
 #include <stack>
+#include <type_traits>
 
 namespace SVF {
 
@@ -51,6 +52,9 @@ class GNodeSCCInfo;
 
 template <class GraphType>
 class SCCDetection {
+
+    static_assert(std::is_pointer<GraphType>::value,
+                  "GraphType must be a pointer");
 
   private:
     /// Define the GTraits and node iterator for printing
@@ -142,7 +146,7 @@ class SCCDetection {
   private:
     GNODESCCInfoMap _NodeSCCAuxInfo; /// NodeID -> GNodeSCCInfo
 
-    const GraphType &_graph;
+    const GraphType _graph;
     NodeID _I;        /// timestamp variable
     NodeToNodeMap _D; /// this map is used to save
                       /// the timestamp of a node when it is visited
