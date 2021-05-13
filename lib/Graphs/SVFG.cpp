@@ -337,7 +337,7 @@ void SVFG::connectIndirectSVFGEdges() {
                 ActualINSVFGNodeSet &actualIns = getActualINSVFGNodes(cs);
                 for (auto ait : actualIns) {
                     const auto *actualIn =
-                        llvm::cast<ActualINSVFGNode>(getSVFGNode(ait));
+                        llvm::cast<ActualINSVFGNode>(getGNode(ait));
                     addInterIndirectVFCallEdge(
                         actualIn, formalIn,
                         getCallSiteID(cs, formalIn->getFun()));
@@ -356,7 +356,7 @@ void SVFG::connectIndirectSVFGEdges() {
                 ActualOUTSVFGNodeSet &actualOuts = getActualOUTSVFGNodes(cs);
                 for (auto ait : actualOuts) {
                     const ActualOUTSVFGNode *actualOut =
-                        llvm::cast<ActualOUTSVFGNode>(getSVFGNode(ait));
+                        llvm::cast<ActualOUTSVFGNode>(getGNode(ait));
                     addInterIndirectVFRetEdge(
                         formalOut, actualOut,
                         getCallSiteID(cs, formalOut->getFun()));
@@ -405,11 +405,10 @@ void SVFG::connectFromGlobalToProgEntry() {
             const PointsTo &storePts =
                 mssa->getPTA()->getPts(store->getPAGDstNodeID());
 
-            for (auto fiIt : formalIns) {
-                NodeID formalInID = fiIt;
-                PointsTo formalInPts =
-                    ((FormalINSVFGNode *)getSVFGNode(formalInID))
-                        ->getPointsTo();
+            for (auto fiId : formalIns) {
+                auto fiNode = llvm::dyn_cast<FormalINSVFGNode>(getGNode(fiId));
+                assert(fiNode != nullptr && "FormalInSVFGNode is nullptr");
+                PointsTo formalInPts = fiNode->getPointsTo();
 
                 formalInPts &= storePts;
                 if (formalInPts.empty()) {
@@ -417,7 +416,7 @@ void SVFG::connectFromGlobalToProgEntry() {
                 }
 
                 /// add indirect value flow edge
-                addIntraIndirectVFEdge(store->getId(), formalInID, formalInPts);
+                addIntraIndirectVFEdge(store->getId(), fiId, formalInPts);
             }
         }
     }
@@ -428,8 +427,8 @@ void SVFG::connectFromGlobalToProgEntry() {
  */
 SVFGEdge *SVFG::addIntraIndirectVFEdge(NodeID srcId, NodeID dstId,
                                        const PointsTo &cpts) {
-    SVFGNode *srcNode = getSVFGNode(srcId);
-    SVFGNode *dstNode = getSVFGNode(dstId);
+    SVFGNode *srcNode = getGNode(srcId);
+    SVFGNode *dstNode = getGNode(dstId);
     checkIntraEdgeParents(srcNode, dstNode);
     if (SVFGEdge *edge =
             hasIntraVFGEdge(srcNode, dstNode, SVFGEdge::IntraIndirectVF)) {
@@ -443,7 +442,7 @@ SVFGEdge *SVFG::addIntraIndirectVFEdge(NodeID srcId, NodeID dstId,
     auto *indirectEdge =
         new IntraIndSVFGEdge(srcNode, dstNode, getNextEdgeId());
     indirectEdge->addPointsTo(cpts);
-    return (addSVFGEdge(indirectEdge) ? indirectEdge : nullptr);
+    return (addGEdge(indirectEdge) ? indirectEdge : nullptr);
 }
 
 /*!
@@ -452,8 +451,8 @@ SVFGEdge *SVFG::addIntraIndirectVFEdge(NodeID srcId, NodeID dstId,
  */
 SVFGEdge *SVFG::addThreadMHPIndirectVFEdge(NodeID srcId, NodeID dstId,
                                            const PointsTo &cpts) {
-    SVFGNode *srcNode = getSVFGNode(srcId);
-    SVFGNode *dstNode = getSVFGNode(dstId);
+    SVFGNode *srcNode = getGNode(srcId);
+    SVFGNode *dstNode = getGNode(dstId);
     if (SVFGEdge *edge =
             hasThreadVFGEdge(srcNode, dstNode, SVFGEdge::TheadMHPIndirectVF)) {
         assert(llvm::isa<IndirectSVFGEdge>(edge) &&
@@ -466,7 +465,7 @@ SVFGEdge *SVFG::addThreadMHPIndirectVFEdge(NodeID srcId, NodeID dstId,
     auto *indirectEdge =
         new ThreadMHPIndSVFGEdge(srcNode, dstNode, getNextEdgeId());
     indirectEdge->addPointsTo(cpts);
-    return (addSVFGEdge(indirectEdge) ? indirectEdge : nullptr);
+    return (addGEdge(indirectEdge) ? indirectEdge : nullptr);
 }
 
 /*
@@ -474,8 +473,8 @@ SVFGEdge *SVFG::addThreadMHPIndirectVFEdge(NodeID srcId, NodeID dstId,
  */
 SVFGEdge *SVFG::addCallIndirectVFEdge(NodeID srcId, NodeID dstId,
                                       const PointsTo &cpts, CallSiteID csId) {
-    SVFGNode *srcNode = getSVFGNode(srcId);
-    SVFGNode *dstNode = getSVFGNode(dstId);
+    SVFGNode *srcNode = getGNode(srcId);
+    SVFGNode *dstNode = getGNode(dstId);
     if (SVFGEdge *edge =
             hasInterVFGEdge(srcNode, dstNode, SVFGEdge::CallIndVF, csId)) {
         assert(llvm::isa<CallIndSVFGEdge>(edge) &&
@@ -487,7 +486,7 @@ SVFGEdge *SVFG::addCallIndirectVFEdge(NodeID srcId, NodeID dstId,
     auto *callEdge =
         new CallIndSVFGEdge(srcNode, dstNode, getNextEdgeId(), csId);
     callEdge->addPointsTo(cpts);
-    return (addSVFGEdge(callEdge) ? callEdge : nullptr);
+    return (addGEdge(callEdge) ? callEdge : nullptr);
 }
 
 /*
@@ -495,8 +494,8 @@ SVFGEdge *SVFG::addCallIndirectVFEdge(NodeID srcId, NodeID dstId,
  */
 SVFGEdge *SVFG::addRetIndirectVFEdge(NodeID srcId, NodeID dstId,
                                      const PointsTo &cpts, CallSiteID csId) {
-    SVFGNode *srcNode = getSVFGNode(srcId);
-    SVFGNode *dstNode = getSVFGNode(dstId);
+    SVFGNode *srcNode = getGNode(srcId);
+    SVFGNode *dstNode = getGNode(dstId);
     if (SVFGEdge *edge =
             hasInterVFGEdge(srcNode, dstNode, SVFGEdge::RetIndVF, csId)) {
         assert(llvm::isa<RetIndSVFGEdge>(edge) &&
@@ -507,7 +506,7 @@ SVFGEdge *SVFG::addRetIndirectVFEdge(NodeID srcId, NodeID dstId,
 
     auto *retEdge = new RetIndSVFGEdge(srcNode, dstNode, getNextEdgeId(), csId);
     retEdge->addPointsTo(cpts);
-    return (addSVFGEdge(retEdge) ? retEdge : nullptr);
+    return (addGEdge(retEdge) ? retEdge : nullptr);
 }
 
 /*!
@@ -609,7 +608,7 @@ void SVFG::getInterVFEdgesForIndirectCallSite(
         SVFG::ActualINSVFGNodeSet &actualInNodes =
             getActualINSVFGNodes(callBlockNode);
         for (auto ai_it : actualInNodes) {
-            auto *actualIn = llvm::cast<ActualINSVFGNode>(getSVFGNode(ai_it));
+            auto *actualIn = llvm::cast<ActualINSVFGNode>(getGNode(ai_it));
             getInterVFEdgeAtIndCSFromAInToFIn(actualIn, callee, edges);
         }
     }
@@ -620,7 +619,7 @@ void SVFG::getInterVFEdgesForIndirectCallSite(
         SVFG::ActualOUTSVFGNodeSet &actualOutNodes =
             getActualOUTSVFGNodes(callBlockNode);
         for (auto ao_it : actualOutNodes) {
-            auto *actualOut = llvm::cast<ActualOUTSVFGNode>(getSVFGNode(ao_it));
+            auto *actualOut = llvm::cast<ActualOUTSVFGNode>(getGNode(ao_it));
             getInterVFEdgeAtIndCSFromFOutToAOut(actualOut, callee, edges);
         }
     }
@@ -644,10 +643,10 @@ void SVFG::connectCallerAndCallee(const CallBlockNode *cs,
             getFormalINSVFGNodes(callee);
         for (auto ai_it : actualInNodes) {
             const auto *actualIn =
-                llvm::cast<ActualINSVFGNode>(getSVFGNode(ai_it));
+                llvm::cast<ActualINSVFGNode>(getGNode(ai_it));
             for (auto fi_it : formalInNodes) {
                 const auto *formalIn =
-                    llvm::cast<FormalINSVFGNode>(getSVFGNode(fi_it));
+                    llvm::cast<FormalINSVFGNode>(getGNode(fi_it));
                 connectAInAndFIn(actualIn, formalIn, csId, edges);
             }
         }
@@ -661,10 +660,10 @@ void SVFG::connectCallerAndCallee(const CallBlockNode *cs,
         SVFG::ActualOUTSVFGNodeSet &actualOutNodes = getActualOUTSVFGNodes(cs);
         for (auto fo_it : formalOutNodes) {
             const auto *formalOut =
-                llvm::cast<FormalOUTSVFGNode>(getSVFGNode(fo_it));
+                llvm::cast<FormalOUTSVFGNode>(getGNode(fo_it));
             for (auto ao_it : actualOutNodes) {
                 const auto *actualOut =
-                    llvm::cast<ActualOUTSVFGNode>(getSVFGNode(ao_it));
+                    llvm::cast<ActualOUTSVFGNode>(getGNode(ao_it));
                 connectFOutAndAOut(formalOut, actualOut, csId, edges);
             }
         }

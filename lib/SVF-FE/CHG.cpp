@@ -55,19 +55,6 @@ const string pureVirtualFunName = "__cxa_pure_virtual";
 
 const string ztiLabel = "_ZTI";
 
-//// FIXME: remove this and use hasGEdge in GenericGraph.h
-static bool hasEdge(const CHNode *src, const CHNode *dst,
-                    CHEdge::CHEDGETYPE et) {
-    for (auto *it : src->getOutEdges()) {
-        CHNode *node = it->getDstNode();
-        CHEdge::CHEDGETYPE edgeType = it->getEdgeType();
-        if (node == dst && edgeType == et) {
-            return true;
-        }
-    }
-    return false;
-}
-
 void CHNode::getVirtualFunctions(u32_t idx,
                                  FuncVector &virtualFunctions) const {
     for (const auto &virtualFunctionVector : virtualFunctionVectors) {
@@ -314,7 +301,7 @@ void CHGraph::addEdge(const string &className, const string &baseClassName,
 
     assert(srcNode && dstNode && "node not found?");
 
-    if (!hasEdge(srcNode, dstNode, edgeType)) {
+    if (getGEdge(srcNode, dstNode, edgeType) == nullptr) {
         auto *edge = new CHEdge(srcNode, dstNode, getNextEdgeId(), edgeType);
         addGEdge(edge);
     }
@@ -365,7 +352,7 @@ void CHGraph::buildClassNameToAncestorsDescendantsMap() {
             const CHNode *curnode = worklist.pop();
             if (visitedNodes.find(curnode) == visitedNodes.end()) {
                 for (auto *it : curnode->getOutEdges()) {
-                    if (it->getEdgeType() == CHEdge::INHERITANCE) {
+                    if (it->getEdgeKind() == CHEdge::INHERITANCE) {
                         CHNode *succnode = it->getDstNode();
                         classNameToAncestorsMap[node->getName()].insert(
                             succnode);
@@ -849,7 +836,7 @@ void CHGraph::printCH() {
         const CHNode *node = it.second;
         outs() << "class: " << node->getName() << "\n";
         for (auto it = node->OutEdgeBegin(); it != node->OutEdgeEnd(); ++it) {
-            if ((*it)->getEdgeType() == CHEdge::INHERITANCE) {
+            if ((*it)->getEdgeKind() == CHEdge::INHERITANCE) {
                 outs() << (*it)->getDstNode()->getName() << " --inheritance--> "
                        << (*it)->getSrcNode()->getName() << "\n";
             } else {
@@ -904,7 +891,7 @@ struct DOTGraphTraits<CHGraph *> : public DefaultDOTGraphTraits {
 
         CHEdge *edge = *(EI.getCurrent());
         assert(edge && "No edge found!!");
-        if (edge->getEdgeType() == CHEdge::INHERITANCE) {
+        if (edge->getEdgeKind() == CHEdge::INHERITANCE) {
             return "style=solid";
         }
         return "style=dashed";

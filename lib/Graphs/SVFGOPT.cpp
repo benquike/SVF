@@ -137,7 +137,7 @@ void SVFGOPT::handleInterValueFlow() {
             }
 
             removeAllEdges(node);
-            removeSVFGNode(node);
+            removeGNodeAndDelete(node);
         }
     }
 }
@@ -176,7 +176,7 @@ void SVFGOPT::replaceFParamARetWithPHI(PHISVFGNode *phi, SVFGNode *svfgNode) {
             auto *ap = llvm::cast<ActualParmSVFGNode>((*it)->getSrcNode());
             addInterPHIOperands(phi, ap->getParam());
             // connect actual param's def node to phi node
-            addCallEdge(getDef(ap->getParam()), phiId,
+            addCallEdge(VFG::getDef(ap->getParam()), phiId,
                         getCallSiteID(ap->getCallSite(), fp->getFun()));
         }
     } else if (auto *ar = llvm::dyn_cast<ActualRetSVFGNode>(svfgNode)) {
@@ -185,7 +185,7 @@ void SVFGOPT::replaceFParamARetWithPHI(PHISVFGNode *phi, SVFGNode *svfgNode) {
             auto *fr = llvm::cast<FormalRetSVFGNode>((*it)->getSrcNode());
             addInterPHIOperands(phi, fr->getRet());
             // connect formal return's def node to phi node
-            addRetEdge(getDef(fr->getRet()), phiId,
+            addRetEdge(VFG::getDef(fr->getRet()), phiId,
                        getCallSiteID(ar->getCallSite(), fr->getFun()));
         }
     }
@@ -436,7 +436,7 @@ void SVFGOPT::handleIntraValueFlow() {
         /// remove this node if it has no edges
         if (node->hasIncomingEdge() == false &&
             node->hasOutgoingEdge() == false) {
-            removeSVFGNode(const_cast<MSSAPHISVFGNode *>(node));
+            removeGNodeAndDelete(node->getId());
         }
     }
 }
@@ -470,7 +470,7 @@ bool SVFGOPT::checkSelfCycleEdges(const MSSAPHISVFGNode *node) {
             } else {
                 assert(llvm::isa<IndirectSVFGEdge>(preEdge) &&
                        "can only remove indirect SVFG edge");
-                removeSVFGEdge(preEdge);
+                removeGEdgeAndDelete(preEdge);
             }
         }
     }

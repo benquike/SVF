@@ -363,7 +363,7 @@ void FlowSensitiveStat::statInOutPtsSize(const DFInOutMap &data,
     auto it = data.begin();
     auto eit = data.end();
     for (; it != eit; ++it) {
-        const SVFGNode *node = fspta->svfg->getSVFGNode(it->first);
+        const SVFGNode *node = fspta->svfg->getGNode(it->first);
 
         // Count number of SVFG nodes have IN/OUT set.
         if (llvm::isa<FormalINSVFGNode>(node))

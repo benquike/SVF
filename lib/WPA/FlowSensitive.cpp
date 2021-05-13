@@ -144,7 +144,7 @@ NodeStack &FlowSensitive::SCCDetect() {
  * Process each SVFG node
  */
 void FlowSensitive::processNode(NodeID nodeId) {
-    SVFGNode *node = svfg->getSVFGNode(nodeId);
+    SVFGNode *node = svfg->getGNode(nodeId);
     if (processSVFGNode(node))
         propagate(&node);
 

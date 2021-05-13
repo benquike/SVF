@@ -562,8 +562,8 @@ void VFG::addVFGNodes() {
  * Add def-use edges for top level pointers
  */
 VFGEdge *VFG::addIntraDirectVFEdge(NodeID srcId, NodeID dstId) {
-    VFGNode *srcNode = getVFGNode(srcId);
-    VFGNode *dstNode = getVFGNode(dstId);
+    VFGNode *srcNode = getGNode(srcId);
+    VFGNode *dstNode = getGNode(dstId);
     checkIntraEdgeParents(srcNode, dstNode);
     if (VFGEdge *edge =
             hasIntraVFGEdge(srcNode, dstNode, VFGEdge::IntraDirectVF)) {
@@ -575,7 +575,7 @@ VFGEdge *VFG::addIntraDirectVFEdge(NodeID srcId, NodeID dstId) {
     if (srcNode != dstNode) {
         auto *directEdge =
             new IntraDirSVFGEdge(srcNode, dstNode, getNextEdgeId());
-        return (addVFGEdge(directEdge) ? directEdge : nullptr);
+        return (addGEdge(directEdge) ? directEdge : nullptr);
     }
 
     return nullptr;
@@ -585,8 +585,8 @@ VFGEdge *VFG::addIntraDirectVFEdge(NodeID srcId, NodeID dstId) {
  * Add interprocedural call edges for top level pointers
  */
 VFGEdge *VFG::addCallEdge(NodeID srcId, NodeID dstId, CallSiteID csId) {
-    VFGNode *srcNode = getVFGNode(srcId);
-    VFGNode *dstNode = getVFGNode(dstId);
+    VFGNode *srcNode = getGNode(srcId);
+    VFGNode *dstNode = getGNode(dstId);
     if (VFGEdge *edge =
             hasInterVFGEdge(srcNode, dstNode, VFGEdge::CallDirVF, csId)) {
         assert(edge->isCallDirectVFGEdge() &&
@@ -596,15 +596,15 @@ VFGEdge *VFG::addCallEdge(NodeID srcId, NodeID dstId, CallSiteID csId) {
 
     auto *callEdge =
         new CallDirSVFGEdge(srcNode, dstNode, getNextEdgeId(), csId);
-    return (addVFGEdge(callEdge) ? callEdge : nullptr);
+    return (addGEdge(callEdge) ? callEdge : nullptr);
 }
 
 /*!
  * Add interprocedural return edges for top level pointers
  */
 VFGEdge *VFG::addRetEdge(NodeID srcId, NodeID dstId, CallSiteID csId) {
-    VFGNode *srcNode = getVFGNode(srcId);
-    VFGNode *dstNode = getVFGNode(dstId);
+    VFGNode *srcNode = getGNode(srcId);
+    VFGNode *dstNode = getGNode(dstId);
     if (VFGEdge *edge =
             hasInterVFGEdge(srcNode, dstNode, VFGEdge::RetDirVF, csId)) {
         assert(edge->isRetDirectVFGEdge() &&
@@ -613,7 +613,7 @@ VFGEdge *VFG::addRetEdge(NodeID srcId, NodeID dstId, CallSiteID csId) {
     }
 
     auto *retEdge = new RetDirSVFGEdge(srcNode, dstNode, getNextEdgeId(), csId);
-    return (addVFGEdge(retEdge) ? retEdge : nullptr);
+    return (addGEdge(retEdge) ? retEdge : nullptr);
 }
 
 /*!

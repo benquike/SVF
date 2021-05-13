@@ -196,11 +196,6 @@ class VFG : public GenericVFGTy {
     /// Return CallGraph
     inline PTACallGraph *getCallGraph() const { return callgraph; }
 
-    /// Get a VFG node
-    inline VFGNode *getVFGNode(NodeID id) const { return getGNode(id); }
-
-    /// Whether has the VFGNode
-    inline bool hasVFGNode(NodeID id) const { return hasGNode(id); }
     /// Return global stores
     inline GlobalVFGNodeSet &getGlobalVFGNodes() { return globalVFGNodes; }
 
@@ -232,7 +227,7 @@ class VFG : public GenericVFGTy {
 
     /// Given a pagNode, return its definition site
     inline const VFGNode *getDefVFGNode(const PAGNode *pagNode) const {
-        return getVFGNode(getDef(pagNode));
+        return getGNode(getDef(pagNode));
     }
 
     // Given an VFG node, return its left hand side top level pointer (PAGnode)
@@ -307,7 +302,7 @@ class VFG : public GenericVFGTy {
     /// Whether a PAGNode has a blackhole or const object as its definition
     inline bool hasBlackHoleConstObjAddrAsDef(const PAGNode *pagNode) const {
         if (hasDef(pagNode)) {
-            const VFGNode *defNode = getVFGNode(getDef(pagNode));
+            const VFGNode *defNode = getGNode(getDef(pagNode));
             if (const auto *addr = llvm::dyn_cast<AddrVFGNode>(defNode)) {
                 if (pag->isBlkObjOrConstantObj(
                         addr->getPAGEdge()->getSrcID())) {
@@ -356,17 +351,6 @@ class VFG : public GenericVFGTy {
     VFGEdge *addRetEdge(NodeID srcId, NodeID dstId, CallSiteID csId);
     //@}
 
-    /// Remove a SVFG edge
-    inline void removeVFGEdge(VFGEdge *edge) {
-        removeGEdge(edge);
-        delete edge;
-    }
-    /// Remove a VFGNode
-    inline void removeVFGNode(VFGNode *node) {
-        removeGNode(node);
-        delete node;
-    }
-
     /// Whether we has a SVFG edge
     //@{
     VFGEdge *hasIntraVFGEdge(VFGNode *src, VFGNode *dst,
@@ -376,9 +360,6 @@ class VFG : public GenericVFGTy {
     VFGEdge *hasThreadVFGEdge(VFGNode *src, VFGNode *dst,
                               VFGEdge::VFGEdgeK kind);
     //@}
-
-    /// Add VFG edge
-    inline bool addVFGEdge(VFGEdge *edge) { return addGEdge(edge); }
 
   protected:
     /// sanitize Intra edges, verify that both nodes belong to the same
@@ -453,7 +434,7 @@ class VFG : public GenericVFGTy {
         auto it = PAGNodeToDefMap.find(pagNode->getId());
         if (it == PAGNodeToDefMap.end()) {
             PAGNodeToDefMap[pagNode->getId()] = node->getId();
-            assert(hasVFGNode(node->getId()) && "not in the map!!");
+            assert(hasGNode(node->getId()) && "not in the map!!");
         } else {
             assert((it->second == node->getId()) &&
                    "a PAG node can only have unique definition ");

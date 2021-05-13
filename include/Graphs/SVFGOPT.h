@@ -81,10 +81,10 @@ class SVFGOPT : public SVFG {
                                        const PAGNode *fun_arg,
                                        const CallBlockNode *, CallSiteID csId,
                                        SVFGEdgeSetTy &edges) override {
-        NodeID phiId = getDef(fun_arg);
-        SVFGEdge *edge = addCallEdge(getDef(cs_arg), phiId, csId);
+        NodeID phiId = VFG::getDef(fun_arg);
+        SVFGEdge *edge = addCallEdge(VFG::getDef(cs_arg), phiId, csId);
         if (edge != nullptr) {
-            auto *phi = llvm::cast<PHISVFGNode>(getSVFGNode(phiId));
+            auto *phi = llvm::cast<PHISVFGNode>(getGNode(phiId));
             addInterPHIOperands(phi, cs_arg);
             edges.insert(edge);
         }
@@ -93,10 +93,10 @@ class SVFGOPT : public SVFG {
     inline void connectFRetAndARet(const PAGNode *fun_ret,
                                    const PAGNode *cs_ret, CallSiteID csId,
                                    SVFGEdgeSetTy &edges) override {
-        NodeID phiId = getDef(cs_ret);
-        SVFGEdge *edge = addRetEdge(getDef(fun_ret), phiId, csId);
+        NodeID phiId = VFG::getDef(cs_ret);
+        SVFGEdge *edge = addRetEdge(VFG::getDef(fun_ret), phiId, csId);
         if (edge != nullptr) {
-            PHISVFGNode *phi = llvm::cast<PHISVFGNode>(getSVFGNode(phiId));
+            PHISVFGNode *phi = llvm::cast<PHISVFGNode>(getGNode(phiId));
             addInterPHIOperands(phi, fun_ret);
             edges.insert(edge);
         }
@@ -331,12 +331,12 @@ class SVFGOPT : public SVFG {
     inline void removeInEdges(const SVFGNode *node) {
         /// remove incoming edges
         while (node->hasIncomingEdge()) {
-            removeSVFGEdge(*(node->InEdgeBegin()));
+            removeGEdgeAndDelete(*(node->InEdgeBegin()));
         }
     }
     inline void removeOutEdges(const SVFGNode *node) {
         while (node->hasOutgoingEdge()) {
-            removeSVFGEdge(*(node->OutEdgeBegin()));
+            removeGEdgeAndDelete(*(node->OutEdgeBegin()));
         }
     }
     //@}

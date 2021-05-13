@@ -51,17 +51,12 @@ class CHEdge : public GenericCHEdgeTy {
 
     using CHEdgeSetTy = GenericNode<CHNode, CHEdge>::GEdgeSetTy;
 
-    CHEdge(CHNode *s, CHNode *d, EdgeID id, CHEDGETYPE et, GEdgeFlag k = 0)
-        : GenericCHEdgeTy(s, d, id, k) {
-        edgeType = et;
-    }
+    using GEdgeKind = CHEDGETYPE;
+
+    CHEdge(CHNode *s, CHNode *d, EdgeID id, GEdgeKind k)
+        : GenericCHEdgeTy(s, d, id, k) {}
 
     virtual ~CHEdge() {}
-
-    CHEDGETYPE getEdgeType() const { return edgeType; }
-
-  private:
-    CHEDGETYPE edgeType;
 };
 
 using GenericCHNodeTy = GenericNode<CHNode, CHEdge>;
@@ -75,7 +70,7 @@ class CHNode : public GenericCHNodeTy {
 
     using FuncVector = std::vector<const SVFFunction *>;
 
-    CHNode(const std::string name, NodeID i = 0, GNodeK k = 0)
+    CHNode(const std::string name, NodeID i, GNodeK k = 0)
         : GenericCHNodeTy(i, k), vtable(nullptr), className(name), flags(0) {}
     CHNode() = default;
     virtual ~CHNode() {}

@@ -103,7 +103,7 @@ void VersionedFlowSensitive::meldLabel(void) {
 
     while (!vWorklist.empty()) {
         NodeID l = vWorklist.pop();
-        const SVFGNode *sl = svfg->getSVFGNode(l);
+        const SVFGNode *sl = svfg->getGNode(l);
 
         // Propagate l's y to lp's c for all l --o--> lp.
         for (const SVFGEdge *e : sl->getOutEdges()) {
@@ -116,7 +116,7 @@ void VersionedFlowSensitive::meldLabel(void) {
             if (delta(lp))
                 continue;
 
-            bool lpIsStore = llvm::isa<StoreSVFGNode>(svfg->getSVFGNode(lp));
+            bool lpIsStore = llvm::isa<StoreSVFGNode>(svfg->getGNode(lp));
             // Consume and yield are the same for non-stores, so ignore them.
             if (l == lp && !lpIsStore)
                 continue;
@@ -162,7 +162,7 @@ void VersionedFlowSensitive::mapMeldVersions(void) {
     // meldConsume -> consume.
     for (LocMeldVersionMap::value_type &lomv : meldConsume) {
         NodeID l = lomv.first;
-        bool isStore = llvm::isa<StoreSVFGNode>(svfg->getSVFGNode(l));
+        bool isStore = llvm::isa<StoreSVFGNode>(svfg->getGNode(l));
         ObjToVersionMap &consumel = consume[l];
         ObjToVersionMap &yieldl = yield[l];
         for (ObjToMeldVersionMap::value_type &omv : lomv.second) {
@@ -213,7 +213,7 @@ bool VersionedFlowSensitive::delta(NodeID l) {
     if (isDelta != deltaCache.end())
         return isDelta->second;
 
-    const SVFGNode *s = svfg->getSVFGNode(l);
+    const SVFGNode *s = svfg->getGNode(l);
     // Cases:
     //  * Function entry: can get new incoming indirect edges through ind.
     //  callsites.
@@ -320,7 +320,7 @@ void VersionedFlowSensitive::propagateVersion(NodeID o, Version v,
 }
 
 void VersionedFlowSensitive::processNode(NodeID n) {
-    SVFGNode *sn = svfg->getSVFGNode(n);
+    SVFGNode *sn = svfg->getGNode(n);
     if (processSVFGNode(sn))
         propagate(&sn);
 }

@@ -164,12 +164,6 @@ class SVFG : public VFG {
     /// Get Pointer Analysis
     inline PointerAnalysis *getPTA() const { return pta; }
 
-    /// Get a SVFG node
-    inline SVFGNode *getSVFGNode(NodeID id) const { return getVFGNode(id); }
-
-    /// Whether has the SVFGNode
-    inline bool hasSVFGNode(NodeID id) const { return hasVFGNode(id); }
-
     /// Get all inter value flow edges of a indirect call site
     void getInterVFEdgesForIndirectCallSite(const CallBlockNode *cs,
                                             const SVFFunction *callee,
@@ -185,7 +179,7 @@ class SVFG : public VFG {
 
     /// Given a pagNode, return its definition site
     inline const SVFGNode *getDefSVFGNode(const PAGNode *pagNode) const {
-        return getSVFGNode(getDef(pagNode));
+        return getGNode(VFG::getDef(pagNode));
     }
 
     /// Perform statistics
@@ -237,14 +231,6 @@ class SVFG : public VFG {
 
     /// Whether a node is callsite return SVFGNode
     const CallBlockNode *isCallSiteRetSVFGNode(const SVFGNode *node) const;
-
-    /// Remove a SVFG edge
-    inline void removeSVFGEdge(SVFGEdge *edge) { removeVFGEdge(edge); }
-    /// Remove a SVFGNode
-    inline void removeSVFGNode(SVFGNode *node) { removeVFGNode(node); }
-
-    /// Add SVFG edge
-    inline bool addSVFGEdge(SVFGEdge *edge) { return addVFGEdge(edge); }
 
   protected:
     /// Add indirect def-use edges of a memory region between two statements,
@@ -300,8 +286,8 @@ class SVFG : public VFG {
                                                         const CallBlockNode *,
                                                         CallSiteID csId,
                                                         SVFGEdgeSetTy &edges) {
-        SVFGNode *actualParam = getSVFGNode(getDef(cs_arg));
-        SVFGNode *formalParam = getSVFGNode(getDef(fun_arg));
+        SVFGNode *actualParam = getGNode(VFG::getDef(cs_arg));
+        SVFGNode *formalParam = getGNode(VFG::getDef(fun_arg));
         SVFGEdge *edge = hasInterVFGEdge(actualParam, formalParam,
                                          SVFGEdge::CallDirVF, csId);
         assert(edge != nullptr &&
@@ -313,8 +299,8 @@ class SVFG : public VFG {
                                                         const PAGNode *cs_ret,
                                                         CallSiteID csId,
                                                         SVFGEdgeSetTy &edges) {
-        SVFGNode *formalRet = getSVFGNode(getDef(fun_ret));
-        SVFGNode *actualRet = getSVFGNode(getDef(cs_ret));
+        SVFGNode *formalRet = getGNode(VFG::getDef(fun_ret));
+        SVFGNode *actualRet = getGNode(VFG::getDef(cs_ret));
         SVFGEdge *edge =
             hasInterVFGEdge(formalRet, actualRet, SVFGEdge::RetDirVF, csId);
         assert(edge != nullptr &&
@@ -352,20 +338,6 @@ class SVFG : public VFG {
     }
     //@}
 
-    /// Given a PAGNode, set/get its def SVFG node (definition of top level
-    /// pointers)
-    //@{
-    inline void setDef(const PAGNode *pagNode, const SVFGNode *node) {
-        VFG::setDef(pagNode, node);
-    }
-    inline NodeID getDef(const PAGNode *pagNode) const {
-        return VFG::getDef(pagNode);
-    }
-    inline bool hasDef(const PAGNode *pagNode) const {
-        return VFG::hasDef(pagNode);
-    }
-    //@}
-
     /// Given a MSSADef, set/get its def SVFG node (definition of address-taken
     /// variables)
     //@{
@@ -373,7 +345,7 @@ class SVFG : public VFG {
         auto it = MSSAVarToDefMap.find(mvar);
         if (it == MSSAVarToDefMap.end()) {
             MSSAVarToDefMap[mvar] = node->getId();
-            assert(hasSVFGNode(node->getId()) && "not in the map!!");
+            assert(hasGNode(node->getId()) && "not in the map!!");
         } else {
             assert((it->second == node->getId()) &&
                    "a PAG node can only have unique definition ");

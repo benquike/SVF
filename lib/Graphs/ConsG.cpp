@@ -367,11 +367,10 @@ void ConstraintGraph::removeAddrEdge(AddrCGEdge *edge) {
     getConstraintNode(edge->getSrcID())->removeOutgoingAddrEdge(edge);
     getConstraintNode(edge->getDstID())->removeIncomingAddrEdge(edge);
 
-    // remove the edge from GenericGraph
-    removeGEdge(edge);
-
     Size_t num = AddrCGEdgeSet.erase(edge);
-    delete edge;
+    // remove the edge from GenericGraph
+    removeGEdgeAndDelete(edge);
+
     assert(num && "edge not in the set, can not remove!!!");
 }
 
@@ -383,11 +382,9 @@ void ConstraintGraph::removeLoadEdge(LoadCGEdge *edge) {
     getConstraintNode(edge->getSrcID())->removeOutgoingLoadEdge(edge);
     getConstraintNode(edge->getDstID())->removeIncomingLoadEdge(edge);
 
-    // remove the edge from GenericGraph
-    removeGEdge(edge);
-
     Size_t num = LoadCGEdgeSet.erase(edge);
-    delete edge;
+    // remove the edge from GenericGraph
+    removeGEdgeAndDelete(edge);
     assert(num && "edge not in the set, can not remove!!!");
 }
 
@@ -399,11 +396,9 @@ void ConstraintGraph::removeStoreEdge(StoreCGEdge *edge) {
     getConstraintNode(edge->getSrcID())->removeOutgoingStoreEdge(edge);
     getConstraintNode(edge->getDstID())->removeIncomingStoreEdge(edge);
 
-    // remove the edge from GenericGraph
-    removeGEdge(edge);
-
     Size_t num = StoreCGEdgeSet.erase(edge);
-    delete edge;
+    // remove the edge from GenericGraph
+    removeGEdgeAndDelete(edge);
     assert(num && "edge not in the set, can not remove!!!");
 }
 
@@ -415,13 +410,11 @@ void ConstraintGraph::removeDirectEdge(ConstraintEdge *edge) {
     getConstraintNode(edge->getSrcID())->removeOutgoingDirectEdge(edge);
     getConstraintNode(edge->getDstID())->removeIncomingDirectEdge(edge);
 
-    // remove the edge from GenericGraph
-    removeGEdge(edge);
-
     Size_t num = directEdgeSet.erase(edge);
+    // remove the edge from GenericGraph
+    removeGEdgeAndDelete(edge);
 
     assert(num && "edge not in the set, can not remove!!!");
-    delete edge;
 }
 
 /*!
