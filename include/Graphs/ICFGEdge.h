@@ -80,12 +80,6 @@ class ICFGEdge : public GenericICFGEdgeTy {
     //@}
     using ICFGEdgeSetTy = GenericNode<ICFGNode, ICFGEdge>::GEdgeSetTy;
 
-    /// Compute the unique edgeFlag value from edge kind and CallSiteID.
-    static inline GEdgeFlag makeEdgeFlagWithInvokeID(GEdgeKind k,
-                                                     CallSiteID cs) {
-        return (cs << EdgeKindMaskBits) | k;
-    }
-
     /// Overloading operator << for dumping ICFG node ID
     //@{
     friend raw_ostream &operator<<(raw_ostream &o, const ICFGEdge &edge) {

@@ -136,11 +136,11 @@ class CallIndSVFGEdge : public IndirectSVFGEdge {
 
   public:
     CallIndSVFGEdge(VFGNode *s, VFGNode *d, EdgeID eid, CallSiteID id)
-        : IndirectSVFGEdge(s, d, eid, makeEdgeFlagWithInvokeID(CallIndVF, id)),
+        : IndirectSVFGEdge(s, d, eid, makeEdgeFlagWithAuxInfo(CallIndVF, id)),
           csId(id) {}
     CallIndSVFGEdge()
         : IndirectSVFGEdge(nullptr, nullptr, MAX_EDGEID,
-                           makeEdgeFlagWithInvokeID(CallIndVF, MAX_CSID)) {}
+                           makeEdgeFlagWithAuxInfo(CallIndVF, MAX_CSID)) {}
 
     virtual ~CallIndSVFGEdge() {}
 
@@ -177,11 +177,11 @@ class RetIndSVFGEdge : public IndirectSVFGEdge {
 
   public:
     RetIndSVFGEdge(VFGNode *s, VFGNode *d, EdgeID eid, CallSiteID id)
-        : IndirectSVFGEdge(s, d, eid, makeEdgeFlagWithInvokeID(RetIndVF, id)),
+        : IndirectSVFGEdge(s, d, eid, makeEdgeFlagWithAuxInfo(RetIndVF, id)),
           csId(id) {}
     RetIndSVFGEdge()
         : IndirectSVFGEdge(nullptr, nullptr, MAX_EDGEID,
-                           makeEdgeFlagWithInvokeID(RetIndVF, MAX_CSID)){};
+                           makeEdgeFlagWithAuxInfo(RetIndVF, MAX_CSID)){};
 
     virtual ~RetIndSVFGEdge() {}
 

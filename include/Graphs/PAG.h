@@ -202,7 +202,7 @@ class PAG : public GenericPAGTy {
         auto iter = inst2LabelMap.find(cs);
         u64_t label = (iter != inst2LabelMap.end()) ? iter->second
                                                     : callEdgeLabelCounter++;
-        return (label << PAGEdge::EdgeKindMaskBits) | k;
+        return PAGEdge::makeEdgeFlagWithAuxInfo(k, label);
     }
 
     /// Compute the unique edgeFlag value from edge kind and store Instruction.
@@ -212,7 +212,7 @@ class PAG : public GenericPAGTy {
         auto iter = inst2LabelMap.find(store);
         u64_t label = (iter != inst2LabelMap.end()) ? iter->second
                                                     : storeEdgeLabelCounter++;
-        return (label << PAGEdge::EdgeKindMaskBits) | k;
+        return PAGEdge::makeEdgeFlagWithAuxInfo(k, label);
     }
 
     /// Get LLVM Module

@@ -119,11 +119,6 @@ class VFGEdge : public GenericVFGEdgeTy {
     //@}
     using VFGEdgeSetTy = GenericNode<VFGNode, VFGEdge>::GEdgeSetTy;
     using SVFGEdgeSetTy = VFGEdgeSetTy;
-    /// Compute the unique edgeFlag value from edge kind and CallSiteID.
-    static inline GEdgeFlag makeEdgeFlagWithInvokeID(GEdgeKind k,
-                                                     CallSiteID cs) {
-        return (cs << EdgeKindMaskBits) | k;
-    }
 
     //@{ Methods for support type inquiry through isa, cast, and dyn_cast:
     static bool classof(const GenericVFGEdgeTy *edge);
@@ -230,11 +225,11 @@ class CallDirSVFGEdge : public DirectSVFGEdge {
   public:
     /// Constructor
     CallDirSVFGEdge(VFGNode *s, VFGNode *d, EdgeID eid, CallSiteID id)
-        : DirectSVFGEdge(s, d, eid, makeEdgeFlagWithInvokeID(CallDirVF, id)),
+        : DirectSVFGEdge(s, d, eid, makeEdgeFlagWithAuxInfo(CallDirVF, id)),
           csId(id) {}
     CallDirSVFGEdge()
         : DirectSVFGEdge(nullptr, nullptr, MAX_EDGEID,
-                         makeEdgeFlagWithInvokeID(CallDirVF, MAX_CSID)) {}
+                         makeEdgeFlagWithAuxInfo(CallDirVF, MAX_CSID)) {}
 
     virtual ~CallDirSVFGEdge() {}
 
@@ -275,11 +270,11 @@ class RetDirSVFGEdge : public DirectSVFGEdge {
   public:
     /// Constructor
     RetDirSVFGEdge(VFGNode *s, VFGNode *d, EdgeID eid, CallSiteID id)
-        : DirectSVFGEdge(s, d, eid, makeEdgeFlagWithInvokeID(RetDirVF, id)),
+        : DirectSVFGEdge(s, d, eid, makeEdgeFlagWithAuxInfo(RetDirVF, id)),
           csId(id) {}
     RetDirSVFGEdge()
         : DirectSVFGEdge(nullptr, nullptr, MAX_EDGEID,
-                         makeEdgeFlagWithInvokeID(RetDirVF, MAX_CSID)) {}
+                         makeEdgeFlagWithAuxInfo(RetDirVF, MAX_CSID)) {}
 
     virtual ~RetDirSVFGEdge() {}
 

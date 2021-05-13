@@ -780,7 +780,7 @@ VFGEdge *VFG::hasThreadVFGEdge(VFGNode *src, VFGNode *dst,
 VFGEdge *VFG::hasInterVFGEdge(VFGNode *src, VFGNode *dst,
                               VFGEdge::VFGEdgeK kind, CallSiteID csId) {
     VFGEdge edge(src, dst, getDummyEdgeId(),
-                 VFGEdge::makeEdgeFlagWithInvokeID(kind, csId));
+                 VFGEdge::makeEdgeFlagWithAuxInfo(kind, csId));
     VFGEdge *outEdge = src->hasOutgoingEdge(&edge);
     VFGEdge *inEdge = dst->hasIncomingEdge(&edge);
     if (outEdge && inEdge) {

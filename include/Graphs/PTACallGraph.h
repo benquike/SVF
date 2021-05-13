@@ -76,17 +76,12 @@ class PTACallGraphEdge : public GenericCallGraphEdgeTy {
     /// Constructor
     PTACallGraphEdge(PTACallGraphNode *s, PTACallGraphNode *d, EdgeID id,
                      CEDGEK kind, CallSiteID cs)
-        : GenericCallGraphEdgeTy(s, d, id, makeEdgeFlagWithInvokeID(kind, cs)),
+        : GenericCallGraphEdgeTy(s, d, id, makeEdgeFlagWithAuxInfo(kind, cs)),
           csId(cs) {}
     PTACallGraphEdge() = default;
 
     /// Destructor
     virtual ~PTACallGraphEdge() {}
-    /// Compute the unique edgeFlag value from edge kind and CallSiteID.
-    static inline GEdgeFlag makeEdgeFlagWithInvokeID(GEdgeKind k,
-                                                     CallSiteID cs) {
-        return (cs << EdgeKindMaskBits) | k;
-    }
     /// Get direct and indirect calls
     //@{
     inline CallSiteID getCallSiteID() const { return csId; }
