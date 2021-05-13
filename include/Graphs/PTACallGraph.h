@@ -131,7 +131,8 @@ class PTACallGraphEdge : public GenericCallGraphEdgeTy {
     static inline bool classof(const GenericCallGraphEdgeTy *edge) {
         return edge->getEdgeKind() == PTACallGraphEdge::CallRetEdge ||
                edge->getEdgeKind() == PTACallGraphEdge::TDForkEdge ||
-               edge->getEdgeKind() == PTACallGraphEdge::TDJoinEdge;
+               edge->getEdgeKind() == PTACallGraphEdge::TDJoinEdge ||
+               edge->getEdgeKind() == PTACallGraphEdge::HareParForEdge;
     }
     //@}
 
