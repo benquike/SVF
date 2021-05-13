@@ -142,7 +142,9 @@ void ThreadCallGraph::addDirectForkEdge(const CallBlockNode *cs) {
         getCallGraphNode(getDefFunForMultipleModule(modSet, forkee));
     CallSiteID csId = addCallSite(cs, callee->getFunction());
 
-    if (!hasGraphEdge(caller, callee, PTACallGraphEdge::TDForkEdge, csId)) {
+    auto flag = PTACallGraphEdge::makeEdgeFlagWithAuxInfo(
+        PTACallGraphEdge::TDForkEdge, csId);
+    if (getGEdge(caller, callee, flag) == nullptr) {
         assert(cs->getCaller() == caller->getFunction() &&
                "callee instruction not inside caller??");
 
@@ -163,8 +165,10 @@ void ThreadCallGraph::addIndirectForkEdge(const CallBlockNode *cs,
     PTACallGraphNode *callee = getCallGraphNode(calleefun);
 
     CallSiteID csId = addCallSite(cs, callee->getFunction());
+    auto flag = PTACallGraphEdge::makeEdgeFlagWithAuxInfo(
+        PTACallGraphEdge::TDForkEdge, csId);
 
-    if (!hasGraphEdge(caller, callee, PTACallGraphEdge::TDForkEdge, csId)) {
+    if (getGEdge(caller, callee, flag) == nullptr) {
         assert(cs->getCaller() == caller->getFunction() &&
                "callee instruction not inside caller??");
 
@@ -228,7 +232,9 @@ void ThreadCallGraph::addDirectParForEdge(const CallBlockNode *cs) {
 
     CallSiteID csId = addCallSite(cs, callee->getFunction());
 
-    if (!hasGraphEdge(caller, callee, PTACallGraphEdge::TDForkEdge, csId)) {
+    auto flag = PTACallGraphEdge::makeEdgeFlagWithAuxInfo(
+        PTACallGraphEdge::TDForkEdge, csId);
+    if (getGEdge(caller, callee, flag) == nullptr) {
         assert(cs->getCaller() == caller->getFunction() &&
                "callee instruction not inside caller??");
 
@@ -251,7 +257,9 @@ void ThreadCallGraph::addIndirectParForEdge(const CallBlockNode *cs,
 
     CallSiteID csId = addCallSite(cs, callee->getFunction());
 
-    if (!hasGraphEdge(caller, callee, PTACallGraphEdge::HareParForEdge, csId)) {
+    auto flag = PTACallGraphEdge::makeEdgeFlagWithAuxInfo(
+        PTACallGraphEdge::HareParForEdge, csId);
+    if (getGEdge(caller, callee, flag) == nullptr) {
         assert(cs->getCaller() == caller->getFunction() &&
                "callee instruction not inside caller??");
 

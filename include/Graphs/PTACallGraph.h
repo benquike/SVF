@@ -398,14 +398,6 @@ class PTACallGraph : public GenericCallGraphTy {
         return getCallSitePair(id).second;
     }
     //@}
-    /// Whether we have aleady created this call graph edge
-    PTACallGraphEdge *hasGraphEdge(PTACallGraphNode *src, PTACallGraphNode *dst,
-                                   PTACallGraphEdge::CEDGEK kind,
-                                   CallSiteID csId) const;
-    /// Get call graph edge via nodes
-    PTACallGraphEdge *getGraphEdge(PTACallGraphNode *src, PTACallGraphNode *dst,
-                                   PTACallGraphEdge::CEDGEK kind,
-                                   CallSiteID csId);
 
     /// Get all callees for a callsite
     inline void getCallees(const CallBlockNode *cs, FunctionSet &callees) {
