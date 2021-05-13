@@ -92,6 +92,7 @@ class GenericEdge {
     inline NodeID getDstID() const { return dst->getId(); }
     inline EdgeID getId() const { return id; }
     inline GEdgeKind getEdgeKind() const { return (EdgeKindMask & edgeFlag); }
+    inline GEdgeFlag getEdgeFlag() const { return edgeFlag; }
     NodeType *getSrcNode() const { return src; }
     NodeType *getDstNode() const { return dst; }
     //@}
@@ -100,6 +101,7 @@ class GenericEdge {
     /// implement this)
     //  and duplicated elements in the set are not inserted (binary tree
     //  comparison)
+    //  This operator consider source node id, dest node id, and edge flag
     //@{
     typedef struct {
         template <typename EdgePtrType>
@@ -418,27 +420,12 @@ class GenericGraph {
         return true;
     }
 
+    /// lookup edge by address of edge
     inline bool hasGEdge(EdgeType *edge) {
         return EdgeToIDMap.find(edge) != EdgeToIDMap.end();
     }
 
-    inline bool hasGEdge(EdgeID id) {
-        return IDToEdgeMap.find(id) != IDToEdgeMap.end();
-    }
-
-    inline bool hasGEdge(NodeType *src, NodeType *dst,
-                         typename EdgeType::GEdgeKind kind) {
-        if (src == nullptr || dst == nullptr) {
-            return false;
-        }
-        for (auto oe : src->getOutEdges()) {
-            if (oe->getDstNode() == dst && oe->getEdgeKind() == kind) {
-                return true;
-            }
-        }
-        return false;
-    }
-
+    // lookup edge by src, dest, and EdgeKind
     inline EdgeType *getGEdge(NodeType *src, NodeType *dst,
                               typename EdgeType::GEdgeKind kind) {
         if (src == nullptr || dst == nullptr) {
@@ -454,14 +441,35 @@ class GenericGraph {
         }
 
         assert(n <= 1 && "there are more than 1 edges with the same "
-                         "types between two nodes");
+                         "EdgeKind between two nodes");
 
         return ret;
     }
 
+    // lookup edge by src, dest, and EdgeFlag
+    inline EdgeType *getGEdge(NodeType *src, NodeType *dst,
+                              typename EdgeType::GEdgeFlag flag) {
+        if (src == nullptr || dst == nullptr) {
+            return nullptr;
+        }
+        Size_t n = 0;
+        EdgeType *ret = nullptr;
+        for (auto oe : src->getOutEdges()) {
+            if (oe->getDstNode() == dst && oe->getEdgeFlag() == flag) {
+                n++;
+                ret = oe;
+            }
+        }
+        assert(n <= 1 && "there are more than 1 edges with the same "
+                         "EdgeFlag between two nodes");
+        return ret;
+    }
+
     inline EdgeType *getGEdge(EdgeID id) {
-        assert(IDToEdgeMap.find(id) != IDToEdgeMap.end() &&
-               "edge id not exists");
+        if (IDToEdgeMap.find(id) == IDToEdgeMap.end()) {
+            return nullptr;
+        }
+
         return IDToEdgeMap[id];
     }
 

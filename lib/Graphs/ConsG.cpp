@@ -152,7 +152,7 @@ AddrCGEdge::AddrCGEdge(ConstraintNode *s, ConstraintNode *d, EdgeID id,
 AddrCGEdge *ConstraintGraph::addAddrCGEdge(NodeID src, NodeID dst) {
     ConstraintNode *srcNode = getConstraintNode(src);
     ConstraintNode *dstNode = getConstraintNode(dst);
-    if (hasGEdge(srcNode, dstNode, ConstraintEdge::Addr)) {
+    if (getGEdge(srcNode, dstNode, ConstraintEdge::Addr) != nullptr) {
         return nullptr;
     }
     auto *edge = new AddrCGEdge(srcNode, dstNode, getNextEdgeId(), pag);
@@ -176,7 +176,7 @@ CopyCGEdge *ConstraintGraph::addCopyCGEdge(NodeID src, NodeID dst) {
 
     ConstraintNode *srcNode = getConstraintNode(src);
     ConstraintNode *dstNode = getConstraintNode(dst);
-    if (hasGEdge(srcNode, dstNode, ConstraintEdge::Copy) ||
+    if (getGEdge(srcNode, dstNode, ConstraintEdge::Copy) != nullptr ||
         srcNode == dstNode) {
         return nullptr;
     }
@@ -202,7 +202,7 @@ NormalGepCGEdge *ConstraintGraph::addNormalGepCGEdge(NodeID src, NodeID dst,
                                                      const LocationSet &ls) {
     ConstraintNode *srcNode = getConstraintNode(src);
     ConstraintNode *dstNode = getConstraintNode(dst);
-    if (hasGEdge(srcNode, dstNode, ConstraintEdge::NormalGep)) {
+    if (getGEdge(srcNode, dstNode, ConstraintEdge::NormalGep) != nullptr) {
         return nullptr;
     }
 
@@ -226,7 +226,7 @@ NormalGepCGEdge *ConstraintGraph::addNormalGepCGEdge(NodeID src, NodeID dst,
 VariantGepCGEdge *ConstraintGraph::addVariantGepCGEdge(NodeID src, NodeID dst) {
     ConstraintNode *srcNode = getConstraintNode(src);
     ConstraintNode *dstNode = getConstraintNode(dst);
-    if (hasGEdge(srcNode, dstNode, ConstraintEdge::VariantGep)) {
+    if (getGEdge(srcNode, dstNode, ConstraintEdge::VariantGep) != nullptr) {
         return nullptr;
     }
 
@@ -250,7 +250,7 @@ VariantGepCGEdge *ConstraintGraph::addVariantGepCGEdge(NodeID src, NodeID dst) {
 LoadCGEdge *ConstraintGraph::addLoadCGEdge(NodeID src, NodeID dst) {
     ConstraintNode *srcNode = getConstraintNode(src);
     ConstraintNode *dstNode = getConstraintNode(dst);
-    if (hasGEdge(srcNode, dstNode, ConstraintEdge::Load)) {
+    if (getGEdge(srcNode, dstNode, ConstraintEdge::Load) != nullptr) {
         return nullptr;
     }
 
@@ -274,7 +274,7 @@ LoadCGEdge *ConstraintGraph::addLoadCGEdge(NodeID src, NodeID dst) {
 StoreCGEdge *ConstraintGraph::addStoreCGEdge(NodeID src, NodeID dst) {
     ConstraintNode *srcNode = getConstraintNode(src);
     ConstraintNode *dstNode = getConstraintNode(dst);
-    if (hasGEdge(srcNode, dstNode, ConstraintEdge::Store)) {
+    if (getGEdge(srcNode, dstNode, ConstraintEdge::Store) != nullptr) {
         return nullptr;
     }
 

@@ -97,17 +97,20 @@ void CSC::visit(NodeID nodeId, Size_t _w) {
         _S.pop();
         _revS.push(backNodeId);
         ConstraintNode *backNode = _consG->getConstraintNode(backNodeId);
-        if (_consG->hasGEdge(node, backNode, ConstraintEdge::NormalGep)) {
+        if (_consG->getGEdge(node, backNode, ConstraintEdge::NormalGep) !=
+            nullptr) {
             auto *normalGep = llvm::dyn_cast<NormalGepCGEdge>(
                 _consG->getGEdge(node, backNode, ConstraintEdge::NormalGep));
+            assert(normalGep != nullptr && "normalGep is nullptr");
             Size_t _w = normalGep->getLocationSet().getOffset();
             Size_t _l = _D[nodeId] + _w - _D[backNodeId];
             backNode->strides.set(_l);
             for (auto cNodeId : _C)
                 _consG->getConstraintNode(cNodeId)->strides.set(_l);
-        } else if (_consG->hasGEdge(node, backNode,
-                                    ConstraintEdge::VariantGep) ||
-                   _consG->hasGEdge(node, backNode, ConstraintEdge::Copy)) {
+        } else if (_consG->getGEdge(node, backNode,
+                                    ConstraintEdge::VariantGep) != nullptr ||
+                   _consG->getGEdge(node, backNode, ConstraintEdge::Copy) !=
+                       nullptr) {
             Size_t _l = _D[nodeId] - _D[backNodeId];
             backNode->strides.set(_l);
             for (auto cNodeId : _C)
