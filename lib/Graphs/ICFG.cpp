@@ -61,24 +61,6 @@ bool ICFGEdge::classof(const GenericICFGEdgeTy *edge) {
            CallCFGEdge::classof(edge) || RetCFGEdge::classof(edge);
 }
 
-FunEntryBlockNode::FunEntryBlockNode(NodeID id, const SVFFunction *f)
-    : InterBlockNode(id, FunEntryBlock) {
-    fun = f;
-    // if function is implemented
-    if (f->getLLVMFun()->begin() != f->getLLVMFun()->end()) {
-        bb = &(f->getLLVMFun()->getEntryBlock());
-    }
-}
-
-FunExitBlockNode::FunExitBlockNode(NodeID id, const SVFFunction *f)
-    : InterBlockNode(id, FunExitBlock), fun(f), formalRet(nullptr) {
-    fun = f;
-    // if function is implemented
-    if (f->getLLVMFun()->begin() != f->getLLVMFun()->end()) {
-        bb = SVFUtil::getFunExitBB(f->getLLVMFun());
-    }
-}
-
 const std::string ICFGNode::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);

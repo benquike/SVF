@@ -78,9 +78,26 @@ class ICFGNode : public GenericICFGNode {
 
   public:
     /// Constructor
-    ICFGNode(NodeID i, ICFGNodeK k)
-        : GenericICFGNodeTy(i, k), fun(nullptr), bb(nullptr) {}
-    ICFGNode() : GenericICFGNodeTy(MAX_NODEID, AbstractNode) {}
+    ICFGNode(NodeID id, ICFGNodeK k)
+        : GenericICFGNode(id, k), fun(nullptr), bb(nullptr) {}
+
+    ICFGNode(NodeID id, ICFGNodeK k, const SVFFunction *fun)
+        : GenericICFGNode(id, k), fun(fun) {
+        if (fun != nullptr &&
+            fun->getLLVMFun()->begin() != fun->getLLVMFun()->end()) {
+            bb = &(fun->getLLVMFun()->getEntryBlock());
+        }
+    }
+
+    ICFGNode(NodeID id, ICFGNodeK k, const Instruction *inst, SVFModule *mod)
+        : GenericICFGNode(id, k) {
+        if (inst != nullptr) {
+            fun = mod->getLLVMModSet()->getSVFFunction(inst->getFunction());
+            bb = inst->getParent();
+        }
+    }
+
+    ICFGNode() : GenericICFGNode(MAX_NODEID, AbstractNode) {}
 
     virtual ~ICFGNode(){};
 
@@ -161,10 +178,7 @@ class IntraBlockNode : public ICFGNode {
 
   public:
     IntraBlockNode(NodeID id, const Instruction *i, SVFModule *svfMod)
-        : ICFGNode(id, IntraBlock), inst(i) {
-        fun = svfMod->getLLVMModSet()->getSVFFunction(inst->getFunction());
-        bb = inst->getParent();
-    }
+        : ICFGNode(id, IntraBlock, i, svfMod), inst(i) {}
 
     IntraBlockNode() : ICFGNode(MAX_NODEID, IntraBlock) {}
 
@@ -179,14 +193,21 @@ class IntraBlockNode : public ICFGNode {
     }
     //@}
 
-    const std::string toString() const;
+    const std::string toString() const override;
 };
 
+/*!
+ * Abstract ICFG node standing for instructions handling function
+ * call and return
+ */
 class InterBlockNode : public ICFGNode {
 
   public:
     /// Constructor
-    InterBlockNode(NodeID id, ICFGNodeK k) : ICFGNode(id, k) {}
+    InterBlockNode(NodeID id, ICFGNodeK k, const SVFFunction *fun)
+        : ICFGNode(id, k, fun) {}
+    InterBlockNode(NodeID id, ICFGNodeK k, const Instruction *i, SVFModule *mod)
+        : ICFGNode(id, k, i, mod) {}
     InterBlockNode() : ICFGNode(MAX_NODEID, InterBlock) {}
 
     virtual ~InterBlockNode() {}
@@ -210,8 +231,9 @@ class FunEntryBlockNode : public InterBlockNode {
     FormalParmNodeVec FPNodes;
 
   public:
-    FunEntryBlockNode(NodeID id, const SVFFunction *f);
-    FunEntryBlockNode() : InterBlockNode(MAX_NODEID, FunEntryBlock) {}
+    FunEntryBlockNode(NodeID id, const SVFFunction *f)
+        : InterBlockNode(id, FunEntryBlock, f) {}
+    FunEntryBlockNode() : InterBlockNode(MAX_NODEID, FunEntryBlock, nullptr) {}
 
     virtual ~FunEntryBlockNode() {}
 
@@ -241,12 +263,12 @@ class FunEntryBlockNode : public InterBlockNode {
 class FunExitBlockNode : public InterBlockNode {
 
   private:
-    const SVFFunction *fun = nullptr;
     const PAGNode *formalRet = nullptr;
 
   public:
-    FunExitBlockNode(NodeID id, const SVFFunction *f);
-    FunExitBlockNode() : InterBlockNode(MAX_NODEID, FunExitBlock) {}
+    FunExitBlockNode(NodeID id, const SVFFunction *f)
+        : InterBlockNode(id, FunExitBlock, f) {}
+    FunExitBlockNode() : InterBlockNode(MAX_NODEID, FunExitBlock, nullptr) {}
 
     virtual ~FunExitBlockNode() {}
 
@@ -285,13 +307,10 @@ class CallBlockNode : public InterBlockNode {
 
   public:
     CallBlockNode(NodeID id, const Instruction *c, SVFModule *svfMod)
-        : InterBlockNode(id, FunCallBlock), cs(c), ret(nullptr),
-          svfMod(svfMod) {
-        fun = svfMod->getLLVMModSet()->getSVFFunction(cs->getFunction());
-        bb = cs->getParent();
-    }
+        : InterBlockNode(id, FunCallBlock, c, svfMod), cs(c), ret(nullptr),
+          svfMod(svfMod) {}
 
-    CallBlockNode() : InterBlockNode(MAX_NODEID, FunCallBlock) {}
+    CallBlockNode() : InterBlockNode(MAX_NODEID, FunCallBlock, nullptr) {}
     virtual ~CallBlockNode() {}
 
     /// Return callsite
@@ -350,13 +369,10 @@ class RetBlockNode : public InterBlockNode {
   public:
     RetBlockNode(NodeID id, const Instruction *c, CallBlockNode *cb,
                  SVFModule *svfMod)
-        : InterBlockNode(id, FunRetBlock), cs(c), actualRet(nullptr),
-          callBlockNode(cb) {
-        fun = svfMod->getLLVMModSet()->getSVFFunction(cs->getFunction());
-        bb = cs->getParent();
-    }
+        : InterBlockNode(id, FunRetBlock, c, svfMod), cs(c), actualRet(nullptr),
+          callBlockNode(cb) {}
 
-    RetBlockNode() : InterBlockNode(MAX_NODEID, FunRetBlock) {}
+    RetBlockNode() : InterBlockNode(MAX_NODEID, FunRetBlock, nullptr) {}
 
     virtual ~RetBlockNode() {}
 
