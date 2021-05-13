@@ -138,7 +138,8 @@ class PAG : public GenericPAGTy {
 
     NodeIDAllocator nodeIdAllocator;
 
-    using Inst2LabelMap = Map<const ICFGNode *, u32_t>;
+    using LabelID = u32_t;
+    using Inst2LabelMap = Map<const ICFGNode *, LabelID>;
     Inst2LabelMap inst2LabelMap;     ///< Call site Instruction to label map
     u64_t callEdgeLabelCounter = 0;  ///< Call site Instruction counter
     u64_t storeEdgeLabelCounter = 0; ///< Store Instruction counter
@@ -202,6 +203,7 @@ class PAG : public GenericPAGTy {
         auto iter = inst2LabelMap.find(cs);
         u64_t label = (iter != inst2LabelMap.end()) ? iter->second
                                                     : callEdgeLabelCounter++;
+        assert(label < numeric_limits<LabelID>::max() && "LabelID overflow");
         return PAGEdge::makeEdgeFlagWithAuxInfo(k, label);
     }
 
@@ -212,6 +214,7 @@ class PAG : public GenericPAGTy {
         auto iter = inst2LabelMap.find(store);
         u64_t label = (iter != inst2LabelMap.end()) ? iter->second
                                                     : storeEdgeLabelCounter++;
+        assert(label < numeric_limits<LabelID>::max() && "LabelID overflow");
         return PAGEdge::makeEdgeFlagWithAuxInfo(k, label);
     }
 
