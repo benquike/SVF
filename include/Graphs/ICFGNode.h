@@ -237,9 +237,6 @@ class FunEntryBlockNode : public InterBlockNode {
 
     virtual ~FunEntryBlockNode() {}
 
-    /// Return function
-    inline const SVFFunction *getFun() const { return fun; }
-
     /// Return the set of formal parameters
     inline const FormalParmNodeVec &getFormalParms() const { return FPNodes; }
 
@@ -271,9 +268,6 @@ class FunExitBlockNode : public InterBlockNode {
     FunExitBlockNode() : InterBlockNode(MAX_NODEID, FunExitBlock, nullptr) {}
 
     virtual ~FunExitBlockNode() {}
-
-    /// Return function
-    inline const SVFFunction *getFun() const { return fun; }
 
     /// Return actual return parameter
     inline const PAGNode *getFormalRet() const { return formalRet; }
