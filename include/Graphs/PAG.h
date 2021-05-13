@@ -39,13 +39,14 @@
 
 namespace SVF {
 
+using GenericPAGTy = GenericGraph<PAGNode, PAGEdge>;
+using GenericPAG = GenericPAGTy;
+
 /*!
  * Program Assignment Graph for pointer analysis
  * SymID and NodeID are equal here (same numbering).
  */
-
-using GenericPAGTy = GenericGraph<PAGNode, PAGEdge>;
-class PAG : public GenericPAGTy {
+class PAG : public GenericPAG {
 
   public:
     using CallSiteSet = Set<const CallBlockNode *>;

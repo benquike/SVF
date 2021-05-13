@@ -26,7 +26,10 @@ namespace SVF {
 class SVFModule;
 class DCHNode;
 
-class DCHEdge : public GenericEdge<DCHNode> {
+using GenericDCHEdgeTy = GenericEdge<DCHNode>;
+using GenericDCHEdge = GenericDCHEdgeTy;
+
+class DCHEdge : public GenericDCHEdge {
   public:
     enum {
         INHERITANCE, // inheritance relation
@@ -39,7 +42,7 @@ class DCHEdge : public GenericEdge<DCHNode> {
     using DCHEdgeSetTy = GenericNode<DCHNode, DCHEdge>::GEdgeSetTy;
 
     DCHEdge(DCHNode *src, DCHNode *dst, EdgeID id, GEdgeFlag k = 0)
-        : GenericEdge<DCHNode>(src, dst, id, k), offset(0) {}
+        : GenericDCHEdge(src, dst, id, k), offset(0) {}
 
     unsigned int getOffset(void) const { return offset; }
 
@@ -52,7 +55,10 @@ class DCHEdge : public GenericEdge<DCHNode> {
     unsigned int offset;
 };
 
-class DCHNode : public GenericNode<DCHNode, DCHEdge> {
+using GenericDCHNodeTy = GenericNode<DCHNode, DCHEdge>;
+using GenericDCHNode = GenericDCHNodeTy;
+
+class DCHNode : public GenericDCHNode {
   public:
     typedef enum {
         PURE_ABSTRACT = 0x1,     // pure virtual abstract class
@@ -64,7 +70,7 @@ class DCHNode : public GenericNode<DCHNode, DCHEdge> {
     using FuncVector = std::vector<const Function *>;
 
     DCHNode(const DIType *diType, NodeID i = 0, GNodeK k = 0)
-        : GenericNode<DCHNode, DCHEdge>(i, k), vtable(nullptr), flags(0) {
+        : GenericDCHNode(i, k), vtable(nullptr), flags(0) {
         this->diType = diType;
         if (diType == nullptr) {
             typeName = "null-void";
@@ -146,8 +152,11 @@ class DCHNode : public GenericNode<DCHNode, DCHEdge> {
     std::vector<std::vector<const Function *>> vfnVectors;
 };
 
+using GenericDCHGraphTy = GenericGraph<DCHNode, DCHEdge>;
+using GenericDCHGraph = GenericDCHGraphTy;
+
 /// Dwarf based CHG.
-class DCHGraph : public CommonCHGraph, public GenericGraph<DCHNode, DCHEdge> {
+class DCHGraph : public CommonCHGraph, public GenericDCHGraph {
   public:
     /// Returns the DIType beneath the qualifiers. Does not strip away
     /// "DW_TAG_members".

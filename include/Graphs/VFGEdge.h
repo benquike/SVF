@@ -40,12 +40,14 @@ class VFGNode;
 
 #define MAX_CSID (numeric_limits<CallSiteID>::max())
 
+using GenericVFGEdgeTy = GenericEdge<VFGNode>;
+using GenericVFGEdge = GenericVFGEdgeTy;
+
 /*!
  * Interprocedural control-flow and value-flow edge, representing the control-
  * and value-flow dependence between two nodes
  */
-using GenericVFGEdgeTy = GenericEdge<VFGNode>;
-class VFGEdge : public GenericVFGEdgeTy {
+class VFGEdge : public GenericVFGEdge {
 
   public:
     /// seven types of VFG edge

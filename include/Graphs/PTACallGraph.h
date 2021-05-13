@@ -42,22 +42,30 @@ namespace SVF {
 
 class PTACallGraphNode;
 
-/*
- * Call Graph edge representing a calling relation between two functions
+using GenericCallGraphEdgeTy = GenericEdge<PTACallGraphNode>;
+using GenericCallGraphEdge = GenericCallGraphEdgeTy;
+
+/*! \class PTACallGraphEdge
+ *  \brief Edge reprensentation of a PTACallGraph
+ *
+ * Call Graph edge representing a calling relation between two functions.
  * Multiple calls from function A to B are merged into one call edge
  * Each call edge has a set of direct callsites and a set
  * of indirect callsites
  */
-using GenericCallGraphEdgeTy = GenericEdge<PTACallGraphNode>;
-class PTACallGraphEdge : public GenericCallGraphEdgeTy {
+class PTACallGraphEdge : public GenericCallGraphEdge {
 
   public:
     using CallInstSet = Set<const CallBlockNode *>;
     enum CEDGEK { CallRetEdge, TDForkEdge, TDJoinEdge, HareParForEdge };
 
   private:
-    CallInstSet directCalls;
-    CallInstSet indirectCalls;
+    CallInstSet directCalls; ///< A set of direct call instructions
+                             ///< represented with ICFG CallBlockNodes
+
+    CallInstSet indirectCalls; ///< A set of indirection call instructions
+                               ///< represented with ICFG CallBlockNodes
+
     CallSiteID csId;
 
     /// support for serialization
@@ -146,11 +154,13 @@ class PTACallGraphEdge : public GenericCallGraphEdgeTy {
         GenericNode<PTACallGraphNode, PTACallGraphEdge>::GEdgeSetTy;
 };
 
-/*
+using GenericCallGraphNodeTy = GenericNode<PTACallGraphNode, PTACallGraphEdge>;
+using GenericCallGraphNode = GenericCallGraphNodeTy;
+
+/*!
  * Call Graph node representing a function
  */
-using GenericCallGraphNodeTy = GenericNode<PTACallGraphNode, PTACallGraphEdge>;
-class PTACallGraphNode : public GenericCallGraphNodeTy {
+class PTACallGraphNode : public GenericCallGraphNode {
 
   public:
     using CallGraphEdgeSet = PTACallGraphEdge::CallGraphEdgeSet;
@@ -204,10 +214,15 @@ class PTACallGraphNode : public GenericCallGraphNodeTy {
     virtual const std::string toString() const;
 };
 
-/*!
- * Pointer Analysis Call Graph used internally for various pointer analysis
- */
 using GenericCallGraphTy = GenericGraph<PTACallGraphNode, PTACallGraphEdge>;
+using GenericCallGraph = GenericCallGraphTy;
+
+/*!
+ * Pointer Analysis Call Graph
+ * used internally for various pointer analysis
+ *
+ *
+ */
 class PTACallGraph : public GenericCallGraphTy {
 
   public:
@@ -237,13 +252,13 @@ class PTACallGraph : public GenericCallGraphTy {
     IdToCallSiteMap idToCSMap;       ///< Map a callsite ID to a pair of call
                                      ///< instruction and callee
     CallSiteID totalCallSiteNum = 0; ///< Total number of CallSites
-                                     ///  (more precisely, pairs of
-                                     ///  <CallInstruction, Function>, because
-                                     ///  an indirect call instruction may
-                                     ///  have multiple callees).
-                                     ///  This field is also used to
-                                     ///  allocate ids for Callsites, ids are
-                                     ///  allocated from 1;
+                                     ///<  (more precisely, pairs of
+                                     ///< CallInstruction, Function>, because
+                                     ///<  an indirect call instruction may
+                                     ///<  have multiple callees).
+                                     ///<  This field is also used to
+                                     ///<  allocate ids for Callsites, ids are
+                                     ///<  allocated from 1;
     PAG *pag = nullptr;
 
   protected:

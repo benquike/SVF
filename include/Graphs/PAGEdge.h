@@ -40,11 +40,13 @@ namespace SVF {
 class PAGNode;
 class PAG;
 
-/*
+using GenericPAGEdgeTy = GenericEdge<PAGNode>;
+using GenericPAGEdge = GenericPAGEdgeTy;
+
+/*!
  * PAG edge between nodes
  */
-using GenericPAGEdgeTy = GenericEdge<PAGNode>;
-class PAGEdge : public GenericPAGEdgeTy {
+class PAGEdge : public GenericPAGEdge {
 
   public:
     /// Thirteen kinds of PAG edges
@@ -122,7 +124,7 @@ class PAGEdge : public GenericPAGEdgeTy {
 };
 
 /*!
- * Copy edge
+ * Addr Edge
  */
 class AddrPE : public PAGEdge {
   private:

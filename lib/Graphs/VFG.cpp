@@ -742,8 +742,7 @@ void VFG::connectDirectVFGEdges() {
 }
 
 /*!
- * Whether we has an intra VFG edge
- * FIXME: remove this and use hasGEdge instead
+ * Whether VFG has an intra VFG edge
  */
 VFGEdge *VFG::hasIntraVFGEdge(VFGNode *src, VFGNode *dst,
                               VFGEdge::VFGEdgeK kind) {

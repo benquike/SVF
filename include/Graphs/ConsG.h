@@ -35,12 +35,15 @@
 
 namespace SVF {
 
+using GenericConstraintGraphTy = GenericGraph<ConstraintNode, ConstraintEdge>;
+using GenericConstraintGraph = GenericConstraintGraphTy;
+
 /*!
  * Constraint graph for Andersen's analysis
  * ConstraintNodes are same as PAGNodes
  * ConstraintEdges are self-defined edges (initialized with ConstraintEdges)
  */
-class ConstraintGraph : public GenericGraph<ConstraintNode, ConstraintEdge> {
+class ConstraintGraph : public GenericConstraintGraph {
 
   public:
     using ConstraintNodeIDToNodeMapTy = Map<NodeID, ConstraintNode *>;

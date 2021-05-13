@@ -38,7 +38,10 @@ namespace SVF {
 class SVFModule;
 class ThreadAPI;
 /*!
- * PTA thread fork edge from fork site to the entry of a start routine function
+ * \class ThreadForkEdge
+ * \brief PTA thread fork edge
+ *
+ * From fork site to the entry of a start routine function
  */
 class ThreadForkEdge : public PTACallGraphEdge {
 
@@ -74,7 +77,10 @@ class ThreadForkEdge : public PTACallGraphEdge {
 };
 
 /*!
- * PTA thread join edge from the exit of a start routine function to a join
+ * \class ThreadJoinEdge
+ * \brief PTA thread join edge
+ *
+ * From the exit of a start routine function to a join
  * point of the thread
  */
 class ThreadJoinEdge : public PTACallGraphEdge {
@@ -107,7 +113,10 @@ class ThreadJoinEdge : public PTACallGraphEdge {
 };
 
 /*!
- * hare_parallel_for edge from fork site to the entry of a start routine
+ * \class HareParForEdge
+ * \brief hare_parallel_for edge
+ *
+ * from fork site to the entry of a start routine
  * function
  */
 class HareParForEdge : public PTACallGraphEdge {
@@ -132,7 +141,9 @@ class HareParForEdge : public PTACallGraphEdge {
 };
 
 /*!
- * Thread sensitive call graph
+ * \class ThreadCallGraph
+ * \brief  Thread sensitive call graph
+ *
  */
 class ThreadCallGraph : public PTACallGraph {
 

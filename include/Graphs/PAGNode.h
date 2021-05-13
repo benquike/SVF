@@ -48,7 +48,12 @@ namespace SVF {
 class PAGNode;
 
 using GenericPAGNodeTy = GenericNode<PAGNode, PAGEdge>;
-class PAGNode : public GenericPAGNodeTy {
+using GenericPAGNode = GenericPAGNodeTy;
+
+/*! A Node in PAG
+**
+*/
+class PAGNode : public GenericPAGNode {
 
   public:
     /// Nine kinds of PAG nodes
@@ -117,8 +122,8 @@ class PAGNode : public GenericPAGNodeTy {
     inline bool hasValue() const { return value != nullptr; }
     /// Whether it is a pointer
     virtual inline bool isPointer() const {
-        return true;
-        // return isTopLevelPtr() || isAddressTakenPtr();
+        // return true;
+        return isTopLevelPtr() || isAddressTakenPtr();
     }
     /// Whether it is a top-level pointer
     inline bool isTopLevelPtr() const { return isTLPointer; }
@@ -378,8 +383,10 @@ class GepValPN : public ValPN {
     const std::string toString() const override;
 };
 
-/*
- * Gep Obj node, this is dynamic generated for field sensitive analysis
+/*!
+ * Gep Obj node
+ *
+ * this is dynamic generated for field sensitive analysis
  * Each gep obj node is one field of a MemObj (base)
  */
 class GepObjPN : public ObjPN {
@@ -431,8 +438,10 @@ class GepObjPN : public ObjPN {
     const std::string toString() const override;
 };
 
-/*
- * Field-insensitive Gep Obj node, this is dynamic generated for field sensitive
+/*!
+ * Field-insensitive Gep Obj node,
+ *
+ * this is dynamic generated for field sensitive
  * analysis Each field-insensitive gep obj node represents all fields of a
  * MemObj (base)
  */
@@ -462,7 +471,7 @@ class FIObjPN : public ObjPN {
     const std::string toString() const override;
 };
 
-/*
+/*!
  * Unique Return node of a procedure
  */
 class RetPN : public PAGNode {
@@ -489,7 +498,7 @@ class RetPN : public PAGNode {
     const std::string toString() const override;
 };
 
-/*
+/*!
  * Unique vararg node of a procedure
  */
 class VarArgPN : public PAGNode {
@@ -516,8 +525,8 @@ class VarArgPN : public PAGNode {
     const std::string toString() const override;
 };
 
-/*
- * Dummy node
+/*!
+ * Dummy Value node
  */
 class DummyValPN : public ValPN {
 
@@ -542,8 +551,8 @@ class DummyValPN : public ValPN {
     const std::string toString() const override;
 };
 
-/*
- * Dummy node
+/*!
+ * Dummy Obj node
  */
 class DummyObjPN : public ObjPN {
 
@@ -567,7 +576,7 @@ class DummyObjPN : public ObjPN {
     const std::string toString() const override;
 };
 
-/*
+/*!
  * Clone object node for dummy objects.
  */
 class CloneDummyObjPN : public DummyObjPN {
@@ -593,7 +602,7 @@ class CloneDummyObjPN : public DummyObjPN {
     const std::string toString() const override;
 };
 
-/*
+/*!
  * Clone object for GEP objects.
  */
 class CloneGepObjPN : public GepObjPN {
@@ -623,7 +632,7 @@ class CloneGepObjPN : public GepObjPN {
     const std::string toString() const override;
 };
 
-/*
+/*!
  * Clone object for FI objects.
  */
 class CloneFIObjPN : public FIObjPN {

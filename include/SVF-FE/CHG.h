@@ -42,7 +42,9 @@ class SVFModule;
 class CHNode;
 
 using GenericCHEdgeTy = GenericEdge<CHNode>;
-class CHEdge : public GenericCHEdgeTy {
+using GenericCHEdge = GenericCHEdgeTy;
+
+class CHEdge : public GenericCHEdge {
   public:
     typedef enum {
         INHERITANCE = 0x1, // inheritance relation
@@ -54,12 +56,14 @@ class CHEdge : public GenericCHEdgeTy {
     using GEdgeKind = CHEDGETYPE;
 
     CHEdge(CHNode *s, CHNode *d, EdgeID id, GEdgeKind k)
-        : GenericCHEdgeTy(s, d, id, k) {}
+        : GenericCHEdge(s, d, id, k) {}
 
     virtual ~CHEdge() {}
 };
 
 using GenericCHNodeTy = GenericNode<CHNode, CHEdge>;
+using GenericCHNode = GenericCHNodeTy;
+
 class CHNode : public GenericCHNodeTy {
   public:
     typedef enum {
@@ -71,7 +75,7 @@ class CHNode : public GenericCHNodeTy {
     using FuncVector = std::vector<const SVFFunction *>;
 
     CHNode(const std::string name, NodeID i, GNodeK k = 0)
-        : GenericCHNodeTy(i, k), vtable(nullptr), className(name), flags(0) {}
+        : GenericCHNode(i, k), vtable(nullptr), className(name), flags(0) {}
     CHNode() = default;
     virtual ~CHNode() {}
     std::string getName() const { return className; }
@@ -128,7 +132,9 @@ class CHNode : public GenericCHNodeTy {
 
 /// class hierarchy graph
 using GenericCHGraphTy = GenericGraph<CHNode, CHEdge>;
-class CHGraph : public CommonCHGraph, public GenericCHGraphTy {
+using GenericCHGraph = GenericCHGraphTy;
+
+class CHGraph : public CommonCHGraph, public GenericCHGraph {
   public:
     using CHNodeSetTy = Set<const CHNode *>;
     using WorkList = FIFOWorkList<const CHNode *>;

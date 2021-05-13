@@ -37,12 +37,14 @@ namespace SVF {
 
 class ICFGNode;
 
+using GenericICFGEdgeTy = GenericEdge<ICFGNode>;
+using GenericICFGEdge = GenericICFGEdgeTy;
+
 /*!
  * Interprocedural control-flow and value-flow edge, representing the control-
  * and value-flow dependence between two nodes
  */
-using GenericICFGEdgeTy = GenericEdge<ICFGNode>;
-class ICFGEdge : public GenericICFGEdgeTy {
+class ICFGEdge : public GenericICFGEdge {
 
   public:
     /// ten types of ICFG edge

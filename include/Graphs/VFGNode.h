@@ -44,13 +44,15 @@ namespace SVF {
 class VFGNode;
 class ICFGNode;
 
+using GenericVFGNodeTy = GenericNode<VFGNode, VFGEdge>;
+using GenericVFGNode = GenericVFGNodeTy;
+
 /*!
  * Interprocedural control-flow graph node, representing different kinds of
  * program statements including top-level pointers (ValPN) and address-taken
  * objects (ObjPN)
  */
-using GenericVFGNodeTy = GenericNode<VFGNode, VFGEdge>;
-class VFGNode : public GenericVFGNodeTy {
+class VFGNode : public GenericVFGNode {
 
   public:
     /// 24 kinds of ICFG node

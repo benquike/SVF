@@ -40,7 +40,9 @@ namespace SVF {
 class ConstraintNode;
 
 using GenericConsNodeTy = GenericNode<ConstraintNode, ConstraintEdge>;
-class ConstraintNode : public GenericConsNodeTy {
+using GenericConsNode = GenericConsNodeTy;
+
+class ConstraintNode : public GenericConsNode {
 
   public:
     using iterator = ConstraintEdge::ConstraintEdgeSetTy::iterator;
@@ -88,8 +90,8 @@ class ConstraintNode : public GenericConsNodeTy {
     static void setSCCEdgeFlag(SCCEdgeFlag f) { sccEdgeFlag = f; }
 
     ConstraintNode(NodeID i, PAG *pag)
-        : GenericConsNodeTy(i, 0), _isPWCNode(false), pag(pag),
-          newExpand(false) {}
+        : GenericConsNode(i, 0), _isPWCNode(false), pag(pag), newExpand(false) {
+    }
 
     ConstraintNode() = default;
 

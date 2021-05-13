@@ -44,11 +44,13 @@ namespace SVF {
 class PTACallGraph;
 class PAG;
 
+using GenericICFGTy = GenericGraph<ICFGNode, ICFGEdge>;
+using GenericICFG = GenericICFGTy;
+
 /*!
  * Interprocedural Control-Flow Graph (ICFG)
  */
-using GenericICFGTy = GenericGraph<ICFGNode, ICFGEdge>;
-class ICFG : public GenericICFGTy {
+class ICFG : public GenericICFG {
 
   public:
     using ICFGEdgeSetTy = ICFGEdge::ICFGEdgeSetTy;

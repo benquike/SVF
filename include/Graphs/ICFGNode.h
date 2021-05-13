@@ -45,14 +45,15 @@ class PAGEdge;
 class PAGNode;
 class VFGNode;
 
+using GenericICFGNodeTy = GenericNode<ICFGNode, ICFGEdge>;
+using GenericICFGNode = GenericICFGNodeTy;
+
 /*!
  * Interprocedural control-flow graph node, representing different kinds of
  * program statements including top-level pointers (ValPN) and address-taken
  * objects (ObjPN)
  */
-using GenericICFGNodeTy = GenericNode<ICFGNode, ICFGEdge>;
-
-class ICFGNode : public GenericICFGNodeTy {
+class ICFGNode : public GenericICFGNode {
 
   public:
     /// 22 kinds of ICFG node

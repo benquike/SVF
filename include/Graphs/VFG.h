@@ -42,11 +42,13 @@ class PointerAnalysis;
 class VFGStat;
 class CallBlockNode;
 
+using GenericVFGTy = GenericGraph<VFGNode, VFGEdge>;
+using GenericVFG = GenericVFGTy;
+
 /*!
  * Interprocedural Control-Flow Graph (VFG)
  */
-using GenericVFGTy = GenericGraph<VFGNode, VFGEdge>;
-class VFG : public GenericVFGTy {
+class VFG : public GenericVFG {
 
   public:
     /// VFG kind

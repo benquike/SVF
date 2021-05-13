@@ -39,13 +39,16 @@
 namespace SVF {
 
 class ConstraintNode;
+
+using GenericConsEdgeTy = GenericEdge<ConstraintNode>;
+using GenericConsEdge = GenericConsEdgeTy;
+
 /*!
  * Self-defined edge for constraint resolution
  * including add/remove/re-target, but all the operations do not affect original
  * PAG Edges
  */
-using GenericConsEdgeTy = GenericEdge<ConstraintNode>;
-class ConstraintEdge : public GenericConsEdgeTy {
+class ConstraintEdge : public GenericConsEdge {
 
   public:
     /// five kinds of constraint graph edges
@@ -65,7 +68,7 @@ class ConstraintEdge : public GenericConsEdgeTy {
     /// Constructor
     ConstraintEdge(ConstraintNode *s, ConstraintNode *d, ConstraintEdgeK k,
                    EdgeID id = 0)
-        : GenericConsEdgeTy(s, d, id, k) {}
+        : GenericConsEdge(s, d, id, k) {}
 
     ConstraintEdge() {
         setId(MAX_EDGEID);
