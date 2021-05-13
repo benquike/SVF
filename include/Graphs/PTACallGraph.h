@@ -236,11 +236,18 @@ class PTACallGraph : public GenericCallGraphTy {
     CallEdgeMap indirectCallMap;
 
     /// Call site information
-    CallSiteToIdMap csToIdMap;   ///< Map a pair of call instruction and
-                                 ///< callee to a callsite ID
-    IdToCallSiteMap idToCSMap;   ///< Map a callsite ID to a pair of call
-                                 ///< instruction and callee
-    CallSiteID totalCallSiteNum; ///< CallSiteIDs, start from 1;
+    CallSiteToIdMap csToIdMap;       ///< Map a pair of call instruction and
+                                     ///< callee to a callsite ID
+    IdToCallSiteMap idToCSMap;       ///< Map a callsite ID to a pair of call
+                                     ///< instruction and callee
+    CallSiteID totalCallSiteNum = 0; ///< Total number of CallSites
+                                     ///  (more precisely, pairs of
+                                     ///  <CallInstruction, Function>, because
+                                     ///  an indirect call instruction may
+                                     ///  have multiple callees).
+                                     ///  This field is also used to
+                                     ///  allocate ids for Callsites, ids are
+                                     ///  allocated from 1;
     PAG *pag = nullptr;
 
   protected:
@@ -355,7 +362,7 @@ class PTACallGraph : public GenericCallGraphTy {
         auto it = csToIdMap.find(newCS);
         // assert(it == csToIdMap.end() && "cannot add a callsite twice");
         if (it == csToIdMap.end()) {
-            CallSiteID id = totalCallSiteNum++;
+            CallSiteID id = ++totalCallSiteNum;
             csToIdMap.insert(std::make_pair(newCS, id));
             idToCSMap.insert(std::make_pair(id, newCS));
             return id;
