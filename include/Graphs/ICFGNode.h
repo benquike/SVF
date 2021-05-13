@@ -166,7 +166,7 @@ class GlobalBlockNode : public ICFGNode {
     }
     //@}
 
-    virtual const std::string toString() const;
+    const std::string toString() const override;
 };
 
 /*!
@@ -253,7 +253,7 @@ class FunEntryBlockNode : public InterBlockNode {
     }
     //@}
 
-    const virtual std::string toString() const;
+    const std::string toString() const override;
 };
 
 /*!
@@ -288,7 +288,7 @@ class FunExitBlockNode : public InterBlockNode {
     }
     //@}
 
-    virtual const std::string toString() const;
+    const std::string toString() const override;
 };
 
 /*!
@@ -353,7 +353,7 @@ class CallBlockNode : public InterBlockNode {
     }
     //@}
 
-    virtual const std::string toString() const;
+    const std::string toString() const override;
 };
 
 /*!
@@ -395,7 +395,7 @@ class RetBlockNode : public InterBlockNode {
     }
     //@}
 
-    virtual const std::string toString() const;
+    const std::string toString() const override;
 };
 
 } // End namespace SVF
