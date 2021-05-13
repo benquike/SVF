@@ -76,9 +76,12 @@ class GenericEdge {
     inline void setEdgeFlag(GEdgeFlag flag) { edgeFlag = flag; }
 
   public:
-    /// Constructor
-    GenericEdge(NodeTy *s, NodeTy *d, EdgeID id, GEdgeFlag k)
-        : src(s), dst(d), id(id), edgeFlag(k) {}
+    /// Constructor with flag directly
+    GenericEdge(NodeTy *s, NodeTy *d, EdgeID id, GEdgeFlag flag)
+        : src(s), dst(d), id(id), edgeFlag(flag) {}
+    /// Constructor with other fields in edge flag zeroed out
+    GenericEdge(NodeTy *s, NodeTy *d, EdgeID id, GEdgeKind kind)
+        : src(s), dst(d), id(id), edgeFlag(kind) {}
 
     // to support serialization
     GenericEdge() = default;
@@ -139,6 +142,12 @@ class GenericEdge {
                                                          /// lower 8 bits to
                                                          /// denote edge kind
     static constexpr u64_t EdgeKindMask = (~0ULL) >> (64 - EdgeKindMaskBits);
+
+    /// Compute the unique edgeFlag value from edge kind and CallSiteID.
+    template <typename AuxTy>
+    static inline GEdgeFlag makeEdgeFlagWithAuxInfo(GEdgeKind k, AuxTy aux) {
+        return (aux << EdgeKindMaskBits) | k;
+    }
 };
 
 /*!
