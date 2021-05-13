@@ -214,17 +214,15 @@ void Andersen::handleLoadStore(ConstraintNode *node) {
  * Process address edges
  */
 void Andersen::processAllAddr() {
-    for (auto nodeIt : *consCG) {
-        ConstraintNode *cgNode = nodeIt.second;
-        for (auto it = cgNode->incomingAddrsBegin(),
-                  eit = cgNode->incomingAddrsEnd();
-             it != eit; ++it)
-            processAddr(llvm::cast<AddrCGEdge>(*it));
+    for (auto edge : consCG->getAddrCGEdges()) {
+        auto addrEdge = llvm::cast<AddrCGEdge>(edge);
+        assert(addrEdge && "not an AddrCGEdge?");
+        processAddr(addrEdge);
     }
 }
 
 /*!
- * Process address edges
+ * Process one address edge in ConstraintGraph
  */
 void Andersen::processAddr(const AddrCGEdge *addr) {
     numOfProcessedAddr++;
