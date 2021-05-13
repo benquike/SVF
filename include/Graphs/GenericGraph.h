@@ -348,7 +348,8 @@ class GenericGraph {
     inline auto edge_end() const { return IDToEdgeMap.end(); }
     //}@
 
-    /// APIs for handling nodes @{
+    /// APIs for handling nodes
+    /// @{
     /// add a node with a specified id
     inline bool addGNode(NodeID id, NodeType *node) {
         assert(IDToNodeMap.find(id) == IDToNodeMap.end() && "node exists");
@@ -388,6 +389,18 @@ class GenericGraph {
     }
 
     /// Delete a node
+    inline void removeGNode(NodeID id) {
+        if (hasGNode(id)) {
+            removeGNode(getGNode(id));
+        }
+    }
+
+    inline void removeGNodeAndDelete(NodeID id) {
+        if (hasGNode(id)) {
+            removeGNodeAndDelete(getGNode(id));
+        }
+    }
+
     inline void removeGNode(NodeType *node) {
         assert(node->hasIncomingEdge() == false &&
                node->hasOutgoingEdge() == false &&
@@ -400,9 +413,15 @@ class GenericGraph {
         assert(it2 != NodeToIDMap.end() && "can not find the node");
         NodeToIDMap.erase(it2);
     }
+
+    inline void removeGNodeAndDelete(NodeType *node) {
+        removeGNode(node);
+        delete node;
+    }
     ///}@
 
-    /// APIs for handling nodes @{
+    /// APIs for handling edges
+    /// @{
     /// add edge
     inline bool addGEdge(EdgeType *edge) {
 
@@ -482,7 +501,17 @@ class GenericGraph {
         return IDToEdgeMap[id];
     }
 
-    inline void removeGEdge(EdgeID id) { return removeGEdge(getGEdge(id)); }
+    inline void removeGEdge(EdgeID id) {
+        if (hasGEdge(id)) {
+            return removeGEdge(getGEdge(id));
+        }
+    }
+
+    inline void removeGEdgeAndDelete(EdgeID id) {
+        if (hasGEdge(id)) {
+            removeGEdgeAndDelete(getGEdge(id));
+        }
+    }
 
     inline void removeGEdge(EdgeType *edge) {
         assert(edge != nullptr && "edge is null");
@@ -505,6 +534,11 @@ class GenericGraph {
         auto it2 = IDToEdgeMap.find(id);
         assert(it2 != IDToEdgeMap.end() && "edge id not exits");
         IDToEdgeMap.erase(it2);
+    }
+
+    inline void removeGEdgeAndDelete(EdgeType *edge) {
+        removeGEdge(edge);
+        delete edge;
     }
     ///}@
 
