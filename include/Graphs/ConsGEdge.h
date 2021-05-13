@@ -61,14 +61,11 @@ class ConstraintEdge : public GenericConsEdgeTy {
         VariantGep
     };
 
-  private:
-    EdgeID edgeId;
-
   public:
     /// Constructor
     ConstraintEdge(ConstraintNode *s, ConstraintNode *d, ConstraintEdgeK k,
                    EdgeID id = 0)
-        : GenericConsEdgeTy(s, d, id, k), edgeId(id) {}
+        : GenericConsEdgeTy(s, d, id, k) {}
 
     ConstraintEdge() {
         setId(MAX_EDGEID);
@@ -77,8 +74,6 @@ class ConstraintEdge : public GenericConsEdgeTy {
 
     /// Destructor
     virtual ~ConstraintEdge() {}
-    /// Return edge ID
-    inline EdgeID getEdgeID() const { return edgeId; }
 
     /// Overloading operator << for dumping ICFG node ID
     //@{

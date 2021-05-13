@@ -58,7 +58,7 @@ const std::string ConstraintNode::toString() const {
 const std::string ConstraintEdge::toString() const {
     std::string str;
     raw_string_ostream rawstr(str);
-    rawstr << "ConstraintEdge ID: " << edgeId << ",";
+    rawstr << "ConstraintEdge ID: " << getId() << ",";
     rawstr << "[" << getSrcID() << " -> " << getDstID() << "]";
     return rawstr.str();
 }
