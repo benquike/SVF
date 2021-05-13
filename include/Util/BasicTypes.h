@@ -271,6 +271,9 @@ raw_ostream &operator<<(raw_ostream &o, const std::pair<F, S> &var) {
 
 } // End namespace SVF
 
+#define SPDLOG_FUNCTION __PRETTY_FUNCTION__
+#include "spdlog/spdlog.h"
+
 /// Specialise hash for CallSites.
 template <>
 struct std::hash<SVF::CallSite> {
