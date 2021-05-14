@@ -413,8 +413,8 @@ NodeID PAGBuilder::getGlobalVarField(const GlobalVariable *gvar, u32_t offset) {
  * *m = &z;       // store z m  (pointer type) struct Z n = {10,&z.s}; // store
  * z.s n ,  &z.s constant expression (constant expression)
  */
-void PAGBuilder::InitialGlobal(const GlobalVariable *gvar, Constant *C,
-                               u32_t offset) {
+void PAGBuilder::InitializeGlobal(const GlobalVariable *gvar, Constant *C,
+                                  u32_t offset) {
     DBOUT(DPAGBuild, outs() << "global " << *gvar
                             << " constant initializer: " << *C << "\n");
 
@@ -452,8 +452,8 @@ void PAGBuilder::InitialGlobal(const GlobalVariable *gvar, Constant *C,
     } else if (llvm::isa<ConstantArray>(C)) {
         if (cppUtil::isValVtbl(gvar) == false) {
             for (u32_t i = 0, e = C->getNumOperands(); i != e; i++) {
-                InitialGlobal(gvar, llvm::cast<Constant>(C->getOperand(i)),
-                              offset);
+                InitializeGlobal(gvar, llvm::cast<Constant>(C->getOperand(i)),
+                                 offset);
             }
         }
 
@@ -463,8 +463,8 @@ void PAGBuilder::InitialGlobal(const GlobalVariable *gvar, Constant *C,
             pag->getSymbolTableInfo()->getFattenFieldIdxVec(sty);
         for (u32_t i = 0, e = C->getNumOperands(); i != e; i++) {
             u32_t off = offsetvect[i];
-            InitialGlobal(gvar, llvm::cast<Constant>(C->getOperand(i)),
-                          offset + off);
+            InitializeGlobal(gvar, llvm::cast<Constant>(C->getOperand(i)),
+                             offset + off);
         }
     } else {
         // TODO:assert(false,"what else do we have");
@@ -504,7 +504,7 @@ void PAGBuilder::visitGlobal(SVFModule *svfModule) {
         if (gvar->hasInitializer()) {
             Constant *C = gvar->getInitializer();
             DBOUT(DPAGBuild, outs() << "add global var node " << *gvar << "\n");
-            InitialGlobal(gvar, C, 0);
+            InitializeGlobal(gvar, C, 0);
         }
     }
 
@@ -1460,7 +1460,7 @@ NodeID PAGBuilder::getGepValNode(const Value *val, const LocationSet &ls,
  * GlobalVariable       AddrEdge  (PAGBuilder::visitGlobal)
  *                      GepEdge   (PAGBuilder::getGlobalVarField)
  * Function             AddrEdge  (PAGBuilder::visitGlobal)
- * Constant             StoreEdge (PAGBuilder::InitialGlobal)
+ * Constant             StoreEdge (PAGBuilder::InitializeGlobal)
  */
 void PAGBuilder::setCurrentBBAndValueForPAGEdge(PAGEdge *edge) {
     if (SVFModule::pagReadFromTXT()) {
