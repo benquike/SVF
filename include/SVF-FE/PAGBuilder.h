@@ -70,7 +70,7 @@ class PAGBuilder : public llvm::InstVisitor<PAGBuilder> {
 
     /// Initialize nodes and edges
     //@{
-    void initialiseNodes();
+    void initializeNodesAndConstantAddrEdges();
     void addEdge(NodeID src, NodeID dst, PAGEdge::PEDGEK kind,
                  Size_t offset = 0, Instruction *cs = nullptr);
     // @}

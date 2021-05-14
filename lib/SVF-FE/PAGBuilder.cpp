@@ -94,7 +94,7 @@ PAG *PAGBuilder::build() {
     svfMod = pag->getModule();
 
     /// initial PAG nodes
-    initialiseNodes();
+    initializeNodesAndConstantAddrEdges();
 
     ///
     /// initialize PAG edges in globals
@@ -184,11 +184,10 @@ PAG *PAGBuilder::build() {
  *    - add a return node for each function
  *    - add a vararg node for vararg functions
  *
- * 3. connect val nodes with their corresponding object node
- *    with an AddrEdge
- *
+ * 3. for constant object, add an AddrPE edge between the
+ *    val node and the obj node
  */
-void PAGBuilder::initialiseNodes() {
+void PAGBuilder::initializeNodesAndConstantAddrEdges() {
     DBOUT(DPAGBuild, outs() << "Initialise PAG Nodes ...\n");
 
     SymbolTableInfo *symTable = pag->getSymbolTableInfo();
@@ -203,39 +202,25 @@ void PAGBuilder::initialiseNodes() {
     /// For each sym value in the symtable, add a PAG node
     ///
     auto idToVal = symTable->idToValSym();
-    for (auto iter = idToVal.begin(); iter != idToVal.end(); ++iter) {
-        DBOUT(DPAGBuild, outs() << "add val node " << iter->second << "\n");
+    for (auto iter : idToVal) {
+        spdlog::debug("add val node {}", iter.first);
 
-        if (iter->first == symTable->blkPtrSymID() ||
-            iter->first == symTable->nullPtrSymID()) {
+        /// skip the blackhole ptr and nullptr
+        if (iter.first == symTable->blkPtrSymID() ||
+            iter.first == symTable->nullPtrSymID()) {
             continue;
         }
-        pag->addValNode(iter->second, iter->first);
-    }
-
-    ///
-    /// for each object value in the symtable, add a PAG node
-    ///
-    for (auto iter = symTable->idToObjSym().begin();
-         iter != symTable->idToObjSym().end(); ++iter) {
-        DBOUT(DPAGBuild, outs() << "add obj node " << iter->second << "\n");
-
-        if (iter->first == symTable->blackholeSymID() ||
-            iter->first == symTable->constantSymID()) {
-            continue;
-        }
-        pag->addObjNode(iter->second, iter->first);
+        pag->addValNode(iter.second, iter.first);
     }
 
     /// hanlding functions
     /// for each function, we add a PAG return node
     /// TODO: how about external function with only
     /// declaration
-    for (auto iter = symTable->idToRetSym().begin();
-         iter != symTable->idToRetSym().end(); ++iter) {
-        DBOUT(DPAGBuild, outs() << "add ret node " << iter->second << "\n");
-        const SVFFunction *fun = modSet->getSVFFunction(iter->second);
-        pag->addRetNode(fun, iter->first);
+    for (auto iter : symTable->idToRetSym()) {
+        spdlog::debug("add ret node {}", iter.first);
+        const SVFFunction *fun = modSet->getSVFFunction(iter.second);
+        pag->addRetNode(fun, iter.first);
     }
 
     ///
@@ -243,39 +228,38 @@ void PAGBuilder::initialiseNodes() {
     /// for each vararg sym in the symbol table,
     /// add a PAG node for it
     ///
-    for (auto iter = symTable->idToVarargSym().begin();
-         iter != symTable->idToVarargSym().end(); ++iter) {
-        DBOUT(DPAGBuild, outs() << "add vararg node " << iter->second << "\n");
-        const SVFFunction *fun = modSet->getSVFFunction(iter->second);
-        pag->addVarargNode(fun, iter->first);
+    for (auto iter : symTable->idToVarargSym()) {
+        spdlog::debug("add vararg node {}", iter.first);
+        const SVFFunction *fun = modSet->getSVFFunction(iter.second);
+        pag->addVarargNode(fun, iter.first);
     }
 
-    /// add address edges for constant nodes.
-    /// TODO: why not put this in a previous loop?
-    /// For object value, both a value sym and an
-    /// object sym are were added in the symbol table
-    /// thus should should be object node and a
-    /// value node.
-    /// This loop connect the value node with the
-    /// object node with an AddrEdge.
     ///
-    /// FIXME: why put this code here?
-    for (auto iter = symTable->objSymToId().begin();
-         iter != symTable->objSymToId().end(); ++iter) {
-        DBOUT(DPAGBuild, outs() << "add address edges for constant node "
-                                << iter->second << "\n");
-        const Value *val = iter->first;
+    /// for each object value in the symtable, add a PAG node
+    ///
+    for (auto iter : symTable->idToObjSym()) {
+        spdlog::debug("add obj node {}", iter.first);
+
+        /// skip the blackhole object ptr and constant object
+        if (iter.first == symTable->blackholeSymID() ||
+            iter.first == symTable->constantSymID()) {
+            continue;
+        }
+        pag->addObjNode(iter.second, iter.first);
+
+        const Value *val = iter.second;
         if (symTable->isConstantObjSym(val)) {
+            spdlog::debug("add address edges for constant node {}", iter.first);
             NodeID ptr = pag->getValueNode(val);
             if (ptr != pag->getBlkPtr() && ptr != pag->getNullPtr()) {
                 setCurrentLocation(val, nullptr);
-                addAddrEdge(iter->second, ptr);
+                addAddrEdge(iter.first, ptr);
             }
         }
     }
 
     assert(pag->getTotalNodeNum() >= symTable->getTotalSymNum() &&
-           "not all node been inititalize!!!");
+           "not all nodes inititalized!!!");
 }
 
 /*!
