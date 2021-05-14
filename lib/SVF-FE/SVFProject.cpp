@@ -235,20 +235,4 @@ SymID getIdByMemObjFromCurrentProject(const MemObj *memObj) {
     return symTable->getMemObjId(memObj);
 }
 
-const Type *getTypeByIdFromCurrentProject(SymID id) {
-    SVFProject *currProject = SVFProject::getCurrentProject();
-    assert(currProject != nullptr && "current project is null");
-    auto *symTable = currProject->getSymbolTableInfo();
-
-    return symTable->getType(id);
-}
-
-SymID getIdByTypeFromCurrentProject(const Type *type) {
-    SVFProject *currProject = SVFProject::getCurrentProject();
-    assert(currProject != nullptr && "current project is null");
-    auto *symTable = currProject->getSymbolTableInfo();
-
-    return symTable->getTypeId(type);
-}
-
 } // end of namespace SVF

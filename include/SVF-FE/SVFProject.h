@@ -145,9 +145,6 @@ const Value *getValueByIdFromCurrentProject(SymID id);
 SymID getIdByValueFromCurrentProject(const Value *value);
 const MemObj *getMemObjByIdFromCurrentProject(SymID id);
 SymID getIdByMemObjFromCurrentProject(const MemObj *memObj);
-const Type *getTypeByIdFromCurrentProject(SymID id);
-SymID getIdByTypeFromCurrentProject(const Type *type);
-
 } // end of namespace SVF
 
 #endif // __SVFPROJECT_H_

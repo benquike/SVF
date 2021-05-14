@@ -231,31 +231,6 @@ void SymbolTableInfo::collectSimpleTypeInfo(const Type *ty) {
 }
 
 /*!
-** Collect the ids of LLVM Type info
-*/
-void SymbolTableInfo::collectTypeID(const Value *val) {
-    auto *type = val->getType();
-
-    collectTypeID(type);
-
-    if (type->isPointerTy()) {
-        auto *ptype = llvm::dyn_cast<Type>(type);
-        collectTypeID(ptype);
-    }
-}
-
-void SymbolTableInfo::collectTypeID(const Type *type) {
-    if (typeToIdMap.find(type) != typeToIdMap.end()) {
-        return;
-    }
-
-    SymID tid = nodeIDAllocator.allocateObjectId();
-    addTypeId(type, tid);
-
-    /// TODO: get types of containing elements
-}
-
-/*!
  * Compute gep offset
  */
 bool SymbolTableInfo::computeGepOffset(const User *V, LocationSet &ls) {
@@ -611,8 +586,6 @@ void SymbolTableInfo::collectSym(const Value *val) {
 
     DBOUT(DMemModel, outs() << "collect sym from ##" << *val << " \n");
 
-    collectTypeID(val);
-
     // special sym here
     if (isNullPtrSym(val) || isBlackholeSym(val)) {
         return;
@@ -634,7 +607,6 @@ void SymbolTableInfo::collectSym(const Value *val) {
  * Get value sym, if not available create a new one
  */
 void SymbolTableInfo::collectVal(const Value *val) {
-    collectTypeID(val);
 
     auto iter = valSymToIdMap.find(val);
     if (iter == valSymToIdMap.end()) {
@@ -663,7 +635,6 @@ void SymbolTableInfo::collectVal(const Value *val) {
  * Get memory object sym, if not available create a new one
  */
 void SymbolTableInfo::collectObj(const Value *val) {
-    collectTypeID(val);
 
     auto iter = objSymToIdMap.find(val);
     if (iter == objSymToIdMap.end()) {

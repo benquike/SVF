@@ -60,8 +60,6 @@ class SymbolTableInfo {
     using IDToSymTyMapTy = OrderedMap<SymID, SYMTYPE>;
     /// struct type to struct info map
     using TypeToFieldInfoMap = OrderedMap<const Type *, StInfo *>;
-    using IDToTypeMapTy = OrderedMap<SymID, const Type *>;
-    using TypeToIDMapTy = OrderedMap<const Type *, SymID>;
     using CallSiteSet = Set<CallSite>;
     using CallSiteToIDMapTy = OrderedMap<const Instruction *, CallSiteID>;
     using IDToCallSiteMapTy = OrderedMap<CallSiteID, const Instruction *>;
@@ -87,10 +85,6 @@ class SymbolTableInfo {
     IDToFunMapTy idToRetSymMap;
     FunToIDMapTy varargSymToIdMap; ///< vararg map
     IDToFunMapTy idToVarargSymMap;
-
-    // map id to its llvm type
-    IDToTypeMapTy idToTypeMap;
-    TypeToIDMapTy typeToIdMap;
 
     CallSiteSet callSiteSet;
 
@@ -119,14 +113,6 @@ class SymbolTableInfo {
         idToMemObjMap[id] = memObj;
         memObjToIdMap[idToMemObjMap[id]] = id;
     }
-
-    inline void addTypeId(const Type *type, SymID id) {
-        idToTypeMap[id] = type;
-        typeToIdMap[idToTypeMap[id]] = id;
-    }
-
-    void collectTypeID(const Value *val);
-    void collectTypeID(const Type *type);
 
   public:
     /// Constructor
@@ -280,19 +266,6 @@ class SymbolTableInfo {
                "MemObj ID not exists");
 
         return idToMemObjMap[id];
-    }
-
-    IDToTypeMapTy &getIdToTypeMap() { return idToTypeMap; }
-
-    SymID getTypeId(const Type *type) {
-        assert(typeToIdMap.find(type) != typeToIdMap.end() && "Type not exist");
-        return typeToIdMap[type];
-    }
-
-    const Type *getType(SymID id) {
-        assert(idToTypeMap.find(id) != idToTypeMap.end() &&
-               "Type id not exist");
-        return idToTypeMap[id];
     }
 
     inline bool hasValSym(const Value *val) {

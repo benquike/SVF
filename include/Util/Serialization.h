@@ -109,26 +109,6 @@ BOOST_SERIALIZATION_SPLIT_FREE(Set<const SVFFunction *>)
         }                                                                      \
     } while (0)
 
-// Save a pointer to llvm::Type
-#define SAVE_Type(ar, type)                                                    \
-    do {                                                                       \
-        if (type != nullptr) {                                                 \
-            ar &getIdByTypeFromCurrentProject(type);                           \
-        } else {                                                               \
-            ar &numeric_limits<SymID>::max();                                  \
-        }                                                                      \
-    } while (0)
-
-// Load a pointer to llvm::Type
-#define LOAD_Type(ar, type)                                                    \
-    do {                                                                       \
-        SymID id;                                                              \
-        ar &id;                                                                \
-        if (id < numeric_limits<SymID>::max()) {                               \
-            type = getTypeByIdFromCurrentProject(id);                          \
-        }                                                                      \
-    } while (0)
-
 // Save any pointer of type llvm::Value (or its derivative types)
 #define SAVE_Value(ar, val)                                                    \
     do {                                                                       \
