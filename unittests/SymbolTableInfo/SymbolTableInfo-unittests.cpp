@@ -193,8 +193,9 @@ class SymbolTableInfoTest : public ::testing::Test {
         auto &varargSyms_2 = symInfo2->varargSymToId();
         ASSERT_EQ(varargSyms_1.size(), varargSyms_2.size());
 
-        // Test type info
-        //
+#if 0 // delete it now, not going to support it anymore
+      // Test type info
+      //
         auto &id2TypeMap1 = symInfo->getIdToTypeMap();
         auto &id2TypeMap2 = symInfo->getIdToTypeMap();
 
@@ -203,6 +204,7 @@ class SymbolTableInfoTest : public ::testing::Test {
             ASSERT_TRUE(id2TypeMap2.find(it.first) != id2TypeMap2.end());
             ASSERT_EQ(id2TypeMap1[it.first], id2TypeMap2[it.first]);
         }
+#endif
 
         // TODO: more tests
         //
