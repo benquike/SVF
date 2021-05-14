@@ -50,8 +50,8 @@ class SymbolTableInfo {
     using ValueToIDMapTy = OrderedMap<const Value *, SymID>;
     /// sym id to memory object map
     using IDToValueMapTy = OrderedMap<SymID, const Value *>;
-    using IDToMemMapTy = OrderedMap<SymID, const MemObj *>;
-    using MemToIDMapTy = OrderedMap<const MemObj *, SymID>;
+    using IDToMemObjMapTy = OrderedMap<SymID, const MemObj *>;
+    using MemObjToIDMapTy = OrderedMap<const MemObj *, SymID>;
 
     /// function to sym id map
     using FunToIDMapTy = OrderedMap<const Function *, SymID>;
@@ -72,12 +72,12 @@ class SymbolTableInfo {
     // node id allocator
     NodeIDAllocator nodeIDAllocator;
 
-    ValueToIDMapTy valSymToIdMap; ///< map a value to its sym id
-    IDToValueMapTy idToValSymMap; ///< map from its id to the pointer
-    ValueToIDMapTy objSymToIdMap; ///< map a obj reference to its sym id
-    IDToValueMapTy idToObjSymMap; ///< map from its id to obj symbol
-    IDToMemMapTy idToMemObjMap;   ///< map a memory sym id to its obj
-    MemToIDMapTy memObjToIdMap;
+    ValueToIDMapTy valSymToIdMap;  ///< map a value to its sym id
+    IDToValueMapTy idToValSymMap;  ///< map from its id to the pointer
+    ValueToIDMapTy objSymToIdMap;  ///< map a obj reference to its sym id
+    IDToValueMapTy idToObjSymMap;  ///< map from its id to obj symbol
+    IDToMemObjMapTy idToMemObjMap; ///< map a memory sym id to its obj
+    MemObjToIDMapTy memObjToIdMap;
 
     /// map a sym Id to its SVF symbol type,
     /// i.e., valsym or obj sym
@@ -351,7 +351,7 @@ class SymbolTableInfo {
 
     inline ValueToIDMapTy &objSymToId() { return objSymToIdMap; }
     inline IDToValueMapTy &idToObjSym() { return idToObjSymMap; }
-    inline IDToMemMapTy &idToMemObj() { return idToMemObjMap; }
+    inline IDToMemObjMapTy &idToMemObj() { return idToMemObjMap; }
     inline IDToValueMapTy &idToValSym() { return idToValSymMap; }
 
     inline FunToIDMapTy &retSymToId() { return retSymToIdMap; }
