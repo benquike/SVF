@@ -28,6 +28,21 @@ cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
 -DCMAKE_MODULE_LINKER_FLAGS="-fsanitize=address" ..
 ```
 
+To build with MSAN, use the following CMake command:
+
+``` sh
+CC=clang-10 CXX=clang++-10 LLVM_DIR=/usr/lib/llvm-10 \
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
+-DSVF_BUILD_UNITTESTS=On -DCMAKE_EXPORT_COMPILE_COMMANDS=On \
+-DCMAKE_CXX_FLAGS="-fno-omit-frame-pointer -fsanitize=memory -fsanitize-blacklist=`pwd`/../scripts/MyMSAN_ignore.txt" \
+-DCMAKE_C_FLAGS="-fno-omit-frame-pointer -fsanitize=memory -fsanitize-blacklist=`pwd`/../scripts/MyMSAN_ignore.txt" \
+-DCMAKE_MODULE_LINKER_FLAGS="-fsanitize=memory -fsanitize-blacklist=`pwd`/../scripts/MyMSAN_ignore.txt" \
+..
+```
+
+
+To export build commands, add the `-DCMAKE_EXPORT_COMPILE_COMMANDS=On` to the
+CMake command.
 
 ## Other CMake build parameters
 
