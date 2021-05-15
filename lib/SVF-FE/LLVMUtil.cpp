@@ -43,7 +43,7 @@ bool SVFUtil::isObject(const Value *ref, SVFModule *svfMod) {
     bool createobj = false;
     if (llvm::isa<Instruction>(ref) &&
         SVFUtil::isStaticExtCall(llvm::cast<Instruction>(ref), svfMod)) {
-        /// a call to external function
+        /// a CallInst to an external function
         createobj = true;
     } else if (llvm::isa<Instruction>(ref) &&
                SVFUtil::isHeapAllocExtCallViaRet(llvm::cast<Instruction>(ref),

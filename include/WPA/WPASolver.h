@@ -138,6 +138,7 @@ class WPASolver {
     //@{
     inline NodeID popFromWorklist() { return sccRepNode(worklist.pop()); }
 
+    /// save the representative node to the worklist
     virtual inline void pushIntoWorklist(NodeID id) {
         worklist.push(sccRepNode(id));
     }

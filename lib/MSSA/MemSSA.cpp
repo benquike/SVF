@@ -498,6 +498,8 @@ void MemSSA::dumpMSSA(raw_ostream &Out) {
     if (!Options::DumpMSSA)
         return;
 
+    spdlog::debug("Starting to dump MemSSA");
+
     PAG *pag = pta->getPAG();
 
     SVFModule *svfMod = pag->getModule();
@@ -595,4 +597,6 @@ void MemSSA::dumpMSSA(raw_ostream &Out) {
             }
         }
     }
+
+    spdlog::debug("Done dumping MemSSA");
 }

@@ -132,6 +132,7 @@ void ThreadCallGraph::updateJoinEdge(PointerAnalysis *pta) {
  * Add direct fork edges
  */
 void ThreadCallGraph::addDirectForkEdge(const CallBlockNode *cs) {
+    spdlog::debug("Start to add DirectForkEdge");
 
     PTACallGraphNode *caller = getCallGraphNode(cs->getCaller());
     const auto *forkee =
@@ -140,7 +141,9 @@ void ThreadCallGraph::addDirectForkEdge(const CallBlockNode *cs) {
     LLVMModuleSet *modSet = getPAG()->getModule()->getLLVMModSet();
     PTACallGraphNode *callee =
         getCallGraphNode(getDefFunForMultipleModule(modSet, forkee));
+
     CallSiteID csId = addCallSite(cs, callee->getFunction());
+    spdlog::debug("CallSiteID: {}", csId);
 
     auto flag = PTACallGraphEdge::makeEdgeFlagWithAuxInfo(
         PTACallGraphEdge::TDForkEdge, csId);
@@ -153,7 +156,12 @@ void ThreadCallGraph::addDirectForkEdge(const CallBlockNode *cs) {
 
         addGEdge(edge);
         addThreadForkEdgeSetMap(cs, edge);
+        spdlog::debug("a DirectForkEdge for callsite {} added", csId);
+    } else {
+        spdlog::debug("TDForkEdge for callsite {} exists, skipping", csId);
     }
+
+    spdlog::debug("Done adding DirectForkEdge");
 }
 
 /*!
@@ -161,10 +169,16 @@ void ThreadCallGraph::addDirectForkEdge(const CallBlockNode *cs) {
  */
 void ThreadCallGraph::addIndirectForkEdge(const CallBlockNode *cs,
                                           const SVFFunction *calleefun) {
+    spdlog::debug("Start to add IndirectForkEdge");
+
     PTACallGraphNode *caller = getCallGraphNode(cs->getCaller());
+    assert(nullptr != caller && "caller node is nullptr");
     PTACallGraphNode *callee = getCallGraphNode(calleefun);
+    assert(nullptr != callee && "callee node is nullptr");
 
     CallSiteID csId = addCallSite(cs, callee->getFunction());
+    spdlog::debug("CallSiteID: {}", csId);
+
     auto flag = PTACallGraphEdge::makeEdgeFlagWithAuxInfo(
         PTACallGraphEdge::TDForkEdge, csId);
 
@@ -177,7 +191,12 @@ void ThreadCallGraph::addIndirectForkEdge(const CallBlockNode *cs,
 
         addGEdge(edge);
         addThreadForkEdgeSetMap(cs, edge);
+        spdlog::debug("a InDirectForkEdge for callsite {} added", csId);
+    } else {
+        spdlog::debug("TDForkEdge for callsite {} exists, skipping", csId);
     }
+
+    spdlog::debug("Done adding IndirectForkEdge");
 }
 
 /*!
@@ -189,7 +208,7 @@ void ThreadCallGraph::addIndirectForkEdge(const CallBlockNode *cs,
  */
 void ThreadCallGraph::addDirectJoinEdge(const CallBlockNode *cs,
                                         const CallSiteSet &forkset) {
-
+    spdlog::debug("Start to add DirectJoinEdge");
     PTACallGraphNode *joinFunNode = getCallGraphNode(cs->getCaller());
 
     for (const auto *it : forkset) {
@@ -214,13 +233,14 @@ void ThreadCallGraph::addDirectJoinEdge(const CallBlockNode *cs,
             addThreadJoinEdgeSetMap(cs, edge);
         }
     }
+    spdlog::debug("Done adding DirectJoinEdge");
 }
 
 /*!
  * Add a direct ParFor edges
  */
 void ThreadCallGraph::addDirectParForEdge(const CallBlockNode *cs) {
-
+    spdlog::debug("Start to add DirectParForEdge");
     PTACallGraphNode *caller = getCallGraphNode(cs->getCaller());
     const auto *taskFunc = llvm::dyn_cast<Function>(
         tdAPI->getTaskFuncAtHareParForSite(cs->getCallSite()));
@@ -244,6 +264,7 @@ void ThreadCallGraph::addDirectParForEdge(const CallBlockNode *cs) {
         addGEdge(edge);
         addHareParForEdgeSetMap(cs, edge);
     }
+    spdlog::debug("Done adding DirectParForEdge");
 }
 
 /*!
@@ -251,7 +272,7 @@ void ThreadCallGraph::addDirectParForEdge(const CallBlockNode *cs) {
  */
 void ThreadCallGraph::addIndirectParForEdge(const CallBlockNode *cs,
                                             const SVFFunction *calleefun) {
-
+    spdlog::debug("Start to add IndirectParForEdge");
     PTACallGraphNode *caller = getCallGraphNode(cs->getCaller());
     PTACallGraphNode *callee = getCallGraphNode(calleefun);
 
@@ -269,4 +290,5 @@ void ThreadCallGraph::addIndirectParForEdge(const CallBlockNode *cs,
         addGEdge(edge);
         addHareParForEdgeSetMap(cs, edge);
     }
+    spdlog::debug("Done adding IndirectParForEdge");
 }

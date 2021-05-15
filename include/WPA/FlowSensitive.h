@@ -86,13 +86,17 @@ class FlowSensitive : public WPASVFGFSSolver, public BVDataPTAImpl {
     static FlowSensitive *createFSWPA(SVFProject *proj,
                                       bool virtualCallAnalaysis = false,
                                       bool threadCallGraph = false) {
+
         FlowSensitive *fspta = new FlowSensitive(proj);
+        spdlog::debug("Creating FlowSensitive PointerAnalysis Object");
         if (virtualCallAnalaysis) {
             fspta->enableVirtualCallAnalysis();
+            spdlog::debug("Enabling C++ virtual call analysis");
         }
 
         if (threadCallGraph) {
             fspta->buildThreadCallGraph();
+            spdlog::debug("Going to build ThreadCallGraph");
         }
 
         fspta->analyze();

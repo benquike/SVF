@@ -69,8 +69,11 @@ class SymbolTableInfo {
     /// struct type to struct info map
     using TypeToFieldInfoMap = OrderedMap<const Type *, StInfo *>;
     using CallSiteSet = Set<CallSite>;
+
+#if 0
     using CallSiteToIDMapTy = OrderedMap<const Instruction *, CallSiteID>;
     using IDToCallSiteMapTy = OrderedMap<CallSiteID, const Instruction *>;
+#endif
 
     //@}
 

@@ -270,6 +270,7 @@ class PTACallGraph : public GenericCallGraphTy {
 
     SVFProject *proj = nullptr;
 
+    /// shared_ptr<spdlog::logger> _logger;
     /// Clean up memory
     void destroy();
 
@@ -368,12 +369,16 @@ class PTACallGraph : public GenericCallGraphTy {
     //@{
     inline CallSiteID addCallSite(const CallBlockNode *cs,
                                   const SVFFunction *callee) {
-        std::pair<const CallBlockNode *, const SVFFunction *> newCS(
-            std::make_pair(cs, callee));
+        /// CallBlockNode (CallInstruction + callee)
+        std::pair<const CallBlockNode *, const SVFFunction *> newCS =
+            std::make_pair(cs, callee);
         auto it = csToIdMap.find(newCS);
         // assert(it == csToIdMap.end() && "cannot add a callsite twice");
         if (it == csToIdMap.end()) {
             CallSiteID id = ++totalCallSiteNum;
+            spdlog::debug("Adding callsite ({0}, {1}), id:{2}",
+                          fmt::ptr(cs->getCallSite()), callee->getName().str(),
+                          id);
             csToIdMap.insert(std::make_pair(newCS, id));
             idToCSMap.insert(std::make_pair(id, newCS));
             return id;
@@ -383,7 +388,7 @@ class PTACallGraph : public GenericCallGraphTy {
 
     inline CallSiteID getCallSiteID(const CallBlockNode *cs,
                                     const SVFFunction *callee) const {
-        CallSitePair newCS(std::make_pair(cs, callee));
+        CallSitePair newCS = std::make_pair(cs, callee);
         auto it = csToIdMap.find(newCS);
         assert(it != csToIdMap.end() &&
                "callsite id not found! This maybe a partially resolved "

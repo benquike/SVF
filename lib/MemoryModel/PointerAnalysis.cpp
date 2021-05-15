@@ -128,16 +128,19 @@ void PointerAnalysis::initialize() {
     auto pag = getPAG();
     assert(pag && "PAG has not been built!");
 
+    spdlog::debug("Creating Class Hierarchy Graph");
     if (chgraph == nullptr) {
         if (getSVFModule()->getLLVMModSet()->allCTir()) {
             DCHGraph *dchg = new DCHGraph(proj->getSymbolTableInfo());
             // TODO: we might want to have an option for extending.
             dchg->buildCHG(true);
             chgraph = dchg;
+            spdlog::debug("A DCHGraph was built");
         } else {
             CHGraph *chg = new CHGraph(proj->getSymbolTableInfo());
             chg->buildCHG();
             chgraph = chg;
+            spdlog::debug("A CHGraph was built");
         }
     }
 
@@ -159,11 +162,14 @@ void PointerAnalysis::initialize() {
 
     /// initialise pta call graph
     /// for every pointer analysis instance
+    spdlog::debug("Creating PTA Call Graph");
     bool includeThreadCall = Options::EnableThreadCallGraph || threadCallGraph;
     if (includeThreadCall) {
         ptaCallGraph = new ThreadCallGraph(proj);
+        spdlog::debug("a ThreadCallGraph built");
     } else {
         ptaCallGraph = new PTACallGraph(proj);
+        spdlog::debug("a PTACallGraph built");
     }
     /// build the callgraph with direct calls now
     /// indirect calls will be resolved in analyze method

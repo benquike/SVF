@@ -113,6 +113,7 @@ inline bool cmpPts(const PointsTo &lpts, const PointsTo &rpts) {
 }
 
 inline bool isIntrinsicFun(const Function *func) {
+    /// FIXME: why not use func->isIntrinsic()?
     if (func && (func->getIntrinsicID() == llvm::Intrinsic::donothing ||
                  func->getIntrinsicID() == llvm::Intrinsic::dbg_addr ||
                  func->getIntrinsicID() == llvm::Intrinsic::dbg_declare ||

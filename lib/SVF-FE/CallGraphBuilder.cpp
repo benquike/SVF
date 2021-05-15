@@ -45,6 +45,7 @@ PTACallGraph *CallGraphBuilder::buildCallGraph() {
     for (auto F = svfModule->llvmFunBegin(); F != E; ++F) {
         const SVFFunction *fun = modSet->getSVFFunction(*F);
         callgraph->addCallGraphNode(fun);
+        spdlog::debug("Added Node for : {0}", fun->getName().str());
     }
 
     /// Step 2. create edges by looking through the direct
@@ -65,6 +66,9 @@ PTACallGraph *CallGraphBuilder::buildCallGraph() {
                     const SVFFunction *caller = modSet->getSVFFunction(fun);
                     callgraph->addDirectCallGraphEdge(callBlockNode, caller,
                                                       callee);
+                    spdlog::debug("Added DirectCallEdge: {0} -> {1}",
+                                  caller->getName().str(),
+                                  callee->getName().str());
                 }
             }
             /// merge the ThreadCallGraphBuilder logic here
@@ -80,6 +84,8 @@ PTACallGraph *CallGraphBuilder::buildCallGraph() {
                     }
                     // indirect call to the start routine function
                     else {
+                        // here a call to addThreadForkEdgeSetMap
+                        // does nothing, if edge is nullptr
                         cg->addThreadForkEdgeSetMap(cs, nullptr);
                     }
                 } else if (tdAPI->isHareParFor(inst)) {

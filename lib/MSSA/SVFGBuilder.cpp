@@ -40,18 +40,22 @@ using namespace SVF;
 using namespace SVFUtil;
 
 SVFG *SVFGBuilder::buildPTROnlySVFG(BVDataPTAImpl *pta) {
+    spdlog::debug("Going to build PTROnlySVFG_OPT");
     return build(pta, VFG::PTRONLYSVFG_OPT);
 }
 
 SVFG *SVFGBuilder::buildPTROnlySVFGWithoutOPT(BVDataPTAImpl *pta) {
+    spdlog::debug("Going to build PTROnlySVFG");
     return build(pta, VFG::PTRONLYSVFG);
 }
 
 SVFG *SVFGBuilder::buildFullSVFG(BVDataPTAImpl *pta) {
+    spdlog::debug("Going to build FullSVFG_OPT");
     return build(pta, VFG::FULLSVFG_OPT);
 }
 
 SVFG *SVFGBuilder::buildFullSVFGWithoutOPT(BVDataPTAImpl *pta) {
+    spdlog::debug("Going to build FullSVFG");
     return build(pta, VFG::FULLSVFG);
 }
 
@@ -71,12 +75,14 @@ SVFG *SVFGBuilder::build(BVDataPTAImpl *pta, VFG::VFGK kind) {
     MemSSA *mssa = buildMSSA(
         pta, (VFG::PTRONLYSVFG == kind || VFG::PTRONLYSVFG_OPT == kind));
 
-    DBOUT(DGENERAL, outs() << pasMsg("Build Sparse Value-Flow Graph \n"));
     /// Note that we use callgraph from andersen analysis here
+    spdlog::debug("Starting to create SVFG");
     if (kind == VFG::FULLSVFG_OPT || kind == VFG::PTRONLYSVFG_OPT)
         svfg = new SVFGOPT(mssa, pta->getPAG(), kind);
     else
         svfg = new SVFG(mssa, pta->getPAG(), kind);
+    spdlog::debug("Done creating SVFG");
+
     buildSVFG();
 
     /// Update call graph using pre-analysis results
@@ -96,7 +102,7 @@ void SVFGBuilder::releaseMemory() { svfg->clearMSSA(); }
 
 MemSSA *SVFGBuilder::buildMSSA(BVDataPTAImpl *pta, bool ptrOnlyMSSA) {
 
-    DBOUT(DGENERAL, outs() << pasMsg("Build Memory SSA \n"));
+    spdlog::debug("Starting to build MemSSA object");
 
     auto *mssa = new MemSSA(pta, ptrOnlyMSSA);
 
@@ -106,17 +112,28 @@ MemSSA *SVFGBuilder::buildMSSA(BVDataPTAImpl *pta, bool ptrOnlyMSSA) {
     SVFModule *svfModule = mssa->getPTA()->getSVFModule();
     for (const auto *fun : *svfModule) {
 
-        if (isExtCall(fun))
+        spdlog::debug("Starting to build MemSSA on function: {}",
+                      fun->getName().str());
+
+        if (isExtCall(fun)) {
+            spdlog::debug("{} is an external function, skipping",
+                          fun->getName().str());
+
             continue;
+        }
 
         dt.recalculate(*fun->getLLVMFun());
         df.runOnDT(dt);
 
         mssa->buildMemSSA(*fun, &df, &dt);
+        spdlog::debug("Done building MemSSA on function: {}",
+                      fun->getName().str());
     }
 
     mssa->performStat();
     mssa->dumpMSSA();
+
+    spdlog::debug("Done building MemSSA object");
 
     return mssa;
 }

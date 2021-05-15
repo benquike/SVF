@@ -68,64 +68,103 @@ const std::string ConstraintEdge::toString() const {
  */
 void ConstraintGraph::buildCG() {
 
+    spdlog::debug("Start to build ConstraintGraph");
+
     // initialize nodes
+    int cnt = 0;
     for (auto &it : *pag) {
         addGNode(new ConstraintNode(it.first, pag));
+        cnt++;
     }
+    spdlog::debug("Added {} ConstraintNodes from PAG", cnt);
 
     // initialize edges
+    cnt = 0;
     PAGEdge::PAGEdgeSetTy &addrs = getPAGEdgeSet(PAGEdge::Addr);
     for (auto *edge : addrs) {
         addAddrCGEdge(edge->getSrcID(), edge->getDstID());
+        cnt++;
     }
+    spdlog::debug("Added {} AddrCGEdges from PAG Addr Edges", cnt);
 
+    cnt = 0;
     PAGEdge::PAGEdgeSetTy &copys = getPAGEdgeSet(PAGEdge::Copy);
     for (auto *edge : copys) {
         addCopyCGEdge(edge->getSrcID(), edge->getDstID());
+        cnt++;
     }
+    spdlog::debug("Added {} CopyCGEdges from PAG Copy Edges", cnt);
 
+    cnt = 0;
     PAGEdge::PAGEdgeSetTy &calls = getPAGEdgeSet(PAGEdge::Call);
     for (auto *edge : calls) {
+        /// Is this correct?
         addCopyCGEdge(edge->getSrcID(), edge->getDstID());
+        cnt++;
     }
+    spdlog::debug("Added {} CopyCGEdges from PAG Call Edges", cnt);
 
+    cnt = 0;
     PAGEdge::PAGEdgeSetTy &rets = getPAGEdgeSet(PAGEdge::Ret);
     for (auto *edge : rets) {
         addCopyCGEdge(edge->getSrcID(), edge->getDstID());
+        cnt++;
     }
+    spdlog::debug("Added {} CopyCGEdges from PAG Ret Edges", cnt);
 
+    cnt = 0;
     PAGEdge::PAGEdgeSetTy &tdfks = getPAGEdgeSet(PAGEdge::ThreadFork);
     for (auto *edge : tdfks) {
         addCopyCGEdge(edge->getSrcID(), edge->getDstID());
+        cnt++;
     }
+    spdlog::debug("Added {} CopyCGEdges from PAG ThreadFork Edges", cnt);
 
+    cnt = 0;
     PAGEdge::PAGEdgeSetTy &tdjns = getPAGEdgeSet(PAGEdge::ThreadJoin);
     for (auto *edge : tdjns) {
         addCopyCGEdge(edge->getSrcID(), edge->getDstID());
+        cnt++;
     }
+    spdlog::debug("Added {} CopyCGEdges from PAG ThreadJoin Edges", cnt);
 
+    cnt = 0;
     PAGEdge::PAGEdgeSetTy &ngeps = getPAGEdgeSet(PAGEdge::NormalGep);
     for (auto *ngep : ngeps) {
         auto *edge = llvm::cast<NormalGepPE>(ngep);
         addNormalGepCGEdge(edge->getSrcID(), edge->getDstID(),
                            edge->getLocationSet());
-    }
 
+        cnt++;
+    }
+    spdlog::debug("Added {} NormalGepCGEdges from PAG NormalGep Edges", cnt);
+
+    cnt = 0;
     PAGEdge::PAGEdgeSetTy &vgeps = getPAGEdgeSet(PAGEdge::VariantGep);
     for (auto *vgep : vgeps) {
         auto *edge = llvm::cast<VariantGepPE>(vgep);
         addVariantGepCGEdge(edge->getSrcID(), edge->getDstID());
+        cnt++;
     }
+    spdlog::debug("Added {} VariantGepCGEdges from PAG VariantGep Edges", cnt);
 
+    cnt = 0;
     PAGEdge::PAGEdgeSetTy &stores = getPAGEdgeSet(PAGEdge::Load);
     for (auto *edge : stores) {
         addLoadCGEdge(edge->getSrcID(), edge->getDstID());
+        cnt++;
     }
+    spdlog::debug("Adding {} LoadCGEdges from PAG Load Edges", cnt);
 
+    cnt = 0;
     PAGEdge::PAGEdgeSetTy &loads = getPAGEdgeSet(PAGEdge::Store);
     for (auto *edge : loads) {
         addStoreCGEdge(edge->getSrcID(), edge->getDstID());
+        cnt++;
     }
+    spdlog::debug("Adding {} StoreCGEdges from PAG Store Edges", cnt);
+
+    spdlog::debug("Done building ConstraintGraph");
 }
 
 /*!

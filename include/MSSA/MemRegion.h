@@ -275,7 +275,7 @@ class MRGenerator {
     /// Map a condition pts to its rep conditional pts (super set points-to)
     PtsToRepPtsSetMap cptsToRepCPtsMap;
 
-    /// Generate a memory region and put in into functions which use it
+    /// Generate a memory region and put it into functions which use it
     void createMR(const SVFFunction *fun, const PointsTo &cpts);
 
     /// Collect all global variables for later escape analysis

@@ -117,6 +117,8 @@ bool PTACallGraphNode::isReachableFromProgEntry() const {
 PTACallGraph::PTACallGraph(SVFProject *proj, CGEK k)
     : kind(k), pag(proj->getPAG()), proj(proj) {
     numOfResolvedIndCallEdge = 0;
+    // auto sink = std::make_shared<spdlog::sinks::stdout_sink_mt>();
+    // _logger= std::make_shared<spdlog::logger>("PTACallGraph", sink);
 }
 
 /*!
@@ -139,11 +141,15 @@ void PTACallGraph::addCallGraphNode(const SVFFunction *fun) {
 void PTACallGraph::addDirectCallGraphEdge(const CallBlockNode *cs,
                                           const SVFFunction *callerFun,
                                           const SVFFunction *calleeFun) {
+    spdlog::debug("Start to add DirectGraphEdge");
 
     PTACallGraphNode *caller = getCallGraphNode(callerFun);
+    assert(nullptr != caller && "caller node is nullptr");
     PTACallGraphNode *callee = getCallGraphNode(calleeFun);
+    assert(nullptr != callee && "callee node is nullptr");
 
     CallSiteID csId = addCallSite(cs, callee->getFunction());
+    spdlog::debug("CallSiteID: {}", csId);
 
     auto flag = PTACallGraphEdge::makeEdgeFlagWithAuxInfo(
         PTACallGraphEdge::CallRetEdge, csId);
@@ -153,7 +159,13 @@ void PTACallGraph::addDirectCallGraphEdge(const CallBlockNode *cs,
         edge->addDirectCallSite(cs);
         addGEdge(edge);
         callinstToCallGraphEdgesMap[cs].insert(edge);
+        spdlog::debug("a DirectCallGraphEdge for callsite {} added", csId);
+    } else {
+        spdlog::debug("DirectCallGraphEdge for callsite {} exists, skipping",
+                      csId);
     }
+
+    spdlog::debug("Done adding DirectGraphEdge");
 }
 
 /*!
@@ -162,13 +174,16 @@ void PTACallGraph::addDirectCallGraphEdge(const CallBlockNode *cs,
 void PTACallGraph::addIndirectCallGraphEdge(const CallBlockNode *cs,
                                             const SVFFunction *callerFun,
                                             const SVFFunction *calleeFun) {
-
+    spdlog::debug("Start to add IndirectCallGraphEdge");
     PTACallGraphNode *caller = getCallGraphNode(callerFun);
+    assert(nullptr != caller && "caller node is nullptr");
     PTACallGraphNode *callee = getCallGraphNode(calleeFun);
+    assert(nullptr != callee && "callee node is nullptr");
 
     numOfResolvedIndCallEdge++;
 
     CallSiteID csId = addCallSite(cs, callee->getFunction());
+    spdlog::debug("CallSiteID: {}", csId);
     auto flag = PTACallGraphEdge::makeEdgeFlagWithAuxInfo(
         PTACallGraphEdge::CallRetEdge, csId);
     if (getGEdge(caller, callee, flag) == nullptr) {
@@ -177,7 +192,12 @@ void PTACallGraph::addIndirectCallGraphEdge(const CallBlockNode *cs,
         edge->addInDirectCallSite(cs, proj);
         addGEdge(edge);
         callinstToCallGraphEdgesMap[cs].insert(edge);
+        spdlog::debug("an IndirectCallGraphEdge for callsite {} added", csId);
+    } else {
+        spdlog::debug("IndirectCallGraphEdge for callsite {} exists, skipping",
+                      csId);
     }
+    spdlog::debug("Done adding IndirectCallGraphEdge");
 }
 
 /*!

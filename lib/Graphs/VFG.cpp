@@ -338,11 +338,15 @@ PHIVFGNode::PHIVFGNode(NodeID id, const PAGNode *r, VFGNodeK k)
 VFG::VFG(PTACallGraph *cg, PAG *pag, VFGK k)
     : callgraph(cg), pag(pag), kind(k) {
 
-    DBOUT(DGENERAL, outs() << pasMsg("\tCreate VFG Top Level Node\n"));
+    spdlog::debug("Starting to build VFG");
+
+    spdlog::debug("Create VFG Top Level Node");
     addVFGNodes();
 
-    DBOUT(DGENERAL, outs() << pasMsg("\tCreate SVFG Direct Edge\n"));
+    spdlog::debug("Create VFG Direct Edge");
     connectDirectVFGEdges();
+
+    spdlog::debug("Done building VFG");
 }
 
 /*!

@@ -58,8 +58,8 @@ class PointerAnalysis {
         Andersen_BASE,    ///< Base Andersen PTA
         Andersen_WPA,     ///< Andersen PTA
         AndersenLCD_WPA,  ///< Lazy cycle detection andersen-style WPA
-        AndersenHCD_WPA,  ///< Hybird cycle detection andersen-style WPA
-        AndersenHLCD_WPA, ///< Hybird lazy cycle detection andersen-style WPA
+        AndersenHCD_WPA,  ///< Hybrid cycle detection andersen-style WPA
+        AndersenHLCD_WPA, ///< Hybrid lazy cycle detection andersen-style WPA
         AndersenSCD_WPA,  ///< Selective cycle detection andersen-style WPA
         AndersenSFR_WPA,  ///< Stride-based field representation
         AndersenWaveDiff_WPA, ///< Diff wave propagation andersen-style WPA
@@ -369,6 +369,7 @@ class PointerAnalysis {
     //@{
     /// CallGraph SCC detection
     inline void callGraphSCCDetection() {
+        spdlog::debug("Create PTA CallGraph SCC Object and detect SCCs");
         if (callGraphSCC == nullptr)
             callGraphSCC = new CallGraphSCC(ptaCallGraph);
 

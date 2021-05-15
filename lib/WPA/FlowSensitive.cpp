@@ -44,9 +44,13 @@ using namespace SVFUtil;
 void FlowSensitive::initialize() {
     PointerAnalysis::initialize();
 
+    spdlog::debug("Starting to create AndersenWaveDiff PTA object");
     ander = AndersenWaveDiff::createAndersenWaveDiff(getSVFProject());
+    spdlog::debug("Done creating AndersenWaveDiff PTA object");
 
     // When evaluating ctir aliases, we want the whole SVFG.
+    // This part of the code initialize the WPA solver
+    spdlog::debug("Starting to build SVFG graph and initialize WPASolver");
     if (Options::OPTSVFG)
         svfg = Options::CTirAliasEval ? svfgBuilder.buildFullSVFG(ander)
                                       : svfgBuilder.buildPTROnlySVFG(ander);
@@ -54,6 +58,7 @@ void FlowSensitive::initialize() {
         svfg = svfgBuilder.buildPTROnlySVFGWithoutOPT(ander);
 
     setGraph(svfg);
+    spdlog::debug("Done building SVFG graph and initializing WPASolver");
 
     // AndersenWaveDiff::releaseAndersenWaveDiff();
     stat = new FlowSensitiveStat(this);
@@ -79,10 +84,12 @@ void FlowSensitive::analyze() {
 
     double start = stat->getClk(true);
     /// Start solving constraints
-    DBOUT(DGENERAL, outs() << SVFUtil::pasMsg("Start Solving Constraints\n"));
+    spdlog::debug("Start Solving Constraints");
 
     do {
         numOfIteration++;
+
+        spdlog::debug("--> Iteration {}", numOfIteration);
 
         if (0 == numOfIteration % OnTheFlyIterBudgetForStat)
             dumpStat();
@@ -93,7 +100,7 @@ void FlowSensitive::analyze() {
         solveWorklist();
     } while (updateCallGraph(getIndirectCallsites()));
 
-    DBOUT(DGENERAL, outs() << SVFUtil::pasMsg("Finish Solving Constraints\n"));
+    spdlog::debug("Finish Solving Constraints");
 
     double end = stat->getClk(true);
     solveTime += (end - start) / TIMEINTERVAL;

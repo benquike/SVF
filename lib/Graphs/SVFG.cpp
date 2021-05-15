@@ -229,20 +229,20 @@ void SVFG::destroy() {
  */
 
 void SVFG::buildSVFG() {
-    DBOUT(DGENERAL, outs() << pasMsg("Build Sparse Value-Flow Graph \n"));
+    spdlog::debug("Starting to build SVFG (Sparse Value-Flow Graph)");
     stat->startClk();
-
-    DBOUT(DGENERAL, outs() << pasMsg("\tCreate SVFG Addr-taken Node\n"));
 
     stat->ATVFNodeStart();
     addSVFGNodesForAddrTakenVars();
     stat->ATVFNodeEnd();
 
-    DBOUT(DGENERAL, outs() << pasMsg("\tCreate SVFG Indirect Edge\n"));
+    spdlog::debug("Create SVFG Indirect Edge");
 
     stat->indVFEdgeStart();
     connectIndirectSVFGEdges();
     stat->indVFEdgeEnd();
+
+    spdlog::debug("Done building SVFG (Sparse Value-Flow Graph)");
 }
 
 /*
@@ -250,7 +250,9 @@ void SVFG::buildSVFG() {
  */
 void SVFG::addSVFGNodesForAddrTakenVars() {
 
+    spdlog::debug("Starting to create SVFG Addr-taken Nodes");
     // set defs for address-taken vars defined at store statements
+    spdlog::debug("Handling Store edges in PAG");
     PAGEdge::PAGEdgeSetTy &stores = getPAGEdgeSet(PAGEdge::Store);
     for (auto *iter : stores) {
         auto *store = llvm::cast<StorePE>(iter);
@@ -263,35 +265,46 @@ void SVFG::addSVFGNodesForAddrTakenVars() {
     /// set defs for address-taken vars defined at phi/chi/call
     /// create corresponding def and use nodes for address-taken vars (a.k.a
     /// MRVers) initialize memory SSA phi nodes (phi of address-taken variables)
+    spdlog::debug("Handling phi defs in MemSSA");
     for (auto &it : mssa->getBBToPhiSetMap()) {
         for (auto *pi : it.second) {
             addIntraMSSAPHISVFGNode(pi);
         }
     }
+
     /// initialize memory SSA entry chi nodes
+    spdlog::debug("Handling fun EntryChi defs in MemSSA");
     for (auto &it : mssa->getFunToEntryChiSetMap()) {
         for (auto *pi : it.second) {
             addFormalINSVFGNode(llvm::cast<ENTRYCHI>(pi));
         }
     }
+
     /// initialize memory SSA return mu nodes
+    spdlog::debug("Handling fun RetMu defs in MemSSA");
     for (auto &it : mssa->getFunToRetMuSetMap()) {
         for (auto *pi : it.second) {
             addFormalOUTSVFGNode(llvm::cast<RETMU>(pi));
         }
     }
+
     /// initialize memory SSA callsite mu nodes
+    spdlog::debug("Handling fun CallSite to MuSet in MemSSA");
     for (auto &it : mssa->getCallSiteToMuSetMap()) {
         for (auto *pi : it.second) {
             addActualINSVFGNode(llvm::cast<CALLMU>(pi));
         }
     }
+
     /// initialize memory SSA callsite chi nodes
+    spdlog::debug("Handling fun CallSite to ChiSet in MemSSA");
     for (auto &it : mssa->getCallSiteToChiSetMap()) {
         for (auto *pi : it.second) {
             addActualOUTSVFGNode(llvm::cast<CALLCHI>(pi));
         }
     }
+
+    spdlog::debug("Done creating SVFG Addr-taken Nodes");
 }
 
 /*

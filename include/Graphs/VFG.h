@@ -220,6 +220,9 @@ class VFG : public GenericVFG {
     //@{
     inline CallSiteID getCallSiteID(const CallBlockNode *cs,
                                     const SVFFunction *func) const {
+        spdlog::debug("trying to get csId of ({0}, {1}), caller:{2}",
+                      fmt::ptr(cs->getCallSite()), func->getName().str(),
+                      cs->getCaller()->getName().str());
         return callgraph->getCallSiteID(cs, func);
     }
     inline const CallBlockNode *getCallSite(CallSiteID id) const {

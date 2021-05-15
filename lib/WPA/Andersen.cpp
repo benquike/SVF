@@ -60,8 +60,14 @@ void AndersenBase::initialize() {
     /// Build PAG
     PointerAnalysis::initialize();
     /// Build Constraint Graph
+    /// initialize the constraint graph
+    /// and WPASolver
+    spdlog::debug("Start to build a ConstraintGraph");
     consCG = new ConstraintGraph(getPAG());
+    spdlog::debug("Done building a ConstraintGraph");
+
     setGraph(consCG);
+
     /// Create statistic class
     stat = new AndersenStat(this);
     if (Options::ConsCGDotGraph)

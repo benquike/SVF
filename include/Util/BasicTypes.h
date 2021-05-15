@@ -272,6 +272,8 @@ raw_ostream &operator<<(raw_ostream &o, const std::pair<F, S> &var) {
 } // End namespace SVF
 
 #define SPDLOG_FUNCTION __PRETTY_FUNCTION__
+#include "spdlog/sinks/stdout_color_sinks.h"
+#include "spdlog/sinks/stdout_sinks.h"
 #include "spdlog/spdlog.h"
 
 /// Specialise hash for CallSites.
