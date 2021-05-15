@@ -43,6 +43,25 @@ TEST(SerializationTestSuite, BS_Test) {
             ASSERT_FALSE(bs.test(us));
         }
     }
+
+    {
+        NodeBS bs;
+
+        bs.set(1);
+
+        for (auto it : bs) {
+            llvm::outs() << it << "\n";
+        }
+        llvm::outs() << "========== \n";
+
+        bs.reset(1);
+        for (auto it : bs) {
+            llvm::outs() << it << "\n";
+        }
+
+        llvm::outs() << "========== \n";
+    }
+
 #endif
 
 #if 0
