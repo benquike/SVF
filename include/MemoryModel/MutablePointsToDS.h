@@ -131,9 +131,8 @@ class MutablePTData : public PTData<Key, KeySet, Data, DataSet> {
 
     inline void addRevPts(const DataSet &ptsData, const Key &tgr) {
         if (this->rev) {
-            for (iterator it = ptsData.begin(), eit = ptsData.end(); it != eit;
-                 ++it)
-                addSingleRevPts(revPtsMap[*it], tgr);
+            for (auto it : ptsData)
+                addSingleRevPts(revPtsMap[it], tgr);
         }
     }
     ///@}

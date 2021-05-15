@@ -188,11 +188,8 @@ void Andersen::handleCopyGep(ConstraintNode *node) {
  */
 void Andersen::handleLoadStore(ConstraintNode *node) {
     NodeID nodeId = node->getId();
-    for (PointsTo::iterator piter = getPts(nodeId).begin(),
-                            epiter = getPts(nodeId).end();
-         piter != epiter; ++piter) {
-        NodeID ptd = *piter;
-        // handle load
+    auto pts = getPts(nodeId);
+    for (NodeID ptd : pts) {
         for (auto it = node->outgoingLoadsBegin(),
                   eit = node->outgoingLoadsEnd();
              it != eit; ++it) {
