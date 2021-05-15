@@ -49,6 +49,19 @@ using GenericICFG = GenericICFGTy;
 
 /*!
  * Interprocedural Control-Flow Graph (ICFG)
+ *
+ * Representation of Control flow graph:
+ *
+ * - Each LLVM function has a virtual FunEntryBlockNode
+ *   and FunExitBlockNode
+ *
+ * - Each non-call instruction in an LLVM function is
+ *   represented as an IntraBlockNode.
+ *
+ *  - Each call instruction is handled by 2 nodes:
+ *    + a CallBlockNode, and
+ *    + a RetBlockNode
+ *    Inidrect calls are not handled.
  */
 class ICFG : public GenericICFG {
 

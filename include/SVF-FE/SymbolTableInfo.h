@@ -38,6 +38,12 @@ namespace SVF {
 
 /*!
  * Symbol table of the memory model for analysis
+ * Symbols are roughly divided into
+ * 1. value symbol (valsym), i.e., pointers
+ * 2. object symbol (objsym), i.e. a momory object.
+ *
+ * Additionally, the SymbolTable also collect struct info
+ * and variadic arguments and return values of functions.
  */
 class SymbolTableInfo {
 
@@ -54,6 +60,8 @@ class SymbolTableInfo {
     using MemObjToIDMapTy = OrderedMap<const MemObj *, SymID>;
 
     /// function to sym id map
+    /// These types are used to save RetVal
+    /// and VarargVal symbols
     using FunToIDMapTy = OrderedMap<const Function *, SymID>;
     using IDToFunMapTy = OrderedMap<SymID, const Function *>;
     /// sym id to sym type map

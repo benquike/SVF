@@ -121,7 +121,7 @@ void PointerAnalysis::destroy() {
  * Initialization of pointer analysis
  * 1. build class hierarchy graph
  * 2. build PTA callgraph
- *
+ * 3. initialize the PTACallGraphSCCDetector
  */
 void PointerAnalysis::initialize() {
 

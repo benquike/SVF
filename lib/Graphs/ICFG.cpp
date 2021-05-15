@@ -178,12 +178,7 @@ const std::string RetCFGEdge::toString() const {
 }
 
 /*!
- * Constructor
- *  * Build ICFG
- * 1) build ICFG nodes
- *    statements for top level pointers (PAGEdges)
- * 2) connect ICFG edges
- *    between two statements (PAGEdges)
+ * Constructor: create ICFG and build it
  */
 ICFG::ICFG(PAG *pag) : pag(pag) {
     DBOUT(DGENERAL, outs() << pasMsg("\tCreate ICFG ...\n"));
@@ -192,6 +187,9 @@ ICFG::ICFG(PAG *pag) : pag(pag) {
     buildICFG();
 }
 
+/*!
+ * Build the ICFG using ICFGBuilder
+ */
 void ICFG::buildICFG() {
     ICFGBuilder builder(this);
     builder.build();

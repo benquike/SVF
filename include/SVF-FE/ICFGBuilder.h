@@ -36,6 +36,11 @@
 
 namespace SVF {
 
+/*!
+ *  \class ICFGBuilder
+ *
+ *  A helper class for building ICFG of the target program
+ */
 class ICFGBuilder {
 
   public:

@@ -40,7 +40,8 @@ using namespace SVF;
 using namespace SVFUtil;
 
 /*!
- * Create ICFG nodes and edges
+ * Create ICFG nodes and edges for each
+ * function in SVF Module
  */
 void ICFGBuilder::build() {
     for (const auto *fun : *icfg->getPAG()->getModule()) {
@@ -58,6 +59,7 @@ void ICFGBuilder::build() {
  * function entry
  */
 void ICFGBuilder::processFunEntry(const SVFFunction *fun, WorkList &worklist) {
+
     FunEntryBlockNode *FunEntryBlockNode = icfg->getFunEntryBlockNode(fun);
     const Instruction *entryInst =
         &((fun->getLLVMFun()->getEntryBlock()).front());
@@ -86,6 +88,9 @@ void ICFGBuilder::processFunBody(WorkList &worklist) {
         if (visited.find(inst) == visited.end()) {
             visited.insert(inst);
             ICFGNode *srcNode = getOrAddBlockICFGNode(inst);
+
+            /// If this is a return instruction, create an IntraEdge
+            /// connecting the IntraBlockNode and the FunExitBlockNode
             if (isReturn(inst)) {
                 const Function *fun = inst->getFunction();
                 const SVFFunction *svfFun = modSet->getSVFFunction(fun);
@@ -149,6 +154,7 @@ ICFGBuilder::getOrAddInterBlockICFGNode(const Instruction *inst) {
            "associating an intrinsic debug instruction with an ICFGNode!");
     LLVMModuleSet *modSet = icfg->getPAG()->getModule()->getLLVMModSet();
     CallBlockNode *callICFGNode = getOrAddCallICFGNode(inst);
+    /// only handle direct calls
     if (const SVFFunction *callee = getCallee(modSet, inst))
         addICFGInterEdges(inst, callee); // creating interprocedural edges
     return callICFGNode;
@@ -156,6 +162,9 @@ ICFGBuilder::getOrAddInterBlockICFGNode(const Instruction *inst) {
 
 /*!
  * Create edges between ICFG nodes across functions
+ * 1. add a call edge connecting the CallBlockNode and FunEntryBlockNode
+ * 2. if the callee is not an external function, also a RetBlockNode,
+ *    a return edge connecting the FunExitBlockNode and the new RetBlockNode
  */
 void ICFGBuilder::addICFGInterEdges(const Instruction *cs,
                                     const SVFFunction *callee) {

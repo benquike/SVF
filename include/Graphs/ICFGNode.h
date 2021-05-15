@@ -297,7 +297,7 @@ class CallBlockNode : public InterBlockNode {
     const Instruction *cs = nullptr;
     const RetBlockNode *ret = nullptr;
     const SVFModule *svfMod = nullptr;
-    ActualParmVFGNodeVec APNodes;
+    ActualParmVFGNodeVec APNodes; /// < the arguments passed in
 
   public:
     CallBlockNode(NodeID id, const Instruction *c, SVFModule *svfMod)

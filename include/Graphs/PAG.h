@@ -116,9 +116,18 @@ class PAG : public GenericPAG {
 
     CallSiteToFunPtrMap indCallSiteToFunPtrMap; ///< Map an indirect callsite to
                                                 ///< its function pointer
+                                                ///< CallBlockNode -> SymId
+                                                ///< of the called
+                                                ///< value (function ptr)
     FunPtrToCallSitesMap
-        funPtrToCallSitesMap; ///< Map a function pointer to the callsites where
-                              ///< it is used
+        funPtrToCallSitesMap; ///< Map SymID of a function ptr (an llvm value)
+                              ///< to the callsites where
+                              ///< it is used the reverse mapping of
+                              ///< indCallSiteToFunPtrMap
+                              ///< Note, the same value may be called at
+                              ///< multiple locations, thus the value is a set
+                              ///< of CallBlockNode
+
     bool fromFile; ///< Whether the PAG is built according to user specified
                    ///< data from a txt file
     /// Valid pointers for pointer analysis resolution connected by PAG edges
