@@ -372,11 +372,21 @@ class AndersenWaveDiff : public Andersen {
                               bool alias_check = true)
         : Andersen(proj, type, alias_check) {}
 
-    /// Create an singleton instance directly instead of invoking llvm pass
-    /// manager
-    static AndersenWaveDiff *createAndersenWaveDiff(SVFProject *proj) {
+    /// Create a new instance of AndersenWaveDiff
+    static AndersenWaveDiff *
+    createAndersenWaveDiff(SVFProject *proj, bool virtualCallAnalaysis = false,
+                           bool threadCallGraph = false) {
         AndersenWaveDiff *diffWave =
             new AndersenWaveDiff(proj, AndersenWaveDiff_WPA, false);
+
+        if (virtualCallAnalaysis) {
+            diffWave->enableVirtualCallAnalysis();
+        }
+
+        if (threadCallGraph) {
+            diffWave->buildThreadCallGraph();
+        }
+
         diffWave->analyze();
         return diffWave;
     }
