@@ -239,7 +239,9 @@ void DDAStat::performStat() {
     PTNumStatMap["MemoryUsageVmrss"] = _vmrssUsageAfter - _vmrssUsageBefore;
     PTNumStatMap["MemoryUsageVmsize"] = _vmsizeUsageAfter - _vmsizeUsageBefore;
 
-    printStat();
+    if (statEnabled()) {
+        printStat();
+    }
 }
 
 void DDAStat::printStatPerQuery(NodeID ptr, const PointsTo &pts) {
@@ -273,6 +275,8 @@ void DDAStat::printStat() {
             contextDDA->getInsensitiveEdgeSet());
     }
 
-    std::cout << "\n****Demand-Driven Pointer Analysis Statistics****\n";
-    PTAStat::printStat();
+    if (statEnabled()) {
+        std::cout << "\n****Demand-Driven Pointer Analysis Statistics****\n";
+        PTAStat::printStat();
+    }
 }

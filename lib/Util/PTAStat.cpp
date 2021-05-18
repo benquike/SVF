@@ -243,7 +243,9 @@ void PTAStat::performStat() {
     bitcastInstStat();
     branchStat();
 
-    printStat("General Stats");
+    if (statEnabled()) {
+        printStat("General Stats");
+    }
 }
 
 void PTAStat::callgraphStat() {
@@ -295,7 +297,9 @@ void PTAStat::callgraphStat() {
     PTNumStatMap["TotalEdge"] = totalEdge;
     PTNumStatMap["CalRetPairInCycle"] = edgeInCycle;
 
-    PTAStat::printStat("CallGraph Stats");
+    if (statEnabled()) {
+        PTAStat::printStat("CallGraph Stats");
+    }
 
     delete callgraphSCC;
 }

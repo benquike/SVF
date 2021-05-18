@@ -30,6 +30,7 @@
 #include "Graphs/SVFGStat.h"
 #include "Graphs/PTACallGraph.h"
 #include "Graphs/SVFG.h"
+#include "Util/Options.h"
 
 using namespace SVF;
 
@@ -144,8 +145,10 @@ void MemSSAStat::performStat() {
  */
 void MemSSAStat::printStat() {
 
-    std::cout << "\n****Memory SSA Statistics****\n";
-    PTAStat::printStat();
+    if (statEnabled()) {
+        std::cout << "\n****Memory SSA Statistics****\n";
+        PTAStat::printStat();
+    }
 }
 
 /*!
@@ -492,13 +495,17 @@ void SVFGStat::performSCCStat(SVFGEdgeSet insensitiveCalRetEdges) {
     PTNumStatMap["RetEdgeInCycle"] = retEdgeInCycle;
     PTNumStatMap["InsenRetEdge"] = insensitiveRetEdge;
 
-    std::cout << "\n****SVFG SCC Stat****\n";
-    PTAStat::printStat();
+    if (statEnabled()) {
+        std::cout << "\n****SVFG SCC Stat****\n";
+        PTAStat::printStat();
+    }
 
     delete svfgSCC;
 }
 
 void SVFGStat::printStat() {
-    std::cout << "\n****SVFG Statistics****\n";
-    PTAStat::printStat();
+    if (statEnabled()) {
+        std::cout << "\n****SVFG Statistics****\n";
+        PTAStat::printStat();
+    }
 }

@@ -487,4 +487,12 @@ llvm::cl::bits<WPAPass::AliasCheckRule> Options::AliasRule(
                      clEnumValN(WPAPass::Veto, "veto",
                                 "return NoAlias if any pta says no alias")));
 
+static bool __statEnabled = false;
+
+void enableStat() { __statEnabled = true; }
+
+void disableStat() { __statEnabled = false; }
+
+bool statEnabled() { return __statEnabled; }
+
 }; // namespace SVF.

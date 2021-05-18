@@ -267,8 +267,10 @@ void FlowSensitiveStat::performStat() {
             ? 0
             : ((double)fspta->numOfNodesInSCC / fspta->numOfSCC);
 
-    std::cout << "\n****Flow-Sensitive Pointer Analysis Statistics****\n";
-    PTAStat::printStat();
+    if (statEnabled()) {
+        std::cout << "\n****Flow-Sensitive Pointer Analysis Statistics****\n";
+        PTAStat::printStat();
+    }
 }
 
 void FlowSensitiveStat::statNullPtr() {

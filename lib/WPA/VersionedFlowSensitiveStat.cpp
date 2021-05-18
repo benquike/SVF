@@ -150,9 +150,11 @@ void VersionedFlowSensitiveStat::performStat() {
             ? 0
             : ((double)vfspta->numOfNodesInSCC / vfspta->numOfSCC);
 
-    std::cout
-        << "\n****Versioned Flow-Sensitive Pointer Analysis Statistics****\n";
-    PTAStat::printStat();
+    if (statEnabled()) {
+        std::cout << "\n****Versioned Flow-Sensitive Pointer Analysis "
+                     "Statistics****\n";
+        PTAStat::printStat();
+    }
 }
 
 void VersionedFlowSensitiveStat::versionStat(void) {

@@ -202,6 +202,11 @@ class Options {
     static llvm::cl::bits<PointerAnalysis::PTATY> PASelected;
     static llvm::cl::bits<WPAPass::AliasCheckRule> AliasRule;
 };
+
+void enableStat();
+void disableStat();
+bool statEnabled();
+
 }; // namespace SVF
 
 #endif // ifdef OPTIONS_H_
