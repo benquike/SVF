@@ -27,10 +27,16 @@
  *      Author: Yulei Sui
  */
 
+#include "boost/algorithm/string/trim.hpp"
+#include "boost/filesystem.hpp"
+
 #include "SVF-FE/LLVMUtil.h"
 #include "llvm/Support/JSON.h"
 
 using namespace SVF;
+
+namespace SVF {
+namespace SVFUtil {
 
 /*!
  * A value represents an object if it is
@@ -39,15 +45,14 @@ using namespace SVF;
  * 3) stack
  * 4) heap
  */
-bool SVFUtil::isObject(const Value *ref, SVFModule *svfMod) {
+bool isObject(const Value *ref, SVFModule *svfMod) {
     bool createobj = false;
     if (llvm::isa<Instruction>(ref) &&
-        SVFUtil::isStaticExtCall(llvm::cast<Instruction>(ref), svfMod)) {
+        isStaticExtCall(llvm::cast<Instruction>(ref), svfMod)) {
         /// a call to external function
         createobj = true;
     } else if (llvm::isa<Instruction>(ref) &&
-               SVFUtil::isHeapAllocExtCallViaRet(llvm::cast<Instruction>(ref),
-                                                 svfMod)) {
+               isHeapAllocExtCallViaRet(llvm::cast<Instruction>(ref), svfMod)) {
         // a call to heap allocation function
         createobj = true;
     } else if (llvm::isa<GlobalVariable>(ref)) {
@@ -64,9 +69,8 @@ bool SVFUtil::isObject(const Value *ref, SVFModule *svfMod) {
 /*!
  * Return reachable bbs from function entry
  */
-void SVFUtil::getFunReachableBBs(
-    const Function *fun, DominatorTree *dt,
-    std::vector<const BasicBlock *> &reachableBBs) {
+void getFunReachableBBs(const Function *fun, DominatorTree *dt,
+                        std::vector<const BasicBlock *> &reachableBBs) {
     Set<const BasicBlock *> visited;
     std::vector<const BasicBlock *> bbVec;
     bbVec.push_back(&fun->getEntryBlock());
@@ -91,7 +95,7 @@ void SVFUtil::getFunReachableBBs(
  * Return true if the function has a return instruction reachable from function
  * entry
  */
-bool SVFUtil::functionDoesNotRet(const Function *fun) {
+bool functionDoesNotRet(const Function *fun) {
 
     std::vector<const BasicBlock *> bbVec;
     Set<const BasicBlock *> visited;
@@ -123,14 +127,14 @@ bool SVFUtil::functionDoesNotRet(const Function *fun) {
 /*!
  * Return true if this is a function without any possible caller
  */
-bool SVFUtil::isDeadFunction(const Function *fun, SVFModule *svfMod) {
+bool isDeadFunction(const Function *fun, SVFModule *svfMod) {
     if (fun->hasAddressTaken())
         return false;
     if (isProgEntryFunction(fun))
         return false;
     for (Value::const_user_iterator i = fun->user_begin(), e = fun->user_end();
          i != e; ++i) {
-        if (SVFUtil::isCallSite(*i))
+        if (isCallSite(*i))
             return false;
     }
     if (svfMod->getLLVMModSet()->hasDeclaration(fun)) {
@@ -143,7 +147,7 @@ bool SVFUtil::isDeadFunction(const Function *fun, SVFModule *svfMod) {
             for (Value::const_user_iterator i = decl->user_begin(),
                                             e = decl->user_end();
                  i != e; ++i) {
-                if (SVFUtil::isCallSite(*i))
+                if (isCallSite(*i))
                     return false;
             }
         }
@@ -155,7 +159,7 @@ bool SVFUtil::isDeadFunction(const Function *fun, SVFModule *svfMod) {
  * Return true if this is a value in a dead function (function without any
  * caller)
  */
-bool SVFUtil::isPtrInDeadFunction(const Value *value, SVFModule *svfMod) {
+bool isPtrInDeadFunction(const Value *value, SVFModule *svfMod) {
     if (const auto *inst = llvm::dyn_cast<Instruction>(value)) {
         if (isDeadFunction(inst->getParent()->getParent(), svfMod))
             return true;
@@ -169,7 +173,7 @@ bool SVFUtil::isPtrInDeadFunction(const Value *value, SVFModule *svfMod) {
 /*!
  * Strip constant casts
  */
-const Value *SVFUtil::stripConstantCasts(const Value *val) {
+const Value *stripConstantCasts(const Value *val) {
     if (llvm::isa<GlobalValue>(val) || isInt2PtrConstantExpr(val))
         return val;
     else if (const auto *CE = llvm::dyn_cast<ConstantExpr>(val)) {
@@ -182,7 +186,7 @@ const Value *SVFUtil::stripConstantCasts(const Value *val) {
 /*!
  * Strip all casts
  */
-Value *SVFUtil::stripAllCasts(Value *val) {
+Value *stripAllCasts(Value *val) {
     while (true) {
         if (auto *ci = llvm::dyn_cast<CastInst>(val)) {
             val = ci->getOperand(0);
@@ -197,8 +201,8 @@ Value *SVFUtil::stripAllCasts(Value *val) {
 }
 
 /// Get the next instructions following control flow
-void SVFUtil::getNextInsts(const Instruction *curInst,
-                           std::vector<const Instruction *> &instList) {
+void getNextInsts(const Instruction *curInst,
+                  std::vector<const Instruction *> &instList) {
     if (!curInst->isTerminator()) {
         const Instruction *nextInst = curInst->getNextNode();
         if (isIntrinsicInst(nextInst))
@@ -220,8 +224,8 @@ void SVFUtil::getNextInsts(const Instruction *curInst,
 }
 
 /// Get the previous instructions following control flow
-void SVFUtil::getPrevInsts(const Instruction *curInst,
-                           std::vector<const Instruction *> &instList) {
+void getPrevInsts(const Instruction *curInst,
+                  std::vector<const Instruction *> &instList) {
     if (curInst != &(curInst->getParent()->front())) {
         const Instruction *prevInst = curInst->getPrevNode();
         if (isIntrinsicInst(prevInst))
@@ -245,8 +249,7 @@ void SVFUtil::getPrevInsts(const Instruction *curInst,
 /*!
  * Return the type of the object from a heap allocation
  */
-const Type *SVFUtil::getTypeOfHeapAlloc(const Instruction *inst,
-                                        SVFModule *svfMod) {
+const Type *getTypeOfHeapAlloc(const Instruction *inst, SVFModule *svfMod) {
     const PointerType *type = llvm::dyn_cast<PointerType>(inst->getType());
 
     if (isHeapAllocExtCallViaRet(inst, svfMod)) {
@@ -272,7 +275,7 @@ const Type *SVFUtil::getTypeOfHeapAlloc(const Instruction *inst,
 /*!
  * Get position of a successor basic block
  */
-u32_t SVFUtil::getBBSuccessorPos(const BasicBlock *BB, const BasicBlock *Succ) {
+u32_t getBBSuccessorPos(const BasicBlock *BB, const BasicBlock *Succ) {
     u32_t i = 0;
     for (const BasicBlock *SuccBB : successors(BB)) {
         if (SuccBB == Succ)
@@ -286,8 +289,7 @@ u32_t SVFUtil::getBBSuccessorPos(const BasicBlock *BB, const BasicBlock *Succ) {
 /*!
  * Return a position index from current bb to it successor bb
  */
-u32_t SVFUtil::getBBPredecessorPos(const BasicBlock *bb,
-                                   const BasicBlock *succbb) {
+u32_t getBBPredecessorPos(const BasicBlock *bb, const BasicBlock *succbb) {
     u32_t pos = 0;
     for (const_pred_iterator it = pred_begin(succbb), et = pred_end(succbb);
          it != et; ++it, ++pos) {
@@ -301,14 +303,14 @@ u32_t SVFUtil::getBBPredecessorPos(const BasicBlock *bb,
 /*!
  *  Get the num of BB's successors
  */
-u32_t SVFUtil::getBBSuccessorNum(const BasicBlock *BB) {
+u32_t getBBSuccessorNum(const BasicBlock *BB) {
     return BB->getTerminator()->getNumSuccessors();
 }
 
 /*!
  * Get the num of BB's predecessors
  */
-u32_t SVFUtil::getBBPredecessorNum(const BasicBlock *BB) {
+u32_t getBBPredecessorNum(const BasicBlock *BB) {
     u32_t num = 0;
     for (const_pred_iterator it = pred_begin(BB), et = pred_end(BB); it != et;
          ++it)
@@ -321,7 +323,7 @@ u32_t SVFUtil::getBBPredecessorNum(const BasicBlock *BB) {
  * llvm::parseIRFile (lib/IRReader/IRReader.cpp)
  * llvm::parseIR (lib/IRReader/IRReader.cpp)
  */
-bool SVFUtil::isIRFile(const std::string &filename) {
+bool isIRFile(const std::string &filename) {
     llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> FileOrErr =
         llvm::MemoryBuffer::getFileOrSTDIN(filename);
     if (FileOrErr.getError())
@@ -336,13 +338,12 @@ bool SVFUtil::isIRFile(const std::string &filename) {
 
 /// Get the names of all modules into a vector
 /// And process arguments
-void SVFUtil::processArguments(int argc, char **argv, int &arg_num,
-                               char **arg_value,
-                               std::vector<std::string> &moduleNameVec) {
+void processArguments(int argc, char **argv, int &arg_num, char **arg_value,
+                      std::vector<std::string> &moduleNameVec) {
     bool first_ir_file = true;
     for (s32_t i = 0; i < argc; ++i) {
         std::string argument(argv[i]);
-        if (SVFUtil::isIRFile(argument)) {
+        if (isIRFile(argument)) {
             if (find(moduleNameVec.begin(), moduleNameVec.end(), argument) ==
                 moduleNameVec.end())
                 moduleNameVec.push_back(argument);
@@ -357,3 +358,226 @@ void SVFUtil::processArguments(int argc, char **argv, int &arg_num,
         }
     }
 }
+
+llvm::DILocation *getDILocation(const Instruction *inst) {
+    if (auto *MN = inst->getMetadata(LLVMContext::MD_dbg)) {
+        return llvm::dyn_cast<llvm::DILocation>(MN);
+    }
+    return nullptr;
+}
+
+llvm::DbgVariableIntrinsic *getDbgVarIntrinsic(const llvm::Value *V) {
+    if (auto *VAM =
+            llvm::ValueAsMetadata::getIfExists(const_cast<llvm::Value *>(V))) {
+        if (auto *MDV =
+                llvm::MetadataAsValue::getIfExists(V->getContext(), VAM)) {
+            for (auto *U : MDV->users()) {
+                if (auto *DBGIntr =
+                        llvm::dyn_cast<llvm::DbgVariableIntrinsic>(U)) {
+                    return DBGIntr;
+                }
+            }
+        }
+    } else if (const auto *Arg = llvm::dyn_cast<llvm::Argument>(V)) {
+        /* If mem2reg is not activated, formal parameters will be stored in
+         * registers at the beginning of function call. Debug info will be
+         * linked to those alloca's instead of the arguments itself. */
+        for (const auto *User : Arg->users()) {
+            if (const auto *Store = llvm::dyn_cast<llvm::StoreInst>(User)) {
+                if (Store->getValueOperand() == Arg &&
+                    llvm::isa<llvm::AllocaInst>(Store->getPointerOperand())) {
+                    return getDbgVarIntrinsic(Store->getPointerOperand());
+                }
+            }
+        }
+    }
+    return nullptr;
+}
+
+llvm::DILocalVariable *getDILocalVariable(const llvm::Value *V) {
+    if (auto *DbgIntr = getDbgVarIntrinsic(V)) {
+        if (auto *DDI = llvm::dyn_cast<llvm::DbgDeclareInst>(DbgIntr)) {
+            return DDI->getVariable();
+        }
+        if (auto *DVI = llvm::dyn_cast<llvm::DbgValueInst>(DbgIntr)) {
+            return DVI->getVariable();
+        }
+    }
+    return nullptr;
+}
+
+llvm::DIGlobalVariable *getDIGlobalVariable(const llvm::Value *V) {
+    if (const auto *GV = llvm::dyn_cast<llvm::GlobalVariable>(V)) {
+        if (auto *MN = GV->getMetadata(llvm::LLVMContext::MD_dbg)) {
+            if (auto *DIGVExp =
+                    llvm::dyn_cast<llvm::DIGlobalVariableExpression>(MN)) {
+                return DIGVExp->getVariable();
+            }
+        }
+    }
+    return nullptr;
+}
+
+llvm::DISubprogram *getDISubprogram(const llvm::Value *V) {
+    if (const auto *F = llvm::dyn_cast<llvm::Function>(V)) {
+        return F->getSubprogram();
+    }
+    return nullptr;
+}
+
+llvm::DILocation *getDILocation(const llvm::Value *V) {
+    // Arguments and Instruction such as AllocaInst
+    if (auto *DbgIntr = getDbgVarIntrinsic(V)) {
+        if (auto *MN = DbgIntr->getMetadata(llvm::LLVMContext::MD_dbg)) {
+            return llvm::dyn_cast<llvm::DILocation>(MN);
+        }
+    } else if (const auto *I = llvm::dyn_cast<llvm::Instruction>(V)) {
+        if (auto *MN = I->getMetadata(llvm::LLVMContext::MD_dbg)) {
+            return llvm::dyn_cast<llvm::DILocation>(MN);
+        }
+    }
+    return nullptr;
+}
+
+llvm::DIFile *getDIFile(const llvm::Value *V) {
+    if (const auto *GO = llvm::dyn_cast<llvm::GlobalObject>(V)) {
+        if (auto *MN = GO->getMetadata(llvm::LLVMContext::MD_dbg)) {
+            if (auto *Subpr = llvm::dyn_cast<llvm::DISubprogram>(MN)) {
+                return Subpr->getFile();
+            }
+            if (auto *GVExpr =
+                    llvm::dyn_cast<llvm::DIGlobalVariableExpression>(MN)) {
+                return GVExpr->getVariable()->getFile();
+            }
+        }
+    } else if (const auto *Arg = llvm::dyn_cast<llvm::Argument>(V)) {
+        if (auto *LocVar = getDILocalVariable(Arg)) {
+            return LocVar->getFile();
+        }
+    } else if (const auto *I = llvm::dyn_cast<llvm::Instruction>(V)) {
+        if (I->isUsedByMetadata()) {
+            if (auto *LocVar = getDILocalVariable(I)) {
+                return LocVar->getFile();
+            }
+        } else if (I->getMetadata(llvm::LLVMContext::MD_dbg)) {
+            return I->getDebugLoc()->getFile();
+        }
+    }
+    return nullptr;
+}
+
+std::string getVarNameFromIR(const llvm::Value *V) {
+    if (auto *LocVar = getDILocalVariable(V)) {
+        return LocVar->getName().str();
+    } else if (auto *GlobVar = getDIGlobalVariable(V)) {
+        return GlobVar->getName().str();
+    }
+    return "";
+}
+
+std::string getFunctionNameFromIR(const llvm::Value *V) {
+    // We can return unmangled function names w/o checking debug info
+    if (const auto *F = llvm::dyn_cast<llvm::Function>(V)) {
+        return F->getName().str();
+    } else if (const auto *Arg = llvm::dyn_cast<llvm::Argument>(V)) {
+        return Arg->getParent()->getName().str();
+    } else if (const auto *I = llvm::dyn_cast<llvm::Instruction>(V)) {
+        return I->getFunction()->getName().str();
+    }
+    return "";
+}
+
+std::string getFilePathFromIR(const llvm::Value *V) {
+    if (auto *DIF = getDIFile(V)) {
+        boost::filesystem::path File(DIF->getFilename().str());
+        boost::filesystem::path Dir(DIF->getDirectory().str());
+        if (!File.empty()) {
+            // try to concatenate file path and dir to get absolut path
+            if (!File.has_root_directory() && !Dir.empty()) {
+                File = Dir / File;
+            }
+            return File.string();
+        }
+    } else {
+        /* As a fallback solution, we will return 'source_filename' info from
+         * module. However, it is not guaranteed to contain the absoult path,
+         * and it will return 'llvm-link' for linked modules. */
+        if (const auto *F = llvm::dyn_cast<llvm::Function>(V)) {
+            return F->getParent()->getSourceFileName();
+        } else if (const auto *Arg = llvm::dyn_cast<llvm::Argument>(V)) {
+            return Arg->getParent()->getParent()->getSourceFileName();
+        } else if (const auto *I = llvm::dyn_cast<llvm::Instruction>(V)) {
+            return I->getFunction()->getParent()->getSourceFileName();
+        }
+    }
+    return "";
+}
+
+unsigned int getLineFromIR(const llvm::Value *V) {
+    // Argument and Instruction
+    if (auto *DILoc = getDILocation(V)) {
+        return DILoc->getLine();
+    } else if (auto *DISubpr = getDISubprogram(V)) { // Function
+        return DISubpr->getLine();
+    } else if (auto *DIGV = getDIGlobalVariable(V)) { // Globals
+        return DIGV->getLine();
+    }
+    return 0;
+}
+
+std::string getDirectoryFromIR(const llvm::Value *V) {
+    // Argument and Instruction
+    if (auto *DILoc = getDILocation(V)) {
+        return DILoc->getDirectory();
+    } else if (auto *DISubpr = getDISubprogram(V)) { // Function
+        return DISubpr->getDirectory();
+    } else if (auto *DIGV = getDIGlobalVariable(V)) { // Globals
+        return DIGV->getDirectory();
+    }
+    return nullptr;
+}
+
+unsigned int getColumnFromIR(const llvm::Value *V) {
+    // Globals and Function have no column info
+    if (auto *DILoc = getDILocation(V)) {
+        return DILoc->getColumn();
+    }
+    return 0;
+}
+
+std::string getSrcCodeFromIR(const llvm::Value *V) {
+    unsigned int LineNr = getLineFromIR(V);
+    if (LineNr > 0) {
+        boost::filesystem::path Path(getFilePathFromIR(V));
+        if (boost::filesystem::exists(Path) &&
+            !boost::filesystem::is_directory(Path)) {
+            std::ifstream Ifs(Path.string(), std::ios::binary);
+            if (Ifs.is_open()) {
+                Ifs.seekg(std::ios::beg);
+                std::string SrcLine;
+                for (unsigned int I = 0; I < LineNr - 1; ++I) {
+                    Ifs.ignore(std::numeric_limits<std::streamsize>::max(),
+                               '\n');
+                }
+                std::getline(Ifs, SrcLine);
+                boost::algorithm::trim(SrcLine);
+                return SrcLine;
+            }
+        }
+    }
+    return "";
+}
+
+std::string getModuleIDFromIR(const llvm::Value *V) {
+    if (const auto *GO = llvm::dyn_cast<llvm::GlobalObject>(V)) {
+        return GO->getParent()->getModuleIdentifier();
+    } else if (const auto *Arg = llvm::dyn_cast<llvm::Argument>(V)) {
+        return Arg->getParent()->getParent()->getModuleIdentifier();
+    } else if (const auto *I = llvm::dyn_cast<llvm::Instruction>(V)) {
+        return I->getFunction()->getParent()->getModuleIdentifier();
+    }
+    return "";
+}
+
+} // end of namespace SVFUtil
+} // end of namespace SVF

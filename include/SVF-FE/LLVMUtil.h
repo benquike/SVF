@@ -463,6 +463,16 @@ bool isIRFile(const std::string &filename);
 void processArguments(int argc, char **argv, int &arg_num, char **arg_value,
                       std::vector<std::string> &moduleNameVec);
 
+llvm::DILocation *getDILocation(const llvm::Value *V);
+std::string getVarNameFromIR(const llvm::Value *V);
+std::string getFunctionNameFromIR(const llvm::Value *V);
+std::string getFilePathFromIR(const llvm::Value *V);
+std::string getDirectoryFromIR(const llvm::Value *V);
+unsigned int getLineFromIR(const llvm::Value *V);
+unsigned int getColumnFromIR(const llvm::Value *V);
+std::string getSrcCodeFromIR(const llvm::Value *V);
+std::string getModuleIDFromIR(const llvm::Value *V);
+
 } // namespace SVF::SVFUtil
 
 #endif /* INCLUDE_SVF_FE_LLVMUTIL_H_ */
