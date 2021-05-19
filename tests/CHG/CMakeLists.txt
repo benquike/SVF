@@ -1,12 +1,7 @@
-set(NoMem2regSources
-  callsite.cpp
-  callsite_staticmemory.cpp
-  interproc_callsite.cpp
-  callsite_dynmemory.cpp
-  circular_dependencies.cpp
-  interproc_callsite_double.cpp
-)
+file(GLOB SRCS CONFIGURE_DEPENDS "*.cpp")
 
-foreach(TEST_SRC ${NoMem2regSources})
-  generate_ll_file(FILE ${TEST_SRC})
+foreach(TEST_SRC ${SRCS})
+    get_filename_component(FNAME ${TEST_SRC} NAME)
+    generate_ll_file(FILE ${FNAME})
+    generate_ll_file(DEBUG FILE ${FNAME})
 endforeach(TEST_SRC)
