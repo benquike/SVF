@@ -66,7 +66,7 @@ class PTACallGraphEdge : public GenericCallGraphEdge {
     CallInstSet indirectCalls; ///< A set of indirection call instructions
                                ///< represented with ICFG CallBlockNodes
 
-    CallSiteID csId;
+    CallSiteID csId = 0;
 
     /// support for serialization
     /// @{
@@ -266,7 +266,7 @@ class PTACallGraph : public GenericCallGraphTy {
     CallInstToCallGraphEdgesMap
         callinstToCallGraphEdgesMap; ///< Map a call instruction to its
                                      ///< corresponding call edges
-    Size_t numOfResolvedIndCallEdge;
+    Size_t numOfResolvedIndCallEdge = 0;
 
     SVFProject *proj = nullptr;
 
