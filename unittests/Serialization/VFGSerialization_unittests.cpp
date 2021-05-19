@@ -32,6 +32,8 @@
 #include "config.h"
 #include "gtest/gtest.h"
 
+#include <fstream>
+#include <iostream>
 #include <sstream>
 
 #include "Util/boost_classes_export.h"
@@ -183,43 +185,54 @@ class VFGSerializationTestSuite : public ::testing::Test {
 
         test_graph_serialization(proj, svfg, test_bc, true);
     }
+
+    void serialize(string &test_bc, const string &serialize_to) {
+        SVFProject proj(test_bc);
+        auto ander = unique_ptr<AndersenWaveDiff>(
+            AndersenWaveDiff::createAndersenWaveDiff(&proj));
+        PAG *pag = proj.getPAG();
+        PTACallGraph *callgraph = ander->getPTACallGraph();
+        auto vfg = make_shared<VFG>(callgraph, pag);
+
+        ofstream ofs(serialize_to);
+        binary_oarchive oa{ofs};
+        oa << vfg.get();
+    }
 };
 
 TEST_F(VFGSerializationTestSuite, StaticCallTest_0) {
     string test_bc = SVF_BUILD_DIR "tests/ICFG/static_call_test_cpp.ll";
     vfg_node_and_edge_serialization_test(test_bc);
-    svfg_node_and_edge_serialization_test(test_bc);
+    /// svfg_node_and_edge_serialization_test(test_bc);
 }
 
 TEST_F(VFGSerializationTestSuite, FPtrTest_0) {
     string test_bc = SVF_BUILD_DIR "tests/ICFG/fptr_test_cpp.ll";
     vfg_node_and_edge_serialization_test(test_bc);
-    svfg_node_and_edge_serialization_test(test_bc);
+    /// svfg_node_and_edge_serialization_test(test_bc);
 }
 
 TEST_F(VFGSerializationTestSuite, VirtTest_0) {
     string test_bc = SVF_BUILD_DIR "tests/ICFG/virt_call_test_cpp.ll";
     vfg_node_and_edge_serialization_test(test_bc);
-    svfg_node_and_edge_serialization_test(test_bc);
+    /// svfg_node_and_edge_serialization_test(test_bc);
 }
 
 TEST_F(VFGSerializationTestSuite, VirtTest_1) {
     string test_bc = SVF_BUILD_DIR "/tests/CHG/callsite_cpp.ll";
     vfg_node_and_edge_serialization_test(test_bc);
-    svfg_node_and_edge_serialization_test(test_bc);
+    /// svfg_node_and_edge_serialization_test(test_bc);
 }
 
-#if 0
 // The following tests are still failing
 // comment then out for the mement
-
+#if 0
 // 1. this test runs stack overflow.
 TEST_F(VFGSerializationTestSuite, WebGL_VFG_0) {
     string test_bc = SVF_SRC_DIR
         "tools/chrome-gl-analysis/chrome_webgl_ir/webgl_all_rendering_code.bc";
     vfg_node_and_edge_serialization_test(test_bc);
 }
-
 
 // this is due to a bug in SVFG construction
 TEST_F(VFGSerializationTestSuite, WebGL_SVFG_all) {
@@ -235,6 +248,38 @@ TEST_F(VFGSerializationTestSuite, WebGL_SVFG_graph_only) {
 }
 
 #endif
+
+TEST_F(VFGSerializationTestSuite, WebGL_VFG_0_serialize_to_file) {
+    string test_bc = SVF_SRC_DIR
+        "tools/chrome-gl-analysis/chrome_webgl_ir/webgl_all_rendering_code.bc";
+
+    serialize(test_bc, test_bc + ".archive");
+}
+
+TEST_F(VFGSerializationTestSuite, WebGL_VFG_0_deserialize_from_file) {
+    string test_bc = SVF_SRC_DIR
+        "tools/chrome-gl-analysis/chrome_webgl_ir/webgl_all_rendering_code.bc";
+    SVFProject proj(test_bc);
+
+    auto ander = unique_ptr<AndersenWaveDiff>(
+        AndersenWaveDiff::createAndersenWaveDiff(&proj));
+    PAG *pag = proj.getPAG();
+    PTACallGraph *callgraph = ander->getPTACallGraph();
+    auto vfg1 = make_shared<VFG>(callgraph, pag);
+
+    llvm::outs() << "new vfg created\n";
+
+    ifstream ifs(test_bc + ".archive");
+    binary_iarchive ia{ifs};
+    VFG *vfg2 = nullptr;
+    ia >> vfg2;
+    llvm::outs() << "vfg loaded from file\n";
+
+    ASSERT_NE(vfg2, nullptr);
+    llvm::outs() << "comparing the 2 vfgs\n";
+    graph_eq_test(vfg1.get(), vfg2);
+    delete vfg2;
+}
 
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
